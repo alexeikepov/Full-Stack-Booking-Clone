@@ -12,7 +12,7 @@ export type User = {
   email: string;
   phone: string;
   passwordHash: string;
-  friends: ID[];
+  friends?: ID[];
   role: UserRole;
   managedHotels?: ID[];
   createdAt: Date;
