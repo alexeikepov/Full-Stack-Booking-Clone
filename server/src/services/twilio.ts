@@ -1,16 +1,17 @@
 import twilio from "twilio";
 import { config } from "../config";
 
-export const normalizePhone = (p: string) =>
-  p.replace(/[^\d+]/g, ""); 
+export const normalizePhone = (p: string) => p.replace(/[^\d+]/g, "");
 
-export const twilioClient = twilio(config.twilio.sid, config.twilio.token);
+function assertTwilio() {
+  const { sid, token, phone } = config.twilio;
+  if (!sid || !token || !phone) {
+    throw new Error("Twilio config is missing. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER");
+  }
+}
 
-export async function sendSms(to: string, body: string) {
-  const toClean = normalizePhone(to);
-  return twilioClient.messages.create({
-    to: toClean,
-    from: config.twilio.phone,
-    body,
-  });
+// Call only if you actually use SMS features:
+export function getTwilioClient() {
+  assertTwilio();
+  return twilio(config.twilio.sid, config.twilio.token);
 }
