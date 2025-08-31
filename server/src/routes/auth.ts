@@ -1,64 +1,58 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
 import { signJwt } from "../utils/jwt";
-
-// אם יש לך מודל אמיתי:
-// import { UserModel } from "../models/User";
+import { UserModel } from "../models/User";
 
 const router = Router();
 
-// דמו קצר לרישום
+const registerSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  phone: z.string().min(6),
+  password: z.string().min(6),
+});
+
 router.post("/register", async (req, res, next) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { name, email, phone, password } = registerSchema.parse(req.body);
 
-    // בדוגמה: במקום DB אמיתי
+    const exists = await UserModel.findOne({ email });
+    if (exists) return res.status(409).json({ error: "Email already registered" });
+
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = {
-      id: "u_" + Date.now(),
-      name,
-      email,
-      phone,
-      passwordHash,
-      role: "USER",
-      friends: [],
-      createdAt: new Date()
-    };
+    const user = await UserModel.create({ name, email, phone, passwordHash, role: "USER" });
 
-    // החתימה היא סינכרונית ומחזירה string
-    const token = signJwt({ id: user.id, role: user.role }, { expiresIn: "2h" });
-    res.status(201).json({ user, token });
+    const token = signJwt({ id: user.id, role: user.role });
+    res.status(201).json({
+      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role },
+      token,
+    });
   } catch (err) {
     next(err);
   }
 });
 
-// דמו קצר ללוגין
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
 router.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = loginSchema.parse(req.body);
 
-    // בדוגמה: במקום DB אמיתי — משתמש קשיח
-    const mockUser = {
-      id: "u_demo",
-      email: "demo@demo.com",
-      name: "Demo",
-      phone: "0500000000",
-      passwordHash: await bcrypt.hash("secret123", 10),
-      role: "USER",
-      friends: [],
-      createdAt: new Date()
-    };
+    const user = await UserModel.findOne({ email });
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-    if (email !== mockUser.email) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const ok = await bcrypt.compare(password, mockUser.passwordHash);
+    const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    const token = signJwt({ id: mockUser.id, role: mockUser.role }, { expiresIn: "2h" });
-    res.json({ user: mockUser, token });
+    const token = signJwt({ id: user.id, role: user.role });
+    res.json({
+      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role },
+      token,
+    });
   } catch (err) {
     next(err);
   }
