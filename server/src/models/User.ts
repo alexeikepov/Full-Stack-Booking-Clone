@@ -8,7 +8,7 @@ const UserSchema = new Schema(
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ["OWNER", "HOTEL_ADMIN", "USER"], default: "USER" },
   },
-  { timestamps: true }
+  { timestamps: true, collection: "users3" } 
 );
 
 export const UserModel = model("User", UserSchema);
