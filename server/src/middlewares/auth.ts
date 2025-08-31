@@ -1,27 +1,18 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { verifyJwt } from "../utils/jwt";
 
-export interface AuthUser {
-  id: string;
-  role: string;
-}
+export type AuthedRequest = Request & { user?: { id: string; role?: string } };
 
-export interface AuthRequest extends Request {
-  user?: AuthUser;
-}
+export function requireAuth(req: AuthedRequest, res: Response, next: NextFunction) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+  if (!token) return res.status(401).json({ error: "Missing token" });
 
-export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing or invalid Authorization header" });
+  try {
+    const payload = verifyJwt<{ id: string; role?: string }>(token);
+    req.user = { id: payload.id, role: payload.role };
+    next();
+  } catch {
+    return res.status(401).json({ error: "Invalid token" });
   }
-
-  const token = header.slice("Bearer ".length);
-  const payload = verifyJwt<AuthUser>(token);
-  if (!payload) {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
-
-  req.user = payload;
-  next();
 }

@@ -1,18 +1,29 @@
 import { Router } from "express";
+import { z } from "zod";
+import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
-// GET all hotels
-router.get("/", async (req, res) => {
-  // TODO: query DB
-  res.json([{ id: "1", name: "Hotel Demo" }]);
+const createHotelSchema = z.object({
+  name: z.string().min(2),
+  city: z.string().min(2),
+  address: z.string().min(2),
+  rooms: z.number().int().positive(),
 });
 
-// POST create hotel
-router.post("/", async (req, res) => {
-  const data = req.body;
-  // TODO: insert DB
-  res.status(201).json({ message: "Hotel created", data });
+router.get("/", async (_req, res) => {
+  // TODO: replace with DB query
+  res.json([]);
+});
+
+router.post("/", requireAuth, async (req, res, next) => {
+  try {
+    const dto = createHotelSchema.parse(req.body);
+    // TODO: insert into DB
+    res.status(201).json({ id: "demo-hotel-id", ...dto });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

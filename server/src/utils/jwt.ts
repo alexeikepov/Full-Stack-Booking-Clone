@@ -1,23 +1,12 @@
-import jwt, { JwtPayload, SignOptions, Secret } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { config } from "../config";
 
-const SECRET: Secret = config.jwtSecret as string;
+type Payload = { id: string; role?: string };
 
-export function signJwt(
-  payload: object,
-  options: SignOptions = {}
-): string {
-  return jwt.sign(payload, SECRET, {
-    algorithm: "HS256",
-    expiresIn: "1d", 
-    ...options,
-  });
+export function signJwt(payload: Payload, opts?: jwt.SignOptions) {
+  return jwt.sign(payload, config.jwtSecret, { expiresIn: "2h", ...opts });
 }
 
-export function verifyJwt<T extends object = JwtPayload>(token: string): T | null {
-  try {
-    return jwt.verify(token, SECRET) as T;
-  } catch {
-    return null;
-  }
+export function verifyJwt<T = any>(token: string): T {
+  return jwt.verify(token, config.jwtSecret) as T;
 }
