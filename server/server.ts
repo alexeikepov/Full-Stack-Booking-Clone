@@ -9,6 +9,7 @@ import { config } from "./src/config";
 import { notFound, errorHandler } from "./src/middlewares/errors";
 
 import authRoutes from "./src/routes/auth";
+import userRoutes from "./src/routes/users";          // ✅ חדש
 import meRoutes from "./src/routes/me";
 import hotelRoutes from "./src/routes/hotels";
 import reservationRoutes from "./src/routes/reservations";
@@ -27,7 +28,7 @@ async function start() {
     res.json({ ok: true, env: config.nodeEnv, time: new Date().toISOString() });
   });
 
-  // Rate-limit sensitive routes
+  // Rate-limit only for sensitive auth endpoints
   const authLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 20,
@@ -35,19 +36,24 @@ async function start() {
     legacyHeaders: false,
   });
   app.use("/api/auth", authLimiter);
+  app.use("/api/users/login", authLimiter);
+  app.use("/api/users/register", authLimiter);
 
   // Routes
-  app.use("/api/auth", authRoutes);
-  app.use("/api", meRoutes); // /api/me
-  app.use("/api/hotels", hotelRoutes);
-  app.use("/api/reservations", reservationRoutes);
+  app.use("/api/auth", authRoutes);           // /api/auth/register, /api/auth/login
+  app.use("/api/users", userRoutes);          // ✅ /api/users/*
+  app.use("/api", meRoutes);                  // /api/me
+  app.use("/api/hotels", hotelRoutes);        // /api/hotels/*
+  app.use("/api/reservations", reservationRoutes); // /api/reservations/*
 
   // 404 + error handling
   app.use(notFound);
   app.use(errorHandler);
 
-  // DB connect
-  await mongoose.connect(config.mongoUri);
+  // DB connect (with fast fail if Mongo is down)
+  await mongoose.connect(config.mongoUri, {
+    serverSelectionTimeoutMS: 5000, // ✅ אל תחכה לנצח אם Mongo לא זמין
+  });
 
   // Listen
   const server = http.createServer(app);
