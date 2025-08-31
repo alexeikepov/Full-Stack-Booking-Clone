@@ -1,30 +1,32 @@
 import { Router } from "express";
-import { z } from "zod";
+import {
+  createReservation,
+  listReservations,
+  getReservationById,
+  cancelReservation,
+  updateReservationStatus,
+  deleteReservation,
+} from "../controller/reservationController";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
-const createReservationSchema = z.object({
-  hotelId: z.string().min(1),
-  room: z.number().int().positive(),
-  from: z.string().datetime(),
-  to: z.string().datetime(),
-  guests: z.number().int().positive(),
-});
+// List (my reservations by default; admin can pass ?all=1 to see all)
+router.get("/", requireAuth, listReservations);
 
-router.get("/", requireAuth, async (_req, res) => {
-  // TODO: replace with DB query filtered by user
-  res.json([]);
-});
+// Create
+router.post("/", requireAuth, createReservation);
 
-router.post("/", requireAuth, async (req, res, next) => {
-  try {
-    const dto = createReservationSchema.parse(req.body);
-    // TODO: insert into DB and associate with userId
-    res.status(201).json({ id: "demo-res-id", ...dto });
-  } catch (err) {
-    next(err);
-  }
-});
+// Get by id
+router.get("/:id", requireAuth, getReservationById);
+
+// Cancel (self or admin)
+router.patch("/:id/cancel", requireAuth, cancelReservation);
+
+// Update status (admin only)
+router.patch("/:id/status", requireAuth, updateReservationStatus);
+
+// Hard delete (admin only)
+router.delete("/:id", requireAuth, deleteReservation);
 
 export default router;
