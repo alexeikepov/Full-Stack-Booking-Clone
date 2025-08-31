@@ -1,0 +1,4 @@
+# env & builds
+.env
+dist/
+node_modules/
