@@ -19,15 +19,10 @@ export default function HeroSearch() {
   const [picker, setPicker] = useState<PickerValue>(() => {
     const from = initialFrom ? new Date(initialFrom) : undefined;
     const to = initialTo ? new Date(initialTo) : undefined;
-    return from
-      ? { mode: "calendar", range: { from, to } }
-      : {
-          mode: "flexible",
-          stay: null,
-          months: [],
-          nights: 1,
-          startDay: "monday",
-        };
+    return {
+      mode: "calendar",
+      range: { from, to },
+    };
   });
 
   const [adults, setAdults] = useState<number>(
@@ -46,17 +41,7 @@ export default function HeroSearch() {
     const t = params.get("to");
     const from = f ? new Date(f) : undefined;
     const to = t ? new Date(t) : undefined;
-    setPicker(
-      from
-        ? { mode: "calendar", range: { from, to } }
-        : {
-            mode: "flexible",
-            stay: null,
-            months: [],
-            nights: 1,
-            startDay: "monday",
-          }
-    );
+    setPicker({ mode: "calendar", range: { from, to } });
     setAdults(Math.max(1, Number(params.get("adults") || 2)));
     setChildren(Math.max(0, Number(params.get("children") || 0)));
     setRooms(Math.max(1, Number(params.get("rooms") || 1)));
