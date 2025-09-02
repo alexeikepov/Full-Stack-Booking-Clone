@@ -36,3 +36,8 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+=======
+# env & builds
+.env
+dist/
+node_modules/
