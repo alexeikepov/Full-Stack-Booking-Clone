@@ -1,31 +1,9 @@
 // src/routes/HomePage.tsx
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import HeroSearch from "@/components/search/HeroSearch";
-
-const PROPERTY_TYPES = [
-  {
-    key: "hotels",
-    title: "Hotels",
-    image: "https://picsum.photos/seed/hotels/600/400",
-  },
-  {
-    key: "apartments",
-    title: "Apartments",
-    image: "https://picsum.photos/seed/apartments/600/400",
-  },
-  {
-    key: "resorts",
-    title: "Resorts",
-    image: "https://picsum.photos/seed/resorts/600/400",
-  },
-  {
-    key: "villas",
-    title: "Villas",
-    image: "https://picsum.photos/seed/villas/600/400",
-  },
-];
+import PropertyTypesSection from "@/components/PropertyTypesSection";
 
 const TRENDING = [
   {
@@ -77,63 +55,72 @@ export default function HomePage() {
         <HeroSearch />
       </div>
 
-      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 py-6 md:grid-cols-[2fr_1fr]">
-        <Card className="overflow-hidden">
-          <div className="h-44 w-full overflow-hidden md:h-52">
-            <img
-              src="https://picsum.photos/seed/offer1/1200/600"
-              alt="Holiday rentals"
-              className="h-full w-full object-cover"
-            />
-          </div>
-        </Card>
+      <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 pt-20">
+        <header>
+          <h2 className="text-[26px] font-bold">Offers</h2>
+          <p className="mt-1 mb-3 text-[16px] text-muted-foreground">
+            Promotions, deals and special offers for you
+          </p>
+        </header>
 
-        <Card className="overflow-hidden">
-          <CardContent className="flex h-full items-center justify-between gap-4 p-4">
-            <div>
-              <div className="text-lg font-semibold">
-                Quick escape, quality time
-              </div>
-              <div className="text-sm opacity-70">
-                Save up to 20% with a Getaway Deal
-              </div>
-              <Button className="mt-3 bg-[#0071c2] hover:bg-[#0a69b4]">
-                Save on stays
-              </Button>
-            </div>
-            <div className="h-24 w-28 overflow-hidden rounded-md">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr]">
+          <Card className="relative overflow-hidden rounded-sm border-0 shadow-md p-0">
+            <div className="relative h-[180px] w-full md:h-[190px]">
               <img
-                src="https://picsum.photos/seed/offer2/400/300"
-                alt="Deal"
-                className="h-full w-full object-cover"
+                src="https://q-xx.bstatic.com/xdata/images/xphoto/814x138/535341132.jpeg?k=9adf4d98ff2d48c5745b37654d2d77e09169647b979dfda9c6baa54198b9fc6c&o="
+                alt="Holiday rentals"
+                className="absolute inset-0 block h-full w-full object-cover object-[58%_50%]"
               />
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+              <div className="absolute inset-0" />
 
-      <section className="mx-auto max-w-6xl px-4 py-2">
-        <h2 className="text-2xl font-semibold">Browse by property type</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {PROPERTY_TYPES.map((p) => (
-            <Card key={p.key} className="overflow-hidden">
-              <div className="h-40 w-full overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-start">
+                <div className="p-6 text-left text-white">
+                  <p className="text-[11px] tracking-wide opacity-90">
+                    Holiday rentals
+                  </p>
+                  <h3 className="text-lg font-bold md:text-xl">
+                    Live the dream in a holiday home
+                  </h3>
+                  <p className="mt-1 text-sm opacity-90">
+                    Choose from houses, villas, chalets and more
+                  </p>
+                  <Button className="mt-3 w-auto rounded bg-[#0071c2] hover:bg-[#0a69b4]">
+                    Book yours
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="h-[170px] md:h-[160px] overflow-hidden rounded-sm border-1  self-start">
+            <CardContent className="flex h-full justify-between">
+              <div className="min-w-0">
+                <div className="text-2xl font-bold">
+                  Quick escape, quality time
+                </div>
+                <div className="mt-1 text-sm ">
+                  Save up to 20% with a Getaway Deal
+                </div>
+                <Button className="mt-3 w-auto rounded bg-[#0071c2] hover:bg-[#0a69b4]">
+                  Save on stays
+                </Button>
+              </div>
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-md md:h-28 md:w-28">
                 <img
-                  src={p.image}
-                  alt={p.title}
+                  src="https://r-xx.bstatic.com/xdata/images/xphoto/248x248/468828542.jpeg?k=b51cb74f05db0ebc1a1cbcca384fa2ee8c4d6c0b5fd089a15b1fd14a107ccab4&o="
+                  alt="Deal"
                   className="h-full w-full object-cover"
                 />
               </div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">{p.title}</CardTitle>
-              </CardHeader>
-            </Card>
-          ))}
+            </CardContent>
+          </Card>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-10 pt-2">
-        <h2 className="text-2xl font-semibold">Trending destinations</h2>
+      <PropertyTypesSection />
+
+      <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 pt-20">
+        <h2 className="text-[26px] font-bold">Browse by property type</h2>
         <div className="text-sm opacity-70">
           Most popular choices for travellers from Israel
         </div>
