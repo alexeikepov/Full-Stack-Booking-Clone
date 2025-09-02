@@ -1,11 +1,17 @@
-import { Button } from "@/components/ui/button";
+import { Outlet } from "react-router-dom";
+import Header from "@/components/Header";
+import { CartSheet } from "@/components/CartSheet";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
-function App() {
+export default function App() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
+    <div className="min-h-screen">
+      <Header />
+      <main className="mx-auto">
+        <Outlet />
+      </main>
+      <CartSheet />
+      <ConfirmModal />
     </div>
   );
 }
-
-export default App;
