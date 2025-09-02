@@ -23,7 +23,7 @@ export function MonthCarousel({
   const slice = months.slice(index, index + visibleCount);
 
   return (
-    <div className="relative">
+    <div className="relative w-[570px]">
       <button
         type="button"
         aria-label="Prev"
