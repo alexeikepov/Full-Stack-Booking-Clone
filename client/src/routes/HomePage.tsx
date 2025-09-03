@@ -5,6 +5,8 @@ import HeroSearch from "@/components/search/HeroSearch";
 import PropertyTypesSection from "@/components/homePage/PropertyTypesSection";
 import TrendingDestinations from "@/components/homePage/TrendingDestinations";
 import TripPlannerCarousel from "@/components/homePage/TripPlannerCarousel";
+import TravelMoreSection from "@/components/homePage/TravelMoreSection";
+import HolidayRentalsBanner from "@/components/homePage/HolidayRentalsBanner";
 
 export default function HomePage() {
   return (
@@ -87,6 +89,8 @@ export default function HomePage() {
       <TrendingDestinations />
       <PropertyTypesSection />
       <TripPlannerCarousel />
+      <TravelMoreSection />
+      <HolidayRentalsBanner />
 
       <footer className="border-t py-6 text-sm opacity-70">
         <div className="mx-auto max-w-6xl px-4">
