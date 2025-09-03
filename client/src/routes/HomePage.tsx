@@ -1,42 +1,10 @@
 // src/routes/HomePage.tsx
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import HeroSearch from "@/components/search/HeroSearch";
-import PropertyTypesSection from "@/components/PropertyTypesSection";
-
-const TRENDING = [
-  {
-    id: "athens",
-    city: "Athens",
-    flag: "🇬🇷",
-    image: "https://picsum.photos/seed/athens/1200/800",
-  },
-  {
-    id: "budapest",
-    city: "Budapest",
-    flag: "🇭🇺",
-    image: "https://picsum.photos/seed/budapest/1200/800",
-  },
-  {
-    id: "rome",
-    city: "Rome",
-    flag: "🇮🇹",
-    image: "https://picsum.photos/seed/rome/1200/800",
-  },
-  {
-    id: "dubai",
-    city: "Dubai",
-    flag: "🇦🇪",
-    image: "https://picsum.photos/seed/dubai/1200/800",
-  },
-  {
-    id: "bangkok",
-    city: "Bangkok",
-    flag: "🇹🇭",
-    image: "https://picsum.photos/seed/bangkok/1200/800",
-  },
-];
+import PropertyTypesSection from "@/components/homePage/PropertyTypesSection";
+import TrendingDestinations from "@/components/homePage/TrendingDestinations";
+import TripPlannerCarousel from "@/components/homePage/TripPlannerCarousel";
 
 export default function HomePage() {
   return (
@@ -116,35 +84,9 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
-
+      <TrendingDestinations />
       <PropertyTypesSection />
-
-      <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 pt-20">
-        <h2 className="text-[26px] font-bold">Browse by property type</h2>
-        <div className="text-sm opacity-70">
-          Most popular choices for travellers from Israel
-        </div>
-
-        <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {TRENDING.map((t) => (
-            <Link
-              key={t.id}
-              to={`/search?city=${encodeURIComponent(t.city)}`}
-              className="relative overflow-hidden rounded-xl border"
-            >
-              <img
-                src={t.image}
-                alt={t.city}
-                className="h-56 w-full object-cover md:h-64"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <div className="absolute left-4 top-4 text-2xl font-semibold text-white drop-shadow">
-                {t.city} <span className="text-xl">{t.flag}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <TripPlannerCarousel />
 
       <footer className="border-t py-6 text-sm opacity-70">
         <div className="mx-auto max-w-6xl px-4">
