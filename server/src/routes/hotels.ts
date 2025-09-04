@@ -1,29 +1,38 @@
 import { Router } from "express";
-import { z } from "zod";
+import {
+  createHotel,
+  listHotels,
+  getHotelById,
+  updateHotel,
+  deleteHotel,
+  getAvailability,
+  createReview,
+  updateMyReview,
+  deleteMyReview,
+  listReviews,
+  getMyReviewForHotel,  // ← add this import
+} from "../controller/hotelController";
 import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
-const createHotelSchema = z.object({
-  name: z.string().min(2),
-  city: z.string().min(2),
-  address: z.string().min(2),
-  rooms: z.number().int().positive(),
-});
+// Public
+router.get("/", listHotels);
+router.get("/:id", getHotelById);
+router.get("/:hotelId/availability", getAvailability);
+router.get("/:hotelId/reviews", listReviews);
 
-router.get("/", async (_req, res) => {
-  // TODO: replace with DB query
-  res.json([]);
-});
+// Reviews: user-scoped but hotel-specific
+router.get("/:hotelId/reviews/me", requireAuth, getMyReviewForHotel); // ← add this route
 
-router.post("/", requireAuth, async (req, res, next) => {
-  try {
-    const dto = createHotelSchema.parse(req.body);
-    // TODO: insert into DB
-    res.status(201).json({ id: "demo-hotel-id", ...dto });
-  } catch (err) {
-    next(err);
-  }
-});
+// Protected (hotel admin/owner actions)
+router.post("/", requireAuth, createHotel);
+router.put("/:id", requireAuth, updateHotel);
+router.delete("/:id", requireAuth, deleteHotel);
+
+// Review CRUD for the authenticated user
+router.post("/:hotelId/reviews", requireAuth, createReview);
+router.patch("/:hotelId/reviews/me", requireAuth, updateMyReview);
+router.delete("/:hotelId/reviews/me", requireAuth, deleteMyReview);
 
 export default router;
