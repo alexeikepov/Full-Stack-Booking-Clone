@@ -5,9 +5,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { queryClient } from "@/lib/queryClient";
 import "./index.css";
-import HomePage from "@/routes/HomePage";
-import SearchPage from "@/routes/SearchPage";
-import HotelPage from "@/routes/HotelPage";
+import HomePage from "@/pages/HomePage";
+import SearchPage from "@/pages/SearchPage";
+import HotelPage from "@/pages/HotelPage";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +19,8 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "search", element: <SearchPage /> },
       { path: "hotel/:id", element: <HotelPage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <RegisterPage /> },
     ],
   },
 ]);
