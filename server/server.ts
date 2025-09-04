@@ -13,7 +13,10 @@ import userRoutes from "./src/routes/users";          // ✅ חדש
 import meRoutes from "./src/routes/me";
 import hotelRoutes from "./src/routes/hotels";
 import reservationRoutes from "./src/routes/reservations";
+import cron from "node-cron";
+import { ReservationModel } from "./src/models/Reservation";
 
+  
 async function start() {
   const app = express();
 
@@ -60,6 +63,15 @@ async function start() {
   server.listen(config.port, () => {
     console.log(`🚀 API on http://localhost:${config.port}`);
     console.log(`🌍 CORS origin: ${config.clientUrl}`);
+  });
+  // Cron job to update reservation statuses daily at midnight
+  cron.schedule("0 0 * * *", async () => {
+    const now = new Date();
+    const result = await ReservationModel.updateMany(
+      { to: { $lt: now }, status: { $in: ["PENDING", "CONFIRMED"] } },
+      { $set: { status: "COMPLETED" } }
+    );
+    console.log(`✅ Cron ran: ${result.modifiedCount} reservations marked as COMPLETED`);
   });
 
   // Graceful shutdown
