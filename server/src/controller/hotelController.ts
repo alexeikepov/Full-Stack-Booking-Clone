@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
+import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 import { HotelModel } from "../models/Hotel";
+import { ReservationModel } from "../models/Reservation";
 import { AuthedRequest } from "../middlewares/auth";
 
 const roomSchema = z.object({
@@ -53,7 +55,6 @@ export async function listHotels(req: Request, res: Response, next: NextFunction
     if (q) filter.$text = { $search: q };
     if (city) filter.city = city;
 
-    // Price filter across any room type
     const priceClauses: any[] = [];
     if (minPrice) priceClauses.push({ "rooms.pricePerNight": { $gte: Number(minPrice) } });
     if (maxPrice) priceClauses.push({ "rooms.pricePerNight": { $lte: Number(maxPrice) } });
@@ -72,6 +73,8 @@ export async function listHotels(req: Request, res: Response, next: NextFunction
 export async function getHotelById(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ error: "Invalid hotel id" });
+
     const h = await HotelModel.findById(id).lean();
     if (!h) return res.status(404).json({ error: "Hotel not found" });
     res.json(h);
@@ -84,13 +87,12 @@ export async function getHotelById(req: Request, res: Response, next: NextFuncti
 export async function updateHotel(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ error: "Invalid hotel id" });
+
     const dto = updateHotelSchema.parse(req.body);
 
     const h = await HotelModel.findById(id);
     if (!h) return res.status(404).json({ error: "Hotel not found" });
-
-    // If you want to restrict: only owner/hotel_admin can update
-    // (פה אפשר להוסיף בדיקת בעלות/תפקיד לפי req.user?.role/req.user?.id)
 
     if (dto.location?.coordinates) {
       (dto as any).location = { type: "Point", coordinates: dto.location.coordinates };
@@ -109,13 +111,71 @@ export async function updateHotel(req: AuthedRequest, res: Response, next: NextF
 export async function deleteHotel(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ error: "Invalid hotel id" });
 
     const h = await HotelModel.findById(id);
     if (!h) return res.status(404).json({ error: "Hotel not found" });
 
-    // אם צריך: בדיקת הרשאות (בעלות/תפקיד)
     await h.deleteOne();
     res.json({ message: "Hotel deleted" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET /api/hotels/:hotelId/availability?roomType=SUITE&from=2025-09-10&to=2025-09-12
+export async function getAvailability(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { hotelId } = req.params;
+    const { roomType, from, to } = req.query as Record<string, string>;
+
+    if (!mongoose.isValidObjectId(hotelId)) {
+      return res.status(400).json({ error: "Invalid hotel id" });
+    }
+    if (!roomType || !from || !to) {
+      return res.status(400).json({ error: "Missing roomType/from/to" });
+    }
+
+    const start = new Date(from);
+    const end = new Date(to);
+    if (isNaN(+start) || isNaN(+end) || end <= start) {
+      return res.status(400).json({ error: "Invalid date range" });
+    }
+
+    const hotel = await HotelModel.findById(hotelId).lean();
+    if (!hotel) return res.status(404).json({ error: "Hotel not found" });
+
+    const roomInfo = (hotel as any).rooms?.find((r: any) => r.roomType === roomType);
+    if (!roomInfo) return res.status(400).json({ error: "Room type not available in hotel" });
+
+    const overlap = await ReservationModel.aggregate<{ qty: number }>([
+      {
+        $match: {
+          hotel: new Types.ObjectId(hotelId),
+          roomType,
+          status: { $in: ["PENDING", "CONFIRMED"] },
+          from: { $lt: end },
+          to: { $gt: start },
+        },
+      },
+      { $group: { _id: null, qty: { $sum: "$quantity" } } },
+      { $project: { _id: 0, qty: 1 } },
+    ]);
+
+    const alreadyBooked = overlap[0]?.qty ?? 0;
+    const totalRooms = roomInfo.totalRooms ?? 0;
+    const available = Math.max(0, totalRooms - alreadyBooked);
+
+    res.json({
+      hotelId,
+      roomType,
+      from: start.toISOString(),
+      to: end.toISOString(),
+      totalRooms,
+      booked: alreadyBooked,
+      available,
+      pricePerNight: roomInfo.pricePerNight,
+    });
   } catch (err) {
     next(err);
   }

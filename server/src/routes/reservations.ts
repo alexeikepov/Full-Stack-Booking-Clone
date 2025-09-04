@@ -6,6 +6,9 @@ import {
   cancelReservation,
   updateReservationStatus,
   deleteReservation,
+  getMyActiveReservations,
+  getCancellationReesevatioByID,
+  getPastReservationByID,
 } from "../controller/reservationController";
 import { requireAuth } from "../middlewares/auth";
 
@@ -28,5 +31,14 @@ router.patch("/:id/status", requireAuth, updateReservationStatus);
 
 // Hard delete (admin only)
 router.delete("/:id", requireAuth, deleteReservation);
+
+// My active reservations
+router.get("/my/active", requireAuth, getMyActiveReservations);
+
+// My cancelled reservations
+router.get("/my/cancelled", requireAuth, getCancellationReesevatioByID);
+
+// My past reservations (completed)
+router.get("/my/past", requireAuth, getPastReservationByID);
 
 export default router;
