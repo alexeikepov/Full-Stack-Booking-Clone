@@ -7,7 +7,7 @@ import rateLimit from "express-rate-limit";
 
 import { config } from "./src/config";
 import { notFound, errorHandler } from "./src/middlewares/errors";
-
+import trendingCitiesRoutes from "./src/routes/trendingCities";
 import authRoutes from "./src/routes/auth";
 import userRoutes from "./src/routes/users";         
 import meRoutes from "./src/routes/me";
@@ -51,6 +51,7 @@ async function start() {
   app.use("/api", meRoutes);                  // /api/me
   app.use("/api/hotels", hotelRoutes);        // /api/hotels/*
   app.use("/api/reservations", reservationRoutes); // /api/reservations/*
+  app.use("/api", trendingCitiesRoutes);
 
   // 404 + error handling
   app.use(notFound);
@@ -58,7 +59,7 @@ async function start() {
 
   // DB connect (with fast fail if Mongo is down)
   await mongoose.connect(config.mongoUri, {
-    serverSelectionTimeoutMS: 5000, // ✅ אל תחכה לנצח אם Mongo לא זמין
+    serverSelectionTimeoutMS: 5000, 
   });
 
   // Listen
