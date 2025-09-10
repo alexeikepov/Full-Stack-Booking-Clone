@@ -16,3 +16,16 @@ export function requireAuth(req: AuthedRequest, res: Response, next: NextFunctio
     return res.status(401).json({ error: "Invalid token" });
   }
 }
+export function maybeAuth(req: AuthedRequest, _res: Response, next: NextFunction) {
+  try {
+    const bearer = req.headers.authorization?.replace(/^Bearer\s+/i, "").trim();
+    const cookieToken = (req as any).cookies?.token;
+    const token = bearer || cookieToken;
+    if (!token) return next();
+
+    const payload = verifyJwt(token) as { id: string; role?: string } | undefined;
+    if (payload?.id) req.user = { id: payload.id, role: payload.role };
+  } catch {
+  }
+  next();
+}

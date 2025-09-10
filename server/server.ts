@@ -16,6 +16,7 @@ import reservationRoutes from "./src/routes/reservations";
 import cron from "node-cron";
 import { ReservationModel } from "./src/models/Reservation";
 import { clerkMiddleware } from "@clerk/express";
+import searchHistoryRoutes from "./src/routes/searchHistory";
 
   
 async function start() {
@@ -52,6 +53,7 @@ async function start() {
   app.use("/api/hotels", hotelRoutes);        // /api/hotels/*
   app.use("/api/reservations", reservationRoutes); // /api/reservations/*
   app.use("/api", trendingCitiesRoutes);
+app.use("/api", searchHistoryRoutes);
 
   // 404 + error handling
   app.use(notFound);
