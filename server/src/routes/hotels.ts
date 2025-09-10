@@ -12,12 +12,11 @@ import {
   listReviews,
   getMyReviewForHotel,  // ← add this import
 } from "../controller/hotelController";
-import { requireAuth } from "../middlewares/auth";
-
+import { requireAuth,maybeAuth } from "../middlewares/auth";
 const router = Router();
 
 // Public
-router.get("/", listHotels);
+router.get("/", maybeAuth, listHotels);
 router.get("/:id", getHotelById);
 router.get("/:hotelId/availability", getAvailability);
 router.get("/:hotelId/reviews", listReviews);
