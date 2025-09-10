@@ -6,10 +6,11 @@ import App from "./App";
 import { queryClient } from "@/lib/queryClient";
 import "./index.css";
 import HomePage from "@/pages/HomePage";
-import SearchPage from "@/pages/SearchPage";
+import SearchResultsPage  from "@/pages/SearchPage";
 import HotelPage from "@/pages/HotelPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import { AuthProvider } from "@/context/AuthContext";
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "search", element: <SearchPage /> },
+      { path: "search", element: <SearchResultsPage  /> },
       { path: "hotel/:id", element: <HotelPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
@@ -28,7 +29,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );
