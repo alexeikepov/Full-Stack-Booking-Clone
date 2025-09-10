@@ -24,7 +24,7 @@ export default function LoginPage() {
   const onSubmit = async (values: z.infer<typeof schema>) => {
     setServerError(null);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/login`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

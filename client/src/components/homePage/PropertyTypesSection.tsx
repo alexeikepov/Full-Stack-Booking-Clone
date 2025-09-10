@@ -41,7 +41,7 @@ const PROPERTY_TYPES: PropertyType[] = [
     key: "cottages",
     title: "Cottages",
     image:
-      "https://q-xx.bstatic.com/xdata/images/hotel/263x210/595550000.jpeg?k=71eeb3e0996d7f734e57a6fa426c718749a36df768ca5d2fb1dc65fcd7483c1d&o=",
+      "https://q-xx.bstatic.com/xdata/images/hotel/263x210/595530000.jpeg?k=71eeb3e0996d7f734e57a6fa426c718749a36df768ca5d2fb1dc65fcd7483c1d&o=",
   },
   {
     key: "glamping",
