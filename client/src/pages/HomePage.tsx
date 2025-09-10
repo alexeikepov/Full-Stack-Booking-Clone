@@ -7,6 +7,8 @@ import TrendingDestinations from "@/components/homePage/TrendingDestinations";
 import TripPlannerCarousel from "@/components/homePage/TripPlannerCarousel";
 import TravelMoreSection from "@/components/homePage/TravelMoreSection";
 import HolidayRentalsBanner from "@/components/homePage/HolidayRentalsBanner";
+import PopularWithTravellers from "@/components/homePage/PopularWithTravellers";
+import Footer from "@/components/Footer";
 
 export default function HomePage() {
   return (
@@ -91,12 +93,8 @@ export default function HomePage() {
       <TripPlannerCarousel />
       <TravelMoreSection />
       <HolidayRentalsBanner />
-
-      <footer className="border-t py-6 text-sm opacity-70">
-        <div className="mx-auto max-w-6xl px-4">
-          © {new Date().getFullYear()} Booking Clone — All rights reserved.
-        </div>
-      </footer>
+      <PopularWithTravellers />
+      <Footer />
     </div>
   );
 }
