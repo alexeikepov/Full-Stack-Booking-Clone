@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Bed, Plane, CarFront, Sparkles, HelpCircle } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSelector from "./LanguageSelector";
+import { useAuth } from "@/context/AuthContext";
+import * as React from "react";
 
 function NavPill({
   to,
@@ -30,6 +32,17 @@ function NavPill({
 
 export default function Header() {
   const { pathname } = useLocation();
+  const { user, signOut, isLoading } = useAuth();
+
+  const initials = React.useMemo(() => {
+    if (!user?.name) return "U";
+    return user.name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((n) => n[0]?.toUpperCase() ?? "")
+      .join("") || "U";
+  }, [user?.name]);
 
   return (
     <header className="w-full bg-[#003b95] text-white">
@@ -47,7 +60,9 @@ export default function Header() {
             <CurrencySelector />
             <LanguageSelector />
           </div>
+
           <HelpCircle className="hidden sm:inline-block h-5 w-5 opacity-90" />
+
           <NavLink
             to="/list-your-property"
             className="hidden md:inline-block font-medium hover:underline"
@@ -55,18 +70,50 @@ export default function Header() {
             List your property
           </NavLink>
 
-          <Button
-            variant="secondary"
-            className="bg-white text-[#0071c2] hover:bg-white/90"
-          >
-            Register
-          </Button>
-          <Button
-            variant="secondary"
-            className="bg-white text-[#0071c2] hover:bg-white/90"
-          >
-            Sign in
-          </Button>
+          {!isLoading && !user && (
+            <>
+              <Link to="/register">
+                <Button
+                  variant="secondary"
+                  className="bg-white text-[#0071c2] hover:bg-white/90"
+                >
+                  Register
+                </Button>
+              </Link>
+              <Link to="/login">
+                <Button
+                  variant="secondary"
+                  className="bg-white text-[#0071c2] hover:bg-white/90"
+                >
+                  Sign in
+                </Button>
+              </Link>
+            </>
+          )}
+
+          {!isLoading && user && (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/account"
+                className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-white/10 transition"
+                aria-label="Account"
+              >
+                <div className="h-9 w-9 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold">
+                  {initials}
+                </div>
+                <span className="hidden sm:inline-block font-medium">
+                  {user.name ?? "My Account"}
+                </span>
+              </Link>
+              <Button
+                onClick={signOut}
+                variant="secondary"
+                className="bg-white text-[#0071c2] hover:bg-white/90"
+              >
+                Logout
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -81,7 +128,6 @@ export default function Header() {
           <NavPill to="/flights" icon={Plane} label="Flights" />
           <NavPill to="/car-rental" icon={CarFront} label="Car rental" />
           <NavPill to="/attractions" icon={Sparkles} label="Attractions" />
-
           <NavLink
             to="/airport-taxis"
             className="flex items-center gap-2 rounded-full px-4 py-2 text-white/90 transition hover:bg-white/10 hover:text-white"
