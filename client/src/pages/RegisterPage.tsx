@@ -26,7 +26,7 @@ export default function RegisterPage() {
   const onSubmit = async (values: z.infer<typeof schema>) => {
     setServerError(null);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/register`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
