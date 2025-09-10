@@ -8,8 +8,10 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{hotel.name}</span>
-          <span className="text-sm opacity-70">
-            ★ {hotel.rating.toFixed(1)}
+           <span className="text-sm opacity-70">
+            ★ {hotel.rating !== undefined && hotel.rating !== null
+              ? hotel.rating.toFixed(1)
+              : "New"}
           </span>
         </CardTitle>
       </CardHeader>
