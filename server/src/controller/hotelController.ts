@@ -82,28 +82,19 @@ export async function createHotel(req: AuthedRequest, res: Response, next: NextF
 export async function listHotels(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const {
-      q,
-      city,
-      roomType,
-      minPrice,
-      maxPrice,
-      category,
-      from,
-      to,
-      adults,
-      children,
-      rooms,
+      q, city, roomType, minPrice, maxPrice, category,
+      from, to, adults, children, rooms,
     } = req.query as Record<string, string | undefined>;
 
-    // base filters
     const filter: any = {};
     if (q) filter.$text = { $search: q };
-    if (city) filter.city = city;
+    if (city) filter.city = { $regex: `^${escapeRegExp(city)}$`, $options: "i" };
 
     if (category) {
-      filter.categories = {
-        $in: category.split(",").map((s) => s.trim()).filter(Boolean),
-      };
+      const cats = category.split(",").map((s) => s.trim()).filter(Boolean);
+      if (cats.length) {
+        filter.categories = { $in: cats.map((c) => new RegExp(`^${escapeRegExp(c)}$`, "i")) };
+      }
     }
 
     const priceClauses: any[] = [];
@@ -111,94 +102,133 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
     if (maxPrice) priceClauses.push({ "rooms.pricePerNight": { $lte: Number(maxPrice) } });
     if (priceClauses.length) filter.$and = [...(filter.$and || []), ...priceClauses];
 
-    if (roomType) filter["rooms.roomType"] = roomType;
+    if (roomType) {
+      filter["rooms.roomType"] = new RegExp(`^${escapeRegExp(roomType)}$`, "i");
+    }
 
-    // read requested rooms (default 1)
     const requestedRooms = rooms ? Math.max(1, parseInt(rooms, 10) || 1) : 1;
 
-    // Save last search for authenticated users (non-blocking)
     if (req.user?.id) {
       saveLastSearch(req.user.id, {
-        city,
-        from,
-        to,
+        city, from, to,
         adults: adults ? Number(adults) : undefined,
         children: children ? Number(children) : undefined,
         rooms: requestedRooms,
       }).catch(() => {});
     }
 
-    // fetch hotels by base filters first
-    const hotels = await HotelModel.find(filter).sort({ ratingAvg: -1, createdAt: -1 }).lean();
+    const hotels = await HotelModel.find(filter)
+      .sort({ ratingAvg: -1, createdAt: -1 })
+      .lean();
 
-    // If no valid date range provided, return as-is
+    // --- dates + nights ---
     const start = from ? new Date(from) : undefined;
     const end = to ? new Date(to) : undefined;
     const hasValidRange = !!(start && end && !isNaN(+start) && !isNaN(+end) && end > start);
 
-    if (!hasValidRange) {
-      return res.json(hotels);
+    // IMPORTANT: nights is null when no valid range
+    const nights = hasValidRange
+      ? Math.max(1, Math.ceil((+end! - +start!) / (1000 * 60 * 60 * 24)))
+      : null;
+
+    // overlaps only if we have a valid range
+    let bookedByHotel: Record<string, Record<string, number>> = {};
+    if (hasValidRange) {
+      const overlaps = await ReservationModel.aggregate<{
+        _id: { hotel: Types.ObjectId; roomType: string };
+        qty: number;
+      }>([
+        {
+          $match: {
+            status: { $in: ["PENDING", "CONFIRMED"] },
+            from: { $lt: end! },
+            to: { $gt: start! },
+          },
+        },
+        {
+          $group: {
+            _id: { hotel: "$hotel", roomType: "$roomType" },
+            qty: { $sum: "$quantity" },
+          },
+        },
+      ]);
+
+      for (const row of overlaps) {
+        const hid = String(row._id.hotel);
+        if (!bookedByHotel[hid]) bookedByHotel[hid] = {};
+        bookedByHotel[hid][row._id.roomType] = row.qty;
+      }
     }
 
-    // Aggregate overlapping reservations for the date range
-    const overlaps = await ReservationModel.aggregate<{
-      _id: { hotel: Types.ObjectId; roomType: string };
-      qty: number;
-    }>([
-      {
-        $match: {
-          status: { $in: ["PENDING", "CONFIRMED"] },
-          from: { $lt: end! },
-          to: { $gt: start! },
-        },
-      },
-      {
-        $group: {
-          _id: { hotel: "$hotel", roomType: "$roomType" },
-          qty: { $sum: "$quantity" },
-        },
-      },
-    ]);
-
-    // Map: hotelId -> { [roomType]: bookedQty }
-    const bookedByHotel: Record<string, Record<string, number>> = {};
-    for (const row of overlaps) {
-      const hid = String(row._id.hotel);
-      if (!bookedByHotel[hid]) bookedByHotel[hid] = {};
-      bookedByHotel[hid][row._id.roomType] = row.qty;
-    }
-
-    // Compute availability per hotel and filter out those that can't satisfy requestedRooms
     const result = hotels
       .map((h: any) => {
         const hid = String(h._id);
-        const booked = bookedByHotel[hid] || {};
         const roomsArr = Array.isArray(h.rooms) ? h.rooms : [];
 
         const availableByType: Record<string, number> = {};
         let totalAvailable = 0;
 
         for (const r of roomsArr) {
-          const bookedQty = booked[r.roomType] ?? 0;
-          const total = r.totalRooms ?? 0;
+          const typeKey = String(r.roomType);
+          const total = Number(r.totalRooms ?? 0);
+          const bookedQty = hasValidRange ? bookedByHotel[hid]?.[typeKey] ?? 0 : 0;
           const avail = Math.max(0, total - bookedQty);
-          availableByType[r.roomType] = avail;
-          totalAvailable += avail;
+          availableByType[typeKey] = hasValidRange ? avail : total;
+          totalAvailable += hasValidRange ? avail : total;
         }
 
-        // Attach availability (non-breaking extra field)
-        h.availability = {
-          from: start!.toISOString(),
-          to: end!.toISOString(),
-          availableByType,
-          totalAvailable,
-        };
+        // cheapest nightly among eligible room types with enough availability
+        let cheapestNightly: number | null = null;
+        for (const r of roomsArr) {
+          const typeKey = String(r.roomType);
+          const matchesType = roomType
+            ? new RegExp(`^${escapeRegExp(roomType)}$`, "i").test(typeKey)
+            : true;
+          if (!matchesType) continue;
 
-        // Filter by requestedRooms and (optional) roomType
+          const nightly = Number(r.pricePerNight);
+          if (!Number.isFinite(nightly)) continue;
+
+          const availForType = availableByType[typeKey] ?? 0;
+          if (availForType < requestedRooms) continue;
+
+          if (cheapestNightly === null || nightly < cheapestNightly) {
+            cheapestNightly = nightly;
+          }
+        }
+
+        // attach computed fields
+        h.availability = hasValidRange
+          ? {
+              from: start!.toISOString(),
+              to: end!.toISOString(),
+              availableByType,
+              totalAvailable,
+            }
+          : undefined;
+
+        h.priceFrom = Number.isFinite(cheapestNightly as number)
+          ? (cheapestNightly as number)
+          : null;
+
+        // IMPORTANT: totalPrice only when dates were provided
+        h.totalPrice =
+          hasValidRange && h.priceFrom !== null
+            ? Number((h.priceFrom * (nights as number)).toFixed(2))
+            : null;
+
+        // final availability filter; case-insensitive when roomType present
         if (roomType) {
-          return availableByType[roomType] >= requestedRooms ? h : null;
+          const rt = roomType.toLowerCase();
+          const hasEnough = Object.entries(availableByType).some(
+            ([k, v]) => k.toLowerCase() === rt && v >= requestedRooms
+          );
+          return hasEnough ? h : null;
         }
-        return totalAvailable >= requestedRooms ? h : null;
+        if (hasValidRange) {
+          return totalAvailable >= requestedRooms ? h : null;
+        }
+        return h;
       })
       .filter(Boolean);
 
@@ -206,6 +236,11 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
   } catch (err) {
     next(err);
   }
+}
+
+// Small helper
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 
