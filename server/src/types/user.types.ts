@@ -16,4 +16,5 @@ export type User = {
   role: UserRole;
   managedHotels?: ID[];
   createdAt: Date;
+  
 };

@@ -7,7 +7,7 @@ import rateLimit from "express-rate-limit";
 
 import { config } from "./src/config";
 import { notFound, errorHandler } from "./src/middlewares/errors";
-
+import trendingCitiesRoutes from "./src/routes/trendingCities";
 import authRoutes from "./src/routes/auth";
 import userRoutes from "./src/routes/users";         
 import meRoutes from "./src/routes/me";
@@ -16,6 +16,7 @@ import reservationRoutes from "./src/routes/reservations";
 import cron from "node-cron";
 import { ReservationModel } from "./src/models/Reservation";
 import { clerkMiddleware } from "@clerk/express";
+import searchHistoryRoutes from "./src/routes/searchHistory";
 
   
 async function start() {
@@ -51,6 +52,8 @@ async function start() {
   app.use("/api", meRoutes);                  // /api/me
   app.use("/api/hotels", hotelRoutes);        // /api/hotels/*
   app.use("/api/reservations", reservationRoutes); // /api/reservations/*
+  app.use("/api", trendingCitiesRoutes);
+app.use("/api", searchHistoryRoutes);
 
   // 404 + error handling
   app.use(notFound);
@@ -58,7 +61,7 @@ async function start() {
 
   // DB connect (with fast fail if Mongo is down)
   await mongoose.connect(config.mongoUri, {
-    serverSelectionTimeoutMS: 5000, // ✅ אל תחכה לנצח אם Mongo לא זמין
+    serverSelectionTimeoutMS: 5000, 
   });
 
   // Listen
