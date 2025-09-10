@@ -2,6 +2,8 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Bed, Plane, CarFront, Sparkles, HelpCircle } from "lucide-react";
+import CurrencySelector from "./CurrencySelector";
+import LanguageSelector from "./LanguageSelector";
 
 function NavPill({
   to,
@@ -41,13 +43,10 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-3 text-sm">
-          <span className="hidden sm:inline-block font-medium">ILS</span>
-          <span
-            className="hidden sm:inline-block text-lg"
-            aria-label="Language"
-          >
-            🇬🇧
-          </span>
+          <div className="hidden sm:flex items-center gap-2">
+            <CurrencySelector />
+            <LanguageSelector />
+          </div>
           <HelpCircle className="hidden sm:inline-block h-5 w-5 opacity-90" />
           <NavLink
             to="/list-your-property"
