@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "booking-copy-app",
+    "name": "Booking Copy App",
     "slug": "booking-copy-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,34 +9,30 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.thatrandomcrazy.bookingcopyapp",
+      "backgroundColor": "#003580"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/booking-app-image.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+        "backgroundColor": "#003580"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/booking-app-image.png"
+      "favicon": "./assets/images/booking-app-image-square.png"
     },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/booking-app-image.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    "splash": {
+      "image": "./assets/images/booking-app-image.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#003580",
+      "color": "black"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/8f5b1f2e-2d3a-4e2b-8e2e-1c8e4f6f4c3d"
+    },
+    "plugins": ["expo-font", "expo-web-browser"]
   }
 }

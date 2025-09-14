@@ -1,43 +1,61 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 
-interface SavedItemProps {
+type SavedItemProps = {
   title: string;
   subtitle: string;
-  onPress?: () => void;
-}
+  onPress: () => void;
+  onDotsPress: () => void;
+};
 
 export default function SavedItem({
   title,
   subtitle,
   onPress,
+  onDotsPress,
 }: SavedItemProps) {
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{
-        flexDirection: "row",
-        backgroundColor: Colors.dark.card,
-        borderRadius: 12,
-        padding: 16,
-        alignItems: "center",
-        marginBottom: 12,
-      }}
-    >
-      <Ionicons
-        name="heart-outline" // replaced hardcoded emoji
-        size={24}
-        color="red"
-        style={{ marginRight: 12 }}
-      />
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: Colors.dark.text, fontWeight: "bold" }}>
-          {title}
-        </Text>
-        <Text style={{ color: Colors.dark.textSecondary }}>{subtitle}</Text>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      <View style={styles.textContainer}>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
-      <Text style={{ color: Colors.dark.icon, fontSize: 20 }}>⋯</Text>
+      <TouchableOpacity onPress={onDotsPress} style={styles.dotsButton}>
+        <Ionicons
+          name="ellipsis-horizontal"
+          size={24}
+          color={Colors.dark.icon}
+        />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.dark.card,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 8,
+    justifyContent: "space-between",
+  },
+  textContainer: {
+    flex: 1,
+  },
+  title: {
+    color: Colors.dark.text,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  subtitle: {
+    color: Colors.dark.icon,
+    fontSize: 14,
+  },
+  dotsButton: {
+    paddingLeft: 10,
+  },
+});

@@ -1,56 +1,103 @@
-import React from "react";
-import { View, Text, Image } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "../../constants/Colors";
 import RebookButton from "./RebookButton";
 
 interface BookingCardProps {
-  propertyName: string;
-  dates: string;
-  price: string;
-  image?: any;
-  status?: string;
+  propertyData: {
+    propertyName: string;
+    dates: string;
+    price: string;
+    image?: any;
+    status?: string;
+  };
+  onPress: () => void;
+  onDotsPress: () => void;
+  onRebook: () => void;
 }
 
 export default function BookingCard({
-  propertyName,
-  dates,
-  price,
-  image,
+  propertyData,
+  onPress,
+  onDotsPress,
+  onRebook,
 }: BookingCardProps) {
   return (
-    <View
-      style={{
-        backgroundColor: Colors.dark.card,
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 16,
-      }}
-    >
-      <View style={{ flexDirection: "row" }}>
+    <TouchableOpacity onPress={onPress} style={styles.card}>
+      <View style={styles.cardContent}>
         <Image
-          source={image || require("../../assets/images/place-holder.jpg")}
-          style={{ width: 80, height: 80, borderRadius: 8, marginRight: 12 }}
+          source={require("../../assets/images/place-holder.jpg")}
+          style={styles.image}
         />
-        <View style={{ flex: 1 }}>
+        <View style={styles.textContainer}>
           <Text
-            style={{
-              color: Colors.dark.text,
-              fontWeight: "bold",
-              fontSize: 16,
-            }}
+            style={[styles.propertyName, { flexShrink: 1 }]}
+            numberOfLines={1}
           >
-            {propertyName}
+            {propertyData.propertyName}
           </Text>
-          <Text style={{ color: Colors.dark.textSecondary, fontSize: 12 }}>
-            {dates}
+          <Text style={[styles.dates, { flexShrink: 1 }]} numberOfLines={1}>
+            {propertyData.dates}
           </Text>
-          <Text style={{ color: Colors.dark.text, fontSize: 14, marginTop: 4 }}>
-            {price}
+          <Text style={[styles.price, { flexShrink: 1 }]} numberOfLines={1}>
+            {propertyData.price}
+          </Text>
+          <Text style={[styles.status, { flexShrink: 1 }]} numberOfLines={1}>
+            {propertyData.status}
           </Text>
         </View>
-        <Text style={{ color: Colors.dark.icon, fontSize: 20 }}>⋯</Text>
+        <TouchableOpacity onPress={onDotsPress} style={styles.dotsButton}>
+          <Text style={styles.dotsText}>⋯</Text>
+        </TouchableOpacity>
       </View>
-      <RebookButton />
-    </View>
+      <RebookButton onPress={onRebook} />
+    </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  image: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  propertyName: {
+    color: Colors.dark.text,
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  dates: {
+    color: Colors.dark.textSecondary,
+    fontSize: 12,
+  },
+  price: {
+    color: Colors.dark.text,
+    fontSize: 14,
+    marginTop: 4,
+  },
+  status: {
+    color: Colors.dark.icon,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  dotsButton: {
+    padding: 8,
+  },
+  dotsText: {
+    color: Colors.dark.icon,
+    fontSize: 20,
+  },
+});
