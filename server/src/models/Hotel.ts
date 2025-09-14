@@ -1,43 +1,71 @@
-// src/models/Hotel.ts
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
+
+/** Embedded reservations exactly like your TS types */
+const RoomReservationSchema = new Schema(
+  {
+    reservationId: { type: Schema.Types.ObjectId, required: true },
+    checkIn: { type: String, required: true },  // ISODateKey: YYYY-MM-DD
+    checkOut: { type: String, required: true }, // ISODateKey: YYYY-MM-DD (exclusive)
+  },
+  { _id: false }
+);
 
 const RoomSchema = new Schema(
   {
-    roomType: { type: String, enum: ["STANDARD", "DELUXE", "SUITE"], required: true },
+    name: { type: String, required: true, trim: true },
+    capacity: { type: Number, required: true, min: 1 },
     pricePerNight: { type: Number, required: true, min: 0 },
-    totalRooms: { type: Number, required: true, min: 0 },
-    availableRooms: { type: Number, min: 0, default: undefined },
+    photos: [{ type: String }],
+    amenities: [{ type: String }],
+    categories: [{ type: String }],
+    media: [{ type: Schema.Types.Mixed }],
+    reservations: { type: [RoomReservationSchema], default: [] },
   },
-  { _id: false }
+  { _id: true }
 );
 
 const HotelSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, index: true },
-    city: { type: String, required: true, trim: true, index: true },
     address: { type: String, required: true, trim: true },
+    country: { type: String, required: true, trim: true, index: true },
+    city: { type: String, required: true, trim: true, index: true },
+
+    // Store as simple lat/lng to match your GeoLocation type
     location: {
-      type: { type: String, enum: ["Point"], default: "Point" },
-      coordinates: { type: [Number] }, // [lng, lat]
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true },
     },
-    title: { type: String, default: "" },
-    description: { type: String, default: "" },
-    amenities: { type: [String], default: [] },
-    images: { type: [String], default: [] },
+
+    stars: { type: Number, min: 1, max: 5, index: true },
+    description: { type: String },
+
     rooms: { type: [RoomSchema], default: [] },
-    ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
-    ratingCount: { type: Number, default: 0, min: 0 },
-    categories: { type: [String], default: [] },
-    reviews: [{ type: Schema.Types.ObjectId, ref: "Review", default: [] }],
-    owner: { type: Schema.Types.ObjectId, ref: "User", index: true },
+    adminIds: [{ type: Schema.Types.ObjectId, index: true }],
+    amenityIds: [{ type: Schema.Types.ObjectId }],
+    media: [{ type: Schema.Types.Mixed }],
+
+    categories: [{ type: String, index: true }],
+
+    // Rating 0..10 as in your TS
+    averageRating: { type: Number, min: 0, max: 10, default: 0, index: true },
+    reviewsCount: { type: Number, min: 0, default: 0 },
+
+    ownerId: { type: Schema.Types.ObjectId, required: true, index: true },
+    approvalStatus: {
+      type: String,
+      enum: ["PENDING", "APPROVED", "REJECTED"],
+      default: "PENDING",
+      index: true,
+    },
+    submittedAt: { type: Date, default: Date.now },
+    approvedAt: { type: Date },
   },
   { timestamps: true, collection: "hotels" }
 );
 
-HotelSchema.index({ location: "2dsphere" });
-HotelSchema.index(
-  { name: "text", city: "text", address: "text", description: "text" },
-  { weights: { name: 5, city: 3, address: 2, description: 1 } }
-);
+// Helpful indices
+HotelSchema.index({ city: 1, stars: -1, averageRating: -1 });
+HotelSchema.index({ categories: 1, "rooms.pricePerNight": 1 });
 
 export const HotelModel = model("Hotel", HotelSchema);
