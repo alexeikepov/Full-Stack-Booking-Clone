@@ -7,7 +7,7 @@ import { ReservationModel } from "../models/Reservation";
 import { ReviewModel } from "../models/Review";
 import { AuthedRequest } from "../middlewares/auth";
 import { saveLastSearch } from "../services/searchHistoryService";
-
+import type { Hotel, Room } from "../types/hotel.types";
 const roomSchema = z.object({
   roomType: z.enum(["STANDARD", "DELUXE", "SUITE"]),
   pricePerNight: z.number().nonnegative(),
@@ -81,76 +81,72 @@ export async function createHotel(req: AuthedRequest, res: Response, next: NextF
     next(err);
   }
 }
-
 export async function listHotels(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const {
-      q,
-      city,
-      roomType,
-      minPrice,
-      maxPrice,
-      category,
-      categoriesMode,
-      from,
-      to,
-      adults,
-      children,
-      rooms,
-      sort,
-      minStars,
-      maxStars,
+      q, city, roomType, minPrice, maxPrice, category,
+      from, to, adults, children, rooms, sort,
+      minStars, maxStars,
     } = req.query as Record<string, string | undefined>;
+
+    const rxEq = (s: string) => new RegExp(`^${escapeRegExp(s)}$`, "i");
+    const toNum = (x?: string) => {
+      const n = Number(x);
+      return Number.isFinite(n) ? n : undefined;
+    };
 
     const filter: any = {};
     if (q) filter.$text = { $search: q };
-    if (city) filter.city = { $regex: `^${escapeRegExp(city)}$`, $options: "i" };
+    if (city?.trim()) filter.city = { $regex: rxEq(city.trim()) };
 
-    if (minStars || maxStars) {
+    const minS = toNum(minStars);
+    const maxS = toNum(maxStars);
+    if (minS !== undefined || maxS !== undefined) {
       filter.stars = {};
-      if (minStars) filter.stars.$gte = Number(minStars);
-      if (maxStars) filter.stars.$lte = Number(maxStars);
+      if (minS !== undefined) filter.stars.$gte = minS;
+      if (maxS !== undefined) filter.stars.$lte = maxS;
     }
 
     if (category) {
-      const cats = category.split(",").map((s) => s.trim()).filter(Boolean);
-      if (cats.length) {
-        if ((categoriesMode ?? "or") === "and") {
-          filter.categories = { $all: cats.map((c) => new RegExp(`^${escapeRegExp(c)}$`, "i")) };
-        } else {
-          filter.categories = { $in: cats.map((c) => new RegExp(`^${escapeRegExp(c)}$`, "i")) };
-        }
-      }
+      const cats = category.split(",").map(s => s.trim()).filter(Boolean);
+      if (cats.length) filter.categories = { $in: cats.map(c => rxEq(c)) };
     }
 
-    const priceClauses: any[] = [];
-    if (minPrice) priceClauses.push({ "rooms.pricePerNight": { $gte: Number(minPrice) } });
-    if (maxPrice) priceClauses.push({ "rooms.pricePerNight": { $lte: Number(maxPrice) } });
-    if (priceClauses.length) filter.$and = [...(filter.$and || []), ...priceClauses];
-
-    if (roomType) {
-      filter["rooms.roomType"] = new RegExp(`^${escapeRegExp(roomType)}$`, "i");
+    const roomElem: any = {};
+    const minP = toNum(minPrice);
+    const maxP = toNum(maxPrice);
+    if (minP !== undefined || maxP !== undefined) {
+      roomElem.pricePerNight = {};
+      if (minP !== undefined) roomElem.pricePerNight.$gte = minP;
+      if (maxP !== undefined) roomElem.pricePerNight.$lte = maxP;
     }
+    if (roomType?.trim()) roomElem.name = rxEq(roomType.trim());
+    if (Object.keys(roomElem).length) filter.rooms = { $elemMatch: roomElem };
 
     const requestedRooms = rooms ? Math.max(1, parseInt(rooms, 10) || 1) : 1;
 
+    const numAdults = toNum(adults) ?? 2;
+    const numChildren = toNum(children) ?? 0;
+    const totalGuests = Math.max(1, numAdults + numChildren);
+
     if (req.user?.id) {
       saveLastSearch(req.user.id, {
-        city,
-        from,
-        to,
-        adults: adults ? Number(adults) : undefined,
-        children: children ? Number(children) : undefined,
+        city: city?.trim(),
+        from, to,
+        adults: numAdults,
+        children: numChildren,
         rooms: requestedRooms,
       }).catch(() => {});
     }
 
-    const hotels = await HotelModel.find(filter).sort({ ratingAvg: -1, createdAt: -1 }).lean();
+    const hotels = await HotelModel.find(filter)
+      .sort({ ratingAvg: -1, createdAt: -1 })
+      .lean();
 
-    const start = parseDateOnly(from);
-    const end = parseDateOnly(to);
-    const hasValidRange = !!(start && end && end > start);
-    const nights = hasValidRange ? nightsBetween(start!, end!) : null;
+    const start = from ? new Date(`${from}T00:00:00Z`) : undefined;
+    const end   = to   ? new Date(`${to}T00:00:00Z`)   : undefined;
+    const hasValidRange = !!(start && end && !isNaN(+start) && !isNaN(+end) && end > start);
+    const nights = hasValidRange ? Math.max(1, Math.ceil((+end! - +start!) / 86400000)) : null;
 
     let bookedByHotel: Record<string, Record<string, number>> = {};
     if (hasValidRange) {
@@ -158,81 +154,155 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
         _id: { hotel: Types.ObjectId; roomType: string };
         qty: number;
       }>([
-        { $match: { status: { $in: ["PENDING", "CONFIRMED"] }, from: { $lt: end! }, to: { $gt: start! } } },
-        { $group: { _id: { hotel: "$hotel", roomType: "$roomType" }, qty: { $sum: "$quantity" } } },
+        { $match: {
+            status: { $in: ["PENDING", "CONFIRMED"] },
+            from: { $lt: end! },
+            to:   { $gt: start! },
+        }},
+        { $group: {
+            _id: { hotel: "$hotel", roomType: "$roomType" },
+            qty: { $sum: "$quantity" },
+        }},
       ]);
       for (const row of overlaps) {
         const hid = String(row._id.hotel);
-        if (!bookedByHotel[hid]) bookedByHotel[hid] = {};
-        bookedByHotel[hid][row._id.roomType] = row.qty;
+        (bookedByHotel[hid] ??= {})[row._id.roomType] = row.qty;
       }
     }
 
-    const enriched = hotels
-      .map((h: any) => {
-        const hid = String(h._id);
-        const roomsArr = Array.isArray(h.rooms) ? h.rooms : [];
+    const capOf = (r: Room): number => {
+      if (Number.isFinite(r.capacity)) return Math.max(1, Number(r.capacity));
+      const adultsCap = Number.isFinite(r.maxAdults) ? Number(r.maxAdults) : undefined;
+      const childrenCap = Number.isFinite(r.maxChildren) ? Number(r.maxChildren) : undefined;
+      const sum = (adultsCap ?? 0) + (childrenCap ?? 0);
+      return Math.max(1, sum || 2);
+    };
+
+    const enriched = (hotels as unknown as Hotel[])
+      .map((h) => {
+        const hid = String((h as any)._id ?? h.id);
+        const roomsArr: Room[] = Array.isArray((h as any).rooms) ? (h as any).rooms as Room[] : [];
 
         const availableByType: Record<string, number> = {};
-        let totalAvailable = 0;
+        let knownAvailableTotal = 0;
+        let hasAnyInventoryNumbers = false;
 
         for (const r of roomsArr) {
-          const typeKey = String(r.roomType);
-          const total = Number(r.totalRooms ?? 0);
-          const bookedQty = hasValidRange ? bookedByHotel[hid]?.[typeKey] ?? 0 : 0;
-          const avail = Math.max(0, total - bookedQty);
-          availableByType[typeKey] = hasValidRange ? avail : total;
-          totalAvailable += hasValidRange ? avail : total;
+          const typeKey = String(r.name ?? r.id);
+          // If you track inventory per room type separately, put it here. If not available, mark unknown (-1).
+          const totalRoomsNum = Number((r as any).totalRooms);
+          const hasInv = Number.isFinite(totalRoomsNum);
+          if (hasInv) hasAnyInventoryNumbers = true;
+
+          const bookedQty = hasValidRange ? (bookedByHotel[hid]?.[typeKey] ?? 0) : 0;
+          const avail = hasInv ? Math.max(0, totalRoomsNum - bookedQty) : -1;
+
+          availableByType[typeKey] = hasValidRange ? avail : (hasInv ? totalRoomsNum : -1);
+          if (hasInv) knownAvailableTotal += hasValidRange ? avail : totalRoomsNum;
         }
 
-        let cheapestNightly: number | null = null;
-        for (const r of roomsArr) {
-          const typeKey = String(r.roomType);
-          const matchesType = roomType ? new RegExp(`^${escapeRegExp(roomType)}$`, "i").test(typeKey) : true;
-          if (!matchesType) continue;
-          const nightly = Number(r.pricePerNight);
-          if (!Number.isFinite(nightly)) continue;
-          const availForType = availableByType[typeKey] ?? 0;
-          if (availForType < requestedRooms) continue;
-          if (cheapestNightly === null || nightly < cheapestNightly) cheapestNightly = nightly;
+        const typeRegex = roomType?.trim() ? rxEq(roomType.trim()) : null;
+
+        const types = roomsArr
+          .filter((r: Room) => {
+            const label = String(r.name ?? r.id);
+            return typeRegex ? typeRegex.test(label) : true;
+          })
+          .map((r: Room) => {
+            const typeKey = String(r.name ?? r.id);
+            const nightly = Number(r.pricePerNight);
+            const cap = capOf(r);
+            const avail = availableByType[typeKey] ?? -1;
+            return { typeKey, nightly, cap, avail };
+          })
+          .filter((t) => Number.isFinite(t.nightly) && t.cap > 0)
+          .sort((a, b) => a.nightly - b.nightly);
+
+        let remainingGuests = totalGuests;
+        const allocation: Array<{ roomType: string; roomsUsed: number; capacityPerRoom: number; pricePerNight: number }> = [];
+        for (const t of types) {
+          if (remainingGuests <= 0) break;
+          const neededForType = Math.ceil(remainingGuests / t.cap);
+          const allowedByAvail = t.avail === -1 ? neededForType : Math.min(neededForType, t.avail);
+          if (allowedByAvail <= 0) continue;
+
+          allocation.push({
+            roomType: t.typeKey,
+            roomsUsed: allowedByAvail,
+            capacityPerRoom: t.cap,
+            pricePerNight: t.nightly,
+          });
+            remainingGuests -= allowedByAvail * t.cap;
         }
+
+        const allocationCoversGuests = remainingGuests <= 0;
+        if (!allocationCoversGuests) {
+          const noInventoryAnywhere = Object.values(availableByType).every((v) => v === -1);
+          if (!noInventoryAnywhere) {
+            return null;
+          }
+        }
+
+        const roomsNeededByGuests = allocation.reduce((sum, a) => sum + a.roomsUsed, 0);
+        const roomsNeeded = Math.max(roomsNeededByGuests, requestedRooms);
+
+        if (roomsNeeded > roomsNeededByGuests && types.length > 0) {
+          const cheapest = types[0];
+          const extra = roomsNeeded - roomsNeededByGuests;
+          allocation.push({
+            roomType: cheapest.typeKey,
+            roomsUsed: extra,
+            capacityPerRoom: cheapest.cap,
+            pricePerNight: cheapest.nightly,
+          });
+        }
+
+        const nightlyTotal = allocation.reduce((sum, a) => sum + a.roomsUsed * a.pricePerNight, 0);
+        const priceFrom = types.length > 0 ? Math.min(...types.map((t) => t.nightly)) : null;
 
         const out: any = {
           ...h,
-          priceFrom: Number.isFinite(cheapestNightly as number) ? (cheapestNightly as number) : null,
-          totalPrice:
-            hasValidRange && cheapestNightly != null ? Number((cheapestNightly * (nights as number)).toFixed(2)) : null,
-          availability: hasValidRange
-            ? {
-                from: start!.toISOString(),
-                to: end!.toISOString(),
-                availableByType,
-                totalAvailable,
-              }
-            : undefined,
+          priceFrom,
+          totalNightly: Number.isFinite(nightlyTotal) ? nightlyTotal : null,
+          totalPrice: hasValidRange && Number.isFinite(nightlyTotal)
+            ? Number((nightlyTotal * (nights as number)).toFixed(2))
+            : null,
+          requiredRooms: roomsNeeded,
+          roomsRequested: requestedRooms,
+          guests: { adults: numAdults, children: numChildren, total: totalGuests },
+          allocation,
+          availability:
+            hasValidRange && hasAnyInventoryNumbers
+              ? {
+                  from: start!.toISOString(),
+                  to: end!.toISOString(),
+                  availableByType,
+                  totalAvailable: knownAvailableTotal,
+                }
+              : undefined,
         };
 
-        if (roomType) {
-          const rt = roomType.toLowerCase();
-          const hasEnough = Object.entries(availableByType).some(
-            ([k, v]) => k.toLowerCase() === rt && v >= requestedRooms
-          );
-          return hasEnough ? out : null;
+        if (roomType?.trim()) {
+          const rt = roomType.trim().toLowerCase();
+          const hasAnyRequestedType = allocation.some((a) => a.roomType.toLowerCase() === rt);
+          if (!hasAnyRequestedType) return null;
         }
-        if (hasValidRange) {
-          return totalAvailable >= requestedRooms ? out : null;
+
+        if (hasValidRange && hasAnyInventoryNumbers) {
+          if (knownAvailableTotal <= 0) return null;
         }
+
         return out;
       })
-      .filter(Boolean) as any[];
+      .filter((x) => Boolean(x)) as any[];
 
     let result = enriched;
     switch (sort) {
       case "price_low":
-        result = [...result].sort((a, b) => (a.priceFrom ?? Infinity) - (b.priceFrom ?? Infinity));
+        result = [...result].sort((a, b) => (a.totalNightly ?? Infinity) - (b.totalNightly ?? Infinity));
         break;
       case "price_high":
-        result = [...result].sort((a, b) => (b.priceFrom ?? -Infinity) - (a.priceFrom ?? -Infinity));
+        result = [...result].sort((a, b) => (b.totalNightly ?? -Infinity) - (a.totalNightly ?? -Infinity));
         break;
       case "rating":
         result = [...result].sort((a, b) => (b.averageRating ?? 0) - (a.averageRating ?? 0));
@@ -249,6 +319,7 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
     next(err);
   }
 }
+
 
 export async function getHotelById(req: Request, res: Response, next: NextFunction) {
   try {
@@ -590,3 +661,5 @@ export async function deleteMyReview(req: AuthedRequest, res: Response, next: Ne
     next(err);
   }
 }
+
+
