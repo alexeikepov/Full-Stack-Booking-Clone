@@ -4,7 +4,9 @@ import { useSearchParams, Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import type { Hotel } from "@/types/hotel";
 import SearchTopBar from "@/components/search/HeroSearch";
-import FiltersSidebar, { type FiltersState } from "@/components/searchPage/FiltersSidebar";
+import FiltersSidebar, {
+  type FiltersState,
+} from "@/components/searchPage/FiltersSidebar";
 import HotelCard from "@/components/searchPage/HotelCard";
 import InfoNotice from "@/components/searchPage/InfoNotice";
 import SortBar from "@/components/searchPage/SortBar";
@@ -13,15 +15,21 @@ import { buildFacets, type FacetGroup } from "@/utils/buildFacets";
 
 type ViewMode = "list" | "grid";
 
-const n = (v: unknown): number | null => (Number.isFinite(Number(v)) ? Number(v) : null);
-const priceOf = (h: Hotel) => n((h as any).totalPrice) ?? n((h as any).priceFrom);
+const n = (v: unknown): number | null =>
+  Number.isFinite(Number(v)) ? Number(v) : null;
+const priceOf = (h: Hotel) =>
+  n((h as any).totalPrice) ?? n((h as any).priceFrom);
 const ratingOf = (h: Hotel) => n((h as any).averageRating) ?? 0;
 const starsOf = (h: Hotel) => n((h as any).stars) ?? 0;
 
 function toStringArray(val: unknown): string[] {
   if (Array.isArray(val)) return val.map(String);
   if (val instanceof Set) return Array.from(val).map(String);
-  if (typeof val === "string") return val.split(",").map((s) => s.trim()).filter(Boolean);
+  if (typeof val === "string")
+    return val
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   if (val && typeof val === "object") {
     return Object.entries(val as Record<string, any>)
       .filter(([, v]) => Boolean(v))
@@ -31,14 +39,19 @@ function toStringArray(val: unknown): string[] {
 }
 
 const catsSet = (h: Hotel) =>
-  new Set<string>(toStringArray((h as any).categories).map((s) => s.toLowerCase()));
+  new Set<string>(
+    toStringArray((h as any).categories).map((s) => s.toLowerCase())
+  );
 
 const typeOf = (h: Hotel) => {
-  const fromField = String((h as any).propertyType ?? (h as any).type ?? "").toLowerCase();
+  const fromField = String(
+    (h as any).propertyType ?? (h as any).type ?? ""
+  ).toLowerCase();
   if (fromField) return fromField;
   const c = catsSet(h);
   if (c.has("hotels")) return "hotel";
-  if (c.has("apartments") || c.has("entire homes & apartments")) return "apartment";
+  if (c.has("apartments") || c.has("entire homes & apartments"))
+    return "apartment";
   if (c.has("hostels")) return "hostel";
   if (c.has("villas")) return "villa";
   if (c.has("guest houses")) return "guest house";
@@ -49,15 +62,18 @@ const typeOf = (h: Hotel) => {
 };
 
 const amens = (h: Hotel) => {
-  const base =
-    Array.isArray((h as any).amenityIds) ? (h as any).amenityIds : (h as any).amenities ?? [];
+  const base = Array.isArray((h as any).amenityIds)
+    ? (h as any).amenityIds
+    : (h as any).amenities ?? [];
   const normalized = base.map((x: any) => String(x).toLowerCase());
   const merged = new Set<string>([...normalized, ...catsSet(h)]);
   return Array.from(merged);
 };
 
 const meals = (h: Hotel) => {
-  const fromField = new Set<string>(toStringArray((h as any).meals).map((s) => s.toLowerCase()));
+  const fromField = new Set<string>(
+    toStringArray((h as any).meals).map((s) => s.toLowerCase())
+  );
   const c = catsSet(h);
   if (c.has("breakfast included")) fromField.add("breakfast included");
   if (c.has("all-inclusive")) fromField.add("all-inclusive");
@@ -85,9 +101,13 @@ const pay = (h: Hotel) => {
 };
 
 const dist = (h: Hotel) =>
-  n((h as any).distanceKm) ?? n((h as any).distance_km) ?? n((h as any).distanceFromCenterKm);
-const hood = (h: Hotel) => String((h as any).neighborhood ?? (h as any).area ?? "").toLowerCase();
-const brand = (h: Hotel) => String((h as any).brand ?? (h as any).chain ?? "").toLowerCase();
+  n((h as any).distanceKm) ??
+  n((h as any).distance_km) ??
+  n((h as any).distanceFromCenterKm);
+const hood = (h: Hotel) =>
+  String((h as any).neighborhood ?? (h as any).area ?? "").toLowerCase();
+const brand = (h: Hotel) =>
+  String((h as any).brand ?? (h as any).chain ?? "").toLowerCase();
 
 function nightsFromParams(params: URLSearchParams): number | null {
   const from = params.get("from");
@@ -159,7 +179,8 @@ function NoResultsPanel({ city }: { city: string | null }) {
           {city ? `${city}: 0 properties found` : "0 properties found"}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          There are no matching properties for your search criteria. Try updating your search.
+          There are no matching properties for your search criteria. Try
+          updating your search.
         </p>
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -174,8 +195,12 @@ function NoResultsPanel({ city }: { city: string | null }) {
 
 export default function SearchPage() {
   const [params, setParams] = useSearchParams();
-  const [view, setView] = useState<ViewMode>(params.get("view") === "grid" ? "grid" : "list");
-  const [sortKey, setSortKey] = useState<SortKey>((params.get("sort") as SortKey) || "price_high");
+  const [view, setView] = useState<ViewMode>(
+    params.get("view") === "grid" ? "grid" : "list"
+  );
+  const [sortKey, setSortKey] = useState<SortKey>(
+    (params.get("sort") as SortKey) || "price_high"
+  );
 
   const nights = nightsFromParams(params);
 
@@ -183,7 +208,19 @@ export default function SearchPage() {
     queryKey: ["hotels", Object.fromEntries(params.entries())],
     queryFn: () => fetchHotels(params),
     enabled: true,
+    retry: 1,
+    retryDelay: 1000,
   });
+
+  // Debug logging
+  if (process.env.NODE_ENV === "development") {
+    console.log("SearchPage render:", {
+      data,
+      isLoading,
+      error,
+      params: Object.fromEntries(params.entries()),
+    });
+  }
 
   const [minBound, maxBound] = useMemo(() => {
     const prices = (data ?? [])
@@ -193,9 +230,18 @@ export default function SearchPage() {
     return [Math.min(...prices), Math.max(...prices)] as const;
   }, [data]);
 
-  const baseFacets: FacetGroup[] = useMemo(() => buildFacets(data ?? []), [data]);
-  const catFacet: FacetGroup = useMemo(() => categoriesFacet(data ?? []), [data]);
-  const facets: FacetGroup[] = useMemo(() => [...baseFacets, catFacet], [baseFacets, catFacet]);
+  const baseFacets: FacetGroup[] = useMemo(
+    () => buildFacets(data ?? []),
+    [data]
+  );
+  const catFacet: FacetGroup = useMemo(
+    () => categoriesFacet(data ?? []),
+    [data]
+  );
+  const facets: FacetGroup[] = useMemo(
+    () => [...baseFacets, catFacet],
+    [baseFacets, catFacet]
+  );
 
   const [filters, setFilters] = useState<FiltersState>({
     priceMin: minBound,
@@ -222,7 +268,10 @@ export default function SearchPage() {
     }));
   };
 
-  const sorted = useMemo(() => (data ? sortHotels(data, sortKey) : []), [data, sortKey]);
+  const sorted = useMemo(
+    () => (data ? sortHotels(data, sortKey) : []),
+    [data, sortKey]
+  );
 
   const filtered = useMemo(() => {
     const sel = filters.selected;
@@ -234,8 +283,10 @@ export default function SearchPage() {
     return sorted.filter((h) => {
       const p = priceOf(h);
       if (p != null) {
-        if (filters.priceMin != null && p < (filters.priceMin ?? -Infinity)) return false;
-        if (filters.priceMax != null && p > (filters.priceMax ?? Infinity)) return false;
+        if (filters.priceMin != null && p < (filters.priceMin ?? -Infinity))
+          return false;
+        if (filters.priceMax != null && p > (filters.priceMax ?? Infinity))
+          return false;
       }
 
       if (
@@ -257,21 +308,37 @@ export default function SearchPage() {
         return false;
 
       if (sel.stars && sel.stars.size > 0) {
-        if (![...sel.stars].some((id) => Number(id.replace("stars_", "")) === starsOf(h))) return false;
+        if (
+          ![...sel.stars].some(
+            (id) => Number(id.replace("stars_", "")) === starsOf(h)
+          )
+        )
+          return false;
       }
 
       if (sel.ptype && sel.ptype.size > 0) {
         const t = typeOf(h);
-        if (![...sel.ptype].some((id) => t.includes(id.replace(/^pt_/, "")))) return false;
+        if (![...sel.ptype].some((id) => t.includes(id.replace(/^pt_/, ""))))
+          return false;
       }
 
       if (sel.facilities && sel.facilities.size > 0) {
         const a = amens(h);
-        if (![...sel.facilities].every((id) => a.includes(id.replace(/^amen_/, "").toLowerCase()))) return false;
+        if (
+          ![...sel.facilities].every((id) =>
+            a.includes(id.replace(/^amen_/, "").toLowerCase())
+          )
+        )
+          return false;
       }
 
-      if (sel.meals?.has("meal_breakfast") && !meals(h).has("breakfast included")) return false;
-      if (sel.meals?.has("meal_all") && !meals(h).has("all-inclusive")) return false;
+      if (
+        sel.meals?.has("meal_breakfast") &&
+        !meals(h).has("breakfast included")
+      )
+        return false;
+      if (sel.meals?.has("meal_all") && !meals(h).has("all-inclusive"))
+        return false;
 
       const payFlags = pay(h);
       if (sel.payment?.has("pay_free_cxl") && !payFlags.free) return false;
@@ -289,12 +356,20 @@ export default function SearchPage() {
 
       if (sel.neighborhood && sel.neighborhood.size > 0) {
         const hv = hood(h);
-        if (![...sel.neighborhood].some((id) => hv.includes(id.replace(/^hood_/, "")))) return false;
+        if (
+          ![...sel.neighborhood].some((id) =>
+            hv.includes(id.replace(/^hood_/, ""))
+          )
+        )
+          return false;
       }
 
       if (sel.brands && sel.brands.size > 0) {
         const b = brand(h);
-        if (![...sel.brands].some((id) => b.includes(id.replace(/^brand_/, "")))) return false;
+        if (
+          ![...sel.brands].some((id) => b.includes(id.replace(/^brand_/, "")))
+        )
+          return false;
       }
 
       if (catTokens.length > 0) {
@@ -303,12 +378,23 @@ export default function SearchPage() {
         if (!hasAll) return false;
       }
 
-      if (sel.popular?.has("popular_breakfast") && !meals(h).has("breakfast included")) return false;
-      if (sel.popular?.has("popular_parking") && !amens(h).includes("parking")) return false;
-      if (sel.popular?.has("popular_hotels") && !typeOf(h).includes("hotel")) return false;
-      if (sel.popular?.has("popular_apartments") && !typeOf(h).includes("apartment")) return false;
+      if (
+        sel.popular?.has("popular_breakfast") &&
+        !meals(h).has("breakfast included")
+      )
+        return false;
+      if (sel.popular?.has("popular_parking") && !amens(h).includes("parking"))
+        return false;
+      if (sel.popular?.has("popular_hotels") && !typeOf(h).includes("hotel"))
+        return false;
+      if (
+        sel.popular?.has("popular_apartments") &&
+        !typeOf(h).includes("apartment")
+      )
+        return false;
       if (sel.popular?.has("popular_review8") && ratingOf(h) < 8) return false;
-      if (sel.popular?.has("popular_hostels") && !typeOf(h).includes("hostel")) return false;
+      if (sel.popular?.has("popular_hostels") && !typeOf(h).includes("hostel"))
+        return false;
       if (sel.popular?.has("popular_review9") && ratingOf(h) < 9) return false;
 
       return true;
@@ -325,17 +411,24 @@ export default function SearchPage() {
 
       <div className="mx-auto max-w-[1112px] px-2 sm:px-0">
         <nav className="py-2 text-[12px] text-gray-500">
-          <Link to="#" className="text-[#0071c2] hover:underline">Home</Link>
+          <Link to="#" className="text-[#0071c2] hover:underline">
+            Home
+          </Link>
           <span className="mx-1">›</span>
-          <Link to="#" className="text-[#0071c2] hover:underline">Israel</Link>
+          <Link to="#" className="text-[#0071c2] hover:underline">
+            Israel
+          </Link>
           <span className="mx-1">›</span>
-          <Link to="#" className="text-[#0071c2] hover:underline">{params.get("city") ?? "City"}</Link>
+          <Link to="#" className="text-[#0071c2] hover:underline">
+            {params.get("city") ?? "City"}
+          </Link>
           <span className="mx-1">›</span>
           <span>Search results</span>
         </nav>
 
         <h1 className="text-[18px] font-semibold">
-          {params.get("city") ?? "city"}: {isLoading ? "…" : filtered.length} properties found
+          {params.get("city") ?? "city"}: {isLoading ? "…" : filtered.length}{" "}
+          properties found
         </h1>
 
         <div className="mt-2 flex items-center justify-between">
@@ -343,7 +436,9 @@ export default function SearchPage() {
             value={sortKey}
             onChange={(k) => {
               setSortKey(k);
-              const sp = new URLSearchParams(Object.fromEntries(params.entries()));
+              const sp = new URLSearchParams(
+                Object.fromEntries(params.entries())
+              );
               sp.set("sort", k);
               setParams(sp, { replace: true });
             }}
@@ -354,7 +449,9 @@ export default function SearchPage() {
                 setView("list");
                 updateUrl({ view: "list" });
               }}
-              className={`rounded-md border px-2 py-1 text-[12px] ${view === "list" ? "bg-muted" : ""}`}
+              className={`rounded-md border px-2 py-1 text-[12px] ${
+                view === "list" ? "bg-muted" : ""
+              }`}
             >
               List
             </button>
@@ -363,7 +460,9 @@ export default function SearchPage() {
                 setView("grid");
                 updateUrl({ view: "grid" });
               }}
-              className={`rounded-md border px-2 py-1 text-[12px] ${view === "grid" ? "bg-muted" : ""}`}
+              className={`rounded-md border px-2 py-1 text-[12px] ${
+                view === "grid" ? "bg-muted" : ""
+              }`}
             >
               Grid
             </button>
@@ -372,8 +471,9 @@ export default function SearchPage() {
 
         <div className="mt-2">
           <InfoNotice>
-            Please review any travel advisories provided by your government to make an informed
-            decision about your stay in this area, which may be considered conflict-affected.
+            Please review any travel advisories provided by your government to
+            make an informed decision about your stay in this area, which may be
+            considered conflict-affected.
           </InfoNotice>
         </div>
 
@@ -385,8 +485,44 @@ export default function SearchPage() {
             facets={facets}
           />
 
-          <div className={`flex-1 ${view === "grid" ? "grid grid-cols-1 gap-3 md:grid-cols-2" : "space-y-3"}`}>
-            {error && <NoResultsPanel city={params.get("city")} />}
+          <div
+            className={`flex-1 ${
+              view === "grid"
+                ? "grid grid-cols-1 gap-3 md:grid-cols-2"
+                : "space-y-3"
+            }`}
+          >
+            {error && (
+              <div className="flex flex-1 items-center justify-center">
+                <div className="mx-auto w-full max-w-[680px] rounded-xl border border-[#e7e7e7] bg-white p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                  <div className="mx-auto mb-4 h-14 w-14 rounded-full border border-red-500/30 p-3">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-full w-full text-red-500"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-lg font-semibold text-red-600">
+                    Error loading hotels
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {error.message ||
+                      "Failed to load hotel data. Please try again."}
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 inline-flex items-center rounded-md bg-[#0071c2] px-4 py-2 text-sm font-medium text-white hover:bg-[#005fa3]"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            )}
 
             {isLoading &&
               Array.from({ length: 4 }).map((_, i) =>
@@ -398,7 +534,10 @@ export default function SearchPage() {
                     <div className="mt-4 h-8 w-28 rounded bg-muted" />
                   </div>
                 ) : (
-                  <div key={i} className="flex animate-pulse gap-4 rounded-xl border p-3 sm:flex-row">
+                  <div
+                    key={i}
+                    className="flex animate-pulse gap-4 rounded-xl border p-3 sm:flex-row"
+                  >
                     <div className="h-40 w-full rounded-lg bg-muted sm:w-[260px]" />
                     <div className="flex w-full flex-1 flex-col gap-3">
                       <div className="h-6 w-1/2 rounded bg-muted" />
@@ -409,10 +548,21 @@ export default function SearchPage() {
                 )
               )}
 
-            {!isLoading && filtered.length > 0 &&
-              filtered.map((h) => <HotelCard key={h.id} hotel={h} nights={nights} variant={view} />)}
+            {!isLoading &&
+              !error &&
+              filtered.length > 0 &&
+              filtered.map((h) => (
+                <HotelCard
+                  key={h.id}
+                  hotel={h}
+                  nights={nights}
+                  variant={view}
+                />
+              ))}
 
-            {!isLoading && !error && filtered.length === 0 && <NoResultsPanel city={params.get("city")} />}
+            {!isLoading && !error && filtered.length === 0 && (
+              <NoResultsPanel city={params.get("city")} />
+            )}
           </div>
         </div>
       </div>
