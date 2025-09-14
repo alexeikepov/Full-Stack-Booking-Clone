@@ -47,7 +47,7 @@ export default function HomePage() {
 
               <div className="absolute inset-0 flex items-center justify-start">
                 <div className="p-6 text-left text-white">
-                  <p className="text-[11px] tracking-wide opacity-90">
+                  <p className="text-[11px] tracking-wide opacity-80">
                     Holiday rentals
                   </p>
                   <h3 className="text-lg font-bold md:text-xl">
