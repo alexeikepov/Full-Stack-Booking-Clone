@@ -5,28 +5,36 @@ import { Bed, Plane, CarFront, Sparkles, HelpCircle } from "lucide-react";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSelector from "./LanguageSelector";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigationStore } from "@/stores/navigation";
 import * as React from "react";
 
 function NavPill({
   to,
   icon: Icon,
   label,
-  active,
+  tabType,
 }: {
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  active?: boolean;
+  tabType: "stays" | "flights" | "cars" | "attractions" | "taxis";
 }) {
+  const { activeTab, setActiveTab } = useNavigationStore();
+  const isActive = activeTab === tabType;
+
   const base =
-    "flex items-center gap-2 rounded-full px-4 py-2 text-white/90 transition";
+    "flex items-center gap-2 rounded-full px-4 py-2 text-white/90 transition cursor-pointer";
   const activeCls = "bg-white/15 ring-1 ring-white/60 text-white";
   const idle = "hover:bg-white/10 hover:text-white";
+
   return (
-    <NavLink to={to} className={`${base} ${active ? activeCls : idle}`}>
+    <div
+      onClick={() => setActiveTab(tabType)}
+      className={`${base} ${isActive ? activeCls : idle}`}
+    >
       <Icon className="h-4 w-4" />
       <span>{label}</span>
-    </NavLink>
+    </div>
   );
 }
 
@@ -36,12 +44,14 @@ export default function Header() {
 
   const initials = React.useMemo(() => {
     if (!user?.name) return "U";
-    return user.name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((n) => n[0]?.toUpperCase() ?? "")
-      .join("") || "U";
+    return (
+      user.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((n) => n[0]?.toUpperCase() ?? "")
+        .join("") || "U"
+    );
   }, [user?.name]);
 
   return (
@@ -119,24 +129,34 @@ export default function Header() {
 
       <div className="mx-auto max-w-6xl px-4 pb-4">
         <div className="flex flex-wrap items-center gap-2">
+          <NavPill to="/" icon={Bed} label="Stays" tabType="stays" />
           <NavPill
-            to="/"
-            icon={Bed}
-            label="Stays"
-            active={pathname === "/" || pathname.startsWith("/search")}
+            to="/flights"
+            icon={Plane}
+            label="Flights"
+            tabType="flights"
           />
-          <NavPill to="/flights" icon={Plane} label="Flights" />
-          <NavPill to="/car-rental" icon={CarFront} label="Car rental" />
-          <NavPill to="/attractions" icon={Sparkles} label="Attractions" />
-          <NavLink
-            to="/airport-taxis"
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-white/90 transition hover:bg-white/10 hover:text-white"
+          <NavPill
+            to="/car-rental"
+            icon={CarFront}
+            label="Car rental"
+            tabType="cars"
+          />
+          <NavPill
+            to="/attractions"
+            icon={Sparkles}
+            label="Attractions"
+            tabType="attractions"
+          />
+          <div
+            onClick={() => useNavigationStore.getState().setActiveTab("taxis")}
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-white/90 transition hover:bg-white/10 hover:text-white cursor-pointer"
           >
             <span className="inline-flex items-center justify-center rounded-sm border border-white/70 px-1 text-[10px] leading-4 tracking-[0.08em]">
               TAXI
             </span>
             <span>Airport taxis</span>
-          </NavLink>
+          </div>
         </div>
       </div>
     </header>
