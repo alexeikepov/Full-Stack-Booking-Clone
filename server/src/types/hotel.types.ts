@@ -19,7 +19,8 @@ export type Hotel = {
   rooms: Room[];
   adminIds: ID[];
   amenityIds?: ID[];
-  media?: Media[];
+  amenities?: Amenity[];
+  media: Media[];
   categories?: string[];
   averageRating?: number;
   reviewsCount?: number;
@@ -29,22 +30,36 @@ export type Hotel = {
   approvedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+
+  houseRules: string;
+  checkIn: string;
+  checkOut: string;
 };
 
 export type Room = {
   id: ID;
   name: string;
   capacity: number;
+  maxAdults: number;
+  maxChildren: number;
+
   pricePerNight: number;
+
+  sizeSqm?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+
   photos?: string[];
   amenities?: string[];
+  facilities?: string[];
   categories?: string[];
   media?: Media[];
+
   reservations: RoomReservation[];
 };
 
 export type RoomReservation = {
   reservationId: ID;
-  checkIn: string; // ISODateKey
-  checkOut: string; // ISODateKey
+  checkIn: string;
+  checkOut: string;
 };
