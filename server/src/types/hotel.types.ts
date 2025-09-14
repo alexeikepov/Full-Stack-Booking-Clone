@@ -20,7 +20,7 @@ export type Hotel = {
   adminIds: ID[];
   amenityIds?: ID[];
   amenities?: Amenity[];
-  media?: Media[];
+  media: Media[];
   categories?: string[];
   averageRating?: number;
   reviewsCount?: number;
