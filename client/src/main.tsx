@@ -11,6 +11,8 @@ import HotelPage from "@/pages/HotelPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import { AuthProvider } from "@/context/AuthContext";
+import AccountPage from "./pages/AccountPage";
+import BookingsPage from "./pages/BookingsPage";
 
 const router = createBrowserRouter([
   {
@@ -20,8 +22,10 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "search", element: <SearchPage  /> },
       { path: "hotel/:id", element: <HotelPage /> },
+      { path: "account", element: <AccountPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
+      { path:"/account/bookings", element: <BookingsPage />},
     ],
   },
 ]);
