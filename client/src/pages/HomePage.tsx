@@ -1,4 +1,5 @@
 // src/routes/HomePage.tsx
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import HeroSearch from "@/components/search/HeroSearch";
@@ -9,8 +10,16 @@ import TravelMoreSection from "@/components/homePage/TravelMoreSection";
 import HolidayRentalsBanner from "@/components/homePage/HolidayRentalsBanner";
 import PopularWithTravellers from "@/components/homePage/PopularWithTravellers";
 import Footer from "@/components/Footer";
+import { useNavigationStore } from "@/stores/navigation";
 
 export default function HomePage() {
+  const { setActiveTab } = useNavigationStore();
+
+  // Set active tab to 'stays' when home page loads
+  useEffect(() => {
+    setActiveTab("stays");
+  }, [setActiveTab]);
+
   return (
     <div className="flex flex-col">
       <section className="w-full bg-[#003b95] text-white">
@@ -23,7 +32,7 @@ export default function HomePage() {
           </p>
         </div>
       </section>
-      <div className="-mt-8">
+      <div className="relative -mt-8 z-10">
         <HeroSearch />
       </div>
 
@@ -47,7 +56,7 @@ export default function HomePage() {
 
               <div className="absolute inset-0 flex items-center justify-start">
                 <div className="p-6 text-left text-white">
-                  <p className="text-[11px] tracking-wide opacity-90">
+                  <p className="text-[11px] tracking-wide opacity-80">
                     Holiday rentals
                   </p>
                   <h3 className="text-lg font-bold md:text-xl">
