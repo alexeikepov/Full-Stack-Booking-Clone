@@ -20,10 +20,15 @@ export type Hotel = {
   adminIds: ID[];
   amenityIds?: ID[];
   media?: Media[];
+  categories?: string[];
+  averageRating?: number;
+  reviewsCount?: number;
+  ownerId: ID;
   approvalStatus: HotelApprovalStatus;
   submittedAt: Date;
   approvedAt?: Date;
   createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type Room = {
@@ -33,6 +38,7 @@ export type Room = {
   pricePerNight: number;
   photos?: string[];
   amenities?: string[];
+  categories?: string[];
   media?: Media[];
   reservations: RoomReservation[];
 };

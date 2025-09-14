@@ -22,8 +22,8 @@ async function start() {
   const app = express();
 
   // Trust proxy (required on some hosts)
-  app.set("trust proxy", true);
-
+const trustProxy = process.env.NODE_ENV === "production" ? 1 : false;
+app.set("trust proxy", trustProxy);
   // CORS (set exact client origin)
   app.use(cors({ origin: config.clientUrl, credentials: true }));
 
