@@ -14,6 +14,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import AccountPage from "./pages/AccountPage";
 import BookingsPage from "./pages/BookingsPage";
 import WishlistPage from "./pages/SavedListsPage.tsx";
+import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { path: "register", element: <RegisterPage /> },
       { path:"/account/bookings", element: <BookingsPage />},
       { path:"/account/saved", element: <WishlistPage />},
+      { path:"/account/reviews", element: <ReviewsTimelinePage />},
     ],
   },
 ]);
