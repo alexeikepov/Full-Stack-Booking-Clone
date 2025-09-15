@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MdBed, MdBathtub, MdSquare, MdGroup } from "react-icons/md";
+import { MdBed, MdBathtub, MdSquare } from "react-icons/md";
 
 interface RoomOption {
   _id: { $oid: string };
+  id?: string; // for frontend compatibility
   name: string;
   capacity: number;
   maxAdults: number;
@@ -33,6 +34,11 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
   const [selectedRooms, setSelectedRooms] = useState<Record<string, number>>(
     {}
   );
+
+  // Helper function to get room ID
+  const getRoomId = (room: any) => {
+    return room.id || room._id?.$oid || room._id || "";
+  };
 
   const handleRoomSelect = (roomId: string, count: number) => {
     setSelectedRooms((prev) => ({
@@ -83,7 +89,7 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
           <div className="bg-white">
             {rooms.map((room, index) => (
               <div
-                key={room._id.$oid}
+                key={getRoomId(room) || index}
                 className={`${index > 0 ? "border-t border-gray-200" : ""}`}
               >
                 {/* Room type details */}
@@ -195,10 +201,10 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
                   {/* Select rooms */}
                   <div className="flex items-center gap-2">
                     <select
-                      value={selectedRooms[room._id.$oid] || 0}
+                      value={selectedRooms[getRoomId(room)] || 0}
                       onChange={(e) =>
                         handleRoomSelect(
-                          room._id.$oid,
+                          getRoomId(room),
                           parseInt(e.target.value)
                         )
                       }

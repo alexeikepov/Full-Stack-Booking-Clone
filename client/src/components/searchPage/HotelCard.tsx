@@ -40,8 +40,20 @@ type Props = {
 export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
   const [params] = useSearchParams();
 
+  // Helper function to get hotel ID
+  const getHotelId = (hotel: Hotel): string => {
+    if (hotel.id) return hotel.id;
+    if (hotel._id?.$oid) return hotel._id.$oid;
+    if (typeof hotel._id === "string") return hotel._id;
+    return "";
+  };
+
   // Build hotel URL with search parameters
   const buildHotelUrl = (hotelId: string) => {
+    if (!hotelId) {
+      console.error("Hotel ID is undefined:", hotel);
+      return "#";
+    }
     const searchParams = new URLSearchParams();
 
     // Add search parameters from current URL
@@ -90,7 +102,7 @@ export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
     return (
       <Card className="overflow-hidden rounded-xl border border-[#e7e7e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <Link
-          to={buildHotelUrl(hotel._id.$oid)}
+          to={buildHotelUrl(getHotelId(hotel))}
           className="block w-full"
           style={{ aspectRatio: "16 / 9" }}
         >
@@ -107,7 +119,7 @@ export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <Link
-                  to={buildHotelUrl(hotel._id.$oid)}
+                  to={buildHotelUrl(getHotelId(hotel))}
                   className="line-clamp-2 text-[18px] font-semibold text-[#0071c2] hover:underline"
                 >
                   {hotel.name}
@@ -184,7 +196,7 @@ export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
               </div>
 
               <Link
-                to={buildHotelUrl(hotel._id.$oid)}
+                to={buildHotelUrl(getHotelId(hotel))}
                 className="inline-flex items-center rounded-md bg-[#0071c2] px-4 py-2 text-sm font-medium text-white hover:bg-[#005fa3]"
               >
                 See availability
@@ -200,7 +212,7 @@ export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
     <Card className="overflow-hidden rounded-xl border border-[#e7e7e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex flex-col gap-3 p-3 sm:flex-row sm:gap-4">
         <Link
-          to={buildHotelUrl(hotel._id.$oid)}
+          to={buildHotelUrl(getHotelId(hotel))}
           className="block w-full shrink-0 overflow-hidden rounded-lg sm:w-[220px]"
           style={{ aspectRatio: "3 / 4" }}
         >
@@ -215,7 +227,7 @@ export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex items-center gap-2">
             <Link
-              to={buildHotelUrl(hotel._id.$oid)}
+              to={buildHotelUrl(getHotelId(hotel))}
               className="text-[20px] font-semibold text-[#0071c2] hover:underline"
             >
               {hotel.name}
@@ -288,7 +300,7 @@ export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
             </div>
 
             <Link
-              to={buildHotelUrl(hotel._id.$oid)}
+              to={buildHotelUrl(getHotelId(hotel))}
               className="inline-flex items-center rounded-md bg-[#0071c2] px-4 py-2 text-sm font-medium text-white hover:bg-[#005fa3]"
             >
               See availability
