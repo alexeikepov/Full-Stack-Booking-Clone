@@ -24,7 +24,11 @@ function isAdmin(role?: string) {
 }
 
 // POST /api/reservations
-export async function createReservation(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function createReservation(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const dto = createReservationSchema.parse(req.body);
 
@@ -37,8 +41,13 @@ export async function createReservation(req: AuthedRequest, res: Response, next:
     const hotel = await HotelModel.findById(dto.hotelId).lean();
     if (!hotel) return res.status(404).json({ error: "Hotel not found" });
 
-    const roomInfo = (hotel as any).rooms?.find((r: any) => r.roomType === dto.roomType);
-    if (!roomInfo) return res.status(400).json({ error: "Room type not available in hotel" });
+    const roomInfo = (hotel as any).rooms?.find(
+      (r: any) => r.roomType === dto.roomType
+    );
+    if (!roomInfo)
+      return res
+        .status(400)
+        .json({ error: "Room type not available in hotel" });
 
     const hotelObjectId = new Types.ObjectId(dto.hotelId);
     const overlap = await ReservationModel.aggregate<{ qty: number }>([
@@ -56,11 +65,17 @@ export async function createReservation(req: AuthedRequest, res: Response, next:
     ]);
 
     const alreadyBooked = overlap[0]?.qty ?? 0;
-    const totalRooms = roomInfo.totalRooms ?? 0;
+    const totalRooms =
+      roomInfo.totalRooms ??
+      roomInfo.availableRooms ??
+      roomInfo.totalUnits ??
+      0;
     const availableNow = Math.max(0, totalRooms - alreadyBooked);
 
     if (dto.quantity > availableNow) {
-      return res.status(409).json({ error: "Not enough rooms available", available: availableNow });
+      return res
+        .status(409)
+        .json({ error: "Not enough rooms available", available: availableNow });
     }
 
     const created = await ReservationModel.create({
@@ -89,9 +104,15 @@ export async function createReservation(req: AuthedRequest, res: Response, next:
 }
 
 // GET /api/reservations
-export async function listReservations(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function listReservations(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const wantsAll = (req.query.all === "1" || req.query.all === "true") && isAdmin(req.user?.role);
+    const wantsAll =
+      (req.query.all === "1" || req.query.all === "true") &&
+      isAdmin(req.user?.role);
     const filter = wantsAll ? {} : { user: req.user!.id };
 
     const list = await ReservationModel.find(filter)
@@ -107,7 +128,11 @@ export async function listReservations(req: AuthedRequest, res: Response, next: 
 }
 
 // GET /api/reservations/:id
-export async function getReservationById(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function getReservationById(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
     if (!mongoose.isValidObjectId(id)) {
@@ -120,7 +145,10 @@ export async function getReservationById(req: AuthedRequest, res: Response, next
       .lean();
 
     if (!r) return res.status(404).json({ error: "Reservation not found" });
-    if (!isAdmin(req.user?.role) && String((r as any).user) !== String(req.user!.id)) {
+    if (
+      !isAdmin(req.user?.role) &&
+      String((r as any).user) !== String(req.user!.id)
+    ) {
       return res.status(403).json({ error: "Forbidden" });
     }
     res.json(r);
@@ -130,7 +158,11 @@ export async function getReservationById(req: AuthedRequest, res: Response, next
 }
 
 // GET /api/reservations/:id/cancel (user)
-export async function getCancellationReesevatioByID(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function getCancellationReesevatioByID(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const userId = req.user!.id;
     const rows = await ReservationModel.find({
@@ -149,7 +181,11 @@ export async function getCancellationReesevatioByID(req: AuthedRequest, res: Res
 }
 
 // GET /api/reservations/:id/past (user)
-export async function getPastReservationByID(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function getPastReservationByID(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const userId = req.user!.id;
     const rows = await ReservationModel.find({
@@ -186,7 +222,8 @@ export async function getMyActiveReservations(
       .sort({ createdAt: -1 })
       .lean();
 
-    if (!rows.length) return res.status(404).json({ error: "No active reservations" });
+    if (!rows.length)
+      return res.status(404).json({ error: "No active reservations" });
     res.json(rows);
   } catch (err) {
     next(err);
@@ -194,7 +231,11 @@ export async function getMyActiveReservations(
 }
 
 // PATCH /api/reservations/:id/cancel  (user or admin)
-export async function cancelReservation(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function cancelReservation(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
     if (!mongoose.isValidObjectId(id)) {
@@ -258,9 +299,14 @@ export async function updateReservationStatus(
 }
 
 // DELETE /api/reservations/:id  (admin only)
-export async function deleteReservation(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function deleteReservation(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    if (!isAdmin(req.user?.role)) return res.status(403).json({ error: "Admin only" });
+    if (!isAdmin(req.user?.role))
+      return res.status(403).json({ error: "Admin only" });
 
     const { id } = req.params;
     if (!mongoose.isValidObjectId(id)) {
