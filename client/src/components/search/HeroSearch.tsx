@@ -7,45 +7,29 @@ import { DatePicker } from "./DatePicker";
 import { GuestsPopover } from "./GuestsPopover";
 import type { PickerValue } from "./types";
 import type { DateRange } from "react-day-picker";
+import { useSearchStore } from "@/stores/search";
 
 export default function HeroSearch() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [city, setCity] = useState(params.get("city") || "");
-  const initialFrom = params.get("from");
-  const initialTo = params.get("to");
-
-  const [picker, setPicker] = useState<PickerValue>(() => {
-    const from = initialFrom ? new Date(initialFrom) : undefined;
-    const to = initialTo ? new Date(initialTo) : undefined;
-    return {
-      mode: "calendar",
-      range: { from, to },
-    };
-  });
-
-  const [adults, setAdults] = useState<number>(
-    Math.max(1, Number(params.get("adults") || 2))
-  );
-  const [children, setChildren] = useState<number>(
-    Math.max(0, Number(params.get("children") || 0))
-  );
-  const [rooms, setRooms] = useState<number>(
-    Math.max(1, Number(params.get("rooms") || 1))
-  );
+  const {
+    city,
+    picker,
+    adults,
+    children,
+    rooms,
+    setCity,
+    setPicker,
+    setAdults,
+    setChildren,
+    setRooms,
+    setSearchParams,
+  } = useSearchStore();
 
   useEffect(() => {
-    setCity(params.get("city") || "");
-    const f = params.get("from");
-    const t = params.get("to");
-    const from = f ? new Date(f) : undefined;
-    const to = t ? new Date(t) : undefined;
-    setPicker({ mode: "calendar", range: { from, to } });
-    setAdults(Math.max(1, Number(params.get("adults") || 2)));
-    setChildren(Math.max(0, Number(params.get("children") || 0)));
-    setRooms(Math.max(1, Number(params.get("rooms") || 1)));
-  }, [params]);
+    setSearchParams(params);
+  }, [params, setSearchParams]);
 
   const submit = () => {
     const base: Record<string, string> = {

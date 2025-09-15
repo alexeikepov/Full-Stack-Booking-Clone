@@ -14,6 +14,7 @@ export function GuestsPopover({
   setAdults,
   setChildren,
   setRooms,
+  minRooms = 1,
 }: {
   adults: number;
   children: number;
@@ -21,6 +22,7 @@ export function GuestsPopover({
   setAdults: (n: number) => void;
   setChildren: (n: number) => void;
   setRooms: (n: number) => void;
+  minRooms?: number;
 }) {
   const label = useMemo(() => {
     const a = `${adults} adult${adults > 1 ? "s" : ""}`;
@@ -58,7 +60,7 @@ export function GuestsPopover({
             set={setChildren}
             min={0}
           />
-          <Counter label="Rooms" value={rooms} set={setRooms} min={1} />
+          <Counter label="Rooms" value={rooms} set={setRooms} min={minRooms} />
         </div>
       </PopoverContent>
     </Popover>
