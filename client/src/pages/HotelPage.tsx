@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import SearchTopBar from "@/components/search/HeroSearch";
@@ -9,29 +9,72 @@ import HotelGallery from "@/components/hotelPage/HotelGallery";
 import HotelOverview from "@/components/hotelPage/HotelOverview";
 import HotelInfoPrices from "@/components/hotelPage/HotelInfoPrices";
 import { useNavigationStore } from "@/stores/navigation";
+import { useSearchStore } from "@/stores/search";
 
 export default function HotelPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("overview");
   const { setActiveTab } = useNavigationStore();
+  const { picker, setSearchParams } = useSearchStore();
 
   // Set active tab to 'stays' when hotel page loads
   useEffect(() => {
     setActiveTab("stays");
   }, [setActiveTab]);
 
+  // Update search store from URL parameters
+  useEffect(() => {
+    setSearchParams(searchParams);
+  }, [searchParams, setSearchParams]);
+
   const { data: hotel, isLoading } = useQuery({
-    queryKey: ["hotel", id],
+    queryKey: ["hotel", id, searchParams.toString()],
     queryFn: async () => {
-      const response = await api.get(`/api/hotels/${id}`);
+      const params = new URLSearchParams();
+
+      // Use URL parameters if available, otherwise fall back to picker
+      const from =
+        searchParams.get("from") ||
+        (picker.mode === "calendar" && picker.range?.from
+          ? picker.range.from.toISOString().split("T")[0]
+          : null);
+      const to =
+        searchParams.get("to") ||
+        (picker.mode === "calendar" && picker.range?.to
+          ? picker.range.to.toISOString().split("T")[0]
+          : null);
+      const adults = searchParams.get("adults");
+      const children = searchParams.get("children");
+      const rooms = searchParams.get("rooms");
+
+      if (from) params.append("from", from);
+      if (to) params.append("to", to);
+      if (adults) params.append("adults", adults);
+      if (children) params.append("children", children);
+      if (rooms) params.append("rooms", rooms);
+
+      const response = await api.get(`/api/hotels/${id}?${params.toString()}`);
       const data = response.data;
+
       // Convert MongoDB _id to id for frontend compatibility
       if (data && data._id && !data.id) {
         data.id = data._id;
       }
+
+      // Convert room _id to id for frontend compatibility
+      if (data && data.rooms) {
+        data.rooms = data.rooms.map((room: any) => ({
+          ...room,
+          id: room._id?.$oid || room._id || room.id,
+        }));
+      }
+
       return data;
     },
     enabled: Boolean(id),
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always refetch when query key changes
   });
 
   if (isLoading) {
@@ -154,7 +197,7 @@ export default function HotelPage() {
 
       <div className="space-y-8">
         <HotelOverview hotel={hotel} />
-        <HotelInfoPrices hotel={hotel} />
+        <HotelInfoPrices hotel={hotel} isLoading={isLoading} />
 
         {/* Facilities Section */}
         <div id="facilities" className="bg-white">

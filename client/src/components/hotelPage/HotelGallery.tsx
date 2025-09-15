@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Hotel } from "@/types/hotel";
+import ReactCountryFlag from "react-country-flag";
 
 interface HotelGalleryProps {
   hotel: Hotel;
@@ -57,7 +58,7 @@ export default function HotelGallery({ hotel }: HotelGalleryProps) {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const allImages = getAllImages(hotel);
   const mainImage = getPrimaryImage(hotel);
-  const sideImages = allImages.slice(1, 5);
+  const sideImages = allImages.slice(1);
 
   if (showAllPhotos) {
     return (
@@ -92,68 +93,153 @@ export default function HotelGallery({ hotel }: HotelGalleryProps) {
 
   return (
     <div className="bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-6">
-        <div className="grid grid-cols-4 gap-2 h-96">
-          {/* Main image */}
-          <div className="col-span-2 row-span-2">
-            <img
-              src={mainImage}
-              alt={hotel.name}
-              className="w-full h-full object-cover rounded-l-lg cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => setShowAllPhotos(true)}
-            />
+      <div className="mx-auto max-w-6xl px-4 pt-6">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Left side - Photo gallery */}
+          <div className="col-span-9">
+            <div className="space-y-13">
+              {/* Main gallery - 3 photos */}
+              <div className="grid grid-cols-3 gap-1 h-80 bg-white p-1 rounded-lg">
+                {/* Main image - large left side */}
+                <div className="col-span-2 row-span-2">
+                  <img
+                    src={mainImage}
+                    alt={hotel.name}
+                    className="w-full h-full object-cover rounded-l-lg cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => setShowAllPhotos(true)}
+                  />
+                </div>
+
+                {/* Right side - 2 small images stacked vertically */}
+                <div className="col-span-1 row-span-2 grid grid-rows-2 gap-1">
+                  {/* Top right - small image */}
+                  <div className="row-span-1">
+                    <img
+                      src={sideImages[0] || mainImage}
+                      alt={`${hotel.name} photo 2`}
+                      className="w-full h-full object-cover rounded-tr-lg cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => setShowAllPhotos(true)}
+                    />
+                  </div>
+
+                  {/* Bottom right - small image */}
+                  <div className="row-span-1">
+                    <img
+                      src={sideImages[1] || mainImage}
+                      alt={`${hotel.name} photo 3`}
+                      className="w-full h-full object-cover rounded-br-lg cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => setShowAllPhotos(true)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom section - 5 thumbnails */}
+              <div className="grid grid-cols-5 gap-1 h-20 bg-white p-1 rounded-lg">
+                {[0, 1, 2, 3, 4].map((index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={sideImages[index + 2] || mainImage}
+                      alt={`${hotel.name} photo ${index + 4}`}
+                      className="w-full h-full object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => setShowAllPhotos(true)}
+                    />
+                    {index === 4 && (
+                      // Overlay for last thumbnail
+                      <div
+                        className="absolute inset-0 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity rounded"
+                        onClick={() => setShowAllPhotos(true)}
+                      >
+                        <div className="text-white text-center bg-black bg-opacity-30 px-2 py-1 rounded">
+                          <div className="text-sm font-bold underline">
+                            +{Math.max(0, allImages.length - 5)} photos
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Side images */}
-          {sideImages.map((image, index) => (
-            <div
-              key={index}
-              className="col-span-1"
-            >
-              <img
-                src={image}
-                alt={`${hotel.name} photo ${index + 2}`}
-                className={`w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity ${
-                  index === 1
-                    ? "rounded-tr-lg"
-                    : index === 3
-                    ? "rounded-br-lg"
-                    : ""
-                }`}
-                onClick={() => setShowAllPhotos(true)}
-              />
+          {/* Right side - Hotel info panel */}
+          <div className="col-span-3">
+            <div className="bg-white border border-gray-200 rounded-lg p-3 h-full">
+              {/* Rating section */}
+              <div className="mb-4">
+                <div className="flex items-center justify-end gap-3 mb-2 pb-2 border-b border-gray-200">
+                  <div>
+                    <div className="text-xl font-bold text-gray-900">
+                      Fabulous
+                    </div>
+                    <div className="text-sm text-gray-600">372 reviews</div>
+                  </div>
+                  <div className="bg-[#003b95] text-white px-3 py-2 rounded rounded-bl-none font-bold text-lg">
+                    8.9
+                  </div>
+                </div>
+              </div>
+
+              {/* Guest review section */}
+              <div className="mb-4">
+                <div className="text-sm font-semibold text-gray-900 mb-2">
+                  Guests who stayed here loved
+                </div>
+                <div className="text-sm text-gray-700 mb-2">
+                  "Wonderful and stylish hotel, big and clean rooms, nice
+                  location. We've got complimentary wine bottle for a little
+                  waiting time which was really..."
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">
+                      M
+                    </span>
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900 flex items-center gap-2">
+                      Michael
+                      <span className="text-gray-600 flex items-center gap-1">
+                        <ReactCountryFlag
+                          countryCode="IL"
+                          svg
+                          style={{ width: "16px", height: "12px" }}
+                        />
+                        Israel
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Free WiFi section */}
+              <div className="mb-4 border-t border-b border-gray-200">
+                <div className="flex items-center justify-between pt-2 pb-2">
+                  <span className="text-sm font-bold text-gray-900">
+                    Free WiFi
+                  </span>
+                  <div className="bg-white border border-gray-500 px-2 py-1 rounded rounded-bl-none text-base">
+                    9.9
+                  </div>
+                </div>
+              </div>
+
+              {/* Map section */}
+              <div className="flex-1 relative">
+                <div className="bg-blue-50 rounded-lg h-48 flex items-center justify-center">
+                  <div className="text-center text-gray-500">
+                    <div className="text-lg font-semibold mb-2">
+                      Map will be here
+                    </div>
+                    <div className="text-sm">Google Maps integration</div>
+                  </div>
+                </div>
+                <button className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#0071c2] text-white py-2 px-4 rounded text-sm font-medium hover:bg-[#005fa3] transition-colors">
+                  Show on map
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
-
-        <div className="mt-4 flex items-center justify-between">
-          <button
-            onClick={() => setShowAllPhotos(true)}
-            className="flex items-center gap-2 text-[#0071c2] hover:underline font-medium"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            Show all {allImages.length} photos
-          </button>
-
-          <div className="flex gap-4">
-            <button className="text-[#0071c2] hover:underline text-sm font-medium">
-              + Save to Wish List
-            </button>
-            <button className="text-[#0071c2] hover:underline text-sm font-medium">
-              We Price Match
-            </button>
           </div>
         </div>
       </div>
