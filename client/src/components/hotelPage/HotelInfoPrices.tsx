@@ -367,7 +367,6 @@ export default function HotelInfoPrices({
                         </div>
                       )}
 
-                      {/* Free cancellation */}
                       {room.categories.some((c) =>
                         /free cancellation/i.test(c)
                       ) && (
