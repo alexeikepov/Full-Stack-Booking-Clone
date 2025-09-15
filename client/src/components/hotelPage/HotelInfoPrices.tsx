@@ -5,14 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/search/DatePicker";
 import { GuestsPopover } from "@/components/search/GuestsPopover";
 import { useSearchStore } from "@/stores/search";
-import {
-  MdPerson,
-  MdPeople,
-  MdBed,
-  MdBathtub,
-  MdSquare,
-  MdGroup,
-} from "react-icons/md";
+import { MdPerson, MdBed, MdBathtub, MdSquare, MdGroup } from "react-icons/md";
 
 interface HotelInfoPricesProps {
   hotel: Hotel;
@@ -24,6 +17,11 @@ export default function HotelInfoPrices({
   isLoading = false,
 }: HotelInfoPricesProps) {
   const rooms = hotel.rooms || [];
+
+  // Helper function to get room ID
+  const getRoomId = (room: any) => {
+    return room.id || room._id?.$oid || room._id || "";
+  };
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -216,7 +214,7 @@ export default function HotelInfoPrices({
             {/* Room details */}
             <div className="bg-white">
               {rooms.map((room, index) => (
-                <div key={room._id.$oid}>
+                <div key={getRoomId(room) || index}>
                   {/* Row grid mirrors header widths */}
                   <div className="grid grid-cols-[minmax(320px,1.2fr)_140px_220px_1.8fr_88px_180px] gap-0 p-0 divide-x divide-[#e6e6e6]">
                     <div
