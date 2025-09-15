@@ -8,7 +8,9 @@ import { ReviewModel } from "../models/Review";
 import { AuthedRequest } from "../middlewares/auth";
 import { saveLastSearch } from "../services/searchHistoryService";
 import type { Hotel, Room } from "../types/hotel.types";
+
 const roomSchema = z.object({
+  // roomType is the UI/API label; stored as Room.name in DB
   roomType: z.enum(["STANDARD", "DELUXE", "SUITE"]),
   pricePerNight: z.number().nonnegative(),
   totalRooms: z.number().int().nonnegative(),
@@ -21,7 +23,7 @@ const createHotelSchema = z.object({
   address: z.string().min(2),
   location: z
     .object({
-      coordinates: z.tuple([z.number(), z.number()]),
+      coordinates: z.tuple([z.number(), z.number()]), // [lng, lat] from client
     })
     .optional(),
   title: z.string().optional(),
@@ -57,8 +59,8 @@ async function recomputeHotelRating(hotelId: string | Types.ObjectId) {
   const avg = agg[0]?.avg ?? 0;
   const count = agg[0]?.count ?? 0;
   await HotelModel.findByIdAndUpdate(hotelId, {
-    ratingAvg: Number(avg.toFixed(2)),
-    ratingCount: count,
+    averageRating: Number(avg.toFixed(2)),
+    reviewsCount: count,
   });
 }
 
@@ -68,25 +70,40 @@ function parseDateOnly(key?: string): Date | undefined {
   return isNaN(+d) ? undefined : d;
 }
 
-function nightsBetween(start: Date, end: Date): number {
-  return Math.max(1, Math.ceil((+end - +start) / (1000 * 60 * 60 * 24)));
-}
-
 export async function createHotel(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const dto = createHotelSchema.parse(req.body);
+
+    const loc =
+      dto.location?.coordinates
+        ? { lat: dto.location.coordinates[1], lng: dto.location.coordinates[0] }
+        : undefined;
+
+    const normalizedRooms =
+      dto.rooms?.map(r => ({
+        name: r.roomType,
+        pricePerNight: r.pricePerNight,
+        totalRooms: r.totalRooms,
+      })) ?? [];
+
     const doc = await HotelModel.create({
-      ...dto,
-      location: dto.location
-        ? { type: "Point", coordinates: dto.location.coordinates }
-        : undefined,
-      owner: req.user?.id,
+      name: dto.name,
+      city: dto.city,
+      address: dto.address,
+      location: loc,
+      description: dto.description,
+      categories: dto.categories,
+      media: dto.images?.map(src => ({ src })) ?? [],
+      rooms: normalizedRooms,
+      ownerId: req.user?.id,
     });
+
     res.status(201).json(doc);
   } catch (err) {
     next(err);
   }
 }
+
 export async function listHotels(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const {
@@ -146,7 +163,7 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
     }
 
     const hotels = await HotelModel.find(filter)
-      .sort({ ratingAvg: -1, createdAt: -1 })
+      .sort({ averageRating: -1, createdAt: -1 })
       .lean();
 
     const start = from ? new Date(`${from}T00:00:00Z`) : undefined;
@@ -160,16 +177,21 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
         _id: { hotel: Types.ObjectId; roomType: string };
         qty: number;
       }>([
-        { $match: {
+        {
+          $match: {
             status: { $in: ["PENDING", "CONFIRMED"] },
             from: { $lt: end! },
             to:   { $gt: start! },
-        }},
-        { $group: {
-            _id: { hotel: "$hotel", roomType: "$roomType" },
+          },
+        },
+        {
+          $group: {
+            _id: { hotel: "$hotel", roomType: "$roomType" }, // roomType here equals Room.name
             qty: { $sum: "$quantity" },
-        }},
+          },
+        },
       ]);
+
       for (const row of overlaps) {
         const hid = String(row._id.hotel);
         (bookedByHotel[hid] ??= {})[row._id.roomType] = row.qty;
@@ -177,25 +199,24 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
     }
 
     const capOf = (r: Room): number => {
-      if (Number.isFinite(r.capacity)) return Math.max(1, Number(r.capacity));
-      const adultsCap = Number.isFinite(r.maxAdults) ? Number(r.maxAdults) : undefined;
-      const childrenCap = Number.isFinite(r.maxChildren) ? Number(r.maxChildren) : undefined;
+      if (Number.isFinite((r as any).capacity)) return Math.max(1, Number((r as any).capacity));
+      const adultsCap = Number.isFinite((r as any).maxAdults) ? Number((r as any).maxAdults) : undefined;
+      const childrenCap = Number.isFinite((r as any).maxChildren) ? Number((r as any).maxChildren) : undefined;
       const sum = (adultsCap ?? 0) + (childrenCap ?? 0);
       return Math.max(1, sum || 2);
     };
 
     const enriched = (hotels as unknown as Hotel[])
       .map((h) => {
-        const hid = String((h as any)._id ?? h.id);
-        const roomsArr: Room[] = Array.isArray((h as any).rooms) ? (h as any).rooms as Room[] : [];
+        const hid = String((h as any)._id ?? (h as any).id);
+        const roomsArr: Room[] = Array.isArray((h as any).rooms) ? ((h as any).rooms as Room[]) : [];
 
         const availableByType: Record<string, number> = {};
         let knownAvailableTotal = 0;
         let hasAnyInventoryNumbers = false;
 
         for (const r of roomsArr) {
-          const typeKey = String(r.name ?? r.id);
-          // If you track inventory per room type separately, put it here. If not available, mark unknown (-1).
+          const typeKey = String((r as any).name ?? (r as any)._id);
           const totalRoomsNum = Number((r as any).totalRooms);
           const hasInv = Number.isFinite(totalRoomsNum);
           if (hasInv) hasAnyInventoryNumbers = true;
@@ -210,22 +231,27 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
         const typeRegex = roomType?.trim() ? rxEq(roomType.trim()) : null;
 
         const types = roomsArr
-          .filter((r: Room) => {
-            const label = String(r.name ?? r.id);
+          .filter((r: any) => {
+            const label = String(r.name ?? r._id);
             return typeRegex ? typeRegex.test(label) : true;
           })
-          .map((r: Room) => {
-            const typeKey = String(r.name ?? r.id);
+          .map((r: any) => {
+            const typeKey = String(r.name ?? r._id);
             const nightly = Number(r.pricePerNight);
-            const cap = capOf(r);
+            const cap = capOf(r as any);
             const avail = availableByType[typeKey] ?? -1;
             return { typeKey, nightly, cap, avail };
           })
           .filter((t) => Number.isFinite(t.nightly) && t.cap > 0)
           .sort((a, b) => a.nightly - b.nightly);
 
-        let remainingGuests = totalGuests;
+        const numAdultsLocal = numAdults;
+        const numChildrenLocal = numChildren;
+        const totalGuestsLocal = totalGuests;
+
+        let remainingGuests = totalGuestsLocal;
         const allocation: Array<{ roomType: string; roomsUsed: number; capacityPerRoom: number; pricePerNight: number }> = [];
+
         for (const t of types) {
           if (remainingGuests <= 0) break;
           const neededForType = Math.ceil(remainingGuests / t.cap);
@@ -238,7 +264,7 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
             capacityPerRoom: t.cap,
             pricePerNight: t.nightly,
           });
-            remainingGuests -= allowedByAvail * t.cap;
+          remainingGuests -= allowedByAvail * t.cap;
         }
 
         const allocationCoversGuests = remainingGuests <= 0;
@@ -275,7 +301,7 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
             : null,
           requiredRooms: roomsNeeded,
           roomsRequested: requestedRooms,
-          guests: { adults: numAdults, children: numChildren, total: totalGuests },
+          guests: { adults: numAdultsLocal, children: numChildrenLocal, total: totalGuestsLocal },
           allocation,
           availability:
             hasValidRange && hasAnyInventoryNumbers
@@ -326,8 +352,6 @@ export async function listHotels(req: AuthedRequest, res: Response, next: NextFu
   }
 }
 
-
-
 export async function getHotelById(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
@@ -335,18 +359,12 @@ export async function getHotelById(req: Request, res: Response, next: NextFuncti
     const h = await HotelModel.findById(id).lean();
     if (!h) return res.status(404).json({ error: "Hotel not found" });
 
-    // Add computed fields for frontend compatibility
-    const rooms = h.rooms || [];
-    const cheapestNightly = Math.min(
-      ...rooms.map((r: any) => r.pricePerNight || Infinity)
-    );
+    const rooms = (h as any).rooms || [];
+    const cheapestNightly = Math.min(...rooms.map((r: any) => r.pricePerNight || Infinity));
 
-    // Add computed fields as any to avoid TypeScript errors
-    (h as any).priceFrom = Number.isFinite(cheapestNightly)
-      ? cheapestNightly
-      : null;
-    (h as any).averageRating = h.averageRating || 8.5; // Default rating
-    (h as any).reviewsCount = h.reviewsCount || 372; // Default review count
+    (h as any).priceFrom = Number.isFinite(cheapestNightly) ? cheapestNightly : null;
+    (h as any).averageRating = (h as any).averageRating ?? 8.5;
+    (h as any).reviewsCount = (h as any).reviewsCount ?? 372;
 
     res.json(h);
   } catch (err) {
@@ -361,12 +379,24 @@ export async function updateHotel(req: AuthedRequest, res: Response, next: NextF
     const dto = updateHotelSchema.parse(req.body);
     const h = await HotelModel.findById(id);
     if (!h) return res.status(404).json({ error: "Hotel not found" });
+
     if (dto.location?.coordinates) {
       (dto as any).location = {
-        type: "Point",
-        coordinates: dto.location.coordinates,
+        lat: dto.location.coordinates[1],
+        lng: dto.location.coordinates[0],
       };
     }
+
+    if (Array.isArray(dto.rooms)) {
+      const normalizedRooms =
+        dto.rooms.map(r => ({
+          name: r.roomType,
+          pricePerNight: r.pricePerNight,
+          totalRooms: r.totalRooms,
+        }));
+      (dto as any).rooms = normalizedRooms;
+    }
+
     Object.assign(h, dto);
     await h.save();
     res.json(h);
@@ -402,19 +432,14 @@ export async function getAvailability(req: Request, res: Response, next: NextFun
     const hotel = await HotelModel.findById(hotelId).lean();
     if (!hotel) return res.status(404).json({ error: "Hotel not found" });
 
-    const roomInfo = (hotel as any).rooms?.find(
-      (r: any) => r.roomType === roomType
-    );
-    if (!roomInfo)
-      return res
-        .status(400)
-        .json({ error: "Room type not available in hotel" });
+    const roomInfo = (hotel as any).rooms?.find((r: any) => String(r.name).toLowerCase() === roomType.toLowerCase());
+    if (!roomInfo) return res.status(400).json({ error: "Room type not available in hotel" });
 
     const overlap = await ReservationModel.aggregate<{ qty: number }>([
       {
         $match: {
           hotel: new Types.ObjectId(hotelId),
-          roomType,
+          roomType: roomType, // stored as Room.name
           status: { $in: ["PENDING", "CONFIRMED"] },
           from: { $lt: end },
           to: { $gt: start },
@@ -425,7 +450,7 @@ export async function getAvailability(req: Request, res: Response, next: NextFun
     ]);
 
     const alreadyBooked = overlap[0]?.qty ?? 0;
-    const totalRooms = roomInfo.totalRooms ?? 0;
+    const totalRooms = Number(roomInfo.totalRooms ?? 0);
     const available = Math.max(0, totalRooms - alreadyBooked);
 
     res.json({
@@ -472,12 +497,13 @@ export async function getHotelRooms(req: Request, res: Response, next: NextFunct
       for (const r of overlaps) bookedByType[r._id] = r.qty;
     }
 
-    const rooms = (hotel as any).rooms.map((r: any) => {
+    const rooms = ((hotel as any).rooms ?? []).map((r: any) => {
+      const key = String(r.name);
       const total = Number(r.totalRooms ?? 0);
-      const booked = hasRange ? Number(bookedByType[r.roomType] ?? 0) : 0;
+      const booked = hasRange ? Number(bookedByType[key] ?? 0) : 0;
       const available = Math.max(0, total - booked);
       return {
-        roomType: r.roomType,
+        roomType: key,
         pricePerNight: r.pricePerNight,
         totalRooms: total,
         availableRooms: hasRange ? available : total,
@@ -498,12 +524,29 @@ export async function getHotelRooms(req: Request, res: Response, next: NextFunct
 
 export async function listCategories(req: Request, res: Response, next: NextFunction) {
   try {
-    const rows = await HotelModel.aggregate<{ _id: string; count: number }>([
-      { $unwind: { path: "$categories", preserveNullAndEmptyArrays: false } },
+    const { city } = req.query as Record<string, string | undefined>;
+    const filter: any = {};
+    if (city) filter.city = { $regex: `^${escapeRegExp(city)}$`, $options: "i" };
+
+    const categories = await HotelModel.aggregate<{ _id: string; count: number }>([
+      { $match: filter },
+      { $unwind: "$categories" },
       { $group: { _id: "$categories", count: { $sum: 1 } } },
-      { $sort: { count: -1, _id: 1 } },
+      { $sort: { count: -1 } },
     ]);
-    res.json(rows.map((r) => ({ id: r._id, label: r._id, count: r.count })));
+
+    const stars = await HotelModel.aggregate<{ _id: number; count: number }>([
+      { $match: filter },
+      { $group: { _id: "$stars", count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]);
+
+    res.json({
+      categories: categories.map((c) => ({ id: c._id, label: c._id, count: c.count })),
+      stars: stars
+        .filter((s) => s._id != null)
+        .map((s) => ({ id: String(s._id), label: `${s._id} stars`, count: s.count })),
+    });
   } catch (err) {
     next(err);
   }
@@ -569,7 +612,7 @@ export async function getMyReviews(req: AuthedRequest, res: Response, next: Next
       ReviewModel.find({ user: userId })
         .populate({
           path: "hotel",
-          select: "name city ratingAvg ratingCount images",
+          select: "name city averageRating reviewsCount media",
         })
         .sort({ createdAt: -1 })
         .skip((p - 1) * l)
@@ -583,7 +626,7 @@ export async function getMyReviews(req: AuthedRequest, res: Response, next: Next
     next(err);
   }
 }
-// GET /api/hotels/:hotelId/reviews  (list)
+
 export async function listReviews(req: Request, res: Response, next: NextFunction) {
   try {
     const { hotelId } = req.params;
@@ -613,7 +656,7 @@ export async function getMyReviewForHotel(req: AuthedRequest, res: Response, nex
     const review = await ReviewModel.findOne({ hotel: hotelId, user: userId })
       .populate({
         path: "hotel",
-        select: "name city ratingAvg ratingCount images",
+        select: "name city averageRating reviewsCount media",
       })
       .lean();
 
@@ -624,7 +667,6 @@ export async function getMyReviewForHotel(req: AuthedRequest, res: Response, nex
   }
 }
 
-
 export async function createReview(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const { hotelId } = req.params;
@@ -633,7 +675,6 @@ export async function createReview(req: AuthedRequest, res: Response, next: Next
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const dto = reviewCreateSchema.parse(req.body);
-
 
     const exists = await ReviewModel.findOne({ hotel: hotelId, user: userId }).lean();
     if (exists) return res.status(409).json({ error: "User already reviewed this hotel" });
@@ -645,16 +686,11 @@ export async function createReview(req: AuthedRequest, res: Response, next: Next
       comment: dto.comment,
     });
 
-
-    await HotelModel.findByIdAndUpdate(hotelId, { $addToSet: { reviews: review._id } });
     await recomputeHotelRating(hotelId);
-
     res.status(201).json(review);
   } catch (err) {
     if ((err as any)?.code === 11000) {
-      return res
-        .status(409)
-        .json({ error: "User already reviewed this hotel" });
+      return res.status(409).json({ error: "User already reviewed this hotel" });
     }
     next(err);
   }
@@ -683,7 +719,6 @@ export async function updateMyReview(req: AuthedRequest, res: Response, next: Ne
   }
 }
 
-
 export async function deleteMyReview(req: AuthedRequest, res: Response, next: NextFunction) {
   try {
     const { hotelId } = req.params;
@@ -697,10 +732,7 @@ export async function deleteMyReview(req: AuthedRequest, res: Response, next: Ne
     });
     if (!review) return res.status(404).json({ error: "Review not found" });
 
-
-    await HotelModel.findByIdAndUpdate(hotelId, { $pull: { reviews: review._id } });
     await recomputeHotelRating(hotelId);
-
     res.json({ message: "Review deleted" });
   } catch (err) {
     next(err);
