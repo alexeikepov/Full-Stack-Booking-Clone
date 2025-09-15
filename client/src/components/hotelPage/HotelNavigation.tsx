@@ -6,6 +6,7 @@ interface HotelNavigationProps {
 const navItems = [
   { id: "overview", label: "Overview" },
   { id: "info", label: "Info & prices" },
+  { id: "activity", label: "Activity" },
   { id: "facilities", label: "Facilities" },
   { id: "house-rules", label: "House rules" },
   { id: "fine-print", label: "The fine print" },

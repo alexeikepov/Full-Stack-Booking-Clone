@@ -3,9 +3,9 @@
 export type HotelApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export type RoomReservation = {
-  reservationId: string;  // unique id
-  checkIn: string;        // ISO date string
-  checkOut: string;       // ISO date string
+  reservationId: string; // unique id
+  checkIn: string; // ISO date string
+  checkOut: string; // ISO date string
 };
 
 export type Room = {
@@ -15,6 +15,7 @@ export type Room = {
   pricePerNight: number;
   photos?: string[];
   amenities?: string[];
+  facilities?: string[];
   categories?: string[];
   media?: { url: string; type?: string }[];
   reservations: RoomReservation[];
@@ -47,8 +48,8 @@ export type Hotel = {
   updatedAt?: Date;
 
   // computed fields from backend (optional)
-  priceFrom?: number | null;   // cheapest nightly price
-  totalPrice?: number | null;  // total for stay (when dates provided)
+  priceFrom?: number | null; // cheapest nightly price
+  totalPrice?: number | null; // total for stay (when dates provided)
   availability?: {
     from: string;
     to: string;
