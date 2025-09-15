@@ -13,6 +13,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import { AuthProvider } from "@/context/AuthContext";
 import AccountPage from "./pages/AccountPage";
 import BookingsPage from "./pages/BookingsPage";
+import WishlistPage from "./pages/SavedListsPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
       { path:"/account/bookings", element: <BookingsPage />},
+      { path:"/account/saved", element: <WishlistPage />},
     ],
   },
 ]);
