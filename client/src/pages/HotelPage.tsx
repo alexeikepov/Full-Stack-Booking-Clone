@@ -8,6 +8,7 @@ import HotelNavigation from "@/components/hotelPage/HotelNavigation";
 import HotelGallery from "@/components/hotelPage/HotelGallery";
 import HotelOverview from "@/components/hotelPage/HotelOverview";
 import HotelInfoPrices from "@/components/hotelPage/HotelInfoPrices";
+import RoomSelection from "@/components/hotelPage/RoomSelection";
 import { useNavigationStore } from "@/stores/navigation";
 
 export default function HotelPage() {
@@ -155,6 +156,7 @@ export default function HotelPage() {
       <div className="space-y-8">
         <HotelOverview hotel={hotel} />
         <HotelInfoPrices hotel={hotel} />
+
 
         {/* Facilities Section */}
         <div id="facilities" className="bg-white">
