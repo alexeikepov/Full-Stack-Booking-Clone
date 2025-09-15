@@ -54,7 +54,7 @@ export type Room = {
   facilities?: string[];
   categories?: string[];
   media?: Media[];
-
+  availableRooms: number; 
   reservations: RoomReservation[];
 };
 
