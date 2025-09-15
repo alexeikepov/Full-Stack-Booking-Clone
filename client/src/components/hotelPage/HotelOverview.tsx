@@ -1,5 +1,4 @@
 import type { Hotel } from "@/types/hotel";
-import { Button } from "@/components/ui/button";
 
 interface HotelOverviewProps {
   hotel: Hotel;
@@ -12,7 +11,7 @@ export default function HotelOverview({ hotel }: HotelOverviewProps) {
 
     // Collect amenities from all rooms
     hotel.rooms?.forEach((room) => {
-      room.amenities?.forEach((amenity) => {
+      room.amenities.forEach((amenity) => {
         amenities.add(amenity);
       });
     });
@@ -34,25 +33,6 @@ export default function HotelOverview({ hotel }: HotelOverviewProps) {
           "City view",
           "Non-smoking rooms",
         ];
-
-  const highlights = [
-    {
-      icon: "📍",
-      title: "Excellent location",
-      description: "9.9 location score for 2-person trips",
-    },
-    {
-      icon: "🛏️",
-      title: "Guests who stayed here loved",
-      description:
-        '"Wonderful and stylish hotel, big and clean rooms, nice location. We\'ve got complimentary wine bottle for a little waiting time which was really..."',
-    },
-    {
-      icon: "🏆",
-      title: "Fabulous",
-      description: `${hotel.reviewsCount || 372} reviews`,
-    },
-  ];
 
   return (
     <div id="overview" className="bg-white">

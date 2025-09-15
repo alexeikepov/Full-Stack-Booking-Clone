@@ -3,8 +3,8 @@ import { Schema, model } from "mongoose";
 const RoomReservationSchema = new Schema(
   {
     reservationId: { type: Schema.Types.ObjectId, required: true },
-    checkIn: { type: String, required: true },   // ISO date string
-    checkOut: { type: String, required: true },  // ISO date string
+    checkIn: { type: String, required: true }, // ISO date string
+    checkOut: { type: String, required: true }, // ISO date string
   },
   { _id: false }
 );
@@ -17,8 +17,12 @@ const RoomSchema = new Schema(
     maxChildren: { type: Number, required: true, min: 0 },
     pricePerNight: { type: Number, required: true, min: 0 },
 
-    // total units of this room type in the hotel (e.g., 12 identical doubles)
-    totalUnits: { type: Number, required: true, min: 1 },
+    // total rooms of this room type in the hotel (e.g., 12 identical doubles)
+    totalRooms: { type: Number, required: true, min: 1 },
+    // legacy field for compatibility
+    totalUnits: { type: Number, min: 1 },
+    // alternative field name for compatibility
+    availableRooms: { type: Number, min: 1 },
 
     sizeSqm: { type: Number, min: 0 },
     bedrooms: { type: Number, min: 0 },
@@ -36,10 +40,14 @@ const RoomSchema = new Schema(
 );
 
 // Instance method to compute available units for a given date range (exclusive end).
-RoomSchema.methods.unitsAvailable = function (fromISO: string, toISO: string): number {
+RoomSchema.methods.unitsAvailable = function (
+  fromISO: string,
+  toISO: string
+): number {
   const from = new Date(fromISO);
   const to = new Date(toISO);
-  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from >= to) return 0;
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from >= to)
+    return 0;
 
   const overlaps = this.reservations.filter((r: any) => {
     const rStart = new Date(r.checkIn);
@@ -87,7 +95,7 @@ const HotelSchema = new Schema(
     approvedAt: { type: Date },
 
     houseRules: { type: String, required: true, default: "" },
-    checkIn: { type: String, required: true },  // e.g. "15:00"
+    checkIn: { type: String, required: true }, // e.g. "15:00"
     checkOut: { type: String, required: true }, // e.g. "11:00"
   },
   { timestamps: true, collection: "hotels" }
@@ -96,7 +104,13 @@ const HotelSchema = new Schema(
 HotelSchema.index({ city: 1, stars: -1, averageRating: -1 });
 HotelSchema.index({ categories: 1, "rooms.pricePerNight": 1 });
 HotelSchema.index(
-  { name: "text", address: "text", city: "text", country: "text", description: "text" },
+  {
+    name: "text",
+    address: "text",
+    city: "text",
+    country: "text",
+    description: "text",
+  },
   { weights: { name: 5, city: 3, address: 2, description: 1 } }
 );
 
