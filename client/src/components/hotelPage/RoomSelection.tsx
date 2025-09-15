@@ -1,37 +1,38 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { MdBed, MdBathtub, MdSquare, MdGroup } from "react-icons/md";
 
 interface RoomOption {
-  id: string;
+  _id: { $oid: string };
   name: string;
-  guests: number;
-  price: number;
-  breakfast: {
-    included: boolean;
-    price?: number;
-  };
-  features: string[];
-  availability: string;
-  bedType: string;
-  roomSize: string;
-  view: string;
+  capacity: number;
+  maxAdults: number;
+  maxChildren: number;
+  pricePerNight: number;
+  sizeSqm: number;
+  bedrooms: number;
+  bathrooms: number;
+  photos: string[];
   amenities: string[];
-  includedAmenities: string[];
+  facilities: string[];
+  categories: string[];
+  media: { url: string; type?: string }[];
+  availableRooms: number;
+  reservations: Array<{
+    reservationId: string;
+    checkIn: string;
+    checkOut: string;
+  }>;
 }
 
 interface RoomSelectionProps {
   rooms: RoomOption[];
 }
 
-const fmt = (n: number, currency = "ILS") =>
-  new Intl.NumberFormat("he-IL", { style: "currency", currency }).format(n);
-
 export default function RoomSelection({ rooms }: RoomSelectionProps) {
   const [selectedRooms, setSelectedRooms] = useState<Record<string, number>>(
     {}
   );
-  const [selectedRoomType, setSelectedRoomType] = useState<string | null>(null);
 
   const handleRoomSelect = (roomId: string, count: number) => {
     setSelectedRooms((prev) => ({
@@ -82,7 +83,7 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
           <div className="bg-white">
             {rooms.map((room, index) => (
               <div
-                key={room.id}
+                key={room._id.$oid}
                 className={`${index > 0 ? "border-t border-gray-200" : ""}`}
               >
                 {/* Room type details */}
@@ -94,77 +95,53 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
 
                     {/* Recommendation banner */}
                     <div className="bg-green-100 text-green-800 px-3 py-1 rounded text-sm font-medium">
-                      Recommended for {room.guests} adults
+                      Recommended for {room.maxAdults} adults,{" "}
+                      {room.maxChildren} children
                     </div>
 
                     {/* Availability warning */}
                     <div className="flex items-center gap-2 text-red-600 text-sm">
                       <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                      <span>{room.availability}</span>
-                    </div>
-
-                    {/* Bed type */}
-                    <div className="flex items-center gap-2 text-sm">
-                      <span>🛏️</span>
-                      <span>{room.bedType}</span>
-                    </div>
-
-                    {/* Cot availability */}
-                    <div className="flex items-center gap-2 text-sm">
-                      <span>🛏️</span>
-                      <span>Cot available on request</span>
+                      <span>{room.availableRooms} rooms available</span>
                     </div>
 
                     {/* Room specifications */}
                     <div className="space-y-1 text-sm">
                       <div className="flex items-center gap-2">
-                        <span>🚪</span>
-                        <span>Room</span>
+                        <MdBed className="text-gray-500" size={16} />
+                        <span>
+                          {room.bedrooms} bedroom{room.bedrooms > 1 ? "s" : ""}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span>📐</span>
-                        <span>{room.roomSize}</span>
+                        <MdSquare className="text-gray-500" size={16} />
+                        <span>{room.sizeSqm} m²</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span>🏢</span>
-                        <span>{room.view}</span>
+                        <MdBathtub className="text-gray-500" size={16} />
+                        <span>
+                          {room.bathrooms} bathroom
+                          {room.bathrooms > 1 ? "s" : ""}
+                        </span>
                       </div>
                     </div>
 
                     {/* Key amenities */}
                     <div className="space-y-1 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span>❄️</span>
-                        <span>Air conditioning</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>🛁</span>
-                        <span>Private bathroom</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>📺</span>
-                        <span>Flat-screen TV</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>🔇</span>
-                        <span>Soundproofing</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>☕</span>
-                        <span>Coffee machine</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span>📶</span>
-                        <span>Free WiFi</span>
-                      </div>
+                      {room.amenities.slice(0, 6).map((amenity, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span>✓</span>
+                          <span>{amenity}</span>
+                        </div>
+                      ))}
                     </div>
 
                     {/* Included amenities */}
                     <div className="space-y-1 text-sm">
-                      {room.includedAmenities.map((amenity, idx) => (
+                      {room.facilities.slice(0, 4).map((facility, idx) => (
                         <div key={idx} className="flex items-center gap-2">
                           <span className="text-green-600">✓</span>
-                          <span>{amenity}</span>
+                          <span>{facility}</span>
                         </div>
                       ))}
                     </div>
@@ -173,45 +150,39 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
                   {/* Number of guests */}
                   <div className="flex items-center justify-center">
                     <div className="text-2xl">
-                      {room.guests === 1 ? "👤" : "👥"}
+                      {Array.from(
+                        { length: Math.min(room.capacity, 4) },
+                        (_, i) => (
+                          <span key={i} className="inline-block mr-1">
+                            👤
+                          </span>
+                        )
+                      )}
                     </div>
                   </div>
 
                   {/* Today's price */}
                   <div className="text-right">
                     <div className="text-2xl font-bold">
-                      ₪ {room.price.toLocaleString()}
+                      ₪ {room.pricePerNight.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-600">
-                      Additional charges may apply
-                    </div>
+                    <div className="text-sm text-gray-600">per night</div>
                   </div>
 
                   {/* Your choices */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span>☕</span>
-                      <span className="text-sm">
-                        {room.breakfast.included
-                          ? `Good breakfast included`
-                          : `Good breakfast ₪ ${(
-                              room.breakfast.price || 70
-                            ).toLocaleString()}`}
-                      </span>
-                    </div>
-
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-green-600">✓</span>
-                        <span>Includes high-speed internet</span>
+                        <span>Free WiFi included</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-green-600">✓</span>
-                        <span>Free cancellation before 21 January 2026</span>
+                        <span>Free cancellation available</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-green-600">✓</span>
-                        <span>No prepayment needed – pay at the property</span>
+                        <span>No prepayment needed</span>
                       </div>
                     </div>
 
@@ -224,13 +195,19 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
                   {/* Select rooms */}
                   <div className="flex items-center gap-2">
                     <select
-                      value={selectedRooms[room.id] || 0}
+                      value={selectedRooms[room._id.$oid] || 0}
                       onChange={(e) =>
-                        handleRoomSelect(room.id, parseInt(e.target.value))
+                        handleRoomSelect(
+                          room._id.$oid,
+                          parseInt(e.target.value)
+                        )
                       }
                       className="border border-gray-300 rounded px-2 py-1 text-sm"
                     >
-                      {[0, 1, 2, 3, 4, 5].map((num) => (
+                      {Array.from(
+                        { length: (room.availableRooms || 0) + 1 },
+                        (_, i) => i
+                      ).map((num) => (
                         <option key={num} value={num}>
                           {num}
                         </option>

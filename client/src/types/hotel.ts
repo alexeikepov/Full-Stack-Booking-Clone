@@ -9,43 +9,52 @@ export type RoomReservation = {
 };
 
 export type Room = {
-  id: string;
+  _id: { $oid: string };
   name: string;
   capacity: number;
+  maxAdults: number;
+  maxChildren: number;
   pricePerNight: number;
-  photos?: string[];
-  amenities?: string[];
-  facilities?: string[];
-  categories?: string[];
-  media?: { url: string; type?: string }[];
+  sizeSqm: number;
+  bedrooms: number;
+  bathrooms: number;
+  photos: string[];
+  amenities: string[];
+  facilities: string[];
+  categories: string[];
+  media: { url: string; type?: string }[];
+  availableRooms: number;
   reservations: RoomReservation[];
 };
 
 export type Hotel = {
-  id: string;
+  _id: { $oid: string };
   name: string;
   address: string;
   country: string;
   city: string;
-  location?: {
+  location: {
     lat: number;
     lng: number;
   };
-  stars?: number;
-  description?: string;
+  stars: number;
+  description: string;
   rooms: Room[];
-  adminIds: string[];
-  amenityIds?: string[];
-  media?: { url: string; type?: string }[];
-  categories?: string[];
-  averageRating?: number;
-  reviewsCount?: number;
-  ownerId: string;
+  adminIds: { $oid: string }[];
+  amenityIds: { $oid: string }[];
+  media: { url: string; type?: string }[];
+  categories: string;
+  averageRating: number;
+  reviewsCount: number;
+  ownerId: { $oid: string };
   approvalStatus: HotelApprovalStatus;
-  submittedAt: Date;
-  approvedAt?: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
+  submittedAt: { $date: string };
+  approvedAt: { $date: string };
+  createdAt: { $date: string };
+  updatedAt: { $date: string };
+  houseRules: string;
+  checkIn: string;
+  checkOut: string;
 
   // computed fields from backend (optional)
   priceFrom?: number | null; // cheapest nightly price
