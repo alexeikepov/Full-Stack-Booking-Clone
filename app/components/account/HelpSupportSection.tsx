@@ -1,14 +1,17 @@
 import { JSX, useEffect, useState } from "react";
 import {
   BackHandler,
+  LayoutAnimation,
   Linking,
   Modal,
   Platform,
   Pressable,
+  Platform as RNPlatform,
   ScrollView,
   StyleSheet,
   Text,
   TextStyle,
+  UIManager,
   View,
   ViewStyle,
 } from "react-native";
@@ -20,7 +23,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
-import { itemIcons } from "./itemIcons";
 
 interface Style {
   fullPage: ViewStyle;
@@ -41,20 +43,43 @@ interface Style {
   faqTabText: TextStyle;
   faqItem: ViewStyle;
   faqItemText: TextStyle;
+  faqAnswer: TextStyle;
 }
 
 const items = [
-  "Contact Customer Service",
-  "Dispute resolution",
-  "Safety resource center",
+  {
+    title: "Contact Customer Service",
+    icon: (
+      <Ionicons name="help-circle-outline" size={20} color={Colors.dark.icon} />
+    ),
+  },
+  {
+    title: "Dispute resolution",
+    icon: (
+      <Ionicons name="help-buoy-outline" size={20} color={Colors.dark.icon} />
+    ),
+  },
+  {
+    title: "Safety resource center",
+    icon: (
+      <Ionicons name="help-buoy-outline" size={20} color={Colors.dark.icon} />
+    ),
+  },
 ];
 
 export interface HelpSupportSectionProps {
   onBack?: () => void;
 }
 
+if (
+  RNPlatform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 const styles = StyleSheet.create<Style>({
-  fullPage: { flex: 1, backgroundColor: Colors.dark.background }, // dark background
+  fullPage: { flex: 1, backgroundColor: Colors.dark.background },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -127,14 +152,13 @@ const styles = StyleSheet.create<Style>({
   },
   faqTabText: { color: Colors.dark.textSecondary, fontSize: 14 },
   faqItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "column",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.separator,
   },
   faqItemText: { fontSize: 16, color: Colors.dark.text },
+  faqAnswer: { fontSize: 14, color: Colors.dark.textSecondary, marginTop: 8 },
 });
 
 export default function HelpSupport({
@@ -142,6 +166,9 @@ export default function HelpSupport({
 }: HelpSupportSectionProps): JSX.Element {
   const [showModal, setShowModal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("Stays");
+  const [openQuestionIndex, setOpenQuestionIndex] = useState<number | null>(
+    null,
+  );
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -155,57 +182,154 @@ export default function HelpSupport({
     };
   }, [showModal]);
 
-  const faqData: { [key: string]: string[] } = {
+  const faqData: { [key: string]: { question: string; answer: string }[] } = {
     Stays: [
-      "Cancellations",
-      "Payment",
-      "Booking Details",
-      "Communications",
-      "Room Types",
-      "Pricing",
+      {
+        question: "Cancellations",
+        answer: "You can cancel anytime before check-in.",
+      },
+      { question: "Payment", answer: "Payments are secured and encrypted." },
+      {
+        question: "Booking Details",
+        answer: "You can view your bookings in the app.",
+      },
+      {
+        question: "Communications",
+        answer: "Communicate with hosts through the app.",
+      },
+      { question: "Room Types", answer: "Different room types available." },
+      {
+        question: "Pricing",
+        answer: "Prices depend on season and availability.",
+      },
     ],
     Flights: [
-      "Baggage and seats",
-      "Boarding pass and check-in",
-      "Booking a flight",
-      "Changes and cancellation",
-      "Flight confirmation",
-      "My flight booking",
+      {
+        question: "Baggage and seats",
+        answer: "Check baggage policies before travel.",
+      },
+      {
+        question: "Boarding pass and check-in",
+        answer: "You can check in online.",
+      },
+      {
+        question: "Booking a flight",
+        answer: "Flights can be booked on the website.",
+      },
+      {
+        question: "Changes and cancellation",
+        answer: "Changes depend on airline policy.",
+      },
+      {
+        question: "Flight confirmation",
+        answer: "Confirmation sent to your email.",
+      },
+      {
+        question: "My flight booking",
+        answer: "Manage your bookings in the app.",
+      },
     ],
     "Car rentals": [
-      "Most popular",
-      "Driver requirements and responsibilities",
-      "Fuel, mileage, and travel plans",
-      "Insurance and protection",
-      "Extras",
-      "Payment, fees, and confirmation",
+      {
+        question: "Most popular",
+        answer: "Check our most popular car rentals.",
+      },
+      {
+        question: "Driver requirements and responsibilities",
+        answer: "Drivers must meet age requirements.",
+      },
+      {
+        question: "Fuel, mileage, and travel plans",
+        answer: "Fuel policies vary by rental company.",
+      },
+      {
+        question: "Insurance and protection",
+        answer: "Insurance options are available.",
+      },
+      { question: "Extras", answer: "Additional options can be selected." },
+      {
+        question: "Payment, fees, and confirmation",
+        answer: "Payments are processed securely.",
+      },
     ],
     Attractions: [
-      "Cancellations",
-      "Payment",
-      "Modifications and changes",
-      "Booking details and information",
-      "Pricing",
-      "Tickets and check-in",
+      {
+        question: "Cancellations",
+        answer: "Cancellations allowed as per policy.",
+      },
+      { question: "Payment", answer: "Payment is required at booking." },
+      {
+        question: "Modifications and changes",
+        answer: "Changes may be allowed with fees.",
+      },
+      {
+        question: "Booking details and information",
+        answer: "Booking info is in your account.",
+      },
+      {
+        question: "Pricing",
+        answer: "Pricing depends on attraction and date.",
+      },
+      {
+        question: "Tickets and check-in",
+        answer: "Tickets are digital in most cases.",
+      },
     ],
     "Airport taxis": [
-      "Manage booking",
-      "Journey",
-      "Payment info",
-      "Accessibility and extras",
-      "Pricing",
+      {
+        question: "Manage booking",
+        answer: "Bookings can be managed in your profile.",
+      },
+      { question: "Journey", answer: "Track your taxi journey in the app." },
+      { question: "Payment info", answer: "Payment info is secured." },
+      {
+        question: "Accessibility and extras",
+        answer: "Accessible options available.",
+      },
+      { question: "Pricing", answer: "Prices depend on distance and type." },
     ],
     Insurance: [
-      "Room Cancellation Insurance - Claims (excludes U.S. residents)",
-      "Room Cancellation Insurance - Coverage (excludes U.S. residents)",
-      "Room Cancellation Insurance - Policy terms (excludes U.S. residents)",
-      "Room Cancellation Insurance - General (excludes U.S. residents)",
+      {
+        question:
+          "Room Cancellation Insurance - Claims (excludes U.S. residents)",
+        answer: "Claims are processed according to policy.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - Coverage (excludes U.S. residents)",
+        answer: "Coverage details are listed in the policy.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - Policy terms (excludes U.S. residents)",
+        answer: "Terms must be read carefully.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - General (excludes U.S. residents)",
+        answer: "General info available in policy documents.",
+      },
     ],
     Other: [
-      "How can I contact Booking.com?",
-      "Can I get support in my language for accommodation bookings in the EEA?",
-      "Can I get customer support in my language for flight bookings in the European Economic Area?",
-      "Can I get customer support in my language for car rental bookings in the European Economic Area?",
+      {
+        question: "How can I contact Booking.com?",
+        answer: "You can contact through the Help Center.",
+      },
+      {
+        question:
+          "Can I get support in my language for accommodation bookings in the EEA?",
+        answer: "Yes, multiple languages are supported.",
+      },
+      {
+        question:
+          "Can I get customer support in my language for flight bookings in the European Economic Area?",
+        answer: "Yes, support is available in several languages.",
+      },
+      {
+        question:
+          "Can I get customer support in my language for car rental bookings in the European Economic Area?",
+        answer: "Yes, support is available in your language.",
+      },
     ],
   };
 
@@ -259,7 +383,11 @@ export default function HelpSupport({
                 </Text>
                 <Pressable
                   style={styles.blueButton}
-                  onPress={() => setShowModal(null)}
+                  onPress={() =>
+                    Linking.openURL(
+                      "https://www.booking.com/customer-service.html",
+                    )
+                  }
                 >
                   <Text style={styles.blueButtonText}>
                     Get help with a booking
@@ -280,15 +408,7 @@ export default function HelpSupport({
                   marginTop: 20,
                 }}
               >
-                {[
-                  "Stays",
-                  "Flights",
-                  "Car rentals",
-                  "Attractions",
-                  "Airport taxis",
-                  "Insurance",
-                  "Other",
-                ].map((tab) => (
+                {Object.keys(faqData).map((tab) => (
                   <Pressable
                     key={tab}
                     onPress={() => setActiveTab(tab)}
@@ -336,13 +456,19 @@ export default function HelpSupport({
                           index === faqData[activeTab].length - 1 ? 0 : 1,
                       },
                     ]}
+                    onPress={() => {
+                      LayoutAnimation.configureNext(
+                        LayoutAnimation.Presets.easeInEaseOut,
+                      );
+                      setOpenQuestionIndex(
+                        openQuestionIndex === index ? null : index,
+                      );
+                    }}
                   >
-                    <Text style={styles.faqItemText}>{item}</Text>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={24}
-                      color={Colors.dark.icon}
-                    />
+                    <Text style={styles.faqItemText}>{item.question}</Text>
+                    {openQuestionIndex === index && (
+                      <Text style={styles.faqAnswer}>{item.answer}</Text>
+                    )}
                   </Pressable>
                 ))}
               </View>
@@ -395,7 +521,7 @@ export default function HelpSupport({
           <Pressable
             onPress={() => {
               setShowModal(null);
-              onBack?.(); // call onBack prop if it exists
+              onBack?.();
             }}
             style={styles.backButton}
             accessibilityLabel="Back"
@@ -419,20 +545,13 @@ export default function HelpSupport({
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
-      {/* dark background for initial screen */}
       <AccountSection title="Help and support">
-        {items.map((title) => (
+        {items.map((item) => (
           <AccountItem
-            key={title}
-            icon={
-              <Ionicons
-                name={itemIcons[title]}
-                size={20}
-                color={Colors.dark.icon}
-              />
-            }
-            title={title}
-            onPress={() => handleItemPress(title)}
+            key={item.title}
+            icon={item.icon}
+            title={item.title}
+            onPress={() => handleItemPress(item.title)}
           />
         ))}
       </AccountSection>

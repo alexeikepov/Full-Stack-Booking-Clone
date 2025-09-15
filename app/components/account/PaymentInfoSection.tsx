@@ -1,4 +1,5 @@
-import React, { JSX, useEffect, useState } from "react";
+// path: src/components/account/PaymentInfoSection.tsx
+import { JSX, useEffect, useState } from "react";
 import {
   BackHandler,
   Modal,
@@ -9,6 +10,7 @@ import {
   Text,
   TextInput,
   TextStyle,
+  TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
@@ -18,7 +20,7 @@ import {
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
-import { FAQItem, faqs } from "../../data/paymentInfoData"; // Assumed path for data file
+import { FAQItem, faqs } from "../../data/paymentInfoData";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
 import { itemIcons } from "./itemIcons";
@@ -47,7 +49,7 @@ interface Style {
   cardSectionText: TextStyle;
   addCardButton: ViewStyle;
   cardFormContainer: ViewStyle;
-  input: ViewStyle;
+  input: TextStyle;
   label: TextStyle;
   faqContainer: ViewStyle;
   faqItem: ViewStyle;
@@ -57,10 +59,7 @@ interface Style {
 }
 
 const styles = StyleSheet.create<Style>({
-  fullPage: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
+  fullPage: { flex: 1, backgroundColor: Colors.dark.background },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -68,14 +67,8 @@ const styles = StyleSheet.create<Style>({
     paddingVertical: 12,
     backgroundColor: Colors.dark.card,
   },
-  backButton: {
-    paddingRight: 10,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-  },
+  backButton: { paddingRight: 10 },
+  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
   walletSection: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
@@ -86,8 +79,8 @@ const styles = StyleSheet.create<Style>({
   walletTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: Colors.dark.text,
     marginBottom: 4,
+    color: Colors.dark.text,
   },
   walletBalanceText: {
     fontSize: 28,
@@ -100,23 +93,15 @@ const styles = StyleSheet.create<Style>({
     color: Colors.dark.textSecondary,
     marginBottom: 16,
   },
-  creditText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-  },
-  infoIcon: {
-    marginLeft: 4,
-  },
+  creditText: { fontSize: 16, color: Colors.dark.text },
+  infoIcon: { marginLeft: 4 },
   rewardsActivityLink: {
     color: "#007AFF",
     fontSize: 14,
     fontWeight: "bold",
     marginTop: 16,
   },
-  whatIsSection: {
-    marginHorizontal: 16,
-    marginTop: 30,
-  },
+  whatIsSection: { marginHorizontal: 16, marginTop: 30 },
   whatIsTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -128,19 +113,9 @@ const styles = StyleSheet.create<Style>({
     alignItems: "flex-start",
     marginBottom: 20,
   },
-  whatIsItemContent: {
-    flex: 1,
-    marginLeft: 15,
-  },
-  itemMainText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-  },
-  itemSubText: {
-    fontSize: 14,
-    color: Colors.dark.textSecondary,
-  },
+  whatIsItemContent: { flex: 1, marginLeft: 15 },
+  itemMainText: { fontSize: 16, fontWeight: "bold", color: Colors.dark.text },
+  itemSubText: { fontSize: 14, color: Colors.dark.textSecondary },
   button: {
     backgroundColor: "#007AFF",
     borderRadius: 8,
@@ -149,11 +124,7 @@ const styles = StyleSheet.create<Style>({
     marginHorizontal: 16,
     marginTop: 30,
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "white",
-  },
+  buttonText: { fontSize: 16, fontWeight: "bold", color: "white" },
   cardSection: {
     flex: 1,
     justifyContent: "center",
@@ -175,14 +146,8 @@ const styles = StyleSheet.create<Style>({
     marginTop: "auto",
     marginBottom: 20,
   },
-  cardFormContainer: {
-    padding: 16,
-  },
-  label: {
-    fontSize: 14,
-    color: Colors.dark.textSecondary,
-    marginBottom: 8,
-  },
+  cardFormContainer: { padding: 16 },
+  label: { fontSize: 14, color: Colors.dark.textSecondary, marginBottom: 8 },
   input: {
     backgroundColor: Colors.dark.card,
     borderRadius: 8,
@@ -191,13 +156,12 @@ const styles = StyleSheet.create<Style>({
     marginBottom: 16,
     fontSize: 16,
   },
-  faqContainer: {
-    padding: 16,
-  },
+  faqContainer: { padding: 16 },
   faqItem: {
     marginBottom: 10,
     borderBottomWidth: 1,
     paddingBottom: 10,
+    borderBottomColor: Colors.dark.textSecondary,
   },
   faqQuestionContainer: {
     flexDirection: "row",
@@ -211,252 +175,590 @@ const styles = StyleSheet.create<Style>({
     color: Colors.dark.text,
     paddingRight: 10,
   },
-  faqAnswer: {
-    fontSize: 14,
-    color: Colors.dark.textSecondary,
-    marginTop: 10,
-  },
+  faqAnswer: { fontSize: 14, color: Colors.dark.textSecondary, marginTop: 10 },
 });
 
 export default function PaymentInfoSection(): JSX.Element {
-  const [showModal, setShowModal] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<
+    null | "main" | "info" | "rewards" | "faq" | "addCard" | "paymentMethods"
+  >(null);
   const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null);
+  const [showSavedModal, setShowSavedModal] = useState(false);
+  const [cardDetails, setCardDetails] = useState<any>(null);
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvc, setCvc] = useState("");
+  const [name, setName] = useState("");
   const insets = useSafeAreaInsets();
 
+  // Android back handler
   useEffect(() => {
-    if (!showModal) return;
-    const handler = () => true;
+    if (!activeModal) return;
+    const handler = () => {
+      setActiveModal(null);
+      return true;
+    };
     let subscription: { remove: () => void } | undefined;
-    if (Platform.OS === "android") {
+    if (Platform.OS === "android")
       subscription = BackHandler.addEventListener("hardwareBackPress", handler);
-    }
     return () => {
       if (subscription) subscription.remove();
     };
-  }, [showModal]);
+  }, [activeModal]);
 
   const items = ["Rewards & Wallet", "Payment methods"];
 
-  const getModalContent = () => {
-    switch (showModal) {
-      case "Rewards & Wallet":
-        return (
-          <ScrollView
-            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+  // Track if a card was just saved to keep AddCardModal open while showing SavedModal
+  const [justSavedCard, setJustSavedCard] = useState(false);
+  const handleSaveCard = (details: any) => {
+    setCardDetails(details);
+    setShowSavedModal(true);
+    setJustSavedCard(true);
+    setTimeout(() => {
+      setShowSavedModal(false);
+      setTimeout(() => {
+        setActiveModal("paymentMethods");
+        setJustSavedCard(false);
+      }, 100);
+    }, 1200);
+  };
+
+  // Modals
+  const MainModal = activeModal === "main" && (
+    <Modal
+      visible
+      animationType="slide"
+      transparent={false}
+      presentationStyle="fullScreen"
+      onRequestClose={() => setActiveModal(null)}
+    >
+      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => setActiveModal(null)}
+            style={styles.backButton}
+            accessibilityLabel="Back"
           >
-            <View style={styles.walletSection}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Ionicons
-                  name="wallet"
-                  size={24}
-                  color={Colors.dark.icon}
-                  style={{ marginRight: 8 }}
-                />
-                <Text style={styles.walletTitle}>Wallet balance</Text>
-              </View>
-              <Text style={styles.walletBalanceText}>€ 0</Text>
-              <Text style={styles.walletSubtext}>
-                Includes all spendable rewards
+            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+          </Pressable>
+          <Text style={styles.headerText}>Rewards & Wallet</Text>
+        </View>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        >
+          <View style={styles.walletSection}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Ionicons
+                name="wallet"
+                size={24}
+                color={Colors.dark.icon}
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.walletTitle}>Wallet balance</Text>
+              <Text
+                style={[
+                  styles.walletBalanceText,
+                  { fontSize: 18, marginLeft: "auto", marginBottom: 0 },
+                ]}
+              >
+                € 0
               </Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={styles.creditText}>Credits</Text>
+            </View>
+            <Text style={styles.walletSubtext}>
+              Includes all spendable rewards
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 8,
+              }}
+            >
+              <Text style={styles.creditText}>Credits</Text>
+              <TouchableOpacity onPress={() => setActiveModal("info")}>
                 <Ionicons
                   name="information-circle-outline"
                   size={16}
                   color={Colors.dark.textSecondary}
                   style={styles.infoIcon}
                 />
-                <Text style={[styles.creditText, { marginLeft: "auto" }]}>
-                  € 0
-                </Text>
-              </View>
-              <Pressable onPress={() => {}}>
-                <Text style={styles.rewardsActivityLink}>
-                  View rewards activity
-                </Text>
-              </Pressable>
-            </View>
-            <View style={styles.whatIsSection}>
-              <Text style={styles.whatIsTitle}>What is Rewards & Wallet?</Text>
-              <View style={styles.whatIsItem}>
-                <Ionicons
-                  name="gift-outline"
-                  size={32}
-                  color={Colors.dark.icon}
-                />
-                <View style={styles.whatIsItemContent}>
-                  <Text style={styles.itemMainText}>
-                    Book and earn travel rewards
-                  </Text>
-                  <Text style={styles.itemSubText}>
-                    Credits, vouchers, you name it! These are all spendable on
-                    your next Booking.com trip.
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.whatIsItem}>
-                <Ionicons
-                  name="eye-outline"
-                  size={32}
-                  color={Colors.dark.icon}
-                />
-                <View style={styles.whatIsItemContent}>
-                  <Text style={styles.itemMainText}>
-                    Track everything at a glance
-                  </Text>
-                  <Text style={styles.itemSubText}>
-                    Your Wallet keeps all rewards safe, while updating you about
-                    your earnings and spendings.
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.whatIsItem}>
-                <Ionicons
-                  name="wallet-outline"
-                  size={32}
-                  color={Colors.dark.icon}
-                />
-                <View style={styles.whatIsItemContent}>
-                  <Text style={styles.itemMainText}>
-                    Pay with Wallet to save money
-                  </Text>
-                  <Text style={styles.itemSubText}>
-                    If a booking accepts any rewards in your Wallet, it’ll
-                    appear during payment for spending.
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <Pressable
-              style={styles.button}
-              onPress={() => setShowModal("FAQs")}
-            >
-              <Text style={styles.buttonText}>Need help? Visit FAQs</Text>
-            </Pressable>
-          </ScrollView>
-        );
-      case "Payment methods":
-        return (
-          <View style={{ flex: 1 }}>
-            <View style={styles.cardSection}>
-              <Text style={styles.itemMainText}>Payment details</Text>
-              <Text style={styles.cardSectionText}>
-                Securely add or remove payment methods to make it easier when
-                you book.
+              </TouchableOpacity>
+              <Text style={[styles.creditText, { marginLeft: "auto" }]}>
+                € 0
               </Text>
             </View>
-            <Pressable
-              style={styles.addCardButton}
-              onPress={() => setShowModal("Add card")}
-            >
-              <Text style={styles.buttonText}>Add card</Text>
-            </Pressable>
+            <TouchableOpacity onPress={() => setActiveModal("rewards")}>
+              <Text style={styles.rewardsActivityLink}>
+                View rewards activity
+              </Text>
+            </TouchableOpacity>
           </View>
-        );
-      case "Add card":
-        return (
-          <ScrollView
-            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
-          >
-            <View style={styles.cardFormContainer}>
-              <Text style={styles.label}>Card number</Text>
-              <TextInput style={styles.input} keyboardType="numeric" />
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.label}>Expiration date</Text>
-                  <TextInput style={styles.input} placeholder="MM/YY" />
-                </View>
-                <View style={{ flex: 1, marginLeft: 8 }}>
-                  <Text style={styles.label}>CVC</Text>
-                  <TextInput style={styles.input} keyboardType="numeric" />
-                </View>
+          <View style={styles.whatIsSection}>
+            <Text style={styles.whatIsTitle}>What is Rewards & Wallet?</Text>
+            <View style={styles.whatIsItem}>
+              <Ionicons
+                name="gift-outline"
+                size={32}
+                color={Colors.dark.icon}
+              />
+              <View style={styles.whatIsItemContent}>
+                <Text style={styles.itemMainText}>
+                  Book and earn travel rewards
+                </Text>
+                <Text style={styles.itemSubText}>
+                  Credits, vouchers, you name it! These are all spendable on
+                  your next Booking.com trip.
+                </Text>
               </View>
-              <Text style={styles.label}>Name on card</Text>
-              <TextInput style={styles.input} />
-              <Pressable style={styles.button}>
-                <Text style={styles.buttonText}>Save card</Text>
-              </Pressable>
             </View>
-          </ScrollView>
-        );
-      case "FAQs":
-        return (
-          <ScrollView style={styles.faqContainer}>
-            {faqs.map((faq: FAQItem, index) => (
-              <Pressable
-                key={index}
-                style={styles.faqItem}
-                onPress={() =>
-                  setExpandedFAQ(
-                    expandedFAQ === faq.question ? null : faq.question,
-                  )
-                }
-              >
-                <View style={styles.faqQuestionContainer}>
-                  <Text style={styles.faqQuestion}>{faq.question}</Text>
-                  <Ionicons
-                    name={
-                      expandedFAQ === faq.question
-                        ? "chevron-up"
-                        : "chevron-down"
-                    }
-                    size={24}
-                    color={Colors.dark.icon}
-                  />
-                </View>
-                {expandedFAQ === faq.question && (
-                  <Text style={styles.faqAnswer}>{faq.answer}</Text>
-                )}
-              </Pressable>
-            ))}
-          </ScrollView>
-        );
-      default:
-        return null;
-    }
-  };
+            <View style={styles.whatIsItem}>
+              <Ionicons name="eye-outline" size={32} color={Colors.dark.icon} />
+              <View style={styles.whatIsItemContent}>
+                <Text style={styles.itemMainText}>
+                  Track everything at a glance
+                </Text>
+                <Text style={styles.itemSubText}>
+                  Your Wallet keeps all rewards safe, while updating you about
+                  your earnings and spendings.
+                </Text>
+              </View>
+            </View>
+            <View style={styles.whatIsItem}>
+              <Ionicons
+                name="wallet-outline"
+                size={32}
+                color={Colors.dark.icon}
+              />
+              <View style={styles.whatIsItemContent}>
+                <Text style={styles.itemMainText}>
+                  Pay with Wallet to save money
+                </Text>
+                <Text style={styles.itemSubText}>
+                  If a booking accepts any rewards in your Wallet, it’ll appear
+                  during payment for spending.
+                </Text>
+              </View>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setActiveModal("faq")}
+          >
+            <Text style={styles.buttonText}>Need help? Visit FAQs</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
 
-  const getModalHeaderTitle = () => {
-    switch (showModal) {
-      case "Rewards & Wallet":
-        return "Rewards & Wallet";
-      case "Payment methods":
-        return "Payment details";
-      case "Add card":
-        return "Add card";
-      case "FAQs":
-        return "FAQs";
-      default:
-        return "";
-    }
-  };
-
-  const ModalComponent = (
+  const InfoModal = activeModal === "info" && (
     <Modal
-      visible={!!showModal}
+      visible
+      animationType="fade"
+      transparent
+      onRequestClose={() => setActiveModal(null)}
+    >
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.4)",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: Colors.dark.card,
+            borderRadius: 16,
+            padding: 24,
+            width: 320,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: "bold",
+              fontSize: 18,
+              color: Colors.dark.text,
+              marginBottom: 8,
+            }}
+          >
+            Credits
+          </Text>
+          <Text
+            style={{
+              color: Colors.dark.textSecondary,
+              fontSize: 15,
+              textAlign: "center",
+              marginBottom: 24,
+            }}
+          >
+            Credits are spendable on anything through Booking.com that accepts
+            Wallet payments.
+          </Text>
+          <TouchableOpacity
+            onPress={() => setActiveModal(null)}
+            style={{
+              backgroundColor: "#007AFF",
+              borderRadius: 8,
+              paddingVertical: 10,
+              paddingHorizontal: 32,
+            }}
+          >
+            <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
+              Got it
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const RewardsModal = activeModal === "rewards" && (
+    <Modal
+      visible
       animationType="slide"
       transparent={false}
       presentationStyle="fullScreen"
-      onRequestClose={() => setShowModal(null)}
+      onRequestClose={() => setActiveModal(null)}
     >
       <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <Pressable
-            onPress={() => setShowModal(null)}
+            onPress={() => setActiveModal(null)}
             style={styles.backButton}
             accessibilityLabel="Back"
           >
             <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
           </Pressable>
-          <Text style={styles.headerText}>{getModalHeaderTitle()}</Text>
+          <Text style={styles.headerText}>Rewards & Wallet activity</Text>
         </View>
-        {getModalContent()}
+        <View
+          style={{
+            backgroundColor: Colors.dark.card,
+            margin: 16,
+            borderRadius: 16,
+            padding: 16,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 8,
+            }}
+          >
+            <Ionicons
+              name="wallet"
+              size={24}
+              color={Colors.dark.icon}
+              style={{ marginRight: 8 }}
+            />
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 20,
+                color: Colors.dark.text,
+              }}
+            >
+              Wallet balance
+            </Text>
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 20,
+                color: Colors.dark.text,
+                marginLeft: "auto",
+              }}
+            >
+              € 0
+            </Text>
+          </View>
+          <Text
+            style={{
+              color: Colors.dark.textSecondary,
+              fontSize: 14,
+              marginBottom: 8,
+            }}
+          >
+            Includes all spendable rewards
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            marginBottom: 16,
+          }}
+        >
+          {["Spendable", "Pending", "History"].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              style={{
+                borderBottomWidth: 0,
+                borderBottomColor: "#007AFF",
+                paddingBottom: 6,
+              }}
+            >
+              <Text
+                style={{
+                  color: Colors.dark.text,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                }}
+              >
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: "bold",
+              fontSize: 22,
+              color: Colors.dark.text,
+              marginBottom: 12,
+              textAlign: "center",
+            }}
+          >
+            Nothing yet
+          </Text>
+          <Text
+            style={{
+              color: Colors.dark.textSecondary,
+              fontSize: 16,
+              textAlign: "center",
+            }}
+          >
+            Confirmed rewards can take up to 24 hours to appear here for
+            spending.
+          </Text>
+        </ScrollView>
       </SafeAreaView>
+    </Modal>
+  );
+
+  const FaqModal = activeModal === "faq" && (
+    <Modal
+      visible
+      animationType="slide"
+      transparent={false}
+      presentationStyle="fullScreen"
+      onRequestClose={() => setActiveModal(null)}
+    >
+      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => setActiveModal(null)}
+            style={styles.backButton}
+            accessibilityLabel="Back"
+          >
+            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+          </Pressable>
+          <Text style={styles.headerText}>FAQs</Text>
+        </View>
+        <ScrollView style={styles.faqContainer}>
+          {faqs.map((faq: FAQItem, index) => (
+            <Pressable
+              key={index}
+              style={styles.faqItem}
+              onPress={() =>
+                setExpandedFAQ(
+                  expandedFAQ === faq.question ? null : faq.question,
+                )
+              }
+            >
+              <View style={styles.faqQuestionContainer}>
+                <Text style={styles.faqQuestion}>{faq.question}</Text>
+                <Ionicons
+                  name={
+                    expandedFAQ === faq.question ? "chevron-up" : "chevron-down"
+                  }
+                  size={24}
+                  color={Colors.dark.icon}
+                />
+              </View>
+              {expandedFAQ === faq.question && (
+                <Text style={styles.faqAnswer}>{faq.answer}</Text>
+              )}
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+
+  const AddCardModal = (activeModal === "addCard" || justSavedCard) && (
+    <Modal
+      visible
+      animationType="slide"
+      transparent={false}
+      presentationStyle="fullScreen"
+      onRequestClose={() => setActiveModal(null)}
+    >
+      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => setActiveModal(null)}
+            style={styles.backButton}
+            accessibilityLabel="Back"
+          >
+            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+          </Pressable>
+          <Text style={styles.headerText}>Add card</Text>
+        </View>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        >
+          <View style={styles.cardFormContainer}>
+            <Text style={styles.label}>Card number</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              value={cardNumber}
+              onChangeText={setCardNumber}
+            />
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.label}>Expiration date</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM/YY"
+                  value={expiry}
+                  onChangeText={setExpiry}
+                />
+              </View>
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Text style={styles.label}>CVC</Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={cvc}
+                  onChangeText={setCvc}
+                />
+              </View>
+            </View>
+            <Text style={styles.label}>Name on card</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+            />
+            <Pressable
+              style={styles.button}
+              onPress={() => handleSaveCard({ cardNumber, expiry, cvc, name })}
+            >
+              <Text style={styles.buttonText}>Save card</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+
+  const PaymentMethodsModal = activeModal === "paymentMethods" && (
+    <Modal
+      visible
+      animationType="slide"
+      transparent={false}
+      presentationStyle="fullScreen"
+      onRequestClose={() => setActiveModal(null)}
+    >
+      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => setActiveModal(null)}
+            style={styles.backButton}
+            accessibilityLabel="Back"
+          >
+            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+          </Pressable>
+          <Text style={styles.headerText}>Payment details</Text>
+        </View>
+        <View style={styles.cardSection}>
+          <Text style={styles.itemMainText}>Payment details</Text>
+          <Text style={styles.cardSectionText}>
+            Securely add or remove payment methods to make it easier when you
+            book.
+          </Text>
+          {cardDetails && (
+            <View
+              style={{
+                marginTop: 24,
+                width: "100%",
+                backgroundColor: Colors.dark.card,
+                borderRadius: 8,
+                padding: 16,
+              }}
+            >
+              <Text
+                style={{
+                  color: Colors.dark.text,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                }}
+              >
+                Saved Card
+              </Text>
+              <Text style={{ color: Colors.dark.text, marginTop: 8 }}>
+                Card Number: **** **** **** {cardDetails.cardNumber?.slice(-4)}
+              </Text>
+              <Text style={{ color: Colors.dark.text }}>
+                Expiry: {cardDetails.expiry}
+              </Text>
+              <Text style={{ color: Colors.dark.text }}>
+                Name: {cardDetails.name}
+              </Text>
+            </View>
+          )}
+        </View>
+        <TouchableOpacity
+          style={styles.addCardButton}
+          onPress={() => setActiveModal("addCard")}
+        >
+          <Text style={styles.buttonText}>Add card</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    </Modal>
+  );
+
+  const SavedModal = showSavedModal && (
+    <Modal visible transparent animationType="fade">
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "rgba(0,0,0,0.3)",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "white",
+            padding: 24,
+            borderRadius: 12,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            elevation: 5,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold", color: "#22c55e" }}>
+            Card Saved!
+          </Text>
+        </View>
+      </View>
     </Modal>
   );
 
@@ -473,39 +775,20 @@ export default function PaymentInfoSection(): JSX.Element {
             />
           }
           title={title}
-          onPress={() => setShowModal(title)}
+          onPress={() => {
+            if (title === "Rewards & Wallet") setActiveModal("main");
+            else if (title === "Payment methods")
+              setActiveModal("paymentMethods");
+          }}
         />
       ))}
-      {ModalComponent}
+      {MainModal}
+      {InfoModal}
+      {RewardsModal}
+      {FaqModal}
+      {AddCardModal}
+      {PaymentMethodsModal}
+      {SavedModal}
     </AccountSection>
   );
 }
-
-// Assumed content of data/paymentInfoData.ts
-// export interface FAQItem {
-//   question: string;
-//   answer: string;
-// }
-//
-// export const faqs: FAQItem[] = [
-//   {
-//     question: "What is Wallet credit?",
-//     answer: "Wallet credits are a type of travel reward you can earn. They are automatically added to your Wallet and can be used to pay for eligible bookings.",
-//   },
-//   {
-//     question: "How do I use my Wallet balance?",
-//     answer: "When you book an eligible property, you'll see the option to use your Wallet balance during the payment process. Your credits will be applied automatically.",
-//   },
-//   {
-//     question: "Can I transfer my Wallet credit?",
-//     answer: "No, Wallet credits and other rewards cannot be transferred to another account.",
-//   },
-//   {
-//     question: "Do my Wallet credits expire?",
-//     answer: "Yes, some rewards may have an expiration date. Check the terms and conditions of each reward for more details.",
-//   },
-//   {
-//     question: "Is there a limit to how much credit I can have?",
-//     answer: "There may be a maximum amount of credit you can hold in your Wallet. This is to ensure fair usage and prevent fraud.",
-//   },
-// ];

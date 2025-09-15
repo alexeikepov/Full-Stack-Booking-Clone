@@ -3,6 +3,7 @@ import {
   Alert,
   Image,
   Modal,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -152,7 +153,7 @@ export default function BookingsScreen(): JSX.Element {
       animationType="slide"
       onRequestClose={() => setShowBookingDetailsModal(false)}
     >
-      <View style={styles.modalContainer}>
+      <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalHeaderContainer}>
           <TouchableOpacity onPress={() => setShowBookingDetailsModal(false)}>
             <Ionicons name="close" size={24} color={Colors.dark.text} />
@@ -183,7 +184,7 @@ export default function BookingsScreen(): JSX.Element {
             <Text style={styles.manageButtonText}>Manage booking</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 

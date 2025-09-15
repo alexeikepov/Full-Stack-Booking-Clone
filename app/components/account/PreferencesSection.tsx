@@ -1,4 +1,5 @@
-import React, { JSX, useEffect, useState } from "react";
+// path: src/components/account/PreferencesSection.tsx
+import { JSX, useEffect, useState } from "react";
 import {
   BackHandler,
   Linking,
@@ -21,7 +22,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
-import { itemIcons } from "./itemIcons";
 
 interface Style {
   fullPage: ViewStyle;
@@ -38,10 +38,7 @@ interface Style {
 }
 
 const styles = StyleSheet.create<Style>({
-  fullPage: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
+  fullPage: { flex: 1, backgroundColor: Colors.dark.background },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -49,14 +46,8 @@ const styles = StyleSheet.create<Style>({
     paddingVertical: 12,
     backgroundColor: Colors.dark.card,
   },
-  backButton: {
-    paddingRight: 10,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-  },
+  backButton: { paddingRight: 10 },
+  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
   section: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
@@ -79,19 +70,13 @@ const styles = StyleSheet.create<Style>({
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.separator,
   },
-  sectionItemText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-  },
+  sectionItemText: { fontSize: 16, color: Colors.dark.text },
   sectionItemSubText: {
     fontSize: 14,
     color: Colors.dark.textSecondary,
     marginTop: 4,
   },
-  sectionItemValue: {
-    fontSize: 16,
-    color: Colors.dark.textSecondary,
-  },
+  sectionItemValue: { fontSize: 16, color: Colors.dark.textSecondary },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -105,10 +90,18 @@ const styles = StyleSheet.create<Style>({
 export default function PreferencesSection(): JSX.Element {
   const [showModal, setShowModal] = useState<string | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [accessibilityChoice, setAccessibilityChoice] = useState<
+    "all" | "accessible"
+  >("all");
+  const [showAccessibilityModal, setShowAccessibilityModal] = useState(false);
+  const [showSavedModal, setShowSavedModal] = useState(false);
+  const [currencyChoice, setCurrencyChoice] = useState("Euro (€)");
+  const [unitsChoice, setUnitsChoice] = useState("Metric (km, m²)");
+  const [temperatureChoice, setTemperatureChoice] = useState("Celsius");
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    if (!showModal) return;
+    if (!showModal && !showAccessibilityModal && !showSavedModal) return;
     const handler = () => true;
     let subscription: { remove: () => void } | undefined;
     if (Platform.OS === "android") {
@@ -117,13 +110,34 @@ export default function PreferencesSection(): JSX.Element {
     return () => {
       if (subscription) subscription.remove();
     };
+  }, [showModal, showAccessibilityModal, showSavedModal]);
+
+  useEffect(() => {
+    if (showModal === "Travel preferences") setShowAccessibilityModal(true);
   }, [showModal]);
 
   const items = [
-    "Device preferences",
-    "Travel preferences",
-    "Email preferences",
+    {
+      title: "Device preferences",
+      icon: (
+        <Ionicons name="settings-outline" size={20} color={Colors.dark.icon} />
+      ),
+    },
+    {
+      title: "Travel preferences",
+      icon: (
+        <Ionicons name="options-outline" size={20} color={Colors.dark.icon} />
+      ),
+    },
+    {
+      title: "Email preferences",
+      icon: <Ionicons name="mail-outline" size={20} color={Colors.dark.icon} />,
+    },
   ];
+
+  const currencyOptions = ["Euro (€)", "USD ($)", "GBP (£)", "JPY (¥)"];
+  const unitsOptions = ["Metric (km, m²)", "Imperial (mi, ft²)"];
+  const temperatureOptions = ["Celsius", "Fahrenheit"];
 
   const getModalContent = () => {
     switch (showModal) {
@@ -134,7 +148,12 @@ export default function PreferencesSection(): JSX.Element {
           >
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Device settings</Text>
-              <Pressable style={styles.sectionItem}>
+
+              {/* Language */}
+              <Pressable
+                style={styles.sectionItem}
+                onPress={() => Linking.openSettings()}
+              >
                 <View>
                   <Text style={styles.sectionItemText}>Language</Text>
                   <Text style={styles.sectionItemSubText}>
@@ -152,39 +171,68 @@ export default function PreferencesSection(): JSX.Element {
                   />
                 </View>
               </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>Currency</Text>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={styles.sectionItemValue}>Euro (€)</Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={24}
-                    color={Colors.dark.icon}
-                  />
-                </View>
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>Units</Text>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={styles.sectionItemValue}>Metric (km, m²)</Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={24}
-                    color={Colors.dark.icon}
-                  />
-                </View>
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>Temperature</Text>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={styles.sectionItemValue}>Celsius</Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={24}
-                    color={Colors.dark.icon}
-                  />
-                </View>
-              </Pressable>
+
+              {/* Currency */}
+              <View style={styles.section}>
+                {currencyOptions.map((option) => (
+                  <Pressable
+                    key={option}
+                    style={styles.sectionItem}
+                    onPress={() => setCurrencyChoice(option)}
+                  >
+                    <Text style={styles.sectionItemText}>Currency</Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Text style={styles.sectionItemValue}>
+                        {option === currencyChoice ? `✔ ${option}` : option}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Units */}
+              <View style={styles.section}>
+                {unitsOptions.map((option) => (
+                  <Pressable
+                    key={option}
+                    style={styles.sectionItem}
+                    onPress={() => setUnitsChoice(option)}
+                  >
+                    <Text style={styles.sectionItemText}>Units</Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Text style={styles.sectionItemValue}>
+                        {option === unitsChoice ? `✔ ${option}` : option}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Temperature */}
+              <View style={styles.section}>
+                {temperatureOptions.map((option) => (
+                  <Pressable
+                    key={option}
+                    style={styles.sectionItem}
+                    onPress={() => setTemperatureChoice(option)}
+                  >
+                    <Text style={styles.sectionItemText}>Temperature</Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Text style={styles.sectionItemValue}>
+                        {option === temperatureChoice ? `✔ ${option}` : option}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Notifications */}
               <View style={styles.switchContainer}>
                 <Text style={styles.sectionItemText}>Notifications</Text>
                 <Switch
@@ -197,96 +245,44 @@ export default function PreferencesSection(): JSX.Element {
                 />
               </View>
             </View>
+
+            {/* About */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>About</Text>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>
-                  Booking.com Privacy Statement
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>
-                  Car Rentals Privacy Statement
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>
-                  Manage privacy settings
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>
-                  Exercise your data rights
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <Text style={styles.sectionItemText}>Terms and Conditions</Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
-                <Text style={styles.sectionItemText}>
-                  Rate us in the App Store
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
+              {[
+                "Booking.com Privacy Statement",
+                "Car Rentals Privacy Statement",
+                "Manage privacy settings",
+                "Exercise your data rights",
+                "Terms and Conditions",
+                "Rate us in the App Store",
+              ].map((text) => (
+                <Pressable
+                  key={text}
+                  style={[
+                    styles.sectionItem,
+                    text === "Rate us in the App Store"
+                      ? { borderBottomWidth: 0 }
+                      : {},
+                  ]}
+                  onPress={() =>
+                    Linking.openURL(
+                      "https://www.booking.com/content/about.html",
+                    )
+                  }
+                >
+                  <Text style={styles.sectionItemText}>{text}</Text>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={24}
+                    color={Colors.dark.icon}
+                  />
+                </Pressable>
+              ))}
             </View>
           </ScrollView>
         );
-      case "Travel preferences":
-        return (
-          <ScrollView
-            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
-          >
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                We will remember this info to make it faster when you book.
-              </Text>
-              <Pressable style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
-                <View>
-                  <Text style={styles.sectionItemText}>
-                    Accessibility requirements
-                  </Text>
-                  <Text style={styles.sectionItemSubText}>
-                    Filter out properties that do not meet your needs
-                  </Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-            </View>
-          </ScrollView>
-        );
+
       default:
         return null;
     }
@@ -327,6 +323,140 @@ export default function PreferencesSection(): JSX.Element {
     </Modal>
   );
 
+  const AccessibilityModal = (
+    <Modal
+      visible={showAccessibilityModal}
+      animationType="slide"
+      transparent
+      presentationStyle="overFullScreen"
+      onRequestClose={() => setShowAccessibilityModal(false)}
+    >
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "flex-end",
+          backgroundColor: "rgba(0,0,0,0.5)",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: Colors.dark.card,
+            padding: 20,
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: Colors.dark.text,
+              marginBottom: 20,
+            }}
+          >
+            Select accessibility preference
+          </Text>
+          {["all", "accessible"].map((option) => (
+            <Pressable
+              key={option}
+              style={{
+                padding: 16,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+              onPress={() =>
+                setAccessibilityChoice(option as "all" | "accessible")
+              }
+            >
+              <Ionicons
+                name={
+                  accessibilityChoice === option
+                    ? "radio-button-on"
+                    : "radio-button-off"
+                }
+                size={24}
+                color={Colors.dark.icon}
+              />
+              <Text style={{ color: Colors.dark.text, marginLeft: 12 }}>
+                {option === "all"
+                  ? "Show all properties"
+                  : "Only show accessible properties"}
+              </Text>
+            </Pressable>
+          ))}
+          <Pressable
+            style={{
+              marginTop: 20,
+              backgroundColor: "#007AFF",
+              borderRadius: 8,
+              paddingVertical: 16,
+              alignItems: "center",
+            }}
+            onPress={() => {
+              setShowAccessibilityModal(false);
+              setShowSavedModal(true);
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 16 }}>Save</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const SavedModal = (
+    <Modal
+      visible={showSavedModal}
+      animationType="fade"
+      transparent
+      presentationStyle="overFullScreen"
+      onRequestClose={() => setShowSavedModal(false)}
+    >
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "rgba(0,0,0,0.5)",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: Colors.dark.card,
+            padding: 30,
+            borderRadius: 12,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: Colors.dark.text,
+            }}
+          >
+            Saved
+          </Text>
+          <Pressable
+            style={{
+              marginTop: 20,
+              backgroundColor: "#007AFF",
+              borderRadius: 8,
+              paddingVertical: 12,
+              paddingHorizontal: 30,
+            }}
+            onPress={() => {
+              setShowSavedModal(false);
+              setShowModal("Travel preferences");
+            }}
+          >
+            <Text style={{ color: "white" }}>OK</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+
   const handleItemPress = (title: string) => {
     if (title === "Email preferences") {
       Linking.openURL(
@@ -339,21 +469,17 @@ export default function PreferencesSection(): JSX.Element {
 
   return (
     <AccountSection title="Preferences">
-      {items.map((title) => (
+      {items.map((item) => (
         <AccountItem
-          key={title}
-          icon={
-            <Ionicons
-              name={itemIcons[title]}
-              size={20}
-              color={Colors.dark.icon}
-            />
-          }
-          title={title}
-          onPress={() => handleItemPress(title)}
+          key={item.title}
+          icon={item.icon}
+          title={item.title}
+          onPress={() => handleItemPress(item.title)}
         />
       ))}
       {ModalComponent}
+      {AccessibilityModal}
+      {SavedModal}
     </AccountSection>
   );
 }

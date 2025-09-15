@@ -1,12 +1,49 @@
-import React from "react";
-import { Pressable, Text, StyleSheet } from "react-native";
+import { useState } from "react";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../constants/Colors";
 
 export default function SignOutButton() {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleSignOut = () => {
+    // Add your sign out logic here
+    setModalVisible(false);
+  };
+
   return (
-    <Pressable style={styles.signOutButton}>
-      <Text style={styles.signOutText}>Sign out</Text>
-    </Pressable>
+    <>
+      <Pressable
+        style={styles.signOutButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.signOutText}>Sign out</Text>
+      </Pressable>
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              Are you sure you want to sign out?
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.confirmButton} onPress={handleSignOut}>
+                <Text style={styles.confirmText}>Sign out</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -23,5 +60,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#ff6a6a",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 12,
+    padding: 24,
+    alignItems: "center",
+    width: 280,
+  },
+  modalText: {
+    fontSize: 16,
+    color: Colors.dark.text,
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 10,
+    marginRight: 8,
+    backgroundColor: Colors.dark.background,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  confirmButton: {
+    flex: 1,
+    paddingVertical: 10,
+    marginLeft: 8,
+    backgroundColor: "#ff6a6a",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelText: {
+    color: Colors.dark.text,
+    fontWeight: "bold",
+  },
+  confirmText: {
+    color: "white",
+    fontWeight: "bold",
   },
 });

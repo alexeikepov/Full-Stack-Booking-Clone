@@ -1,4 +1,5 @@
-import React, { JSX, useEffect, useState } from "react";
+// path: src/components/account/ManageAccountSection.tsx
+import { JSX, useEffect, useState } from "react";
 import {
   BackHandler,
   Modal,
@@ -44,10 +45,7 @@ interface Style {
 }
 
 const styles = StyleSheet.create<Style>({
-  fullPage: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
+  fullPage: { flex: 1, backgroundColor: Colors.dark.background },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -55,14 +53,8 @@ const styles = StyleSheet.create<Style>({
     paddingVertical: 12,
     backgroundColor: Colors.dark.card,
   },
-  backButton: {
-    paddingRight: 10,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-  },
+  backButton: { paddingRight: 10 },
+  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
   section: {
     backgroundColor: Colors.dark.card,
     borderRadius: 12,
@@ -85,10 +77,7 @@ const styles = StyleSheet.create<Style>({
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.separator,
   },
-  sectionItemText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-  },
+  sectionItemText: { fontSize: 16, color: Colors.dark.text },
   sectionItemSubText: {
     fontSize: 14,
     color: Colors.dark.textSecondary,
@@ -103,20 +92,14 @@ const styles = StyleSheet.create<Style>({
     marginTop: "auto",
     marginBottom: 20,
   },
-  travelerFormContainer: {
-    padding: 16,
-  },
+  travelerFormContainer: { padding: 16 },
   travelerFormInfo: {
     fontSize: 16,
     color: Colors.dark.textSecondary,
     textAlign: "center",
     marginBottom: 20,
   },
-  label: {
-    fontSize: 14,
-    color: Colors.dark.textSecondary,
-    marginBottom: 8,
-  },
+  label: { fontSize: 14, color: Colors.dark.textSecondary, marginBottom: 8 },
   input: {
     backgroundColor: Colors.dark.card,
     borderRadius: 8,
@@ -134,10 +117,7 @@ const styles = StyleSheet.create<Style>({
     padding: 16,
     marginBottom: 16,
   },
-  genderText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-  },
+  genderText: { fontSize: 16, color: Colors.dark.text },
   saveButton: {
     backgroundColor: "#007AFF",
     borderRadius: 8,
@@ -149,6 +129,31 @@ const styles = StyleSheet.create<Style>({
 
 export default function ManageAccountSection(): JSX.Element {
   const [showModal, setShowModal] = useState<string | null>(null);
+
+  // Personal details
+  const [name, setName] = useState("Crazy That Random");
+  const [gender, setGender] = useState("");
+  const [dob, setDob] = useState("");
+  const [email, setEmail] = useState("adress@gmail.com");
+  const [phone, setPhone] = useState("+972123123");
+
+  // Security
+  const [passkeys, setPasskeys] = useState(true);
+  const [twoFactor, setTwoFactor] = useState(false);
+  const [activeSessions] = useState(1);
+
+  // Travelers
+  const [travelers, setTravelers] = useState<
+    { first: string; last: string; dob: string; gender: string }[]
+  >([]);
+  const [editingTravelerIndex, setEditingTravelerIndex] = useState<
+    number | null
+  >(null);
+  const [travelerFirst, setTravelerFirst] = useState("");
+  const [travelerLast, setTravelerLast] = useState("");
+  const [travelerDob, setTravelerDob] = useState("");
+  const [travelerGender, setTravelerGender] = useState("");
+
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -165,6 +170,49 @@ export default function ManageAccountSection(): JSX.Element {
 
   const items = ["Personal details", "Security settings", "Other travelers"];
 
+  const openTravelerModal = (index?: number) => {
+    if (index !== undefined) {
+      setEditingTravelerIndex(index);
+      const t = travelers[index];
+      setTravelerFirst(t.first);
+      setTravelerLast(t.last);
+      setTravelerDob(t.dob);
+      setTravelerGender(t.gender);
+      setShowModal("Edit traveler");
+    } else {
+      setEditingTravelerIndex(null);
+      setTravelerFirst("");
+      setTravelerLast("");
+      setTravelerDob("");
+      setTravelerGender("");
+      setShowModal("Add new traveler");
+    }
+  };
+
+  const saveTraveler = () => {
+    if (editingTravelerIndex !== null) {
+      const updated = [...travelers];
+      updated[editingTravelerIndex] = {
+        first: travelerFirst,
+        last: travelerLast,
+        dob: travelerDob,
+        gender: travelerGender,
+      };
+      setTravelers(updated);
+    } else {
+      setTravelers([
+        ...travelers,
+        {
+          first: travelerFirst,
+          last: travelerLast,
+          dob: travelerDob,
+          gender: travelerGender,
+        },
+      ]);
+    }
+    setShowModal(null);
+  };
+
   const getModalContent = () => {
     switch (showModal) {
       case "Personal details":
@@ -176,84 +224,73 @@ export default function ManageAccountSection(): JSX.Element {
               <Text style={[styles.sectionTitle, { borderBottomWidth: 0 }]}>
                 We will remember this info to make it faster when you book.
               </Text>
-              <Pressable style={styles.sectionItem}>
+              <View style={styles.sectionItem}>
                 <View>
                   <Text style={styles.sectionItemText}>Name</Text>
-                  <Text style={styles.sectionItemSubText}>
-                    Crazy That Random
-                  </Text>
+                  <TextInput
+                    style={styles.input}
+                    value={name}
+                    onChangeText={setName}
+                  />
                 </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
+              </View>
+              <View style={styles.sectionItem}>
                 <View>
                   <Text style={styles.sectionItemText}>Gender</Text>
-                  <Text style={styles.sectionItemSubText}>
-                    Select your gender
-                  </Text>
+                  <TextInput
+                    style={styles.input}
+                    value={gender}
+                    onChangeText={setGender}
+                    placeholder="Select your gender"
+                  />
                 </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
+              </View>
+              <View style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
                 <View>
                   <Text style={styles.sectionItemText}>Date of birth</Text>
-                  <Text style={styles.sectionItemSubText}>
-                    Enter your date of birth
-                  </Text>
+                  <TextInput
+                    style={styles.input}
+                    value={dob}
+                    onChangeText={setDob}
+                    placeholder="Enter your date of birth"
+                  />
                 </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
+              </View>
             </View>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Contact details</Text>
-              <Text
-                style={[
-                  styles.sectionItemSubText,
-                  { paddingHorizontal: 16, paddingTop: 8 },
-                ]}
-              >
-                Properties or providers you book with will use this info if they
-                need to contact you.
-              </Text>
-              <Pressable style={styles.sectionItem}>
+              <View style={styles.sectionItem}>
                 <View>
                   <Text style={styles.sectionItemText}>Email address</Text>
-                  <Text style={styles.sectionItemSubText}>
-                    adress@gmail.com
-                  </Text>
+                  <TextInput
+                    style={styles.input}
+                    value={email}
+                    onChangeText={setEmail}
+                  />
                 </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
+              </View>
+              <View style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
                 <View>
                   <Text style={styles.sectionItemText}>Phone number</Text>
-                  <Text style={styles.sectionItemSubText}>+972123123</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={phone}
+                    onChangeText={setPhone}
+                  />
                 </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
+              </View>
             </View>
+            <Pressable
+              style={styles.saveButton}
+              onPress={() => setShowModal(null)}
+            >
+              <Text style={[styles.sectionItemText, { color: "white" }]}>
+                Save
+              </Text>
+            </Pressable>
           </ScrollView>
         );
+
       case "Security settings":
         return (
           <ScrollView
@@ -264,75 +301,37 @@ export default function ManageAccountSection(): JSX.Element {
                 Change your security settings, set up secure authentication, or
                 delete your account.
               </Text>
-              <Pressable style={styles.sectionItem}>
-                <View>
-                  <Text style={styles.sectionItemText}>Passkeys</Text>
+              <View style={styles.sectionItem}>
+                <Text style={styles.sectionItemText}>Passkeys</Text>
+                <Pressable onPress={() => setPasskeys(!passkeys)}>
                   <Text style={styles.sectionItemSubText}>
-                    You can now easily sign in to your account using your face,
-                    fingerprint, or PIN.
+                    {passkeys ? "Enabled" : "Disabled"}
                   </Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={styles.sectionItem}>
-                <View>
-                  <Text style={styles.sectionItemText}>
-                    Two-factor authentication
-                  </Text>
+                </Pressable>
+              </View>
+              <View style={styles.sectionItem}>
+                <Text style={styles.sectionItemText}>
+                  Two-factor authentication
+                </Text>
+                <Pressable onPress={() => setTwoFactor(!twoFactor)}>
                   <Text style={styles.sectionItemSubText}>
-                    Increase your accounts security by setting up two-factor
-                    authentication. This can also be used as an alternative
-                    sign-in method in case there is an issue with your email.
+                    {twoFactor ? "Enabled" : "Disabled"}
                   </Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
-                <View>
-                  <Text style={styles.sectionItemText}>Active sessions</Text>
-                  <Text style={styles.sectionItemSubText}>
-                    Sign out from all the active sessions
-                  </Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-            </View>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Linked social accounts</Text>
-              <Pressable style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Ionicons
-                    name="logo-google"
-                    size={20}
-                    color={Colors.dark.text}
-                    style={{ marginRight: 8 }}
-                  />
-                  <Text style={styles.sectionItemText}>Google</Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
+                </Pressable>
+              </View>
+              <View style={[styles.sectionItem, { borderBottomWidth: 0 }]}>
+                <Text style={styles.sectionItemText}>Active sessions</Text>
+                <Text style={styles.sectionItemSubText}>
+                  {activeSessions} active
+                </Text>
+              </View>
             </View>
             <Pressable
               style={[
                 styles.addTravelerButton,
                 { backgroundColor: Colors.dark.red, marginTop: 40 },
               ]}
+              onPress={() => setShowModal("Delete account confirm")}
             >
               <Text style={[styles.sectionItemText, { color: "white" }]}>
                 Delete account
@@ -340,32 +339,44 @@ export default function ManageAccountSection(): JSX.Element {
             </Pressable>
           </ScrollView>
         );
+
       case "Other travelers":
         return (
-          <View style={{ flex: 1 }}>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                paddingHorizontal: 30,
-              }}
-            >
-              <Text style={[styles.sectionItemText, { textAlign: "center" }]}>
-                Add or edit info about the people you are traveling with.
-              </Text>
-            </View>
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+          >
+            {travelers.map((t, idx) => (
+              <View key={idx} style={styles.sectionItem}>
+                <View>
+                  <Text style={styles.sectionItemText}>
+                    {t.first} {t.last}
+                  </Text>
+                  <Text style={styles.sectionItemSubText}>
+                    {t.dob} | {t.gender}
+                  </Text>
+                </View>
+                <Pressable onPress={() => openTravelerModal(idx)}>
+                  <Ionicons
+                    name="create-outline"
+                    size={20}
+                    color={Colors.dark.icon}
+                  />
+                </Pressable>
+              </View>
+            ))}
             <Pressable
               style={styles.addTravelerButton}
-              onPress={() => setShowModal("Add new traveler")}
+              onPress={() => openTravelerModal()}
             >
               <Text style={[styles.sectionItemText, { color: "white" }]}>
                 Add new traveler
               </Text>
             </Pressable>
-          </View>
+          </ScrollView>
         );
+
       case "Add new traveler":
+      case "Edit traveler":
         return (
           <ScrollView
             contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
@@ -376,32 +387,88 @@ export default function ManageAccountSection(): JSX.Element {
                 personal details.
               </Text>
               <Text style={styles.label}>First name*</Text>
-              <TextInput style={styles.input} />
+              <TextInput
+                style={styles.input}
+                value={travelerFirst}
+                onChangeText={setTravelerFirst}
+              />
               <Text style={styles.label}>Last name*</Text>
-              <TextInput style={styles.input} />
+              <TextInput
+                style={styles.input}
+                value={travelerLast}
+                onChangeText={setTravelerLast}
+              />
               <Text style={styles.label}>Date of birth*</Text>
-              <Pressable style={styles.genderInput}>
-                <Text style={styles.genderText}></Text>
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
+              <TextInput
+                style={styles.input}
+                value={travelerDob}
+                onChangeText={setTravelerDob}
+                placeholder="YYYY-MM-DD"
+              />
               <Text style={styles.label}>Gender</Text>
-              <Pressable style={styles.genderInput}>
-                <Text style={styles.genderText}></Text>
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color={Colors.dark.icon}
-                />
-              </Pressable>
-              <Pressable style={styles.saveButton}>
-                <Text style={styles.buttonText}>Save</Text>
+              <TextInput
+                style={styles.input}
+                value={travelerGender}
+                onChangeText={setTravelerGender}
+                placeholder="Gender"
+              />
+              <Pressable style={styles.saveButton} onPress={saveTraveler}>
+                <Text style={[styles.sectionItemText, { color: "white" }]}>
+                  Save
+                </Text>
               </Pressable>
             </View>
           </ScrollView>
+        );
+
+      case "Delete account confirm":
+        return (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 32,
+            }}
+          >
+            <Text
+              style={[
+                styles.sectionItemText,
+                { fontSize: 20, textAlign: "center", marginBottom: 24 },
+              ]}
+            >
+              Are you sure you want to delete your account? This action cannot
+              be undone.
+            </Text>
+            <View style={{ flexDirection: "row", gap: 16 }}>
+              <Pressable
+                style={[
+                  styles.addTravelerButton,
+                  { backgroundColor: Colors.dark.red, flex: 1 },
+                ]}
+                onPress={() => {
+                  /* TODO: handle actual account deletion */ setShowModal(null);
+                }}
+              >
+                <Text style={[styles.sectionItemText, { color: "white" }]}>
+                  Yes, delete
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.addTravelerButton,
+                  { backgroundColor: Colors.dark.card, flex: 1 },
+                ]}
+                onPress={() => setShowModal(null)}
+              >
+                <Text
+                  style={[styles.sectionItemText, { color: Colors.dark.text }]}
+                >
+                  Cancel
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         );
       default:
         return null;
@@ -409,6 +476,7 @@ export default function ManageAccountSection(): JSX.Element {
   };
 
   const getModalHeaderTitle = () => {
+    if (showModal === "Edit traveler") return "Edit traveler";
     switch (showModal) {
       case "Personal details":
         return "Personal details";

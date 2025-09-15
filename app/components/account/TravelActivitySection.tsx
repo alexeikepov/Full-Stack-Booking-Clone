@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import {
   BackHandler,
   Modal,
@@ -19,7 +19,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
-import { itemIcons } from "./itemIcons";
 
 interface Style {
   fullPage: ViewStyle;
@@ -88,7 +87,34 @@ export default function TravelActivitySection(): JSX.Element {
     };
   }, [showModal]);
 
-  const items = ["Saved lists", "My reviews", "My questions to properties"];
+  const items = [
+    {
+      title: "Saved lists",
+      icon: (
+        <Ionicons name="heart-outline" size={20} color={Colors.dark.icon} />
+      ),
+    },
+    {
+      title: "My reviews",
+      icon: (
+        <Ionicons
+          name="chatbubble-ellipses-outline"
+          size={20}
+          color={Colors.dark.icon}
+        />
+      ),
+    },
+    {
+      title: "My questions to properties",
+      icon: (
+        <Ionicons
+          name="document-text-outline"
+          size={20}
+          color={Colors.dark.icon}
+        />
+      ),
+    },
+  ];
 
   const getModalContent = () => {
     switch (showModal) {
@@ -168,18 +194,12 @@ export default function TravelActivitySection(): JSX.Element {
 
   return (
     <AccountSection title="Travel activity">
-      {items.map((title) => (
+      {items.map((item) => (
         <AccountItem
-          key={title}
-          icon={
-            <Ionicons
-              name={itemIcons[title]}
-              size={20}
-              color={Colors.dark.icon}
-            />
-          }
-          title={title}
-          onPress={() => handleItemPress(title)}
+          key={item.title}
+          icon={item.icon}
+          title={item.title}
+          onPress={() => handleItemPress(item.title)}
         />
       ))}
       {ModalComponent}

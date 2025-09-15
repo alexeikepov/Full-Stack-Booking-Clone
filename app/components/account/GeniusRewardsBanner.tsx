@@ -1,3 +1,5 @@
+// path: src/components/account/GeniusRewardsBanner.tsx
+import { useNavigation } from "@react-navigation/native"; // ✅ added
 import { JSX, useEffect, useState } from "react";
 import {
   BackHandler,
@@ -116,6 +118,7 @@ const styles = StyleSheet.create<Style>({
 export default function GeniusRewardsBanner(): JSX.Element {
   const [showFullPage, setShowFullPage] = useState(false);
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation(); // ✅ added
 
   // Block Android hardware back when full page is open
   useEffect(() => {
@@ -166,7 +169,6 @@ export default function GeniusRewardsBanner(): JSX.Element {
         /* prevent closing with hardware back; handled by BackHandler */
       }}
     >
-      {/* SafeAreaView with manual top padding */}
       <SafeAreaView style={[styles.fullContainer, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <Pressable
@@ -242,13 +244,15 @@ export default function GeniusRewardsBanner(): JSX.Element {
             </View>
           </View>
 
+          {/* ✅ Updated button to navigate to Search */}
           <Pressable
             style={[
               styles.findStayButton,
               { marginBottom: Math.max(24, insets.bottom + 16) },
             ]}
             onPress={() => {
-              /* action for Find your next stay */
+              setShowFullPage(false); // close modal
+              navigation.navigate("Search" as never); // go to Search screen
             }}
           >
             <Text style={styles.findStayButtonText}>Find your next stay</Text>

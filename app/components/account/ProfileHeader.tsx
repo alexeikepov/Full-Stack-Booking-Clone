@@ -269,7 +269,7 @@ export default function ProfileHeader({
               />
             </TouchableOpacity>
             <Text style={styles.modalHeaderText}>Genius loyalty program</Text>
-            <Text style={styles.modalHeaderTime}>18:00</Text>
+            <Text style={styles.modalHeaderTime}></Text>
           </View>
 
           <ScrollView style={styles.scrollView} ref={scrollViewRef}>

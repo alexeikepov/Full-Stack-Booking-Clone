@@ -1,5 +1,4 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 
@@ -19,7 +18,10 @@ export default function SavedItem({
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Ionicons name="heart-outline" size={20} color={Colors.dark.red} />
+          <Text style={[styles.title, { marginLeft: 8 }]}>{title}</Text>
+        </View>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
       <TouchableOpacity onPress={onDotsPress} style={styles.dotsButton}>

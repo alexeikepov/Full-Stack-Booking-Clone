@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ImageBackground,
+  Linking,
   Modal,
   Pressable,
   StyleSheet,
@@ -19,6 +20,7 @@ import { itemIcons } from "./itemIcons";
 interface Style {
   fullContainer: ViewStyle;
   backgroundImage: ViewStyle;
+  overlay: ViewStyle;
   header: ViewStyle;
   backButton: ViewStyle;
   headerText: TextStyle;
@@ -34,6 +36,10 @@ const styles = StyleSheet.create<Style>({
   fullContainer: {
     flex: 1,
     backgroundColor: "transparent",
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(10, 10, 10, 0.92)",
   },
   backgroundImage: {
     flex: 1,
@@ -91,50 +97,66 @@ export default function ManagePropertySection() {
   const items = ["List your property"];
 
   const PropertyModal = (
-    <Modal
-      visible={showPropertyModal}
-      animationType="slide"
-      transparent={false}
-    >
-      <ImageBackground
-        source={{
-          uri: "https://r-xx.bstatic.com/xdata/images/xphoto/full/156972046.jpeg?k=33611833772297926b48505e60d5b43a9a838575510de1633593333e6659c00b&o=",
-        }}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
-        <SafeAreaView style={styles.fullContainer}>
-          <View style={styles.header}>
-            <Pressable
-              onPress={() => setShowPropertyModal(false)}
-              style={styles.backButton}
-            >
-              <Ionicons name="chevron-back" size={24} color={"white"} />
-            </Pressable>
-            <Text style={styles.headerText}>List your property</Text>
-          </View>
-          <View style={styles.contentContainer}>
-            <Text style={styles.title}>List your place on Booking.com</Text>
-            <Text style={styles.subtitle}>
-              Homes, hotels, and everything in between – whatever it is, you can
-              list it.
-            </Text>
-          </View>
-          <View style={styles.footer}>
-            <Pressable
-              style={styles.listPropertyButton}
-              onPress={() => {
-                console.log("List property pressed");
-                setShowPropertyModal(false);
-              }}
-            >
-              <Text style={styles.listPropertyButtonText}>
-                List your property on our site
+    <Modal visible={showPropertyModal} animationType="slide" transparent={true}>
+      <View style={styles.overlay}>
+        <ImageBackground
+          source={require("../../assets/images/place-holder.jpg")}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        >
+          <SafeAreaView style={{ flex: 1 }}>
+            <View style={styles.header}>
+              <Pressable
+                onPress={() => setShowPropertyModal(false)}
+                style={styles.backButton}
+              >
+                <Ionicons name="chevron-back" size={24} color={"white"} />
+              </Pressable>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Ionicons
+                  name="home-outline"
+                  size={20}
+                  color="white"
+                  style={{ marginRight: 4 }}
+                />
+                <Ionicons
+                  name="add-circle-outline"
+                  size={20}
+                  color="white"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.headerText}>List your property</Text>
+              </View>
+            </View>
+            <View style={styles.contentContainer}>
+              <Text style={styles.title}>List your place on Booking.com</Text>
+              <Text style={styles.subtitle}>
+                Homes, hotels, and everything in between – whatever it is, you
+                can list it.
               </Text>
-            </Pressable>
-          </View>
-        </SafeAreaView>
-      </ImageBackground>
+            </View>
+            <View style={styles.footer}>
+              <Pressable
+                style={styles.listPropertyButton}
+                onPress={async () => {
+                  const url =
+                    "https://join.booking.com/?aid=392483&lang=en-gb&label=propertysignup-NaxvXgv5_mGacLIhgKeSMQS633895872422:pl:ta:p1:p2:ac:ap:neg:fi:tikwd-298213278415:lp1008006:li:dec:dm:ppccp=UmFuZG9tSVYkc2RlIyh9YQ5jSEdbiwHzcEmz6yTN0U8;ws=&gad_source=1&gad_campaignid=1479165590&gclid=CjwKCAjwz5nGBhBBEiwA-W6XRDbvsAGmQnx8ODrf2ELTVAmxBBFBLSk5SXRDjkRKEPCW68QKjfl0CRoCRJAQAvD_BwE";
+                  try {
+                    await Linking.openURL(url);
+                  } catch (e) {
+                    console.warn("Failed to open URL", e);
+                  }
+                  setShowPropertyModal(false);
+                }}
+              >
+                <Text style={styles.listPropertyButtonText}>
+                  List your property on our site
+                </Text>
+              </Pressable>
+            </View>
+          </SafeAreaView>
+        </ImageBackground>
+      </View>
     </Modal>
   );
 
@@ -146,7 +168,7 @@ export default function ManagePropertySection() {
             key={title}
             icon={
               <Ionicons
-                name={itemIcons[title]}
+                name={itemIcons[title] || "home-outline"}
                 size={20}
                 color={Colors.dark.icon}
               />

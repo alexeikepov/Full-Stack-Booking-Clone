@@ -1,4 +1,4 @@
-import React, { JSX, useState } from "react";
+import { JSX, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -18,7 +18,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
-import { itemIcons } from "./itemIcons";
 
 interface Style {
   fullContainer: ViewStyle;
@@ -309,7 +308,14 @@ export default function DiscoverSection(): JSX.Element {
     useState("Enter destination");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const items = ["Deals"];
+  const items = [
+    {
+      title: "Deals",
+      icon: (
+        <Ionicons name="pricetag-outline" size={20} color={Colors.dark.icon} />
+      ),
+    },
+  ];
 
   const renderModalHeader = (title: string, onClose: () => void) => (
     <View style={styles.header}>
@@ -772,17 +778,11 @@ export default function DiscoverSection(): JSX.Element {
   return (
     <SafeAreaView style={styles.fullContainer}>
       <AccountSection title="Discover">
-        {items.map((title) => (
+        {items.map((item) => (
           <AccountItem
-            key={title}
-            icon={
-              <Ionicons
-                name={itemIcons[title]}
-                size={20}
-                color={Colors.dark.icon}
-              />
-            }
-            title={title}
+            key={item.title}
+            icon={item.icon}
+            title={item.title}
             onPress={() => setShowDealsModal(true)}
           />
         ))}

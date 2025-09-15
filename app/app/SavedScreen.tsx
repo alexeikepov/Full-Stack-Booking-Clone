@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -23,8 +24,15 @@ type List = {
 };
 
 const { width } = Dimensions.get("window");
+
 // Local components to manage screen transitions without React Navigation
-const StartYourListPageLocal = ({ onBack, onFindProperties }) => (
+const StartYourListPageLocal = ({
+  onBack,
+  onFindProperties,
+}: {
+  onBack: () => void;
+  onFindProperties: () => void;
+}) => (
   <View style={localStyles.container}>
     <View style={localStyles.header}>
       <TouchableOpacity onPress={onBack} style={localStyles.backButton}>
@@ -54,22 +62,8 @@ const StartYourListPageLocal = ({ onBack, onFindProperties }) => (
   </View>
 );
 
-const SearchScreenLocal = ({ onBack }: { onBack: () => void }) => (
-  <View style={localStyles.container}>
-    <View style={localStyles.header}>
-      <TouchableOpacity onPress={onBack} style={localStyles.backButton}>
-        <Text style={localStyles.backText}>Back</Text>
-      </TouchableOpacity>
-      <Text style={localStyles.headerTitle}>Search</Text>
-      <View style={{ width: 60 }} />
-    </View>
-    <View style={localStyles.content}>
-      <Text style={localStyles.title}>This is the Search Screen</Text>
-    </View>
-  </View>
-);
-
 export default function SavedScreen() {
+  const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState("Lists");
   const [savedLists, setSavedLists] = useState<List[]>([
     { id: "1", title: "my trip", subtitle: "0 saved items" },
@@ -171,7 +165,7 @@ export default function SavedScreen() {
           </Text>
           <TouchableOpacity
             style={styles.searchButton}
-            onPress={() => setCurrentPage("SearchScreen")}
+            onPress={() => (navigation as any).navigate("Search")}
           >
             <Text style={styles.buttonText}>Start searching for flights</Text>
           </TouchableOpacity>
@@ -229,9 +223,7 @@ export default function SavedScreen() {
             onPress={() => {
               setManageListModalVisible(false);
               setRenameModalVisible(true);
-              if (currentList) {
-                setNewListName(currentList.title);
-              }
+              if (currentList) setNewListName(currentList.title);
             }}
           >
             <Text style={modalStyles.modalItemText}>Rename</Text>
@@ -294,20 +286,17 @@ export default function SavedScreen() {
     </Modal>
   );
 
+  // RENDER REAL SCREENS
   if (currentPage === "StartYourListPage") {
     return (
       <StartYourListPageLocal
         onBack={() => setCurrentPage("SavedScreen")}
-        onFindProperties={() => setCurrentPage("SearchScreen")}
+        onFindProperties={() => setCurrentPage("Searchscreen")}
       />
     );
   }
 
-  if (currentPage === "SearchScreen") {
-    return (
-      <SearchScreenLocal onBack={() => setCurrentPage("StartYourListPage")} />
-    );
-  }
+  // Removed local SearchScreen render logic; navigation now handles it.
 
   return (
     <View style={styles.container}>
@@ -427,43 +416,41 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 32,
+    paddingHorizontal: 16,
   },
   illustration: {
-    width: width * 0.5,
-    height: width * 0.5,
+    width: width * 0.6,
+    height: width * 0.4,
     resizeMode: "contain",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   titleText: {
-    color: Colors.dark.text,
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
+    color: Colors.dark.text,
     marginBottom: 8,
+    textAlign: "center",
   },
   subtitleText: {
-    color: Colors.dark.icon,
     fontSize: 14,
+    color: Colors.dark.icon,
     textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   searchButton: {
     backgroundColor: "#007AFF",
-    paddingVertical: 14,
-    paddingHorizontal: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 8,
-    width: "100%",
-    alignItems: "center",
   },
   buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
+    color: Colors.dark.background,
     fontWeight: "bold",
+    fontSize: 16,
   },
 });
 
+// Dummy modalStyles
 const modalStyles = StyleSheet.create({
   centeredView: {
     flex: 1,
@@ -472,160 +459,98 @@ const modalStyles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalView: {
-    margin: 20,
     backgroundColor: Colors.dark.background,
-    borderRadius: 16,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    borderRadius: 10,
+    padding: 16,
     width: "90%",
   },
   bottomModalView: {
     backgroundColor: Colors.dark.background,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    padding: 16,
     width: "100%",
-    position: "absolute",
-    bottom: 0,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "100%",
-    marginBottom: 20,
+    marginBottom: 12,
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-  },
+  modalTitle: { fontSize: 18, fontWeight: "bold", color: Colors.dark.text },
   input: {
-    width: "100%",
-    backgroundColor: "#2e2e2e",
+    borderWidth: 1,
+    borderColor: Colors.dark.icon,
     borderRadius: 8,
-    padding: 12,
+    padding: 8,
     color: Colors.dark.text,
     marginBottom: 8,
   },
-  charCount: {
-    alignSelf: "flex-end",
-    color: Colors.dark.icon,
-    fontSize: 12,
-    marginBottom: 20,
-  },
+  charCount: { textAlign: "right", color: Colors.dark.icon, marginBottom: 8 },
   actionButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 14,
+    backgroundColor: Colors.dark.text,
     borderRadius: 8,
-    width: "100%",
+    padding: 12,
     alignItems: "center",
   },
   buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
+    color: Colors.dark.background,
     fontWeight: "bold",
-  },
-  modalItem: {
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-    width: "100%",
-  },
-  modalItemText: {
-    color: Colors.dark.text,
     fontSize: 16,
-    fontWeight: "600",
   },
-  closeButton: {
-    paddingVertical: 16,
-    width: "100%",
-    alignItems: "center",
-  },
-  closeButtonText: {
-    color: "#FF3B30",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  modalItem: { paddingVertical: 12 },
+  modalItemText: { color: Colors.dark.text, fontSize: 16 },
+  closeButton: { marginTop: 12, alignItems: "center" },
+  closeButtonText: { color: Colors.dark.text, fontWeight: "bold" },
 });
 
+// Local styles for StartYourListPageLocal
 const localStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
+  container: { flex: 1, backgroundColor: Colors.dark.background },
   header: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    alignItems: "center",
+    padding: 16,
   },
-  backButton: {
-    padding: 8,
-  },
-  backText: {
-    color: Colors.dark.text,
-    fontSize: 16,
-  },
-  headerTitle: {
-    color: Colors.dark.text,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  shareButton: {
-    padding: 8,
-  },
-  shareText: {
-    color: "#007AFF",
-    fontSize: 16,
-  },
+  backButton: { padding: 8 },
+  backText: { color: Colors.dark.text, fontSize: 16 },
+  headerTitle: { color: Colors.dark.text, fontSize: 20, fontWeight: "bold" },
+  shareButton: { padding: 8 },
+  shareText: { color: Colors.dark.text },
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 32,
+    padding: 16,
   },
   illustration: {
-    width: 200,
-    height: 150,
+    width: width * 0.7,
+    height: width * 0.4,
     resizeMode: "contain",
-    marginBottom: 24,
+    marginBottom: 16,
   },
   title: {
-    color: Colors.dark.text,
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
+    color: Colors.dark.text,
     marginBottom: 8,
   },
   subtitle: {
-    color: Colors.dark.icon,
     fontSize: 14,
+    color: Colors.dark.icon,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: 16,
   },
   findPropertiesButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 14,
-    paddingHorizontal: 30,
+    backgroundColor: Colors.dark.text,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 8,
-    width: "100%",
-    alignItems: "center",
   },
   buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
+    color: Colors.dark.background,
     fontWeight: "bold",
+    fontSize: 16,
   },
 });

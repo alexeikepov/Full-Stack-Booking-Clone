@@ -1,11 +1,11 @@
 // path: src/screens/AccountScreen.tsx
+import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {
   Image,
   Modal,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -27,17 +27,16 @@ import PreferencesSection from "../components/account/PreferencesSection";
 import ProfileHeader from "../components/account/ProfileHeader";
 import SignOutButton from "../components/account/SignOutButton";
 import TravelActivitySection from "../components/account/TravelActivitySection";
-import SearchBar from "../components/search/SearchBar";
-import TabSelector from "../components/search/TabSelector";
 
 import { Colors } from "../constants/Colors";
 
 export default function App() {
-  const [activeScreen, setActiveScreen] = useState("Account");
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
   const insets = useSafeAreaInsets();
+
+  const navigation = useNavigation();
 
   const openMessages = () => setShowMessagesModal(true);
   const closeMessages = () => setShowMessagesModal(false);
@@ -57,253 +56,7 @@ export default function App() {
 
   const goToSearch = () => {
     closeMessages();
-    setActiveScreen("Search");
-  };
-  const goToAccount = () => {
-    setActiveScreen("Account");
-  };
-
-  const SearchScreen = () => {
-    const [activeTab, setActiveTab] = useState("Stays");
-    const [returnToSameLocation, setReturnToSameLocation] = useState(false);
-    const [directFlightsOnly, setDirectFlightsOnly] = useState(false);
-    const [flightType, setFlightType] = useState("Round-trip");
-    const [taxiType, setTaxiType] = useState("One-way");
-
-    const tabIcons = {
-      Stays: "bed-outline",
-      "Car rental": "car-outline",
-      Flights: "airplane-outline",
-      Taxi: "car-outline",
-      Attractions: "sparkles-outline",
-    };
-
-    const renderSearchForm = () => {
-      switch (activeTab) {
-        case "Stays":
-          return (
-            <View>
-              <SearchBar placeholder="Enter destination" />
-              <SearchBar placeholder="Any dates" />
-              <SearchBar placeholder="1 room · 2 adults · No children" />
-              <TouchableOpacity style={styles.searchButton}>
-                <Text style={styles.buttonText}>Search</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        case "Flights":
-          return (
-            <View>
-              <View style={styles.radioGroup}>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setFlightType("Round-trip")}
-                >
-                  <Ionicons
-                    name={
-                      flightType === "Round-trip"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>Round-trip</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setFlightType("One-way")}
-                >
-                  <Ionicons
-                    name={
-                      flightType === "One-way"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>One-way</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setFlightType("Multi-city")}
-                >
-                  <Ionicons
-                    name={
-                      flightType === "Multi-city"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>Multi-city</Text>
-                </TouchableOpacity>
-              </View>
-              <SearchBar placeholder="ATH Athens" iconName="paper-plane" />
-              <SearchBar
-                placeholder="Where to?"
-                iconName="paper-plane-outline"
-              />
-              <SearchBar
-                placeholder="Sat, 11 Oct - Sat, 18 Oct"
-                iconName="calendar"
-              />
-              <SearchBar placeholder="1 adult · Economy" iconName="person" />
-              <TouchableOpacity style={styles.searchButton}>
-                <Text style={styles.buttonText}>Search</Text>
-              </TouchableOpacity>
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleText}>Direct flights only</Text>
-                <Switch
-                  value={directFlightsOnly}
-                  onValueChange={setDirectFlightsOnly}
-                  trackColor={{ false: "#767577", true: "#007AFF" }}
-                  thumbColor={directFlightsOnly ? "#fff" : "#f4f3f4"}
-                />
-              </View>
-            </View>
-          );
-        case "Car rental":
-          return (
-            <View>
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleText}>Return to same location</Text>
-                <Switch
-                  value={returnToSameLocation}
-                  onValueChange={setReturnToSameLocation}
-                  trackColor={{ false: "#767577", true: "#007AFF" }}
-                  thumbColor={returnToSameLocation ? "#fff" : "#f4f3f4"}
-                />
-              </View>
-              <SearchBar placeholder="Pickup location" iconName="car-outline" />
-              <SearchBar
-                placeholder="7 Sep at 10:00 - 9 Sep at 10:00"
-                iconName="calendar-outline"
-              />
-              <SearchBar
-                placeholder="Driver's age: 30-65"
-                iconName="person-outline"
-              />
-              <TouchableOpacity style={styles.searchButton}>
-                <Text style={styles.buttonText}>Search</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        case "Taxi":
-          return (
-            <View>
-              <View style={styles.radioGroup}>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setTaxiType("One-way")}
-                >
-                  <Ionicons
-                    name={
-                      taxiType === "One-way"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>One-way</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setTaxiType("Round-trip")}
-                >
-                  <Ionicons
-                    name={
-                      taxiType === "Round-trip"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>Round-trip</Text>
-                </TouchableOpacity>
-              </View>
-              <SearchBar
-                placeholder="Enter pick-up location"
-                iconName="location-outline"
-              />
-              <SearchBar
-                placeholder="Enter destination"
-                iconName="location-outline"
-              />
-              <SearchBar
-                placeholder="Tell us when"
-                iconName="calendar-outline"
-              />
-              <SearchBar placeholder="2 passengers" iconName="person-outline" />
-              <TouchableOpacity style={styles.searchButton}>
-                <Text style={styles.buttonText}>Check prices</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        case "Attractions":
-          return (
-            <View>
-              <SearchBar placeholder="Where are you going?" iconName="search" />
-              <SearchBar placeholder="Any dates" iconName="calendar-outline" />
-              <TouchableOpacity style={styles.searchButton}>
-                <Text style={styles.buttonText}>Search</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        default:
-          return null;
-      }
-    };
-
-    return (
-      <View style={styles.container}>
-        <View style={[styles.header, { paddingTop: insets.top }]}>
-          <TouchableOpacity onPress={goToAccount}>
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Booking.com</Text>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity onPress={openMessages}>
-              <Ionicons
-                name="chatbubble-outline"
-                size={22}
-                color={Colors.dark.icon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={openNotifications}
-              style={styles.headerIconSpacing}
-            >
-              <Ionicons
-                name="notifications-outline"
-                size={22}
-                color={Colors.dark.icon}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <ScrollView
-          contentContainerStyle={{ paddingTop: 16, paddingBottom: 16 }}
-          style={{ flex: 1 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.searchModuleContainer}>
-            <TabSelector
-              tabs={["Stays", "Flights", "Car rental", "Taxi", "Attractions"]}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              icons={tabIcons}
-            />
-            {renderSearchForm()}
-          </View>
-          {/* All other content sections remain unchanged */}
-        </ScrollView>
-      </View>
-    );
+    navigation.navigate("Search" as never);
   };
 
   const AccountScreen = () => {
@@ -434,7 +187,7 @@ export default function App() {
 
   return (
     <View style={{ flex: 1 }}>
-      {activeScreen === "Account" ? <AccountScreen /> : <SearchScreen />}
+      <AccountScreen />
       {showMessagesModal && MessagesModal}
       {showNotificationsModal && NotificationsModal}
       {isHelpCenterOpen && HelpCenterModal}

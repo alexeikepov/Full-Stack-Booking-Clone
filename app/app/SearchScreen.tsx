@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import React, { useRef, useState } from "react";
 import {
   Image,
   Modal,
@@ -21,11 +22,13 @@ import ContinueSearchCard from "../components/search/ContinueSearchCard";
 import SearchBar from "../components/search/SearchBar";
 import TabSelector from "../components/search/TabSelector";
 import { Colors } from "../constants/Colors";
+import AppartmentList from "./ApartmentsList";
 
 export default function App({ onBack }: HelpSupportSectionProps) {
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
+  const [showApartmentsList, setShowApartmentsList] = useState(false);
   const insets = useSafeAreaInsets();
 
   const openMessages = () => setShowMessagesModal(true);
@@ -41,15 +44,28 @@ export default function App({ onBack }: HelpSupportSectionProps) {
 
   const closeHelpCenter = () => {
     setIsHelpCenterOpen(false);
-    openMessages(); // Return to the messages modal
+    openMessages();
   };
 
-  const SearchScreen = () => {
+  const SearchScreen = ({
+    showApartmentsList,
+    setShowApartmentsList,
+  }: {
+    showApartmentsList: boolean;
+    setShowApartmentsList: React.Dispatch<React.SetStateAction<boolean>>;
+  }) => {
+    const [showOfferModal, setShowOfferModal] = useState(false);
+    const handleOfferPress = () => setShowOfferModal(true);
+    const handleCloseOfferModal = () => setShowOfferModal(false);
     const [activeTab, setActiveTab] = useState("Stays");
+    const navigation = useNavigation();
     const [returnToSameLocation, setReturnToSameLocation] = useState(false);
     const [directFlightsOnly, setDirectFlightsOnly] = useState(false);
     const [flightType, setFlightType] = useState("Round-trip");
     const [taxiType, setTaxiType] = useState("One-way");
+    const [searchModalVisible, setSearchModalVisible] = useState(false);
+    const [searchError, setSearchError] = useState(false);
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const tabIcons = {
       Stays: "bed-outline",
@@ -60,67 +76,50 @@ export default function App({ onBack }: HelpSupportSectionProps) {
     };
 
     const renderSearchForm = () => {
+      const handleSearch = () => {
+        setSearchModalVisible(true);
+        setSearchError(false);
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = setTimeout(() => setSearchError(true), 3000);
+      };
+
       switch (activeTab) {
         case "Stays":
           return (
-            <View>
+            <View style={styles.searchFormBorder}>
               <SearchBar placeholder="Enter destination" />
               <SearchBar placeholder="Any dates" />
               <SearchBar placeholder="1 room · 2 adults · No children" />
-              <TouchableOpacity style={styles.searchButton}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
                 <Text style={styles.buttonText}>Search</Text>
               </TouchableOpacity>
             </View>
           );
         case "Flights":
           return (
-            <View>
+            <View style={styles.searchFormBorder}>
               <View style={styles.radioGroup}>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setFlightType("Round-trip")}
-                >
-                  <Ionicons
-                    name={
-                      flightType === "Round-trip"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>Round-trip</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setFlightType("One-way")}
-                >
-                  <Ionicons
-                    name={
-                      flightType === "One-way"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>One-way</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setFlightType("Multi-city")}
-                >
-                  <Ionicons
-                    name={
-                      flightType === "Multi-city"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>Multi-city</Text>
-                </TouchableOpacity>
+                {["Round-trip", "One-way", "Multi-city"].map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={styles.radioButton}
+                    onPress={() => setFlightType(type)}
+                  >
+                    <Ionicons
+                      name={
+                        flightType === type
+                          ? "radio-button-on"
+                          : "radio-button-off"
+                      }
+                      size={20}
+                      color="#007AFF"
+                    />
+                    <Text style={styles.radioText}>{type}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
               <SearchBar placeholder="ATH Athens" iconName="paper-plane" />
               <SearchBar
@@ -132,7 +131,10 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 iconName="calendar"
               />
               <SearchBar placeholder="1 adult · Economy" iconName="person" />
-              <TouchableOpacity style={styles.searchButton}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
                 <Text style={styles.buttonText}>Search</Text>
               </TouchableOpacity>
               <View style={styles.toggleRow}>
@@ -148,7 +150,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
           );
         case "Car rental":
           return (
-            <View>
+            <View style={styles.searchFormBorder}>
               <View style={styles.toggleRow}>
                 <Text style={styles.toggleText}>Return to same location</Text>
                 <Switch
@@ -167,45 +169,36 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 placeholder="Driver's age: 30-65"
                 iconName="person-outline"
               />
-              <TouchableOpacity style={styles.searchButton}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
                 <Text style={styles.buttonText}>Search</Text>
               </TouchableOpacity>
             </View>
           );
         case "Taxi":
           return (
-            <View>
+            <View style={styles.searchFormBorder}>
               <View style={styles.radioGroup}>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setTaxiType("One-way")}
-                >
-                  <Ionicons
-                    name={
-                      taxiType === "One-way"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>One-way</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.radioButton}
-                  onPress={() => setTaxiType("Round-trip")}
-                >
-                  <Ionicons
-                    name={
-                      taxiType === "Round-trip"
-                        ? "radio-button-on"
-                        : "radio-button-off"
-                    }
-                    size={20}
-                    color="#007AFF"
-                  />
-                  <Text style={styles.radioText}>Round-trip</Text>
-                </TouchableOpacity>
+                {["One-way", "Round-trip"].map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={styles.radioButton}
+                    onPress={() => setTaxiType(type)}
+                  >
+                    <Ionicons
+                      name={
+                        taxiType === type
+                          ? "radio-button-on"
+                          : "radio-button-off"
+                      }
+                      size={20}
+                      color="#007AFF"
+                    />
+                    <Text style={styles.radioText}>{type}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
               <SearchBar
                 placeholder="Enter pick-up location"
@@ -220,17 +213,23 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 iconName="calendar-outline"
               />
               <SearchBar placeholder="2 passengers" iconName="person-outline" />
-              <TouchableOpacity style={styles.searchButton}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
                 <Text style={styles.buttonText}>Check prices</Text>
               </TouchableOpacity>
             </View>
           );
         case "Attractions":
           return (
-            <View>
+            <View style={styles.searchFormBorder}>
               <SearchBar placeholder="Where are you going?" iconName="search" />
               <SearchBar placeholder="Any dates" iconName="calendar-outline" />
-              <TouchableOpacity style={styles.searchButton}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
                 <Text style={styles.buttonText}>Search</Text>
               </TouchableOpacity>
             </View>
@@ -270,19 +269,98 @@ export default function App({ onBack }: HelpSupportSectionProps) {
               icons={tabIcons}
             />
             {renderSearchForm()}
+
+            <Modal
+              visible={searchModalVisible}
+              animationType="fade"
+              transparent
+              presentationStyle="overFullScreen"
+              onRequestClose={() => setSearchModalVisible(false)}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "rgba(0,0,0,0.3)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    padding: 32,
+                    borderRadius: 16,
+                    alignItems: "center",
+                    minWidth: 220,
+                  }}
+                >
+                  {!searchError ? (
+                    <>
+                      <Ionicons
+                        name="search"
+                        size={40}
+                        color="#FFD600"
+                        style={{ marginBottom: 16 }}
+                      />
+                      <Text
+                        style={{
+                          fontSize: 20,
+                          fontWeight: "bold",
+                          color: "#222",
+                        }}
+                      >
+                        Searching...
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="close-circle-outline"
+                        size={40}
+                        color="#FF5252"
+                        style={{ marginBottom: 16 }}
+                      />
+                      <Text
+                        style={{
+                          fontSize: 20,
+                          fontWeight: "bold",
+                          color: "#FF5252",
+                        }}
+                      >
+                        Error: Not found
+                      </Text>
+                      <TouchableOpacity
+                        style={{ marginTop: 16 }}
+                        onPress={() => setSearchModalVisible(false)}
+                      >
+                        <Text style={{ color: "#007AFF", fontWeight: "bold" }}>
+                          Close
+                        </Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+              </View>
+            </Modal>
           </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Continue your search</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {[1, 2, 3].map((item) => (
-                <ContinueSearchCard
+                <TouchableOpacity
                   key={item}
-                  title="Gusto Della Vita"
-                  subtitle="Rome, 2 nights"
-                />
+                  onPress={() => setShowApartmentsList(true)}
+                >
+                  <ContinueSearchCard
+                    title="Gusto Della Vita"
+                    subtitle="Rome, 2 nights"
+                  />
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Travel more, spend less</Text>
             <View style={styles.largeCard}>
@@ -298,61 +376,95 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   Save money on your next trip by taking advantage of our
                   amazing deals.
                 </Text>
-                <TouchableOpacity style={styles.largeCardButton}>
+                <TouchableOpacity
+                  style={styles.largeCardButton}
+                  onPress={() => (navigation as any).navigate("Account")}
+                >
                   <Text style={styles.largeCardButtonText}>Find deals</Text>
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.twoColumnCardsContainer}>
-              <View style={styles.smallCard}>
-                <Image
-                  source={require("./../assets/images/place-holder.jpg")}
-                  style={styles.smallCardImage}
-                />
-                <Text style={styles.smallCardTitle}>
-                  Exclusive deals for you
-                </Text>
-              </View>
-              <View style={styles.smallCard}>
-                <Image
-                  source={require("./../assets/images/place-holder.jpg")}
-                  style={styles.smallCardImage}
-                />
-                <Text style={styles.smallCardTitle}>
-                  Book your trip with us
-                </Text>
-              </View>
-            </View>
           </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Offers</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {[1, 2, 3].map((item) => (
-                <View key={item} style={styles.offerCard}>
+                <TouchableOpacity
+                  key={item}
+                  style={styles.offerCard}
+                  onPress={handleOfferPress}
+                >
                   <Image
                     source={require("./../assets/images/place-holder.jpg")}
                     style={styles.offerImage}
                   />
                   <Text style={styles.offerText}>20% off hotel bookings</Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </ScrollView>
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Deals for the weekend</Text>
-            <View style={styles.dealsCard}>
-              <Image
-                source={require("./../assets/images/place-holder.jpg")}
-                style={styles.dealsImage}
-              />
-              <View style={styles.dealsContent}>
-                <Text style={styles.dealsTitle}>Getaway Deals</Text>
-                <Text style={styles.dealsSubtitle}>
-                  Exclusive offers on flights
-                </Text>
+            <Modal
+              visible={showOfferModal}
+              animationType="fade"
+              transparent
+              presentationStyle="overFullScreen"
+              onRequestClose={handleCloseOfferModal}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "rgba(0,0,0,0.3)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    padding: 32,
+                    borderRadius: 16,
+                    alignItems: "center",
+                    minWidth: 220,
+                  }}
+                >
+                  <Ionicons
+                    name="close-circle-outline"
+                    size={40}
+                    color="#FF5252"
+                    style={{ marginBottom: 16 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "bold",
+                      color: "#FF5252",
+                      textAlign: "center",
+                    }}
+                  >
+                    Sorry, offers not relevant to you
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#222",
+                      marginTop: 10,
+                      textAlign: "center",
+                    }}
+                  >
+                    You are only at level 1. Buy more to progress.
+                  </Text>
+                  <TouchableOpacity
+                    style={{ marginTop: 16 }}
+                    onPress={handleCloseOfferModal}
+                  >
+                    <Text style={{ color: "#007AFF", fontWeight: "bold" }}>
+                      Close
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </Modal>
           </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Explore</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -368,168 +480,187 @@ export default function App({ onBack }: HelpSupportSectionProps) {
               ))}
             </ScrollView>
           </View>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Why Booking.com</Text>
-            <View style={styles.whyBookingCard}>
-              <Text style={styles.whyBookingTitle}>Trustworthy and secure</Text>
-              <Text style={styles.whyBookingSubtitle}>
-                Millions of reviews from verified guests
-              </Text>
-            </View>
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Manage</Text>
-            <View style={styles.twoColumnCardsContainer}>
-              <View style={styles.manageCard}>
-                <Ionicons
-                  name="notifications-outline"
-                  size={30}
-                  color={Colors.dark.text}
-                />
-                <Text style={styles.manageText}>Notifications</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.whyBookingCard}>
+                <Text style={styles.whyBookingTitle}>
+                  Trustworthy and secure
+                </Text>
+                <Text style={styles.whyBookingSubtitle}>
+                  Millions of reviews from verified guests
+                </Text>
               </View>
-              <View style={styles.manageCard}>
-                <Ionicons
-                  name="chatbubbles-outline"
-                  size={30}
-                  color={Colors.dark.text}
-                />
-                <Text style={styles.manageText}>Messages</Text>
+              <View style={styles.whyBookingCard}>
+                <Text style={styles.whyBookingTitle}>Easy to use</Text>
+                <Text style={styles.whyBookingSubtitle}>
+                  Book your stay in just a few taps
+                </Text>
               </View>
-            </View>
+              <View style={styles.whyBookingCard}>
+                <Text style={styles.whyBookingTitle}>
+                  24/7 Customer Support
+                </Text>
+                <Text style={styles.whyBookingSubtitle}>
+                  We are here to help, anytime you need
+                </Text>
+              </View>
+            </ScrollView>
           </View>
         </ScrollView>
       </View>
     );
   };
 
-  const MessagesModal = (
-    <Modal
-      visible={showMessagesModal}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={closeMessages}
-    >
-      <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top }]}>
-        <View style={styles.modalHeader}>
-          <TouchableOpacity onPress={closeMessages} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color={Colors.dark.text} />
-          </TouchableOpacity>
-          <Text style={styles.modalHeaderText}>Messages</Text>
-          <TouchableOpacity onPress={openHelpCenter}>
-            <Ionicons
-              name="help-circle-outline"
-              size={24}
-              color={Colors.dark.text}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.modalContent}>
-          <Image
-            source={require("./../assets/images/messages-man.png")}
-            style={styles.messageImage}
-          />
-          <Text style={styles.modalTitle}>No messages</Text>
-          <Text style={styles.modalSubtitle}>
-            You can start exchanging messages when you have upcoming bookings.
-          </Text>
-        </View>
-        <View style={styles.modalFooter}>
-          <TouchableOpacity style={styles.searchButton} onPress={closeMessages}>
-            <Text style={styles.buttonText}>Book now</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </Modal>
-  );
-
-  const NotificationsModal = (
-    <Modal
-      visible={showNotificationsModal}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={closeNotifications}
-    >
-      <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top }]}>
-        <View style={styles.modalHeader}>
-          <TouchableOpacity
-            onPress={closeNotifications}
-            style={styles.closeButton}
-          >
-            <Text style={styles.modalHeaderText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.modalContent}>
-          <Ionicons
-            name="notifications-outline"
-            size={80}
-            color={Colors.dark.text}
-          />
-          <Text style={styles.modalTitle}>
-            You do not have any notifications.
-          </Text>
-          <Text style={styles.modalSubtitle}>
-            Notifications let you quickly take action on upcoming or current
-            bookings.
-          </Text>
-        </View>
-      </SafeAreaView>
-    </Modal>
-  );
-
-  const HelpCenterModal = (
-    <Modal
-      visible={isHelpCenterOpen}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={closeHelpCenter}
-    >
-      <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top }]}>
-        <View style={styles.modalHeader}>
-          <TouchableOpacity
-            onPress={onBack ? onBack : closeHelpCenter}
-            style={styles.closeButton}
-          >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
-          </TouchableOpacity>
-          <Text style={styles.modalHeaderText}>Help Center</Text>
-        </View>
-        <HelpSupportSection />
-      </SafeAreaView>
-    </Modal>
-  );
-
   return (
     <View style={{ flex: 1 }}>
-      <SearchScreen />
-      {MessagesModal}
-      {NotificationsModal}
-      {HelpCenterModal}
+      <SearchScreen
+        showApartmentsList={showApartmentsList}
+        setShowApartmentsList={setShowApartmentsList}
+      />
+
+      {showApartmentsList && (
+        <View style={styles.apartmentsListOverlayDebug}>
+          <TouchableOpacity
+            style={styles.closeOverlayButton}
+            onPress={() => setShowApartmentsList(false)}
+          >
+            <Ionicons name="close" size={32} color="#fff" />
+          </TouchableOpacity>
+          <AppartmentList />
+        </View>
+      )}
+
+      <Modal
+        visible={showMessagesModal}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={closeMessages}
+      >
+        <SafeAreaView
+          style={[styles.modalContainer, { paddingTop: insets.top }]}
+        >
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={closeMessages}
+              style={styles.closeButton}
+            >
+              <Ionicons name="close" size={24} color={Colors.dark.text} />
+            </TouchableOpacity>
+            <Text style={styles.modalHeaderText}>Messages</Text>
+            <TouchableOpacity onPress={openHelpCenter}>
+              <Ionicons
+                name="help-circle-outline"
+                size={24}
+                color={Colors.dark.text}
+              />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalContent}>
+            <Image
+              source={require("./../assets/images/messages-man.png")}
+              style={styles.messageImage}
+            />
+            <Text style={styles.modalTitle}>No messages</Text>
+            <Text style={styles.modalSubtitle}>
+              You can start exchanging messages when you have upcoming bookings.
+            </Text>
+          </View>
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={styles.searchButton}
+              onPress={closeMessages}
+            >
+              <Text style={styles.buttonText}>Book now</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showNotificationsModal}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={closeNotifications}
+      >
+        <SafeAreaView
+          style={[styles.modalContainer, { paddingTop: insets.top }]}
+        >
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={closeNotifications}
+              style={styles.closeButton}
+            >
+              <Text style={styles.modalHeaderText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.modalContent}>
+            <Ionicons
+              name="notifications-outline"
+              size={80}
+              color={Colors.dark.text}
+            />
+            <Text style={styles.modalTitle}>
+              You do not have any notifications.
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              Notifications let you quickly take action on upcoming or current
+              bookings.
+            </Text>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={isHelpCenterOpen}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={closeHelpCenter}
+      >
+        <SafeAreaView
+          style={[styles.modalContainer, { paddingTop: insets.top }]}
+        >
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={onBack ? onBack : closeHelpCenter}
+              style={styles.closeButton}
+            >
+              <Ionicons
+                name="chevron-back"
+                size={24}
+                color={Colors.dark.text}
+              />
+            </TouchableOpacity>
+            <Text style={styles.modalHeaderText}>Help Center</Text>
+          </View>
+          <HelpSupportSection />
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
+  searchFormBorder: {
+    borderWidth: 2,
+    borderColor: "#FFD600",
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 12,
+    marginBottom: 12,
+    backgroundColor: Colors.dark.card,
   },
+  container: { flex: 1, backgroundColor: Colors.dark.background },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
   },
-  headerTitle: {
-    color: Colors.dark.text,
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  headerIcons: {
-    flexDirection: "row",
-    gap: 16,
-  },
+  headerTitle: { color: Colors.dark.text, fontSize: 20, fontWeight: "bold" },
+  headerIcons: { flexDirection: "row", gap: 16 },
   searchModuleContainer: {
     backgroundColor: Colors.dark.card,
     margin: 16,
@@ -543,19 +674,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 8,
   },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-  },
+  buttonText: { color: "#FFFFFF", fontWeight: "bold" },
   toggleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 12,
   },
-  toggleText: {
-    color: Colors.dark.text,
-  },
+  toggleText: { color: Colors.dark.text },
   radioGroup: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -567,13 +693,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 4,
   },
-  radioText: {
-    color: Colors.dark.text,
-  },
-  section: {
-    marginTop: 16,
-    paddingHorizontal: 16,
-  },
+  radioText: { color: Colors.dark.text },
+  section: { marginTop: 16, paddingHorizontal: 16 },
   sectionTitle: {
     color: Colors.dark.text,
     fontSize: 18,
@@ -585,23 +706,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-  largeCardImage: {
-    width: "100%",
-    height: 150,
-    resizeMode: "cover",
-  },
-  largeCardTextContainer: {
-    padding: 16,
-  },
-  largeCardTitle: {
-    color: Colors.dark.text,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  largeCardSubtitle: {
-    color: Colors.dark.textSecondary,
-    marginTop: 4,
-  },
+  largeCardImage: { width: "100%", height: 150, resizeMode: "cover" },
+  largeCardTextContainer: { padding: 16 },
+  largeCardTitle: { color: Colors.dark.text, fontSize: 18, fontWeight: "bold" },
+  largeCardSubtitle: { color: Colors.dark.textSecondary, marginTop: 4 },
   largeCardButton: {
     backgroundColor: "#007AFF",
     padding: 10,
@@ -609,31 +717,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     alignSelf: "flex-start",
   },
-  largeCardButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-  },
-  twoColumnCardsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 12,
-  },
-  smallCard: {
-    width: "48%",
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  smallCardImage: {
-    width: "100%",
-    height: 80,
-    resizeMode: "cover",
-  },
-  smallCardTitle: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-    padding: 8,
-  },
+  largeCardButtonText: { color: "#FFFFFF", fontWeight: "bold" },
   offerCard: {
     width: 150,
     marginRight: 12,
@@ -641,47 +725,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: "hidden",
   },
-  offerImage: {
-    width: "100%",
-    height: 80,
-    resizeMode: "cover",
-  },
-  offerText: {
-    color: Colors.dark.text,
-    padding: 8,
-  },
-  dealsCard: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    overflow: "hidden",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  dealsImage: {
-    width: 100,
-    height: 100,
-    resizeMode: "cover",
-  },
-  dealsContent: {
-    padding: 12,
-  },
-  dealsTitle: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  dealsSubtitle: {
-    color: Colors.dark.textSecondary,
-    fontSize: 12,
-  },
-  exploreItem: {
-    alignItems: "center",
-    marginRight: 20,
-  },
-  exploreText: {
-    color: Colors.dark.text,
-    marginTop: 4,
-  },
+  offerImage: { width: "100%", height: 80, resizeMode: "cover" },
+  offerText: { color: Colors.dark.text, padding: 8 },
+  exploreItem: { alignItems: "center", marginRight: 20 },
+  exploreText: { color: Colors.dark.text, marginTop: 4 },
   whyBookingCard: {
     backgroundColor: Colors.dark.card,
     padding: 16,
@@ -692,37 +739,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  whyBookingSubtitle: {
-    color: Colors.dark.textSecondary,
-    marginTop: 4,
-  },
-  manageCard: {
-    width: "48%",
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-  },
-  manageText: {
-    color: Colors.dark.text,
-    marginTop: 8,
-    fontWeight: "bold",
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
+  whyBookingSubtitle: { color: Colors.dark.textSecondary, marginTop: 4 },
+  modalContainer: { flex: 1, backgroundColor: Colors.dark.background },
   modalContent: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
   },
-  messageImage: {
-    width: 200,
-    height: 200,
-    resizeMode: "contain",
-  },
+  messageImage: { width: 200, height: 200, resizeMode: "contain" },
   modalTitle: {
     fontSize: 24,
     fontWeight: "bold",
@@ -736,10 +761,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 10,
   },
-  modalFooter: {
-    padding: 20,
-    backgroundColor: Colors.dark.card,
-  },
+  modalFooter: { padding: 20, backgroundColor: Colors.dark.card },
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -753,7 +775,25 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-  closeButton: {
-    paddingRight: 10,
+  closeButton: { paddingRight: 10 },
+  apartmentsListOverlayDebug: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.95)",
+    zIndex: 9999,
+    elevation: 20,
+    flex: 1,
+  },
+  closeOverlayButton: {
+    position: "absolute",
+    top: 40,
+    right: 24,
+    zIndex: 101,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 20,
+    padding: 4,
   },
 });
