@@ -3,8 +3,8 @@ import { Schema, model } from "mongoose";
 const RoomReservationSchema = new Schema(
   {
     reservationId: { type: Schema.Types.ObjectId, required: true },
-    checkIn: { type: String, required: true },
-    checkOut: { type: String, required: true },
+    checkIn: { type: String, required: true },   // ISO date string
+    checkOut: { type: String, required: true },  // ISO date string
   },
   { _id: false }
 );
@@ -16,6 +16,9 @@ const RoomSchema = new Schema(
     maxAdults: { type: Number, required: true, min: 0 },
     maxChildren: { type: Number, required: true, min: 0 },
     pricePerNight: { type: Number, required: true, min: 0 },
+
+    // total units of this room type in the hotel (e.g., 12 identical doubles)
+    totalUnits: { type: Number, required: true, min: 1 },
 
     sizeSqm: { type: Number, min: 0 },
     bedrooms: { type: Number, min: 0 },
@@ -31,6 +34,22 @@ const RoomSchema = new Schema(
   },
   { _id: true }
 );
+
+// Instance method to compute available units for a given date range (exclusive end).
+RoomSchema.methods.unitsAvailable = function (fromISO: string, toISO: string): number {
+  const from = new Date(fromISO);
+  const to = new Date(toISO);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from >= to) return 0;
+
+  const overlaps = this.reservations.filter((r: any) => {
+    const rStart = new Date(r.checkIn);
+    const rEnd = new Date(r.checkOut);
+    return rStart < to && from < rEnd; // overlap if ranges intersect
+  }).length;
+
+  const left = this.totalUnits - overlaps;
+  return left > 0 ? left : 0;
+};
 
 const HotelSchema = new Schema(
   {
@@ -76,6 +95,9 @@ const HotelSchema = new Schema(
 
 HotelSchema.index({ city: 1, stars: -1, averageRating: -1 });
 HotelSchema.index({ categories: 1, "rooms.pricePerNight": 1 });
-HotelSchema.index({ name: "text", address: "text", city: "text", country: "text", description: "text" }, { weights: { name: 5, city: 3, address: 2, description: 1 } });
+HotelSchema.index(
+  { name: "text", address: "text", city: "text", country: "text", description: "text" },
+  { weights: { name: 5, city: 3, address: 2, description: 1 } }
+);
 
 export const HotelModel = model("Hotel", HotelSchema);
