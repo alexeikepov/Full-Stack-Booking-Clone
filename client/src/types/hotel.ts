@@ -10,7 +10,6 @@ export type RoomReservation = {
 
 export type Room = {
   _id: { $oid: string };
-  id?: string; // for frontend compatibility
   name: string;
   capacity: number;
   maxAdults: number;
@@ -30,7 +29,6 @@ export type Room = {
 
 export type Hotel = {
   _id: { $oid: string };
-  id?: string; // for frontend compatibility
   name: string;
   address: string;
   country: string;

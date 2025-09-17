@@ -59,7 +59,7 @@ export default function HotelPage() {
 
       // Convert MongoDB _id to id for frontend compatibility
       if (data && data._id && !data.id) {
-        data.id = data._id.$oid || data._id;
+        data.id = data._id;
       }
 
       // Convert room _id to id for frontend compatibility
