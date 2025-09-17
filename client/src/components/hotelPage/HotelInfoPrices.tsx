@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Hotel } from "@/types/hotel";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/search/DatePicker";
@@ -17,11 +17,12 @@ export default function HotelInfoPrices({
   isLoading = false,
 }: HotelInfoPricesProps) {
   const rooms = hotel.rooms || [];
-
-  // Helper function to get room ID
-  const getRoomId = (room: any) => {
-    return room.id || room._id?.$oid || room._id || "";
-  };
+  const [isSticky, setIsSticky] = useState(false);
+  const [selectedRooms, setSelectedRooms] = useState<Record<string, number>>(
+    {}
+  );
+  const tableRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -73,6 +74,73 @@ export default function HotelInfoPrices({
       setSearchParams(newParams);
     }
   }, [searchRooms, requiredRooms, searchParams, setSearchParams]);
+
+  // Helper function to get room ID
+  const getRoomId = (room: any) => {
+    return room.id || room._id?.$oid || room._id || "";
+  };
+
+  // Handle room selection
+  const handleRoomSelect = (roomId: string, count: number) => {
+    setSelectedRooms((prev) => ({
+      ...prev,
+      [roomId]: count,
+    }));
+  };
+
+  // Calculate total price for selected rooms
+  const calculateTotalPrice = () => {
+    let total = 0;
+    Object.entries(selectedRooms).forEach(([roomId, count]) => {
+      if (count > 0) {
+        const room = rooms.find((r) => getRoomId(r) === roomId);
+        if (room && room.pricePerNight) {
+          total += room.pricePerNight * count;
+        }
+      }
+    });
+    return total;
+  };
+
+  // Get total selected rooms count
+  const totalSelectedRooms = Object.values(selectedRooms).reduce(
+    (sum, count) => sum + count,
+    0
+  );
+
+  // Get first selected room details
+  const getFirstSelectedRoomDetails = () => {
+    for (const roomId in selectedRooms) {
+      if (selectedRooms[roomId] > 0) {
+        return rooms.find((r) => getRoomId(r) === roomId);
+      }
+    }
+    return null;
+  };
+
+  const firstSelectedRoom = getFirstSelectedRoomDetails();
+
+  // Handle sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tableRef.current && headerRef.current) {
+        const tableRect = tableRef.current.getBoundingClientRect();
+        const headerHeight = headerRef.current.offsetHeight;
+
+        // Header becomes sticky when table top reaches viewport top
+        // and table bottom is still visible
+        const shouldBeSticky =
+          tableRect.top <= 0 && tableRect.bottom > headerHeight;
+        setIsSticky(shouldBeSticky);
+      }
+    };
+
+    // Initial check
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [rooms.length]);
 
   const handleChangeSearch = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -188,9 +256,14 @@ export default function HotelInfoPrices({
 
         {/* Room selection table */}
         {rooms.length > 0 ? (
-          <div className="border border-[#e6e6e6] overflow-hidden">
+          <div ref={tableRef} className="border border-[#e6e6e6]">
             {/* Table header */}
-            <div className="bg-[#003580] text-white">
+            <div
+              ref={headerRef}
+              className={`sticky top-0 z-50 bg-[#003580] text-white shadow-lg transition-all duration-200 ${
+                isSticky ? "shadow-xl" : ""
+              }`}
+            >
               <div className="grid grid-cols-[minmax(320px,1.2fr)_140px_220px_1.8fr_88px_180px]">
                 <div className="px-4 py-3 font-semibold border-r border-white/30 bg-[#2c5aa0] text-white">
                   Room type
@@ -214,9 +287,13 @@ export default function HotelInfoPrices({
             {/* Room details */}
             <div className="bg-white">
               {rooms.map((room, index) => (
-                <div key={getRoomId(room) || index}>
+                <div key={room._id.$oid}>
                   {/* Row grid mirrors header widths */}
-                  <div className="grid grid-cols-[minmax(320px,1.2fr)_140px_220px_1.8fr_88px_180px] gap-0 p-0 divide-x divide-[#e6e6e6]">
+                  <div
+                    className={`grid grid-cols-[minmax(320px,1.2fr)_140px_220px_1.8fr_88px_180px] gap-0 p-0 divide-x divide-[#e6e6e6] ${
+                      index === 0 ? "sticky top-16 z-30" : ""
+                    }`}
+                  >
                     <div
                       className={`p-4 space-y-3 ${
                         index > 0 ? "border-t border-gray-200" : ""
@@ -270,7 +347,7 @@ export default function HotelInfoPrices({
                           <div className="flex flex-wrap gap-1">
                             {room.categories.map((category, idx) => (
                               <span
-                                key={idx}
+                                key={`category-${room._id.$oid}-${idx}`}
                                 className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
                               >
                                 {category}
@@ -283,7 +360,10 @@ export default function HotelInfoPrices({
                       {/* Amenities from backend */}
                       <div className="space-y-1 text-sm">
                         {room.amenities.slice(0, 6).map((amenity, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
+                          <div
+                            key={`amenity-${room._id.$oid}-${idx}`}
+                            className="flex items-center gap-2"
+                          >
                             <span className="text-green-600">✓</span>
                             <span>{amenity}</span>
                           </div>
@@ -302,7 +382,10 @@ export default function HotelInfoPrices({
                           {Array.from(
                             { length: Math.min(room.capacity, 4) },
                             (_, i) => (
-                              <span key={i} className="inline-block mr-1">
+                              <span
+                                key={`person-${room._id.$oid}-${i}`}
+                                className="inline-block mr-1"
+                              >
                                 <MdPerson className="text-gray-600" size={22} />
                               </span>
                             )
@@ -365,6 +448,7 @@ export default function HotelInfoPrices({
                         </div>
                       )}
 
+                      {/* Free cancellation */}
                       {room.categories.some((c) =>
                         /free cancellation/i.test(c)
                       ) && (
@@ -417,28 +501,177 @@ export default function HotelInfoPrices({
                         index > 0 ? "border-t border-gray-200" : ""
                       }`}
                     >
-                      <select className="border border-gray-300 rounded px-2 py-1 text-sm">
-                        {Array.from(
-                          { length: (room.availableRooms || 0) + 1 },
-                          (_, i) => i
-                        ).map((num) => (
-                          <option key={num} value={num}>
-                            {num}
-                          </option>
-                        ))}
+                      <select
+                        value={selectedRooms[getRoomId(room)] || 0}
+                        onChange={(e) =>
+                          handleRoomSelect(
+                            getRoomId(room),
+                            parseInt(e.target.value)
+                          )
+                        }
+                        className="border border-gray-300 rounded px-2 py-1 text-sm"
+                      >
+                        <option value={0}>0</option>
+                        {room.availableRooms >= 1 && (
+                          <option value={1}>1</option>
+                        )}
+                        {room.availableRooms >= 2 && (
+                          <option value={2}>2</option>
+                        )}
+                        {room.availableRooms >= 3 && (
+                          <option value={3}>3</option>
+                        )}
+                        {room.availableRooms >= 4 && (
+                          <option value={4}>4</option>
+                        )}
+                        {room.availableRooms > 5 && (
+                          <option value={6}>5+</option>
+                        )}
                       </select>
                     </div>
 
                     {/* Reserve button column */}
-                    <div className="p-4 flex items-start border-b-0">
+                    <div
+                      className={`p-4 flex items-start border-b-0 ${
+                        totalSelectedRooms > 0 ? "bg-blue-50" : "bg-white"
+                      }`}
+                    >
                       {index === 0 ? (
-                        <div>
-                          <Button className="bg-[#0071c2] hover:bg-[#005fa3] text-white px-4 py-2 text-sm font-medium">
-                            I'll reserve
-                          </Button>
-                          <div className="mt-3 text-sm text-gray-600">
-                            • You won't be charged in the next step
-                          </div>
+                        <div className="w-full">
+                          {totalSelectedRooms > 0 ? (
+                            <div className="space-y-3">
+                              {/* Selected rooms count and price */}
+                              <div>
+                                <div className="text-sm font-semibold text-gray-900">
+                                  {totalSelectedRooms >= 6
+                                    ? "5+"
+                                    : totalSelectedRooms}{" "}
+                                  room{totalSelectedRooms !== 1 ? "s" : ""} for
+                                </div>
+                                <div className="text-xl font-bold text-gray-900">
+                                  ₪ {calculateTotalPrice().toLocaleString()}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Additional charges may apply
+                                </div>
+                              </div>
+
+                              {/* Reserve button */}
+                              <Button className="w-full bg-[#0071c2] hover:bg-[#005fa3] text-white py-3 text-base font-medium">
+                                I'll reserve
+                              </Button>
+
+                              {/* Reservation info */}
+                              <div className="text-sm text-gray-600">
+                                <div>You'll be taken to the next step</div>
+                                <div>• You won't be charged yet</div>
+                              </div>
+
+                              {/* Your package section */}
+                              {firstSelectedRoom && (
+                                <div className="space-y-2 mt-4 pt-4 border-t border-gray-200">
+                                  <div className="text-base font-bold text-gray-900">
+                                    Your package:
+                                  </div>
+
+                                  {/* Breakfast - показываем если есть в amenities */}
+                                  {firstSelectedRoom.amenities.some((a) =>
+                                    /breakfast/i.test(a)
+                                  ) && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                                      <span>☕</span>
+                                      <span>Good breakfast ₪ 70</span>
+                                    </div>
+                                  )}
+
+                                  {/* High-speed internet - показываем если есть WiFi */}
+                                  {(firstSelectedRoom.amenities.some((a) =>
+                                    /wifi|internet/i.test(a)
+                                  ) ||
+                                    firstSelectedRoom.facilities.some((a) =>
+                                      /wifi|internet/i.test(a)
+                                    )) && (
+                                    <div className="flex items-center gap-2 text-sm text-green-600">
+                                      <span>✓</span>
+                                      <span>Includes high-speed internet</span>
+                                    </div>
+                                  )}
+
+                                  {/* Free cancellation - показываем если есть в categories */}
+                                  {firstSelectedRoom.categories.some((c) =>
+                                    /free cancellation/i.test(c)
+                                  ) && (
+                                    <div className="flex items-center gap-2 text-sm text-green-600">
+                                      <span>✓</span>
+                                      <span>
+                                        Free cancellation before 21 January 2026
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {/* No prepayment - показываем если есть в categories */}
+                                  {firstSelectedRoom.categories.some((c) =>
+                                    /no prepayment/i.test(c)
+                                  ) && (
+                                    <div className="flex items-center gap-2 text-sm text-green-600">
+                                      <span>✓</span>
+                                      <span>
+                                        No prepayment needed – pay at the
+                                        property
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {/* Genius discount - показываем если есть в categories */}
+                                  {firstSelectedRoom.categories.some((c) =>
+                                    /genius/i.test(c)
+                                  ) && (
+                                    <div className="flex items-center gap-2 text-sm text-[#0071c2]">
+                                      <span>🏷️</span>
+                                      <span>
+                                        Genius discount may be available
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {/* Показываем реальные amenities с бэка */}
+                                  {firstSelectedRoom.amenities.map(
+                                    (amenity, index) => (
+                                      <div
+                                        key={index}
+                                        className="flex items-center gap-2 text-sm text-green-600"
+                                      >
+                                        <span>✓</span>
+                                        <span>{amenity}</span>
+                                      </div>
+                                    )
+                                  )}
+
+                                  {/* Показываем реальные facilities с бэка */}
+                                  {firstSelectedRoom.facilities.map(
+                                    (facility, index) => (
+                                      <div
+                                        key={`facility-${index}`}
+                                        className="flex items-center gap-2 text-sm text-green-600"
+                                      >
+                                        <span>✓</span>
+                                        <span>{facility}</span>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div>
+                              <Button className="bg-[#0071c2] hover:bg-[#005fa3] text-white px-4 py-2 text-sm font-medium">
+                                I'll reserve
+                              </Button>
+                              <div className="mt-3 text-sm text-gray-600">
+                                • You won't be charged in the next step
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : null}
                     </div>
@@ -475,14 +708,6 @@ export default function HotelInfoPrices({
             </div>
           </div>
         )}
-
-        {/* Bottom notice */}
-        <div className="mt-4 text-sm text-gray-600">
-          <div className="flex items-center gap-2">
-            <span>•</span>
-            <span>You won't be charged in the next step</span>
-          </div>
-        </div>
       </div>
     </div>
   );
