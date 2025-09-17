@@ -7,24 +7,45 @@ import PriceSummary from "../info/PriceSummary";
 interface RoomRowProps {
   room: any;
   index: number;
+  isFirstOfType: boolean;
   selectedRooms: Record<string, number>;
   onRoomSelect: (roomId: string, count: number) => void;
   getRoomId: (room: any) => string;
   totalSelectedRooms: number;
   totalPrice: number;
   firstSelectedRoom: any;
+  adults: number;
+  children: number;
 }
 
 export default function RoomRow({
   room,
   index,
+  isFirstOfType,
   selectedRooms,
   onRoomSelect,
   getRoomId,
   totalSelectedRooms,
   totalPrice,
   firstSelectedRoom,
+  adults,
+  children,
 }: RoomRowProps) {
+  console.log(
+    `RoomRow ${index}: ${room.name}, isFirstOfType: ${isFirstOfType}`
+  );
+
+  // Calculate required rooms based on current guests
+  const calculateRequiredRooms = (adults: number, children: number) => {
+    const totalGuests = adults + children;
+    const guestsPerRoom = 3; // 2 adults + 1 child per room
+    const minRooms = Math.ceil(totalGuests / guestsPerRoom);
+    return Math.max(1, minRooms);
+  };
+
+  const requiredRooms = calculateRequiredRooms(adults, children);
+  const pricePerRoom = room.pricePerNight;
+
   return (
     <div key={room._id.$oid}>
       {/* Row grid mirrors header widths */}
@@ -118,11 +139,10 @@ export default function RoomRow({
             <div className="text-sm text-gray-500">per night</div>
           </div>
           {/* Show room calculation details */}
-          {(room as any).roomsNeeded && (room as any).roomsNeeded > 1 && (
+          {requiredRooms > 1 && (
             <div className="text-xs text-gray-400 mt-1">
-              {(room as any).roomsNeeded} rooms needed for{" "}
-              {room.adults + room.children} guests (₪
-              {(room as any).pricePerRoom?.toLocaleString()} per room)
+              {requiredRooms} rooms needed for {adults + children} guests (₪
+              {pricePerRoom?.toLocaleString()} per room)
             </div>
           )}
         </div>
