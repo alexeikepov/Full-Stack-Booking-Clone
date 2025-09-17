@@ -3,12 +3,12 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import SearchTopBar from "@/components/search/HeroSearch";
-import HotelHeader from "@/components/hotelPage/HotelHeader";
-import HotelNavigation from "@/components/hotelPage/HotelNavigation";
-import HotelGallery from "@/components/hotelPage/HotelGallery";
-import HotelOverview from "@/components/hotelPage/HotelOverview";
-import HotelInfoPrices from "@/components/hotelPage/HotelInfoPrices";
-import GuestReviews from "@/components/hotelPage/GuestReviews";
+import HotelHeader from "@/components/hotelPage/header/HotelHeader";
+import HotelNavigation from "@/components/hotelPage/navigation/HotelNavigation";
+import HotelGallery from "@/components/hotelPage/gallery/HotelGallery";
+import HotelOverview from "@/components/hotelPage/overview/HotelOverview";
+import HotelInfoPrices from "@/components/hotelPage/info/HotelInfoPrices";
+import GuestReviews from "@/components/hotelPage/reviews/GuestReviews";
 import { useNavigationStore } from "@/stores/navigation";
 import { useSearchStore } from "@/stores/search";
 
