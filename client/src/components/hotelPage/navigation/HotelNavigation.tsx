@@ -11,6 +11,8 @@ const navItems = [
   { id: "house-rules", label: "House rules" },
   { id: "fine-print", label: "The fine print" },
   { id: "reviews", label: "Guest reviews (372)" },
+  { id: "travellers-asking", label: "Travellers are asking" },
+  { id: "hotel-surroundings", label: "Hotel surroundings" },
 ];
 
 export default function HotelNavigation({

@@ -31,9 +31,49 @@ export type Hotel = {
   createdAt?: Date;
   updatedAt?: Date;
 
-  houseRules: string;
-  checkIn: string;
-  checkOut: string;
+  houseRules: {
+    checkIn: {
+      time: string;
+      note: string;
+      advanceNotice: string;
+    };
+    checkOut: {
+      time: string;
+    };
+    cancellation: {
+      policy: string;
+      conditions: string;
+    };
+    children: {
+      welcome: string;
+      searchNote: string;
+      cotPolicy: {
+        ageRange: string;
+        cotPrice: string;
+        note: string;
+        additionalInfo: string;
+        availability: string;
+        noExtraBeds: string;
+        subjectToAvailability: string;
+      };
+    };
+    ageRestriction: {
+      hasRestriction: boolean;
+      minimumAge?: number;
+      note: string;
+    };
+    pets: {
+      allowed: boolean;
+      note: string;
+    };
+    paymentMethods: {
+      methods: string[];
+    };
+    parties: {
+      allowed: boolean;
+      note: string;
+    };
+  };
 };
 
 export type Room = {

@@ -9,6 +9,12 @@ import HotelGallery from "@/components/hotelPage/gallery/HotelGallery";
 import HotelOverview from "@/components/hotelPage/overview/HotelOverview";
 import HotelInfoPrices from "@/components/hotelPage/info/HotelInfoPrices";
 import GuestReviews from "@/components/hotelPage/reviews/GuestReviews";
+import TravellersAsking from "@/components/hotelPage/reviews/TravellersAsking";
+import HotelSurroundings from "@/components/hotelPage/surroundings/HotelSurroundings";
+import HotelFacilities from "@/components/hotelPage/facilities/HotelFacilities";
+import HouseRules from "@/components/hotelPage/rules/HouseRules";
+import FinePrint from "@/components/hotelPage/rules/FinePrint";
+import Footer from "@/components/Footer";
 import { useNavigationStore } from "@/stores/navigation";
 import { useSearchStore } from "@/stores/search";
 
@@ -200,138 +206,14 @@ export default function HotelPage() {
         <HotelOverview hotel={hotel} />
         <HotelInfoPrices hotel={hotel} isLoading={isLoading} />
         <GuestReviews hotel={hotel} />
-
-        {/* Facilities Section */}
-        <div id="facilities" className="bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-8">
-            <h2 className="text-2xl font-semibold mb-8 text-gray-900">
-              Facilities
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  icon: "📶",
-                  name: "Free WiFi",
-                  description: "Available in all areas",
-                },
-                {
-                  icon: "❄️",
-                  name: "Air conditioning",
-                  description: "Available in all rooms",
-                },
-                {
-                  icon: "🚗",
-                  name: "Parking",
-                  description: "Available on site",
-                },
-                {
-                  icon: "🏊",
-                  name: "Swimming pool",
-                  description: "Outdoor pool",
-                },
-                {
-                  icon: "🍽️",
-                  name: "Restaurant",
-                  description: "On-site restaurant",
-                },
-                {
-                  icon: "💼",
-                  name: "Business center",
-                  description: "Available 24/7",
-                },
-                {
-                  icon: "🏋️",
-                  name: "Fitness center",
-                  description: "Available 24/7",
-                },
-                {
-                  icon: "🛎️",
-                  name: "Room service",
-                  description: "Available 24/7",
-                },
-                {
-                  icon: "🚿",
-                  name: "Spa & wellness",
-                  description: "Full service spa",
-                },
-              ].map((facility, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                >
-                  <span className="text-3xl">{facility.icon}</span>
-                  <div>
-                    <div className="font-semibold text-gray-900">
-                      {facility.name}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {facility.description}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* House Rules Section */}
-        <div id="house-rules" className="bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-6">
-            <h2 className="text-2xl font-semibold mb-6">House rules</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <h3 className="font-medium mb-3">Check-in</h3>
-                <p className="text-sm text-gray-600">From 15:00 to 00:00</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Guests are required to show a photo identification and credit
-                  card upon check-in
-                </p>
-              </div>
-              <div>
-                <h3 className="font-medium mb-3">Check-out</h3>
-                <p className="text-sm text-gray-600">From 07:00 to 11:00</p>
-              </div>
-              <div>
-                <h3 className="font-medium mb-3">Cancellation/prepayment</h3>
-                <p className="text-sm text-gray-600">
-                  Cancellation and prepayment policies vary by rate type. Please
-                  check what conditions might apply to each option when making
-                  your selection.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <div>
-                <h3 className="font-medium mb-2">Children and beds</h3>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Children of all ages are welcome</li>
-                  <li>
-                    • Children 18 and above are considered adults at this
-                    property
-                  </li>
-                  <li>
-                    • To see correct prices and occupancy info, add the number
-                    and ages of children in your group to your search
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-medium mb-2">Age restriction</h3>
-                <p className="text-sm text-gray-600">
-                  The minimum age for check-in is 18
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-medium mb-2">Pets</h3>
-                <p className="text-sm text-gray-600">Pets are not allowed.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <TravellersAsking hotelId={hotel.id} />
+        <HotelSurroundings hotelId={hotel.id} />
+        <HotelFacilities hotelId={hotel.id} />
+        <HouseRules hotelId={hotel.id} />
+        <FinePrint hotelName={hotel.name} />
       </div>
+
+      <Footer />
     </div>
   );
 }

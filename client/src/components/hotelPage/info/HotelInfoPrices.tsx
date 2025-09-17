@@ -121,19 +121,26 @@ export default function HotelInfoPrices({
         const headerHeight = headerRef.current.offsetHeight;
 
         // Header becomes sticky when table top reaches viewport top
-        // and table bottom is still visible
-        const shouldBeSticky =
-          tableRect.top <= 0 && tableRect.bottom > headerHeight;
-        setIsSticky(shouldBeSticky);
+        const tableTopReached = tableRect.top <= 0;
+
+        // Header stops being sticky when table bottom is above viewport top
+        const tableBottomVisible = tableRect.bottom > 0;
+
+        const shouldBeSticky = tableTopReached && tableBottomVisible;
+
+        if (shouldBeSticky !== isSticky) {
+          setIsSticky(shouldBeSticky);
+        }
       }
     };
 
     // Initial check
     handleScroll();
 
-    window.addEventListener("scroll", handleScroll);
+    // Add scroll listener
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [rooms.length]);
+  }, [isSticky, rooms.length]);
 
   return (
     <div id="info" className="bg-white">
@@ -179,20 +186,36 @@ export default function HotelInfoPrices({
             </div>
 
             {/* Room details */}
-            <div className="bg-white">
-              {rooms.map((room, index) => (
-                <RoomRow
-                  key={room._id.$oid}
-                  room={room}
-                  index={index}
-                  selectedRooms={selectedRooms}
-                  onRoomSelect={handleRoomSelect}
-                  getRoomId={getRoomId}
-                  totalSelectedRooms={totalSelectedRooms}
-                  totalPrice={calculateTotalPrice()}
-                  firstSelectedRoom={firstSelectedRoom}
-                />
-              ))}
+            <div
+              className="bg-white"
+              style={{ paddingTop: isSticky ? "60px" : "0" }}
+            >
+              {rooms.map((room, index) => {
+                // Check if this is the first room of a new type
+                const isFirstOfType =
+                  index === 0 || room.name !== rooms[index - 1].name;
+
+                console.log(
+                  `Room ${index}: ${room.name}, isFirstOfType: ${isFirstOfType}`
+                );
+
+                return (
+                  <RoomRow
+                    key={room._id.$oid}
+                    room={room}
+                    index={index}
+                    isFirstOfType={isFirstOfType}
+                    selectedRooms={selectedRooms}
+                    onRoomSelect={handleRoomSelect}
+                    getRoomId={getRoomId}
+                    totalSelectedRooms={totalSelectedRooms}
+                    totalPrice={calculateTotalPrice()}
+                    firstSelectedRoom={firstSelectedRoom}
+                    adults={adults}
+                    children={children}
+                  />
+                );
+              })}
             </div>
           </div>
         ) : (
