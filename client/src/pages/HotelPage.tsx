@@ -8,6 +8,7 @@ import HotelNavigation from "@/components/hotelPage/HotelNavigation";
 import HotelGallery from "@/components/hotelPage/HotelGallery";
 import HotelOverview from "@/components/hotelPage/HotelOverview";
 import HotelInfoPrices from "@/components/hotelPage/HotelInfoPrices";
+import GuestReviews from "@/components/hotelPage/GuestReviews";
 import { useNavigationStore } from "@/stores/navigation";
 import { useSearchStore } from "@/stores/search";
 
@@ -198,6 +199,7 @@ export default function HotelPage() {
       <div className="space-y-8">
         <HotelOverview hotel={hotel} />
         <HotelInfoPrices hotel={hotel} isLoading={isLoading} />
+        <GuestReviews hotel={hotel} />
 
         {/* Facilities Section */}
         <div id="facilities" className="bg-white">
@@ -326,97 +328,6 @@ export default function HotelPage() {
                 <h3 className="font-medium mb-2">Pets</h3>
                 <p className="text-sm text-gray-600">Pets are not allowed.</p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Reviews Section */}
-        <div id="reviews" className="bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Guest reviews
-              </h2>
-              <div className="flex items-center gap-4">
-                <div className="bg-[#003b95] text-white px-4 py-2 rounded font-bold text-lg">
-                  {hotel.averageRating?.toFixed(1) || "8.9"}
-                </div>
-                <div>
-                  <div className="font-semibold text-lg text-gray-900">
-                    Fabulous
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {hotel.reviewsCount || 372} reviews
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[
-                {
-                  name: "Michael",
-                  country: "Israel",
-                  rating: 9.2,
-                  comment:
-                    "Wonderful and stylish hotel, big and clean rooms, nice location. We've got complimentary wine bottle for a little waiting time which was really...",
-                },
-                {
-                  name: "Sarah",
-                  country: "United States",
-                  rating: 8.8,
-                  comment:
-                    "Great location, very clean and comfortable. The staff was extremely helpful and friendly. Would definitely stay here again!",
-                },
-                {
-                  name: "David",
-                  country: "Germany",
-                  rating: 9.5,
-                  comment:
-                    "Exceptional service and beautiful rooms. The breakfast was amazing and the staff went above and beyond to make our stay perfect.",
-                },
-                {
-                  name: "Emma",
-                  country: "France",
-                  rating: 8.5,
-                  comment:
-                    "Perfect location in the city center. The room was spacious and clean. Highly recommend this hotel for business travelers.",
-                },
-              ].map((review, index) => (
-                <div
-                  key={index}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-[#0071c2] text-white rounded-full flex items-center justify-center text-lg font-semibold">
-                        {review.name[0]}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">
-                          {review.name}
-                        </div>
-                        <div className="text-sm text-gray-600 flex items-center gap-2">
-                          <span>🇮🇱</span>
-                          <span>{review.country}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-[#003b95] text-white px-3 py-1 rounded font-bold">
-                      {review.rating}
-                    </div>
-                  </div>
-                  <p className="text-gray-700 leading-relaxed">
-                    {review.comment}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 text-center">
-              <button className="text-[#0071c2] hover:underline font-medium">
-                Show all {hotel.reviewsCount || 372} reviews
-              </button>
             </div>
           </div>
         </div>

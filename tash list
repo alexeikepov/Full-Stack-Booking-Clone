@@ -1,0 +1,160 @@
+warning: in the working copy of 'client/src/components/hotelPage/RoomSelection.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/client/src/components/hotelPage/RoomSelection.tsx b/client/src/components/hotelPage/RoomSelection.tsx[m
+[1mindex 29c4554..24f81ed 100644[m
+[1m--- a/client/src/components/hotelPage/RoomSelection.tsx[m
+[1m+++ b/client/src/components/hotelPage/RoomSelection.tsx[m
+[36m@@ -1,4 +1,4 @@[m
+[31m-import { useState } from "react";[m
+[32m+[m[32mimport { useState, useEffect, useRef } from "react";[m
+ import { Button } from "@/components/ui/button";[m
+ import { MdBed, MdBathtub, MdSquare } from "react-icons/md";[m
+ [m
+[36m@@ -34,12 +34,16 @@[m [mexport default function RoomSelection({ rooms }: RoomSelectionProps) {[m
+   const [selectedRooms, setSelectedRooms] = useState<Record<string, number>>([m
+     {}[m
+   );[m
+[32m+[m[32m  const [isSticky, setIsSticky] = useState(false);[m
+[32m+[m[32m  const headerRef = useRef<HTMLDivElement>(null);[m
+[32m+[m[32m  const tableRef = useRef<HTMLDivElement>(null);[m
+ [m
+   // Helper function to get room ID[m
+   const getRoomId = (room: any) => {[m
+     return room.id || room._id?.$oid || room._id || "";[m
+   };[m
+ [m
+[32m+[m[32m  // Handle room selection[m
+   const handleRoomSelect = (roomId: string, count: number) => {[m
+     setSelectedRooms((prev) => ({[m
+       ...prev,[m
+[36m@@ -47,11 +51,59 @@[m [mexport default function RoomSelection({ rooms }: RoomSelectionProps) {[m
+     }));[m
+   };[m
+ [m
+[32m+[m[32m  // Calculate total price for selected rooms[m
+[32m+[m[32m  const calculateTotalPrice = () => {[m
+[32m+[m[32m    let total = 0;[m
+[32m+[m[32m    Object.entries(selectedRooms).forEach(([roomId, count]) => {[m
+[32m+[m[32m      if (count > 0) {[m
+[32m+[m[32m        const room = rooms.find((r) => getRoomId(r) === roomId);[m
+[32m+[m[32m        if (room && room.pricePerNight) {[m
+[32m+[m[32m          total += room.pricePerNight * count;[m
+[32m+[m[32m        }[m
+[32m+[m[32m      }[m
+[32m+[m[32m    });[m
+[32m+[m[32m    return total;[m
+[32m+[m[32m  };[m
+[32m+[m
+[32m+[m[32m  // Get selected rooms details[m
+[32m+[m[32m  const getSelectedRoomsDetails = () => {[m
+[32m+[m[32m    return Object.entries(selectedRooms)[m
+[32m+[m[32m      .filter(([_, count]) => count > 0)[m
+[32m+[m[32m      .map(([roomId, count]) => {[m
+[32m+[m[32m        const room = rooms.find((r) => getRoomId(r) === roomId);[m
+[32m+[m[32m        return room ? { room, count } : null;[m
+[32m+[m[32m      })[m
+[32m+[m[32m      .filter((item): item is { room: any; count: number } => item !== null);[m
+[32m+[m[32m  };[m
+[32m+[m
+   const handleReserve = () => {[m
+     // Handle reservation logic[m
+     console.log("Reserving rooms:", selectedRooms);[m
+   };[m
+ [m
+[32m+[m[32m  // Handle sticky header[m
+[32m+[m[32m  useEffect(() => {[m
+[32m+[m[32m    const handleScroll = () => {[m
+[32m+[m[32m      if (headerRef.current) {[m
+[32m+[m[32m        const rect = headerRef.current.getBoundingClientRect();[m
+[32m+[m[32m        const shouldBeSticky = rect.top < 0;[m
+[32m+[m[32m        console.log([m
+[32m+[m[32m          "Header position:",[m
+[32m+[m[32m          rect.top,[m
+[32m+[m[32m          "Should be sticky:",[m
+[32m+[m[32m          shouldBeSticky[m
+[32m+[m[32m        );[m
+[32m+[m[32m        setIsSticky(shouldBeSticky);[m
+[32m+[m[32m      }[m
+[32m+[m[32m    };[m
+[32m+[m
+[32m+[m[32m    // Initial check[m
+[32m+[m[32m    handleScroll();[m
+[32m+[m
+[32m+[m[32m    window.addEventListener("scroll", handleScroll);[m
+[32m+[m[32m    return () => window.removeEventListener("scroll", handleScroll);[m
+[32m+[m[32m  }, []);[m
+[32m+[m
+   return ([m
+     <div className="bg-white">[m
+       <div className="mx-auto max-w-6xl px-4 py-8">[m
+[36m@@ -72,21 +124,49 @@[m [mexport default function RoomSelection({ rooms }: RoomSelectionProps) {[m
+           </div>[m
+         </div>[m
+ [m
+[32m+[m[32m        {/* Sticky header overlay */}[m
+[32m+[m[32m        {isSticky && ([m
+[32m+[m[32m          <>[m
+[32m+[m[32m            <div className="bg-[#003b95] text-white flex fixed top-0 left-0 right-0 z-50 shadow-lg">[m
+[32m+[m[32m              <div className="grid grid-cols-5 gap-4 p-4 flex-1 max-w-6xl mx-auto">[m
+[32m+[m[32m                <div className="font-bold flex items-center">Room type</div>[m
+[32m+[m[32m                <div className="font-bold flex items-center justify-center">[m
+[32m+[m[32m                  Number of guests[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m                <div className="font-bold flex items-center justify-end">[m
+[32m+[m[32m                  Today's price[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m                <div className="font-bold flex items-center">Your choices</div>[m
+[32m+[m[32m                <div className="font-bold flex items-center">Select rooms</div>[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m            </div>[m
+[32m+[m[32m            <div className="h-16"></div>[m
+[32m+[m[32m          </>[m
+[32m+[m[32m        )}[m
+[32m+[m
+[32m+[m[32m        {/* Debug info */}[m
+[32m+[m[32m        <div className="fixed top-20 right-4 bg-red-500 text-white p-2 z-50">[m
+[32m+[m[32m          Sticky: {isSticky ? "YES" : "NO"}[m
+[32m+[m[32m        </div>[m
+[32m+[m
+         {/* Room selection table */}[m
+[31m-        <div className="border border-gray-200 rounded-lg overflow-hidden">[m
+[32m+[m[32m        <div className="border border-gray-200 rounded-lg" ref={tableRef}>[m
+           {/* Table header */}[m
+[31m-          <div className="bg-[#003b95] text-white">[m
+[31m-            <div className="grid grid-cols-5 gap-4 p-4">[m
+[31m-              <div className="font-semibold">Room type</div>[m
+[31m-              <div className="font-semibold">Number of guests</div>[m
+[31m-              <div className="font-semibold">Today's price</div>[m
+[31m-              <div className="font-semibold">Your choices</div>[m
+[31m-              <div className="font-semibold">Select rooms</div>[m
+[32m+[m[32m          <div className="bg-[#003b95] text-white flex" ref={headerRef}>[m
+[32m+[m[32m            <div className="grid grid-cols-5 gap-4 p-4 flex-1">[m
+[32m+[m[32m              <div className="font-bold flex items-center">Room type</div>[m
+[32m+[m[32m              <div className="font-bold flex items-center justify-center">[m
+[32m+[m[32m                Number of guests[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m              <div className="font-bold flex items-center justify-end">[m
+[32m+[m[32m                Today's price[m
+[32m+[m[32m              </div>[m
+[32m+[m[32m              <div className="font-bold flex items-center">Your choices</div>[m
+[32m+[m[32m              <div className="font-bold flex items-center">Select rooms</div>[m
+             </div>[m
+           </div>[m
+[31m-[m
+           {/* Room details */}[m
+[31m-          <div className="bg-white">[m
+[32m+[m[32m          <div className="bg-white overflow-hidden">[m
+             {rooms.map((room, index) => ([m
+               <div[m
+                 key={getRoomId(room) || index}[m
+[36m@@ -116,7 +196,8 @@[m [mexport default function RoomSelection({ rooms }: RoomSelectionProps) {[m
+                       <div className="flex items-center gap-2">[m
+                         <MdBed className="text-gray-500" size={16} />[m
+                         <span>[m
+[31m-                          {room.bedrooms} bedroom{room.bedrooms > 1 ? "s" : ""}[m
+[32m+[m[32m                          {room.bedrooms} bedroom[m
+[32m+[m[32m                          {room.bedrooms > 1 ? "s" : ""}[m
+                         </span>[m
+                       </div>[m
+                       <div className="flex items-center gap-2">[m
+[36m@@ -168,7 +249,7 @@[m [mexport default function RoomSelection({ rooms }: RoomSelectionProps) {[m
+             

@@ -46,6 +46,37 @@ export type Hotel = {
   categories: string;
   averageRating: number;
   reviewsCount: number;
+  ratingLabel?: string; // "Fabulous", "Good", "Excellent"
+  categoryRatings?: {
+    staff: number;
+    comfort: number;
+    freeWifi: number;
+    facilities: number;
+    valueForMoney: number;
+    cleanliness: number;
+    location: number;
+  };
+  categoryNames?: {
+    staff: string;
+    comfort: string;
+    freeWifi: string;
+    facilities: string;
+    valueForMoney: string;
+    cleanliness: string;
+    location: string;
+  };
+  highScoreCategories?: string[]; // categories that show arrow
+  highScoreTexts?: Record<string, string>; // custom text for high scores
+  reviewTopics?: string[]; // topics for filter buttons
+  guestReviews?: {
+    id: string;
+    reviewerName: string;
+    reviewerInitial: string;
+    country: string;
+    countryCode: string;
+    reviewText: string;
+    rating: number;
+  }[];
   ownerId: { $oid: string };
   approvalStatus: HotelApprovalStatus;
   submittedAt: { $date: string };
