@@ -15,7 +15,7 @@ import AccountPage from "./pages/AccountPage";
 import BookingsPage from "./pages/BookingsPage";
 import WishlistPage from "./pages/SavedListsPage.tsx";
 import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
-
+import ListYourPropertyPage from "./pages/ListYourPropertyPage.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -30,6 +30,7 @@ const router = createBrowserRouter([
       { path:"/account/bookings", element: <BookingsPage />},
       { path:"/account/saved", element: <WishlistPage />},
       { path:"/account/reviews", element: <ReviewsTimelinePage />},
+      { path:"list-your-property", element: <ListYourPropertyPage />},
     ],
   },
 ]);
