@@ -32,7 +32,7 @@ export default function HomePage() {
           </p>
         </div>
       </section>
-      <div className="relative -mt-8 z-10">
+      <div className="relative -mt-8">
         <HeroSearch />
       </div>
 

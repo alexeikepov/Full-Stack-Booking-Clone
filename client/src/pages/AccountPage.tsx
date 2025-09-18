@@ -1,5 +1,6 @@
 // src/pages/AccountPage.tsx
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import {
   CreditCard,
   Wallet,
@@ -13,6 +14,7 @@ import {
   ChevronRight,
   BriefcaseBusiness,
 } from "lucide-react";
+import { useNavigationTabsStore } from "@/stores/navigationTabs";
 
 import perkStays from "@/img/account images/perk-stays.png";
 import perkCars from "@/img/account images/perk-cars.png";
@@ -40,7 +42,13 @@ export default function AccountPage({
 }: {
   user?: UserLite;
 }) {
+  const { setShowTabs } = useNavigationTabsStore();
   const geniusLabel = `Genius Level ${user.geniusLevel ?? 3}`;
+
+  useEffect(() => {
+    setShowTabs(false);
+    return () => setShowTabs(true);
+  }, [setShowTabs]);
 
   return (
     <div className="min-h-screen bg-[#f2f5f9] text-[#1a1a1a]">
@@ -78,17 +86,28 @@ export default function AccountPage({
                 You have {user.rewardsCount ?? 5} Genius rewards
               </div>
               <div className="mt-1 text-[12.5px] text-black/60">
-                Enjoy rewards and discounts on select stays and rental cars worldwide.
+                Enjoy rewards and discounts on select stays and rental cars
+                worldwide.
               </div>
             </div>
 
             <div className="px-4 pb-2">
               <div className="grid grid-cols-5 gap-3">
-                <PerkTile img={perkStays} title="10–20% off stays" badge="Level 3" />
-                <PerkTile img={perkCars} title="10–15% discounts on rental cars" />
+                <PerkTile
+                  img={perkStays}
+                  title="10–20% off stays"
+                  badge="Level 3"
+                />
+                <PerkTile
+                  img={perkCars}
+                  title="10–15% discounts on rental cars"
+                />
                 <PerkTile img={perkBreakfast} title="Free breakfasts" />
                 <PerkTile img={perkUpgrade} title="Free room upgrades" />
-                <PerkTile img={perkPriority} title="Priority support on stays" />
+                <PerkTile
+                  img={perkPriority}
+                  title="Priority support on stays"
+                />
               </div>
             </div>
 
@@ -110,10 +129,18 @@ export default function AccountPage({
             </div>
             <div className="px-5 py-4">
               <div className="flex items-start gap-3">
-                <img src={highestGenius} alt="" className="h-10 w-10 rounded-full" />
+                <img
+                  src={highestGenius}
+                  alt=""
+                  className="h-10 w-10 rounded-full"
+                />
                 <div className="flex-1">
-                  <div className="text-[13px] text-black/70">No Credits or vouchers yet</div>
-                  <div className="mt-1 text-[12px] text-black/45">{user.creditsCount ?? 0}</div>
+                  <div className="text-[13px] text-black/70">
+                    No Credits or vouchers yet
+                  </div>
+                  <div className="mt-1 text-[12px] text-black/45">
+                    {user.creditsCount ?? 0}
+                  </div>
                 </div>
               </div>
               <div className="mt-3">
@@ -130,40 +157,104 @@ export default function AccountPage({
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Section title="Payment information">
-            <Row to="/account/wallet" icon={<Wallet className="h-4 w-4" />} label="Rewards & Wallet" />
-            <Row to="/account/payments" icon={<CreditCard className="h-4 w-4" />} label="Payment methods" />
+            <Row
+              to="/account/wallet"
+              icon={<Wallet className="h-4 w-4" />}
+              label="Rewards & Wallet"
+            />
+            <Row
+              to="/account/payments"
+              icon={<CreditCard className="h-4 w-4" />}
+              label="Payment methods"
+            />
           </Section>
 
           <Section title="Manage account">
-            <Row to="/account/personal" icon={<User className="h-4 w-4" />} label="Personal details" />
-            <Row to="/account/security" icon={<Shield className="h-4 w-4" />} label="Security settings" />
-            <Row to="/account/travellers" icon={<Users className="h-4 w-4" />} label="Other travellers" />
+            <Row
+              to="/account/personal"
+              icon={<User className="h-4 w-4" />}
+              label="Personal details"
+            />
+            <Row
+              to="/account/security"
+              icon={<Shield className="h-4 w-4" />}
+              label="Security settings"
+            />
+            <Row
+              to="/account/travellers"
+              icon={<Users className="h-4 w-4" />}
+              label="Other travellers"
+            />
           </Section>
 
           <Section title="Preferences">
-            <Row to="/account/customizations" icon={<Settings2 className="h-4 w-4" />} label="Customization preferences" />
-            <Row to="/account/email-preferences" icon={<Mail className="h-4 w-4" />} label="Email preferences" />
+            <Row
+              to="/account/customizations"
+              icon={<Settings2 className="h-4 w-4" />}
+              label="Customization preferences"
+            />
+            <Row
+              to="/account/email-preferences"
+              icon={<Mail className="h-4 w-4" />}
+              label="Email preferences"
+            />
           </Section>
 
           <Section title="Travel activity">
-            <Row to="/account/bookings" icon={<BriefcaseBusiness className="h-4 w-4" />} label="Trips and bookings" />
-            <Row to="/account/saved" icon={<FileText className="h-4 w-4" />} label="Saved lists" />
-            <Row to="/account/reviews" icon={<FileText className="h-4 w-4" />} label="My reviews" />
+            <Row
+              to="/account/bookings"
+              icon={<BriefcaseBusiness className="h-4 w-4" />}
+              label="Trips and bookings"
+            />
+            <Row
+              to="/account/saved"
+              icon={<FileText className="h-4 w-4" />}
+              label="Saved lists"
+            />
+            <Row
+              to="/account/reviews"
+              icon={<FileText className="h-4 w-4" />}
+              label="My reviews"
+            />
           </Section>
 
           <Section title="Help and support">
-            <Row to="/support/contact" icon={<FileText className="h-4 w-4" />} label="Contact Customer service" />
-            <Row to="/support/safety" icon={<FileText className="h-4 w-4" />} label="Safety resource centre" />
-            <Row to="/support/disputes" icon={<FileText className="h-4 w-4" />} label="Dispute resolution" />
+            <Row
+              to="/support/contact"
+              icon={<FileText className="h-4 w-4" />}
+              label="Contact Customer service"
+            />
+            <Row
+              to="/support/safety"
+              icon={<FileText className="h-4 w-4" />}
+              label="Safety resource centre"
+            />
+            <Row
+              to="/support/disputes"
+              icon={<FileText className="h-4 w-4" />}
+              label="Dispute resolution"
+            />
           </Section>
 
           <Section title="Legal and privacy">
-            <Row to="/legal/privacy" icon={<Shield className="h-4 w-4" />} label="Privacy and data management" />
-            <Row to="/legal/content" icon={<FileText className="h-4 w-4" />} label="Content guidelines" />
+            <Row
+              to="/legal/privacy"
+              icon={<Shield className="h-4 w-4" />}
+              label="Privacy and data management"
+            />
+            <Row
+              to="/legal/content"
+              icon={<FileText className="h-4 w-4" />}
+              label="Content guidelines"
+            />
           </Section>
 
           <Section title="Manage your property">
-            <Row to="/list-your-property" icon={<Building2 className="h-4 w-4" />} label="List your property" />
+            <Row
+              to="/list-your-property"
+              icon={<Building2 className="h-4 w-4" />}
+              label="List your property"
+            />
           </Section>
         </div>
 
@@ -210,7 +301,13 @@ function PerkTile({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
       <div className="px-4 py-3 border-b border-[#e6eaf0] text-[14px] font-semibold">
@@ -221,7 +318,15 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Row({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function Row({
+  to,
+  icon,
+  label,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
   return (
     <Link
       to={to}

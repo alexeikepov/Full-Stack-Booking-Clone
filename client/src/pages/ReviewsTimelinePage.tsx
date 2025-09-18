@@ -1,16 +1,17 @@
 // src/pages/ReviewsTimelinePage.tsx
 import { Link } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Footer from "@/components/Footer";
+import { useNavigationTabsStore } from "@/stores/navigationTabs";
 
 type Review = {
   id: string;
   hotel: string;
   city: string;
   country?: string;
-  stayed: string;     // e.g. "Sep 2024"
-  reviewed: string;   // e.g. "17 Oct 2024"
-  score: number;      // 1..10
+  stayed: string; // e.g. "Sep 2024"
+  reviewed: string; // e.g. "17 Oct 2024"
+  score: number; // 1..10
   positive?: string;
   negative?: string;
   response?: string;
@@ -65,8 +66,14 @@ const DEMO: Review[] = [
 ];
 
 export default function ReviewsTimelinePage() {
+  const { setShowTabs } = useNavigationTabsStore();
   const [year, setYear] = useState("2024");
   const months = useMemo(() => 3, []);
+
+  useEffect(() => {
+    setShowTabs(false);
+    return () => setShowTabs(true);
+  }, [setShowTabs]);
 
   return (
     <div className="min-h-screen bg-[#f7f7f9] text-[#1a1a1a]">
