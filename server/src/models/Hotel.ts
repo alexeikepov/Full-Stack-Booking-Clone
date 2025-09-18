@@ -94,9 +94,50 @@ const HotelSchema = new Schema(
     submittedAt: { type: Date, default: Date.now },
     approvedAt: { type: Date },
 
-    houseRules: { type: String, required: true, default: "" },
-    checkIn: { type: String, required: true }, // e.g. "15:00"
-    checkOut: { type: String, required: true }, // e.g. "11:00"
+    // House rules and policies
+    houseRules: {
+      checkIn: {
+        time: { type: String, required: true, default: "15:00" },
+        note: { type: String, default: "Guests are required to show a photo identification and credit card upon check-in" },
+        advanceNotice: { type: String, default: "You'll need to let the property know in advance what time you'll arrive." }
+      },
+      checkOut: {
+        time: { type: String, required: true, default: "11:00" }
+      },
+      cancellation: {
+        policy: { type: String, default: "Cancellation and prepayment policies vary according to accommodation type." },
+        conditions: { type: String, default: "Please check what conditions may apply to each option when making your selection." }
+      },
+      children: {
+        welcome: { type: String, default: "Children of any age are welcome." },
+        searchNote: { type: String, default: "To see correct prices and occupancy information, please add the number of children in your group and their ages to your search." },
+        cotPolicy: {
+          ageRange: { type: String, default: "0 - 2 years" },
+          cotPrice: { type: String, default: "₪70 per child, per night" },
+          note: { type: String, default: "Cot upon request" },
+          additionalInfo: { type: String, default: "Prices for cots are not included in the total price, and will have to be paid for separately during your stay." },
+          availability: { type: String, default: "The number of cots allowed is dependent on the option you choose. Please check your selected option for more information." },
+          noExtraBeds: { type: String, default: "There are no extra beds available at this property." },
+          subjectToAvailability: { type: String, default: "All cots are subject to availability." }
+        }
+      },
+      ageRestriction: {
+        hasRestriction: { type: Boolean, default: false },
+        minimumAge: { type: Number, default: null },
+        note: { type: String, default: "There is no age requirement for check-in" }
+      },
+      pets: {
+        allowed: { type: Boolean, default: false },
+        note: { type: String, default: "Pets are not allowed." }
+      },
+      paymentMethods: {
+        methods: { type: [String], default: ["American Express", "Visa", "MasterCard", "JCB", "Maestro", "Discover", "UnionPay", "Cash"] }
+      },
+      parties: {
+        allowed: { type: Boolean, default: false },
+        note: { type: String, default: "Parties/events are not allowed" }
+      }
+    }
   },
   { timestamps: true, collection: "hotels" }
 );

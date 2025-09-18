@@ -10,7 +10,6 @@ export type RoomReservation = {
 
 export type Room = {
   _id: { $oid: string };
-  id?: string; // for frontend compatibility
   name: string;
   capacity: number;
   maxAdults: number;
@@ -30,7 +29,6 @@ export type Room = {
 
 export type Hotel = {
   _id: { $oid: string };
-  id?: string; // for frontend compatibility
   name: string;
   address: string;
   country: string;
@@ -48,6 +46,37 @@ export type Hotel = {
   categories: string;
   averageRating: number;
   reviewsCount: number;
+  ratingLabel?: string; // "Fabulous", "Good", "Excellent"
+  categoryRatings?: {
+    staff: number;
+    comfort: number;
+    freeWifi: number;
+    facilities: number;
+    valueForMoney: number;
+    cleanliness: number;
+    location: number;
+  };
+  categoryNames?: {
+    staff: string;
+    comfort: string;
+    freeWifi: string;
+    facilities: string;
+    valueForMoney: string;
+    cleanliness: string;
+    location: string;
+  };
+  highScoreCategories?: string[]; // categories that show arrow
+  highScoreTexts?: Record<string, string>; // custom text for high scores
+  reviewTopics?: string[]; // topics for filter buttons
+  guestReviews?: {
+    id: string;
+    reviewerName: string;
+    reviewerInitial: string;
+    country: string;
+    countryCode: string;
+    reviewText: string;
+    rating: number;
+  }[];
   ownerId: { $oid: string };
   approvalStatus: HotelApprovalStatus;
   submittedAt: { $date: string };
