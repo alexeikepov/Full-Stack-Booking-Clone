@@ -1,9 +1,10 @@
 // src/components/Header.tsx
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Bed, Plane, CarFront, Sparkles, HelpCircle } from "lucide-react";
 import * as React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigationStore } from "@/stores/navigation";
+import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSelector from "./LanguageSelector";
 import ProfileMenu from "./ProfileMenu";
@@ -27,7 +28,7 @@ function NavPill({
       className={[
         "flex items-center gap-2 rounded-full px-4 py-2 text-sm transition",
         active
-          ? "bg-white text-[#003b95] ring-1 ring-white/70"
+          ? "bg-[#003b95] text-white border border-white"
           : "text-white/90 hover:bg-white/10 hover:text-white",
       ].join(" ")}
     >
@@ -40,6 +41,7 @@ function NavPill({
 export default function Header() {
   const { user, isLoading, signOut } = useAuth();
   const { activeTab, setActiveTab } = useNavigationStore();
+  const { showTabs } = useNavigationTabsStore();
 
   return (
     <header className="w-full bg-[#003b95] text-white">
@@ -93,51 +95,53 @@ export default function Header() {
         </div>
 
         {/* Subnav line */}
-        <div className="flex h-12 items-center gap-2">
-          <NavPill
-            icon={Bed}
-            label="Stays"
-            tab="stays"
-            onClick={setActiveTab}
-            active={activeTab === "stays"}
-          />
-          <NavPill
-            icon={Plane}
-            label="Flights"
-            tab="flights"
-            onClick={setActiveTab}
-            active={activeTab === "flights"}
-          />
-          <NavPill
-            icon={CarFront}
-            label="Car rental"
-            tab="cars"
-            onClick={setActiveTab}
-            active={activeTab === "cars"}
-          />
-          <NavPill
-            icon={Sparkles}
-            label="Attractions"
-            tab="attractions"
-            onClick={setActiveTab}
-            active={activeTab === "attractions"}
-          />
+        {showTabs && (
+          <div className="flex h-12 items-center gap-2">
+            <NavPill
+              icon={Bed}
+              label="Stays"
+              tab="stays"
+              onClick={setActiveTab}
+              active={activeTab === "stays"}
+            />
+            <NavPill
+              icon={Plane}
+              label="Flights"
+              tab="flights"
+              onClick={setActiveTab}
+              active={activeTab === "flights"}
+            />
+            <NavPill
+              icon={CarFront}
+              label="Car rental"
+              tab="cars"
+              onClick={setActiveTab}
+              active={activeTab === "cars"}
+            />
+            <NavPill
+              icon={Sparkles}
+              label="Attractions"
+              tab="attractions"
+              onClick={setActiveTab}
+              active={activeTab === "attractions"}
+            />
 
-          <button
-            onClick={() => setActiveTab("taxis")}
-            className={[
-              "ml-1 flex items-center gap-2 rounded-full px-4 py-2 text-sm transition",
-              activeTab === "taxis"
-                ? "bg-white text-[#003b95] ring-1 ring-white/70"
-                : "text-white/90 hover:bg-white/10 hover:text-white",
-            ].join(" ")}
-          >
-            <span className="inline-flex items-center justify-center rounded-sm border border-white/70 px-1 text-[10px] leading-4 tracking-[0.08em]">
-              TAXI
-            </span>
-            <span>Airport taxis</span>
-          </button>
-        </div>
+            <button
+              onClick={() => setActiveTab("taxis")}
+              className={[
+                "ml-1 flex items-center gap-2 rounded-full px-4 py-2 text-sm transition",
+                activeTab === "taxis"
+                  ? "bg-[#003b95] text-white border border-white"
+                  : "text-white/90 hover:bg-white/10 hover:text-white",
+              ].join(" ")}
+            >
+              <span className="inline-flex items-center justify-center rounded-sm border border-white/70 px-1 text-[10px] leading-4 tracking-[0.08em]">
+                TAXI
+              </span>
+              <span>Airport taxis</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

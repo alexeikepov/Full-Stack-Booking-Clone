@@ -82,6 +82,11 @@ export default function HeroSearch() {
                 placeholder="Where are you going?"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    submit();
+                  }
+                }}
               />
             </div>
           </div>

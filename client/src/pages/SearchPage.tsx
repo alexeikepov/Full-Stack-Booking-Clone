@@ -402,30 +402,42 @@ export default function SearchPage() {
   }, [sorted, filters]);
 
   return (
-    <div className="bg-white">
-      <div className="bg-[#003b95]">
-        <div className="mx-auto max-w-[1112px] px-2 pb-4 pt-3">
-          <SearchTopBar />
+    <div className="min-h-screen bg-white">
+      {/* Blue background section for spacing like on home page */}
+      <section className="w-full bg-[#003b95] text-white">
+        <div className="mx-auto max-w-6xl px-2">
+          <div className="text-3xl font-bold md:text-[1px]">&nbsp;</div>
+          <div className="text-2xl mt-2 text-white/90">&nbsp;</div>
+        </div>
+      </section>
+
+      {/* Search Bar - Overlapping between blue and white */}
+      <div className="relative -mt-8 z-10">
+        <SearchTopBar />
+      </div>
+
+      {/* Breadcrumb */}
+      <div className="bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-2">
+          <nav className="text-sm text-gray-500">
+            <Link to="/" className="text-[#0071c2] hover:underline">
+              Home
+            </Link>
+            <span className="mx-2">›</span>
+            <Link to="#" className="text-[#0071c2] hover:underline">
+              Israel
+            </Link>
+            <span className="mx-2">›</span>
+            <Link to="#" className="text-[#0071c2] hover:underline">
+              {params.get("city") ?? "City"}
+            </Link>
+            <span className="mx-2">›</span>
+            <span>Search results</span>
+          </nav>
         </div>
       </div>
 
       <div className="mx-auto max-w-[1112px] px-2 sm:px-0">
-        <nav className="py-2 text-[12px] text-gray-500">
-          <Link to="#" className="text-[#0071c2] hover:underline">
-            Home
-          </Link>
-          <span className="mx-1">›</span>
-          <Link to="#" className="text-[#0071c2] hover:underline">
-            Israel
-          </Link>
-          <span className="mx-1">›</span>
-          <Link to="#" className="text-[#0071c2] hover:underline">
-            {params.get("city") ?? "City"}
-          </Link>
-          <span className="mx-1">›</span>
-          <span>Search results</span>
-        </nav>
-
         <h1 className="text-[18px] font-semibold">
           {params.get("city") ?? "city"}: {isLoading ? "…" : filtered.length}{" "}
           properties found
@@ -553,7 +565,7 @@ export default function SearchPage() {
               filtered.length > 0 &&
               filtered.map((h) => (
                 <HotelCard
-                  key={h.id}
+                  key={h._id.$oid}
                   hotel={h}
                   nights={nights}
                   variant={view}

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import globeImg from "@/img/MyBooking/Bookings.png";
+import { useNavigationTabsStore } from "@/stores/navigationTabs";
 
 type Trip = {
   id: string;
@@ -21,10 +22,16 @@ const API_BASE =
   (import.meta as any).env?.VITE_API_BASE_URL?.replace(/\/+$/, "") || "";
 
 export default function BookingsPage() {
+  const { setShowTabs } = useNavigationTabsStore();
   const [tab, setTab] = useState<"past" | "cancelled">("past");
   const [data, setData] = useState<ApiPayload>({ past: [], cancelled: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setShowTabs(false);
+    return () => setShowTabs(true);
+  }, [setShowTabs]);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -140,34 +147,58 @@ export default function BookingsPage() {
         </section>
       </main>
 
-     {/* Dark blue band */}
-<div className="mt-14 w-full bg-[#003b95] text-white">
-  <div className="mx-auto max-w-[1128px] px-4">
-    <div className="flex justify-center pt-4">
-      <Link
-        to="#"
-        className="rounded-[4px] border border-white/70 px-3 py-[6px] text-[12px] font-medium hover:bg-white/10"
-      >
-        List your property
-      </Link>
-    </div>
-  </div>
+      {/* Dark blue band */}
+      <div className="mt-14 w-full bg-[#003b95] text-white">
+        <div className="mx-auto max-w-[1128px] px-4">
+          <div className="flex justify-center pt-4">
+            <Link
+              to="#"
+              className="rounded-[4px] border border-white/70 px-3 py-[6px] text-[12px] font-medium hover:bg-white/10"
+            >
+              List your property
+            </Link>
+          </div>
+        </div>
 
-  {/* full-width white separator */}
-  <div className="h-px w-full bg-white/35" />
+        {/* full-width white separator */}
+        <div className="h-px w-full bg-white/35" />
 
-  {/* white nav links with underline (inside container) */}
-  <div className="mx-auto max-w-[1128px] px-4">
-    <nav className="flex flex-wrap items-center gap-x-8 gap-y-2 py-3 text-[13px] font-medium">
-      <Link to="#" className="underline decoration-white/85 underline-offset-4 hover:decoration-white">Mobile version</Link>
-      <Link to="#" className="underline decoration-white/85 underline-offset-4 hover:decoration-white">Manage your bookings</Link>
-      <Link to="#" className="underline decoration-white/85 underline-offset-4 hover:decoration-white">Customer Service help</Link>
-      <Link to="#" className="underline decoration-white/85 underline-offset-4 hover:decoration-white">Become an affiliate</Link>
-      <Link to="#" className="underline decoration-white/85 underline-offset-4 hover:decoration-white">Booking.com for Business</Link>
-    </nav>
-  </div>
-</div>
-
+        {/* white nav links with underline (inside container) */}
+        <div className="mx-auto max-w-[1128px] px-4">
+          <nav className="flex flex-wrap items-center gap-x-8 gap-y-2 py-3 text-[13px] font-medium">
+            <Link
+              to="#"
+              className="underline decoration-white/85 underline-offset-4 hover:decoration-white"
+            >
+              Mobile version
+            </Link>
+            <Link
+              to="#"
+              className="underline decoration-white/85 underline-offset-4 hover:decoration-white"
+            >
+              Manage your bookings
+            </Link>
+            <Link
+              to="#"
+              className="underline decoration-white/85 underline-offset-4 hover:decoration-white"
+            >
+              Customer Service help
+            </Link>
+            <Link
+              to="#"
+              className="underline decoration-white/85 underline-offset-4 hover:decoration-white"
+            >
+              Become an affiliate
+            </Link>
+            <Link
+              to="#"
+              className="underline decoration-white/85 underline-offset-4 hover:decoration-white"
+            >
+              Booking.com for Business
+            </Link>
+          </nav>
+        </div>
+      </div>
 
       {/* White area with blue links */}
       <div className="w-full bg-white py-10">
@@ -234,8 +265,8 @@ export default function BookingsPage() {
           </div>
 
           <div className="mt-8 text-left text-[11px] text-black/50">
-  © 1996–2025 Booking.com™. All rights reserved.
-</div>
+            © 1996–2025 Booking.com™. All rights reserved.
+          </div>
 
           <div className="mt-2 text-center text-[11px] text-black/45">
             Booking.com is part of Booking Holdings Inc., the world leader in
@@ -296,7 +327,10 @@ function FooterTopLink({ children }: { children: React.ReactNode }) {
 function FooterCol({ title, items }: { title: string; items: string[] }) {
   return (
     <div>
-      <Link to="#" className="block text-[#0071c2] font-semibold hover:underline">
+      <Link
+        to="#"
+        className="block text-[#0071c2] font-semibold hover:underline"
+      >
         {title}
       </Link>
       <ul className="mt-2 space-y-1">
