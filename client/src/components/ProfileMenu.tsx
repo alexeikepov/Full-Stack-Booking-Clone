@@ -75,7 +75,9 @@ export default function ProfileMenu({
         </div>
 
         <div className="hidden md:flex flex-col items-start leading-tight">
-          <span className="text-white font-semibold">{user?.name ?? "My account"}</span>
+          <span className="text-white font-semibold">
+            {user?.name ?? "My account"}
+          </span>
           <span className="mt-0.5 text-[13px] font-semibold text-[#febb02]">
             {geniusLabel}
           </span>
@@ -87,7 +89,7 @@ export default function ProfileMenu({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-black/5 bg-white text-[#1a1a1a] shadow-[0_8px_32px_rgba(0,0,0,.18)]"
+          className="absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-black/5 bg-white text-[#1a1a1a] shadow-[0_8px_32px_rgba(0,0,0,.18)] z-[100]"
         >
           <div className="py-2">
             <TopRow
@@ -104,13 +106,21 @@ export default function ProfileMenu({
 
           <div className="my-1 h-px bg-black/10" />
 
-          <MenuItem to="/account" icon={<UserIcon className="h-4 w-4" />} label="My account" />
+          <MenuItem
+            to="/account"
+            icon={<UserIcon className="h-4 w-4" />}
+            label="My account"
+          />
           <MenuItem
             to="/account/bookings"
             icon={<Briefcase className="h-4 w-4" />}
             label="Bookings & Trips"
           />
-          <MenuItem to="/account/saved" icon={<Heart className="h-4 w-4" />} label="Saved" />
+          <MenuItem
+            to="/account/saved"
+            icon={<Heart className="h-4 w-4" />}
+            label="Saved"
+          />
           <MenuItem
             to="/account/reviews"
             icon={<MessageSquareText className="h-4 w-4" />}
