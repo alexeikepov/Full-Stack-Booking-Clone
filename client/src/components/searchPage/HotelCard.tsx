@@ -42,7 +42,6 @@ export default function HotelCard({ hotel, nights, variant = "list" }: Props) {
 
   // Helper function to get hotel ID
   const getHotelId = (hotel: Hotel): string => {
-    if (hotel.id) return hotel.id;
     if (hotel._id?.$oid) return hotel._id.$oid;
     if (typeof hotel._id === "string") return hotel._id;
     return "";
