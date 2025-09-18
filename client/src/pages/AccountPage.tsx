@@ -33,17 +33,29 @@ type UserLite = {
 
 export default function AccountPage({
   user = {
-    name: "Hi, Ofir",
+    name: "Alexei Kepiv",
     geniusLevel: 3,
     rewardsCount: 5,
     creditsCount: 0,
-    initials: "NN",
+    initials: "AK",
   },
 }: {
   user?: UserLite;
 }) {
   const { setShowTabs } = useNavigationTabsStore();
   const geniusLabel = `Genius Level ${user.geniusLevel ?? 3}`;
+
+  // Generate initials from name
+  const initials =
+    user?.initials ||
+    (user?.name
+      ? user.name
+          .trim()
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((n) => n[0]?.toUpperCase() ?? "")
+          .join("") || "U"
+      : "U");
 
   useEffect(() => {
     setShowTabs(false);
@@ -57,8 +69,14 @@ export default function AccountPage({
         <div className="mx-auto max-w-[1128px] px-4 py-8 pb-16">
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 rounded-full p-[3px] bg-[#febb02]">
-              <div className="h-full w-full rounded-full bg-white flex items-center justify-center">
-                <User className="h-8 w-8 text-[#0a3d91]" />
+              <div
+                className="grid h-full w-full place-items-center rounded-full text-white font-semibold text-2xl"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 45%, #cf5418 0 60%, #b84512 100%)",
+                }}
+              >
+                {initials}
               </div>
             </div>
             <div className="flex flex-col">
@@ -117,29 +135,35 @@ export default function AccountPage({
             </div>
           </div>
 
-          <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
-            <div className="border-b border-[#e6eaf0] px-6 pt-8 pb-6">
-              <div className="text-[16px] font-semibold">
-                You're at the highest Genius level!
-              </div>
-            </div>
-            <div className="px-6 py-8">
-              <div className="flex items-start gap-4">
-                <img
-                  src={highestGenius}
-                  alt=""
-                  className="h-12 w-12 rounded-full"
-                />
-                <div className="flex-1">
-                  <div className="text-[14px] text-black/70">
-                    No Credits or vouchers yet
-                  </div>
-                  <div className="mt-2 text-[13px] text-black/45">
-                    {user.creditsCount ?? 0}
+          {/* Right column with two stacked panels */}
+          <div className="flex flex-col gap-6">
+            {/* Top right panel: Genius level */}
+            <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
+              <div className="px-6 py-8">
+                <div className="flex flex-col items-center gap-4">
+                  <img
+                    src={highestGenius}
+                    alt=""
+                    className="h-16 w-16 object-contain"
+                  />
+                  <div className="text-[16px] font-semibold text-center">
+                    You're at the highest Genius level!
                   </div>
                 </div>
               </div>
-              <div className="mt-6">
+            </div>
+
+            {/* Bottom right panel: Credits and vouchers */}
+            <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
+              <div className="px-6 py-8">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-[14px] text-black/70">
+                    No Credits or vouchers yet
+                  </div>
+                  <div className="text-[13px] text-black font-bold">
+                    {user.creditsCount ?? 0}
+                  </div>
+                </div>
                 <Link
                   to="/account/credits"
                   className="text-[#0071c2] text-[13px] font-medium hover:underline"
