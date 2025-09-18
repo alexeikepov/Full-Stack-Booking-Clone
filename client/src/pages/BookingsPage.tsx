@@ -71,47 +71,47 @@ export default function BookingsPage() {
 
   return (
     <div className="min-h-screen bg-white text-[#1a1a1a]">
-      <main className="mx-auto max-w-[1128px] px-4 pt-8">
+      <main className="mx-auto max-w-[1128px] px-4 pt-12">
         {/* Title row */}
         <div className="flex items-center justify-between">
-          <h1 className="text-[20px] font-semibold leading-none">
+          <h1 className="text-[24px] font-bold leading-none">
             Bookings &amp; Trips
           </h1>
           <Link
             to="#"
-            className="text-[12px] font-medium text-[#0a5ad6] hover:underline"
+            className="text-[14px] font-medium text-[#0a5ad6] hover:underline"
           >
-            Can’t find a booking?
+            Can't find a booking?
           </Link>
         </div>
 
         {/* Left column under the title */}
-        <section className="mt-8 w-[736px]">
+        <section className="mt-10 w-[800px]">
           {/* Hero */}
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-6">
             <img
               src={globeImg}
               alt=""
-              className="h-[96px] w-[96px] select-none"
+              className="h-[200px] w-[200px] select-none object-contain object-center"
             />
             <div>
-              <div className="text-[18px] font-semibold">Where to next?</div>
-              <div className="mt-1 text-[12px] text-black/60">
-                You haven’t started any trips yet. When you’ve made a booking,
+              <div className="text-[28px] font-bold">Where to next?</div>
+              <div className="mt-3 text-[16px] text-black/60">
+                You haven't started any trips yet. When you've made a booking,
                 it will appear here.
               </div>
             </div>
           </div>
 
           {/* Tabs under the hero */}
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-8 flex items-center gap-2">
             <button
               onClick={() => setTab("past")}
               className={
-                "rounded-full border px-4 py-[6px] text-[12px] font-medium " +
+                "rounded-full border px-6 py-3 text-[14px] font-medium " +
                 (tab === "past"
-                  ? "border-[#c7d4e8] bg-white text-[#1a1a1a]"
-                  : "border-transparent bg-[#eef2fa] text-[#1a1a1a]/70 hover:bg-[#e9effa]")
+                  ? "border-[#0071c2] bg-[#e6f2ff] text-[#0071c2]"
+                  : "border-[#e6eaf0] bg-white text-[#1a1a1a] hover:bg-[#f6f7fb]")
               }
             >
               Past
@@ -119,10 +119,10 @@ export default function BookingsPage() {
             <button
               onClick={() => setTab("cancelled")}
               className={
-                "rounded-full border px-4 py-[6px] text-[12px] font-medium " +
+                "rounded-full border px-6 py-3 text-[14px] font-medium " +
                 (tab === "cancelled"
-                  ? "border-[#c7d4e8] bg-white text-[#1a1a1a]"
-                  : "border-transparent bg-[#eef2fa] text-[#1a1a1a]/70 hover:bg-[#e9effa]")
+                  ? "border-[#0071c2] bg-[#e6f2ff] text-[#0071c2]"
+                  : "border-[#e6eaf0] bg-white text-[#1a1a1a] hover:bg-[#f6f7fb]")
               }
             >
               Cancelled
@@ -131,13 +131,13 @@ export default function BookingsPage() {
 
           {/* Error banner */}
           {error && (
-            <div className="mt-4 w-[520px] max-w-full rounded-[10px] border border-[#f3c2c0] bg-[#fdeeee] px-3 py-2 text-[12px] text-[#8b1f1b]">
+            <div className="mt-6 w-[600px] max-w-full rounded-[10px] border border-[#f3c2c0] bg-[#fdeeee] px-4 py-3 text-[14px] text-[#8b1f1b]">
               {error}
             </div>
           )}
 
           {/* Trips grid */}
-          <div className="mt-8 grid w-[736px] grid-cols-3 gap-3">
+          <div className="mt-10 grid w-[800px] grid-cols-3 gap-4">
             {loading
               ? Array.from({ length: 6 }).map((_, i) => (
                   <TripSkeleton key={i} />
@@ -282,17 +282,17 @@ export default function BookingsPage() {
 
 function TripCard({ trip }: { trip: Trip }) {
   return (
-    <div className="flex items-center gap-3 rounded-[10px] border border-[#e6eaf0] bg-white px-3 py-2 hover:border-[#cfd7e2]">
+    <div className="flex items-center gap-4 rounded-[12px] border border-[#e6eaf0] bg-white px-4 py-4 hover:border-[#cfd7e2]">
       <img
         src={trip.imageUrl}
         alt=""
-        className="h-[42px] w-[56px] rounded object-cover ring-1 ring-black/10"
+        className="h-[56px] w-[72px] rounded object-cover ring-1 ring-black/10"
       />
       <div className="min-w-0">
-        <div className="truncate text-[13px] font-medium hover:underline">
+        <div className="truncate text-[15px] font-medium hover:underline">
           {trip.city}
         </div>
-        <div className="mt-[2px] truncate text-[11.5px] text-black/60">
+        <div className="mt-1 truncate text-[13px] text-black/60">
           {fmtRange(trip.from, trip.to)} · {trip.bookings} booking
           {trip.bookings === 1 ? "" : "s"}
         </div>
@@ -303,11 +303,11 @@ function TripCard({ trip }: { trip: Trip }) {
 
 function TripSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-[10px] border border-[#e6eaf0] bg-white px-3 py-2">
-      <div className="h-[42px] w-[56px] rounded bg-[#eef2f7]" />
+    <div className="flex items-center gap-4 rounded-[12px] border border-[#e6eaf0] bg-white px-4 py-4">
+      <div className="h-[56px] w-[72px] rounded bg-[#eef2f7]" />
       <div className="flex-1">
-        <div className="h-3 w-24 rounded bg-[#eef2f7]" />
-        <div className="mt-2 h-3 w-40 rounded bg-[#eef2f7]" />
+        <div className="h-4 w-28 rounded bg-[#eef2f7]" />
+        <div className="mt-2 h-4 w-48 rounded bg-[#eef2f7]" />
       </div>
     </div>
   );

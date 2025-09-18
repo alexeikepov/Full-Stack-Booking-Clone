@@ -52,47 +52,43 @@ export default function AccountPage({
 
   return (
     <div className="min-h-screen bg-[#f2f5f9] text-[#1a1a1a]">
+      {/* Welcome Genius Level Section */}
       <div className="w-full bg-[#003b95]">
-        <div className="mx-auto max-w-[1128px] px-4 h-[196px] flex items-end">
-          <div className="mb-8 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full p-[1px] bg-[#febb02]">
-              <div
-                className="grid h-full w-full place-items-center rounded-full text-white text-[13px] font-semibold"
-                style={{
-                  background:
-                    "radial-gradient(circle at 50% 45%, #cf5418 0 60%, #b84512 100%)",
-                }}
-              >
-                {user.initials ?? "NN"}
+        <div className="mx-auto max-w-[1128px] px-4 py-8 pb-16">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-full p-[3px] bg-[#febb02]">
+              <div className="h-full w-full rounded-full bg-white flex items-center justify-center">
+                <User className="h-8 w-8 text-[#0a3d91]" />
               </div>
             </div>
-            <div className="leading-tight">
-              <div className="text-white text-[22px] font-semibold tracking-[.2px]">
-                {user.name ?? "Hi,"}
-              </div>
-              <div className="text-[#febb02] text-[13px] font-semibold">
-                {geniusLabel}
-              </div>
+            <div className="flex flex-col">
+              <span className="text-white text-2xl font-bold">Welcome</span>
+              <span className="text-lg font-medium">
+                <span className="text-white">Genius </span>
+                <span className="text-[#febb02]">
+                  Level {user?.geniusLevel ?? 3}
+                </span>
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      <main className="mx-auto max-w-[1128px] px-4 -mt-[88px] pb-10">
-        <div className="grid grid-cols-[minmax(0,1fr)_312px] gap-4">
+      <main className="mx-auto max-w-[1128px] px-4 -mt-[40px] pb-10">
+        <div className="grid grid-cols-[minmax(0,1fr)_312px] gap-6">
           <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
-            <div className="px-5 pt-4 pb-2">
-              <div className="text-[15px] font-semibold">
+            <div className="px-6 pt-8 pb-6">
+              <div className="text-[16px] font-semibold">
                 You have {user.rewardsCount ?? 5} Genius rewards
               </div>
-              <div className="mt-1 text-[12.5px] text-black/60">
+              <div className="mt-3 text-[13px] text-black/60">
                 Enjoy rewards and discounts on select stays and rental cars
                 worldwide.
               </div>
             </div>
 
-            <div className="px-4 pb-2">
-              <div className="grid grid-cols-5 gap-3">
+            <div className="px-5 pb-6">
+              <div className="grid grid-cols-5 gap-5">
                 <PerkTile
                   img={perkStays}
                   title="10–20% off stays"
@@ -111,7 +107,7 @@ export default function AccountPage({
               </div>
             </div>
 
-            <div className="px-5 pb-4 pt-1">
+            <div className="px-6 pb-8 pt-3">
               <Link
                 to="/account/rewards"
                 className="text-[#0071c2] text-[13px] font-medium hover:underline"
@@ -122,28 +118,28 @@ export default function AccountPage({
           </div>
 
           <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
-            <div className="border-b border-[#e6eaf0] px-5 pt-4 pb-3">
-              <div className="text-[15px] font-semibold">
-                You’re at the highest Genius level!
+            <div className="border-b border-[#e6eaf0] px-6 pt-8 pb-6">
+              <div className="text-[16px] font-semibold">
+                You're at the highest Genius level!
               </div>
             </div>
-            <div className="px-5 py-4">
-              <div className="flex items-start gap-3">
+            <div className="px-6 py-8">
+              <div className="flex items-start gap-4">
                 <img
                   src={highestGenius}
                   alt=""
-                  className="h-10 w-10 rounded-full"
+                  className="h-12 w-12 rounded-full"
                 />
                 <div className="flex-1">
-                  <div className="text-[13px] text-black/70">
+                  <div className="text-[14px] text-black/70">
                     No Credits or vouchers yet
                   </div>
-                  <div className="mt-1 text-[12px] text-black/45">
+                  <div className="mt-2 text-[13px] text-black/45">
                     {user.creditsCount ?? 0}
                   </div>
                 </div>
               </div>
-              <div className="mt-3">
+              <div className="mt-6">
                 <Link
                   to="/account/credits"
                   className="text-[#0071c2] text-[13px] font-medium hover:underline"
@@ -155,7 +151,7 @@ export default function AccountPage({
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Section title="Payment information">
             <Row
               to="/account/wallet"
@@ -289,8 +285,8 @@ function PerkTile({
   badge?: string;
 }) {
   return (
-    <div className="relative h-[72px] rounded-[10px] border border-[#e6eaf0] bg-white px-3.5 py-3 flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,.03)]">
-      <img src={img} alt="" className="h-6 w-6 object-contain" />
+    <div className="relative h-[110px] rounded-[10px] border border-[#e6eaf0] bg-white px-4 py-6 flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,.03)]">
+      <img src={img} alt="" className="h-8 w-8 object-contain" />
       <div className="text-[14px] font-medium leading-5">{title}</div>
       {badge && (
         <span className="absolute -top-2 left-2 rounded-full bg-[#fff3cd] px-2 py-[2px] text-[10px] font-semibold text-[#8a6d3b]">
@@ -310,10 +306,10 @@ function Section({
 }) {
   return (
     <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
-      <div className="px-4 py-3 border-b border-[#e6eaf0] text-[14px] font-semibold">
+      <div className="px-5 py-4 border-b border-[#e6eaf0] text-[14px] font-semibold">
         {title}
       </div>
-      <div className="p-2">{children}</div>
+      <div className="p-3">{children}</div>
     </div>
   );
 }
@@ -330,7 +326,7 @@ function Row({
   return (
     <Link
       to={to}
-      className="flex items-center justify-between rounded-[10px] px-3 py-3 hover:bg-[#f6f7fb]"
+      className="flex items-center justify-between rounded-[10px] px-4 py-4 hover:bg-[#f6f7fb]"
     >
       <div className="flex items-center gap-3">
         <span className="text-[#003b95]">{icon}</span>
