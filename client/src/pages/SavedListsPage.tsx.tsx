@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
+import { useNavigationStore } from "@/stores/navigation";
 
 function BluePill(props: React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -46,9 +47,10 @@ const ITEM = {
 
 export default function SavedListsPage() {
   const { setShowTabs } = useNavigationTabsStore();
+  const { activeTab, setActiveTab } = useNavigationStore();
 
   useEffect(() => {
-    setShowTabs(false);
+    setShowTabs(true);
     return () => setShowTabs(true);
   }, [setShowTabs]);
 
@@ -81,7 +83,6 @@ export default function SavedListsPage() {
         <h1 className="mb-1 text-[28px] font-bold text-[#1a1a1a]">
           Mitzpe Ramon
         </h1>
-        <h2 className="mb-3 text-[18px] font-semibold">Stays</h2>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <TagPlain>
