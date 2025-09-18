@@ -37,7 +37,6 @@ export default function AccountPage({
     geniusLevel: 3,
     rewardsCount: 5,
     creditsCount: 0,
-    initials: "AK",
   },
 }: {
   user?: UserLite;
@@ -46,16 +45,14 @@ export default function AccountPage({
   const geniusLabel = `Genius Level ${user.geniusLevel ?? 3}`;
 
   // Generate initials from name
-  const initials =
-    user?.initials ||
-    (user?.name
-      ? user.name
-          .trim()
-          .split(/\s+/)
-          .slice(0, 2)
-          .map((n) => n[0]?.toUpperCase() ?? "")
-          .join("") || "U"
-      : "U");
+  const initials = user?.name
+    ? user.name
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((n) => n[0]?.toUpperCase() ?? "")
+        .join("") || "U"
+    : "U";
 
   useEffect(() => {
     setShowTabs(false);

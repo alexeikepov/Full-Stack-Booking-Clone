@@ -4,12 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   User as UserIcon,
   Briefcase,
-  MessageSquareText,
   Heart,
-  LogOut,
-  ChevronRight,
   ChevronDown,
-  Star,
+  Wallet,
+  Users,
+  ArrowLeft,
 } from "lucide-react";
 
 type User = {
@@ -91,87 +90,62 @@ export default function ProfileMenu({
           role="menu"
           className="absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-black/5 bg-white text-[#1a1a1a] shadow-[0_8px_32px_rgba(0,0,0,.18)] z-[100]"
         >
-          <div className="py-2">
-            <TopRow
-              to="/account/rewards"
-              label="Unlocked Genius rewards"
-              count={user?.rewardsCount ?? 5}
-            />
-            <TopRow
-              to="/account/credits"
-              label="Credits and Vouchers"
-              count={user?.creditsCount ?? 0}
-            />
-          </div>
-
-          <div className="my-1 h-px bg-black/10" />
-
           <MenuItem
             to="/account"
             icon={<UserIcon className="h-4 w-4" />}
             label="My account"
+            onClick={() => setOpen(false)}
           />
           <MenuItem
             to="/account/bookings"
             icon={<Briefcase className="h-4 w-4" />}
             label="Bookings & Trips"
+            onClick={() => setOpen(false)}
+          />
+          <MenuItem
+            to="/account/genius"
+            icon={<GeniusIcon />}
+            label="Genius loyalty programme"
+            onClick={() => setOpen(false)}
+          />
+          <MenuItem
+            to="/account/rewards"
+            icon={<Wallet className="h-4 w-4" />}
+            label="Rewards & Wallet"
+            onClick={() => setOpen(false)}
+          />
+          <MenuItem
+            to="/account/reviews"
+            icon={<Users className="h-4 w-4" />}
+            label="Reviews"
+            onClick={() => setOpen(false)}
           />
           <MenuItem
             to="/account/saved"
             icon={<Heart className="h-4 w-4" />}
             label="Saved"
+            onClick={() => setOpen(false)}
           />
           <MenuItem
-            to="/account/reviews"
-            icon={<MessageSquareText className="h-4 w-4" />}
-            label="Reviews"
-          />
-
-          <div className="my-1 h-px bg-black/10" />
-
-          <button
             onClick={() => {
               setOpen(false);
               onSignOut();
             }}
-            className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-black/[.04]"
-            role="menuitem"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Sign out</span>
-          </button>
+            icon={<ArrowLeft className="h-4 w-4" />}
+            label="Sign out"
+            isButton={true}
+          />
         </div>
       )}
     </div>
   );
 }
 
-function TopRow({
-  to,
-  label,
-  count,
-}: {
-  to: string;
-  label: string;
-  count: number;
-}) {
+function GeniusIcon() {
   return (
-    <Link
-      to={to}
-      className="flex items-center justify-between px-4 py-3 hover:bg-black/[.04]"
-      role="menuitem"
-    >
-      <div className="flex items-center gap-3">
-        <Star className="h-4 w-4 text-[#0a3d91]" />
-        <span className="font-medium">{label}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="rounded-full bg-black/5 px-2 py-[2px] text-xs font-semibold">
-          {count}
-        </span>
-        <ChevronRight className="h-4 w-4 opacity-70" />
-      </div>
-    </Link>
+    <div className="h-4 w-4 flex items-center justify-center">
+      <span className="text-[#0a3d91] font-bold text-sm">G</span>
+    </div>
   );
 }
 
@@ -179,16 +153,34 @@ function MenuItem({
   to,
   icon,
   label,
+  onClick,
+  isButton = false,
 }: {
-  to: string;
+  to?: string;
   icon: React.ReactNode;
   label: string;
+  onClick?: () => void;
+  isButton?: boolean;
 }) {
+  if (isButton) {
+    return (
+      <button
+        onClick={onClick}
+        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-black/[.04]"
+        role="menuitem"
+      >
+        {icon}
+        <span>{label}</span>
+      </button>
+    );
+  }
+
   return (
     <Link
-      to={to}
+      to={to!}
       className="flex items-center gap-3 px-4 py-3 hover:bg-black/[.04]"
       role="menuitem"
+      onClick={onClick}
     >
       {icon}
       <span>{label}</span>

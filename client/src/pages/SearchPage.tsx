@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
 import { api } from "@/lib/api";
@@ -201,6 +201,11 @@ export default function SearchPage() {
   const [sortKey, setSortKey] = useState<SortKey>(
     (params.get("sort") as SortKey) || "price_high"
   );
+
+  // Scroll to top when component mounts or params change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [params]);
 
   const nights = nightsFromParams(params);
 
