@@ -1,259 +1,204 @@
-// src/pages/SavedListsPage.tsx
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
-import Footer from "@/components/Footer";
-import { useNavigationTabsStore } from "@/stores/navigationTabs";
-import { useNavigationStore } from "@/stores/navigation";
+// src/pages/ListYourPropertyPage.tsx
+import { useEffect, useState } from "react";
 
-function BluePill(props: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      {...props}
-      className={
-        "inline-flex items-center gap-1 rounded-[6px] border border-[#b9d2f5] bg-white px-2.5 py-[6px] text-[12px] font-medium text-[#0a5ad6] " +
-        (props.className || "")
-      }
-    />
-  );
-}
-function TagPlain(props: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      {...props}
-      className={
-        "inline-flex items-center gap-1 px-0 py-[6px] text-[12px] font-medium text-[#6b7280] " +
-        (props.className || "")
-      }
-    />
-  );
-}
-
-const railLink = "text-[12px] text-[#6b7280] hover:underline whitespace-nowrap";
-
-const ITEM = {
-  id: "galini",
-  name: "Galini Palace",
-  img: "https://cf.bstatic.com/xdata/images/hotel/square600/597783002.webp?k=3545efe5865606bf107ad177c20591c2048174246717d7b2f2476168143488d1&o=",
-  rating: 8.1,
-  ratingText: "Very good",
-  reviews: 298,
-  city: "Kolymvari",
-  distance: "0.8 km from centre",
-  dates: "15 Sept – 17 Sept",
-  note: "Sold out on Booking.com",
-  stars: 4,
-};
-
-export default function SavedListsPage() {
-  const { setShowTabs } = useNavigationTabsStore();
-  const { activeTab, setActiveTab } = useNavigationStore();
+export default function ListYourPropertyPage() {
+  const [email, setEmail] = useState("");
+  const [ptype, setPtype] = useState("");
+  const [country, setCountry] = useState("");
 
   useEffect(() => {
-    setShowTabs(true);
-    return () => setShowTabs(true);
-  }, [setShowTabs]);
+    const id = "bk-join-ONE2ONE";
+    if (document.getElementById(id)) return;
+    const s = document.createElement("style");
+    s.id = id;
+    s.innerHTML = `
+:root{
+  --bk-blue:#003580;
+  --bk-blue2:#0a3a86;
+  --bk-hero:#0b3a84;
+  --bk-cta:#0a5ad6;
+  --bk-ink:#1a1a1a;
+  --bk-sub:#5d6a76;
+  --bk-line:#e7e7e7;
+  --bk-gold:#ffb700;
+  --bk-check:#18a34a;
+  --bk-check-ring:#cfe8d6;
+  --bk-link:#0a5ad6;
+  --bk-hero-grad-1:#0b3a84;
+  --bk-hero-grad-2:#022a64;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--bk-ink);background:#fff}
+a{color:var(--bk-link);text-decoration:underline}
+
+/* container */
+.wrap{max-width:1064px;margin:0 auto;padding:0 24px}
+
+/* HERO BAR */
+.hero{background:linear-gradient(180deg,var(--bk-hero-grad-1) 0%, var(--bk-hero-grad-2) 100%);color:#fff}
+.hero-in{padding:36px 0 44px}
+
+/* top row */
+.hero-top{display:flex;justify-content:flex-end;gap:18px;font-size:13px;opacity:.96}
+.brand{position:absolute;left:24px;transform:translateY(-4px);background:#0b3a84;border:1px solid rgba(255,255,255,.3);
+  color:#fff;border-radius:6px;padding:8px 12px;font-weight:800}
+.green-pill{display:inline-flex;align-items:center;gap:8px;background:#1fa347;color:#fff;border-radius:6px;padding:6px 10px;
+  font-size:12px;font-weight:700;margin-top:10px}
+.green-pill i{width:8px;height:8px;border-radius:999px;background:#fff}
+
+/* hero grid */
+.hero-grid{display:grid;gap:24px;align-items:start}
+@media(min-width:992px){.hero-grid{grid-template-columns:1fr 360px}}
+.sub{color:rgba(255,255,255,.95);font-size:15px;line-height:22px;max-width:600px;margin-top:6px}
+
+/* headline */
+.h1{margin:18px 0 8px;font-weight:800;letter-spacing:.2px;font-size:56px;line-height:64px}
+.h1 .accent{background:linear-gradient(180deg,#31b4ff 0%, #0a6adf 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* register card (RIGHT) */
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 18px rgba(0,0,0,.18);outline:3px solid var(--bk-gold)}
+.card-b{padding:16px}
+.card h3{margin:0 0 2px;font-size:18px;line-height:24px;font-weight:800;color:#111827}
+.card small{display:block;color:#5f6b76;font-size:12px;margin-bottom:8px}
+.tick{display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+.tick svg{flex:0 0 18px}
+.tick span{color:#1f2937;font-size:13px}
+.field{margin-top:10px}
+.input,.select{width:100%;height:40px;border:1px solid var(--bk-line);border-radius:8px;padding:0 10px;font-size:14px;background:#fff}
+.select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 20 20'%3E%3Cpath fill='%23666' d='M5.8 7.3 10 11.5l4.2-4.2 1.1 1.1L10 13.7 4.7 8.4z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;height:40px;font-size:14px;font-weight:800;cursor:pointer}
+.btn-cta{background:var(--bk-cta);color:#fff;width:100%;margin-top:12px}
+.btn-cta .arrow{margin-left:8px;display:inline-block;transform:translateY(1px)}
+.card-note{margin-top:10px;border-top:1px solid var(--bk-line);padding-top:10px}
+.card-note small{font-size:12px;color:#1b2430}
+.card-note b{font-weight:800;color:#111827}
+
+/* section under hero */
+.section{padding:40px 0}
+.h2{margin:0 0 10px;font-size:34px;line-height:42px;font-weight:800;color:#111827}
+.cols{display:grid;gap:24px}
+@media(min-width:992px){.cols{grid-template-columns:repeat(3,1fr)}}
+.col h4{margin:0 0 8px;font-size:16px;line-height:22px;font-weight:800}
+.row{display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:15px;color:#334155}
+.note{margin-top:10px;color:#6b7280;font-size:12px}
+.start-inline{margin-top:14px;width:160px}
+
+/* icon */
+svg{display:block}
+    `;
+    document.head.appendChild(s);
+    return () => document.getElementById(id)?.remove();
+  }, []);
+
+  const Check = ({ size = 18 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="10" cy="10" r="9" fill="none" stroke="var(--bk-check-ring)" />
+      <path d="M6.2 10.3 8.8 13l5-6" fill="none" stroke="var(--bk-check)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 
   return (
-    <div className="min-h-screen bg-white text-[#1a1a1a]">
-      <main className="mx-auto max-w-[1128px] px-4 pt-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] text-[#3b3f46]">Select list:</span>
-            <select
-              className="h-8 rounded-[6px] border border-[#b9d2f5] bg-white px-2.5 text-[12px] font-medium text-[#0a5ad6] outline-none focus:ring-2 focus:ring-[#b9d2f5]"
-              defaultValue="Mitzpe Ramon"
-            >
-              <option>Mitzpe Ramon</option>
-              <option>Summer trip</option>
-            </select>
-            <button className="rounded-[6px] bg-[#0a5ad6] px-3 py-2 text-[12px] font-medium text-white hover:bg-[#0950b5]">
-              Share the list
-            </button>
-            <button className="rounded-[6px] bg-[#0a5ad6] px-3 py-2 text-[12px] font-medium text-white hover:bg-[#0950b5]">
-              Create a list
-            </button>
+    <div>
+      <header className="hero">
+        <div className="wrap hero-in" style={{ position: "relative" }}>
+          <div className="brand">Booking.com</div>
+          <div className="hero-top">
+            <a href="#">Already a partner?</a>
+            <a href="#">Sign in</a>
+            <a href="#">Help</a>
           </div>
 
-          <button className="rounded-[6px] border border-[#b9d2f5] bg-white px-3 py-2 text-[12px] font-medium text-[#0a5ad6] hover:bg-[#f0f6ff]">
-            Show on map
-          </button>
-        </div>
+          <div className="green-pill"><i />Join 29,279,209 other listings already on Booking.com</div>
 
-        <h1 className="mb-1 text-[28px] font-bold text-[#1a1a1a]">
-          Mitzpe Ramon
-        </h1>
+          <div className="hero-grid" style={{ marginTop: 20 }}>
+            <div>
+              <h1 className="h1">
+                List your <span className="accent">apartment</span>
+                <br />on Booking.com
+              </h1>
+              <p className="sub">
+                List on one of the world’s most downloaded travel apps to earn more, faster and expand into new markets.
+              </p>
+            </div>
 
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <TagPlain>
-            <span className="text-[#d23b3b]">♥</span>1 saved property
-          </TagPlain>
-          <BluePill>Mon 15 Sept – Wed 17 Sept</BluePill>
-          <BluePill>2 adults · 0 children · 1 room</BluePill>
-        </div>
+            <div className="card">
+              <div className="card-b">
+                <h3>Register for free</h3>
+                <small>45% of hosts get their first booking within a week</small>
 
-        <div className="mb-5 w-[520px] max-w-full rounded-[10px] border border-[#f3c2c0] bg-[#fdeeee] px-3 py-2 text-center text-[12px] text-[#8b1f1b]">
-          HTTP 404
-        </div>
+                <div className="tick">
+                  <Check />
+                  <span>Choose instant bookings or <b>Request to Book</b></span>
+                </div>
+                <div className="tick">
+                  <Check />
+                  <span>We’ll facilitate payments for you</span>
+                </div>
 
-        <div className="mb-8">
-          <HotelCard />
-        </div>
-      </main>
+                <div className="field"><input className="input" placeholder="Work email" value={email} onChange={e=>setEmail(e.target.value)} /></div>
+                <div className="field">
+                  <select className="select" value={ptype} onChange={e=>setPtype(e.target.value)}>
+                    <option value="" disabled>Property type</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="guesthouse">Guest house</option>
+                    <option value="resort">Resort</option>
+                    <option value="bnb">B&amp;B</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <select className="select" value={country} onChange={e=>setCountry(e.target.value)}>
+                    <option value="" disabled>Country/region</option>
+                    <option value="israel">Israel</option>
+                    <option value="usa">United States</option>
+                    <option value="uk">United Kingdom</option>
+                    <option value="germany">Germany</option>
+                    <option value="italy">Italy</option>
+                    <option value="spain">Spain</option>
+                    <option value="france">France</option>
+                  </select>
+                </div>
 
-      <div className="w-full">
-        <div className="mx-auto max-w-[1128px] px-4">
-          <div className="py-3">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <Link to="#" className={railLink}>
-                Countries
-              </Link>
-              <Link to="#" className={railLink}>
-                Regions
-              </Link>
-              <Link to="#" className={railLink}>
-                Cities
-              </Link>
-              <Link to="#" className={railLink}>
-                Districts
-              </Link>
-              <Link to="#" className={railLink}>
-                Airports
-              </Link>
-              <Link to="#" className={railLink}>
-                Hotels
-              </Link>
-              <Link to="#" className={railLink}>
-                Places of interest
-              </Link>
-              <span className="text-[12px] text-[#6b7280]">•</span>
-              <Link to="#" className={railLink}>
-                Holiday Homes
-              </Link>
-              <Link to="#" className={railLink}>
-                Apartments
-              </Link>
-              <Link to="#" className={railLink}>
-                Resorts
-              </Link>
-              <Link to="#" className={railLink}>
-                Villas
-              </Link>
-              <Link to="#" className={railLink}>
-                Hostels
-              </Link>
-              <Link to="#" className={railLink}>
-                B&amp;Bs
-              </Link>
-              <Link to="#" className={railLink}>
-                Guest Houses
-              </Link>
-              <span className="text-[12px] text-[#6b7280]">•</span>
-              <Link to="#" className={railLink}>
-                Unique places to stay
-              </Link>
-              <Link to="#" className={railLink}>
-                Reviews
-              </Link>
+                <button className="btn btn-cta">Start registration <span className="arrow">→</span></button>
+
+                <div className="card-note">
+                  <small><b>Already started a registration?</b> <a href="#">Continue your registration</a></small>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <Footer />
+      <section className="section">
+        <div className="wrap">
+          <div className="h2">Host worry-free. We’ve got your back</div>
+
+          <div className="cols">
+            <div className="col">
+              <h4>Your rental, your rules</h4>
+              <div className="row"><Check /><span>Accept or decline bookings with <a href="#">Request to Book</a>.</span></div>
+              <div className="row"><Check /><span>Manage your guests’ expectations by setting up clear house rules.</span></div>
+              <button className="btn btn-cta start-inline">Start registration</button>
+              <div className="note">*Currently available for guest bookings made via iOS.</div>
+            </div>
+
+            <div className="col">
+              <h4>Get to know your guests</h4>
+              <div className="row"><Check /><span>Chat with your guests before accepting their stay with pre-booking messaging.*</span></div>
+              <div className="row"><Check /><span>Access guest travel history insights.</span></div>
+            </div>
+
+            <div className="col">
+              <h4>Stay protected</h4>
+              <div className="row"><Check /><span>Protection against <a href="#">liability claims</a> from guests and neighbours up to €/$/£1,000,000 for every reservation.</span></div>
+              <div className="row"><Check /><span>Selection of <a href="#">damage protection</a> options for you to choose.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-  );
-}
-
-/* card */
-function HotelCard() {
-  const [liked, setLiked] = useState(false);
-
-  return (
-    <article className="w-[320px] overflow-hidden rounded-[10px] border border-[#e6eaf0] bg-white shadow-[0_1px_2px_rgba(0,0,0,.04)]">
-      <div className="relative">
-        <img
-          src={ITEM.img}
-          alt={ITEM.name}
-          className="h-[180px] w-full object-cover"
-        />
-
-        {/* Heart keeps identical geometry; only fill/stroke change */}
-        <button
-          type="button"
-          aria-pressed={liked}
-          aria-label={liked ? "Remove from saved" : "Save to list"}
-          onClick={() => setLiked((v) => !v)}
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-white/95 shadow ring-1 ring-black/10 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#0a5ad6]"
-        >
-          <Heart
-            className="h-4 w-4 transition-colors"
-            stroke={liked ? "#e63946" : "#1f2937"}
-            fill={liked ? "#e63946" : "none"}
-            strokeWidth={1.8}
-          />
-        </button>
-      </div>
-
-      <div className="p-4">
-        <div className="flex items-center gap-2">
-          <h3 className="text-[14px] font-semibold">{ITEM.name}</h3>
-          <Stars count={ITEM.stars} />
-        </div>
-
-        <div className="mt-2 flex items-center gap-2">
-          <span className="inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-[4px] bg-[#003b95] px-[6px] text-[12px] font-semibold text-white">
-            {ITEM.rating.toFixed(1)}
-          </span>
-          <span className="text-[12px] text-[#1a1a1a]">{ITEM.ratingText}</span>
-          <span className="text-[12px] text-[#6b7280]">
-            {ITEM.reviews} reviews
-          </span>
-        </div>
-
-        <div className="mt-2 space-y-1 text-[12px] text-[#3b3f46]">
-          <div className="flex items-center gap-1">
-            <Pin /> {ITEM.city}
-          </div>
-          <div className="flex items-center gap-1">
-            <Dot /> {ITEM.distance}
-          </div>
-        </div>
-
-        <div className="mt-3 text-right">
-          <div className="text-[11.5px] text-[#6b7280]">{ITEM.dates}</div>
-          <button className="mt-1 text-[12px] text-[#0a5ad6] hover:underline">
-            Change dates to see prices
-          </button>
-          <div className="mt-2 text-[12px] font-medium text-[#d40000]">
-            {ITEM.note}
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function Stars({ count = 0 }: { count?: number }) {
-  if (!count) return null;
-  return (
-    <span className="text-[#febb02] text-[12px] leading-none">
-      {"★".repeat(count)}
-      {"☆".repeat(Math.max(0, 5 - count))}
-    </span>
-  );
-}
-function Pin() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] fill-[#6b7280]">
-      <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z" />
-    </svg>
-  );
-}
-function Dot() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] fill-[#6b7280]">
-      <circle cx="12" cy="12" r="4" />
-    </svg>
   );
 }
