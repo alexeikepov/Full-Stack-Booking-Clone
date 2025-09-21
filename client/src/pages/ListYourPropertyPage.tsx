@@ -1,6 +1,7 @@
 // src/pages/ListYourPropertyPage.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import LanguageSelector from "@/components/LanguageSelector";
 
 import importPropertyDetailsImg from "../img/ListYourPropertyPageImg/Import your property details.png";
 import startFastImg from "../img/ListYourPropertyPageImg/Start fast with review scores.png";
@@ -55,6 +56,8 @@ b,strong{font-weight:700}
 .logo{font-size:24px;font-weight:bold;color:#fff;text-decoration:none}
 .header-nav{display:flex;align-items:center;gap:16px}
 .header-nav span{font-size:14px}
+.header-nav .language-selector{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:4px;background:transparent;color:#fff;border:none;cursor:pointer;transition:background-color 0.2s}
+.header-nav .language-selector:hover{background:rgba(255,255,255,0.1)}
 .header-btn{display:inline-block;padding:8px 12px;border:1px solid #fff;border-radius:4px;color:#fff;text-decoration:none;font-size:14px;background:transparent}
 .header-btn:hover{background:rgba(255,255,255,0.1)}
 
@@ -173,15 +176,20 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
   const faqs = [
     {
       q: "What happens if my property is damaged by a guest?",
-      a: "Property owners can request damage deposits from guests. Deposits help cover any potential damage caused by a guest, offering some reassurance that your property will be treated respectfully. If anything goes wrong, it can be reported to our team through our misconduct reporting feature."
+      a: "Property owners can request damage deposits from guests. Deposits help cover any potential damage caused by a guest, offering some reassurance that your property will be treated respectfully. If anything goes wrong, it can be reported to our team through our misconduct reporting feature.",
     },
     {
       q: "When will my property go online?",
-      a: "Once you've finished creating your listing, you can open your property for bookings on our site. We may ask you to verify your property before you can start accepting bookings, but you can use this time to get familiar with our extranet and get prepared for your first guests."
-    }
+      a: "Once you've finished creating your listing, you can open your property for bookings on our site. We may ask you to verify your property before you can start accepting bookings, but you can use this time to get familiar with our extranet and get prepared for your first guests.",
+    },
   ];
 
-  const TestimonialCard = ({ quote, name, role, imgSrc }: TestimonialCardProps) => (
+  const TestimonialCard = ({
+    quote,
+    name,
+    role,
+    imgSrc,
+  }: TestimonialCardProps) => (
     <div className="testimonial-card">
       <p className="testimonial-quote">"{quote}"</p>
       <div className="testimonial-author">
@@ -194,29 +202,31 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
     </div>
   );
 
-  const UKFlag = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-      <defs><clipPath id="a"><path d="M0 0h24v24H0z"/></clipPath></defs>
-      <g clipPath="url(#a)">
-        <path fill="#00247d" d="M0 0h24v24H0z"/>
-        <path fill="#fff" d="m23.1-1.3-10.6 7-1.7-1.1L21.3-2l1.8.7Zm-24 0L9.7 5.7l1.7-1.1L.9-2l-1.8.7Z M.9 26 11.5 19l1.7 1.1L2.7 26.7.9 26Zm24 0L12.3 19l-1.7 1.1L21.3 26.7l1.8-.7Z"/>
-        <path fill="#cf142b" d="m14.3 9.4-12.8-8.5-2.4 3.6 12.8 8.5 2.4-3.6Zm-2.9 8.8L-1.4 26.7l2.4 3.6 12.8-8.5-2.4-3.6Z M-1.4-1.3 11.5 7.2l2.4-3.6L1.1-4.9-1.4-1.3Zm12.8 24.1L-1.4 4.3l2.4-3.6 12.8 8.5-2.4 3.6Z"/>
-        <path fill="#fff" d="M9.1 0h5.8v24H9.1V0ZM0 9.1h24v5.8H0V9.1Z"/>
-        <path fill="#cf142b" d="M10.3 0h3.4v24h-3.4V0ZM0 10.3h24v3.4H0v-3.4Z"/>
-      </g>
-    </svg>
-  );
-
   const Tick = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="11.5" fill="none" stroke="var(--tick-ring)"/>
-      <path d="M7 12.1579L10.0588 15L17 8" stroke="var(--ink-black)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="12" cy="12" r="11.5" fill="none" stroke="var(--tick-ring)" />
+      <path
+        d="M7 12.1579L10.0588 15L17 8"
+        stroke="var(--ink-black)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 
   const ChevronDown = ({ className = "" }: { className?: string }) => (
-    <svg className={className} width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
+        fill="currentColor"
+      />
     </svg>
   );
 
@@ -224,12 +234,18 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
     <>
       <header className="page-header">
         <div className="wrap header-in">
-          <a href="#" className="logo">Booking.com</a>
+          <a href="#" className="logo">
+            Booking.com
+          </a>
           <nav className="header-nav">
-            <UKFlag />
+            <LanguageSelector variant="header" />
             <span>Already a partner?</span>
-            <a href="#" className="header-btn">Sign in</a>
-            <a href="#" className="header-btn">Help</a>
+            <a href="#" className="header-btn">
+              Sign in
+            </a>
+            <a href="#" className="header-btn">
+              Help
+            </a>
           </nav>
         </div>
       </header>
@@ -248,19 +264,35 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
                   on Booking.com
                 </h1>
                 <p className="subt">
-                  List on one of the world’s most downloaded travel apps to earn more, faster and expand into new markets.
+                  List on one of the world’s most downloaded travel apps to earn
+                  more, faster and expand into new markets.
                 </p>
               </div>
 
               <div className="card">
                 <div className="card-b">
                   <h3>Register for free</h3>
-                  <small>45% of hosts get their first booking within a week</small>
-                  <div className="card-row"><Tick /><span>Choose instant bookings or <b>Request to Book</b></span></div>
-                  <div className="card-row"><Tick /><span>We’ll facilitate payments for you</span></div>
-                  <Link to="/partner-register" className="btn">Start registration →</Link>
+                  <small>
+                    45% of hosts get their first booking within a week
+                  </small>
+                  <div className="card-row">
+                    <Tick />
+                    <span>
+                      Choose instant bookings or <b>Request to Book</b>
+                    </span>
+                  </div>
+                  <div className="card-row">
+                    <Tick />
+                    <span>We’ll facilitate payments for you</span>
+                  </div>
+                  <Link to="/partner-register" className="btn">
+                    Start registration →
+                  </Link>
                   <div className="card-note">
-                    Already started a registration? <Link to="/partner-register">Continue your registration</Link>
+                    Already started a registration?{" "}
+                    <Link to="/partner-register">
+                      Continue your registration
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -274,20 +306,60 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
             <div className="cols cols-3">
               <div className="col">
                 <h4>Your rental, your rules</h4>
-                <div className="feature-line"><Tick /><span>Accept or decline bookings with <a href="#">Request to Book</a>.</span></div>
-                <div className="feature-line"><Tick /><span>Manage your guests’ expectations by setting up clear house rules.</span></div>
-                <div style={{ marginTop: "24px" }}><Link to="/partner-register" className="btn">Start registration</Link></div>
-                <div style={{ marginTop: 12, color: "#6b7280", fontSize: 12 }}>*Currently available for guest bookings made via iOS.</div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    Accept or decline bookings with{" "}
+                    <a href="#">Request to Book</a>.
+                  </span>
+                </div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    Manage your guests’ expectations by setting up clear house
+                    rules.
+                  </span>
+                </div>
+                <div style={{ marginTop: "24px" }}>
+                  <Link to="/partner-register" className="btn">
+                    Start registration
+                  </Link>
+                </div>
+                <div style={{ marginTop: 12, color: "#6b7280", fontSize: 12 }}>
+                  *Currently available for guest bookings made via iOS.
+                </div>
               </div>
               <div className="col">
                 <h4>Get to know your guests</h4>
-                <div className="feature-line"><Tick /><span>Chat with your guests before accepting their stay with pre-booking messaging.*</span></div>
-                <div className="feature-line"><Tick /><span>Access guest travel history insights.</span></div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    Chat with your guests before accepting their stay with
+                    pre-booking messaging.*
+                  </span>
+                </div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>Access guest travel history insights.</span>
+                </div>
               </div>
               <div className="col">
                 <h4>Stay protected</h4>
-                <div className="feature-line"><Tick /><span>Protection against <a href="#">liability claims</a> from guests and neighbours up to €/$/£1,000,000 for every reservation.</span></div>
-                <div className="feature-line"><Tick /><span>Selection of <a href="#">damage protection</a> options for you to choose.</span></div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    Protection against <a href="#">liability claims</a> from
+                    guests and neighbours up to €/$/£1,000,000 for every
+                    reservation.
+                  </span>
+                </div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    Selection of <a href="#">damage protection</a> options for
+                    you to choose.
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -295,21 +367,73 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
 
         <section className="section" style={{ backgroundColor: "#f5f5f5" }}>
           <div className="wrap">
-            <h2 className="h2">Take control of your finances with Payments by Booking.com</h2>
+            <h2 className="h2">
+              Take control of your finances with Payments by Booking.com
+            </h2>
             <div className="cols cols-2">
               <div className="col">
-                <div className="feature-line"><Tick /><span><b>Payments made easy</b><br />We facilitate the payment process for you, freeing up your time to grow your business.</span></div>
-                <div className="feature-line"><Tick /><span><b>Greater revenue security</b><br />Whenever guests complete prepaid reservations at your property and pay online, you are guaranteed payment.</span></div>
-                <div className="feature-line"><Tick /><span><b>More control over your cash flow</b><br />Choose your payout method and timing based on regional availability.</span></div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    <b>Payments made easy</b>
+                    <br />
+                    We facilitate the payment process for you, freeing up your
+                    time to grow your business.
+                  </span>
+                </div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    <b>Greater revenue security</b>
+                    <br />
+                    Whenever guests complete prepaid reservations at your
+                    property and pay online, you are guaranteed payment.
+                  </span>
+                </div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    <b>More control over your cash flow</b>
+                    <br />
+                    Choose your payout method and timing based on regional
+                    availability.
+                  </span>
+                </div>
               </div>
               <div className="col">
-                <div className="feature-line"><Tick /><span><b>Daily payouts in select markets</b><br />Get payouts faster! We’ll send your payouts 24 hours after guest checkout.</span></div>
-                <div className="feature-line"><Tick /><span><b>One-stop solution for multiple listings</b><br />Save time managing finances with group invoicing and reconciliation.</span></div>
-                <div className="feature-line"><Tick /><span><b>Reduced risk</b><br />We help you stay compliant with regulatory changes and reduce the risk of fraud and chargebacks.</span></div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    <b>Daily payouts in select markets</b>
+                    <br />
+                    Get payouts faster! We’ll send your payouts 24 hours after
+                    guest checkout.
+                  </span>
+                </div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    <b>One-stop solution for multiple listings</b>
+                    <br />
+                    Save time managing finances with group invoicing and
+                    reconciliation.
+                  </span>
+                </div>
+                <div className="feature-line">
+                  <Tick />
+                  <span>
+                    <b>Reduced risk</b>
+                    <br />
+                    We help you stay compliant with regulatory changes and
+                    reduce the risk of fraud and chargebacks.
+                  </span>
+                </div>
               </div>
             </div>
             <div style={{ marginTop: "24px", textAlign: "left" }}>
-              <Link to="/partner-register" className="btn">Start registration</Link>
+              <Link to="/partner-register" className="btn">
+                Start registration
+              </Link>
             </div>
           </div>
         </section>
@@ -319,23 +443,41 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
             <h2 className="h2">Simple to begin and stay ahead</h2>
             <div className="cols cols-3">
               <div className="image-col">
-                <img src={importPropertyDetailsImg} alt="Import property details icon" />
+                <img
+                  src={importPropertyDetailsImg}
+                  alt="Import property details icon"
+                />
                 <h4>Import your property details</h4>
-                <p>Seamlessly import your property information from other travel websites and avoid overbooking with calendar sync.</p>
+                <p>
+                  Seamlessly import your property information from other travel
+                  websites and avoid overbooking with calendar sync.
+                </p>
               </div>
               <div className="image-col">
-                <img src={startFastImg} alt="Start fast with review scores icon" />
+                <img
+                  src={startFastImg}
+                  alt="Start fast with review scores icon"
+                />
                 <h4>Start fast with review scores</h4>
-                <p>Your review scores on other travel websites are converted and displayed on your property page before your first Booking.com guests leave their reviews.</p>
+                <p>
+                  Your review scores on other travel websites are converted and
+                  displayed on your property page before your first Booking.com
+                  guests leave their reviews.
+                </p>
               </div>
               <div className="image-col">
                 <img src={standOutImg} alt="Stand out in the market icon" />
                 <h4>Stand out in the market</h4>
-                <p>The "New to Booking.com" label helps you stand out in our search results.</p>
+                <p>
+                  The "New to Booking.com" label helps you stand out in our
+                  search results.
+                </p>
               </div>
             </div>
             <div style={{ marginTop: "32px" }}>
-              <Link to="/partner-register" className="btn">Start registration</Link>
+              <Link to="/partner-register" className="btn">
+                Start registration
+              </Link>
             </div>
           </div>
         </section>
@@ -347,20 +489,28 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
             <div className="global-grid">
               <div>
                 <div className="stat-num">1.8+ billion</div>
-                <div className="stat-desc">holiday rental guests since 2010.</div>
+                <div className="stat-desc">
+                  holiday rental guests since 2010.
+                </div>
               </div>
               <div>
                 <div className="stat-num">1 in every 3</div>
-                <div className="stat-desc">room nights booked in 2024 was a holiday rental.</div>
+                <div className="stat-desc">
+                  room nights booked in 2024 was a holiday rental.
+                </div>
               </div>
               <div>
                 <div className="stat-num">48% of nights</div>
-                <div className="stat-desc">booked were for international stays at the end of 2023.</div>
+                <div className="stat-desc">
+                  booked were for international stays at the end of 2023.
+                </div>
               </div>
             </div>
 
             <div style={{ textAlign: "left", marginTop: 32 }}>
-              <Link to="/partner-register" className="btn">Start registration</Link>
+              <Link to="/partner-register" className="btn">
+                Start registration
+              </Link>
             </div>
           </div>
         </section>
@@ -408,7 +558,9 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
             </div>
 
             <div style={{ textAlign: "left", marginTop: "32px" }}>
-              <Link to="/partner-register" className="btn">Start registration</Link>
+              <Link to="/partner-register" className="btn">
+                Start registration
+              </Link>
             </div>
           </div>
         </section>
@@ -443,11 +595,14 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
             </div>
 
             <p className="faq-note" style={{ textAlign: "left" }}>
-              Still have questions? Find answers to all your questions on our <a href="#">FAQ</a>.
+              Still have questions? Find answers to all your questions on our{" "}
+              <a href="#">FAQ</a>.
             </p>
 
             <div style={{ textAlign: "left", marginTop: "16px" }}>
-              <Link to="/partner-register" className="btn">Start registration</Link>
+              <Link to="/partner-register" className="btn">
+                Start registration
+              </Link>
             </div>
           </div>
         </section>
@@ -457,7 +612,11 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
         <div className="wrap">
           <div className="footer-top">
             <div className="footer-cta">
-              <h2>Sign up and start<br/>welcoming guests today!</h2>
+              <h2>
+                Sign up and start
+                <br />
+                welcoming guests today!
+              </h2>
             </div>
 
             <div className="reg-card">
@@ -465,20 +624,56 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
                 <h3>Register for free</h3>
                 <ul className="reg-list">
                   <li className="reg-line">
-                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 12.9l2.7 2.7L17 9.3"
+                        fill="none"
+                        stroke="#008009"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     45% of hosts get their first booking within a week
                   </li>
                   <li className="reg-line">
-                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 12.9l2.7 2.7L17 9.3"
+                        fill="none"
+                        stroke="#008009"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     Choose instant bookings or Request to Book
                   </li>
                   <li className="reg-line">
-                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 12.9l2.7 2.7L17 9.3"
+                        fill="none"
+                        stroke="#008009"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     We’ll facilitate payments for you
                   </li>
@@ -496,23 +691,37 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
             <div className="footer-col">
               <h4>Discover</h4>
               <ul>
-                <li><a href="#">Trust and Safety</a></li>
+                <li>
+                  <a href="#">Trust and Safety</a>
+                </li>
               </ul>
             </div>
             <div className="footer-col">
               <h4>Useful links</h4>
               <ul>
-                <li><a href="#">Extranet</a></li>
-                <li><a href="#">Pulse for Android</a></li>
-                <li><a href="#">Pulse for iOS</a></li>
+                <li>
+                  <a href="#">Extranet</a>
+                </li>
+                <li>
+                  <a href="#">Pulse for Android</a>
+                </li>
+                <li>
+                  <a href="#">Pulse for iOS</a>
+                </li>
               </ul>
             </div>
             <div className="footer-col">
               <h4>Help and communities</h4>
               <ul>
-                <li><a href="#">Partner Help</a></li>
-                <li><a href="#">Partner Community</a></li>
-                <li><a href="#">How-to videos</a></li>
+                <li>
+                  <a href="#">Partner Help</a>
+                </li>
+                <li>
+                  <a href="#">Partner Community</a>
+                </li>
+                <li>
+                  <a href="#">How-to videos</a>
+                </li>
               </ul>
             </div>
           </div>
