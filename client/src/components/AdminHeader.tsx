@@ -1,4 +1,5 @@
 import LanguageSelector from "@/components/LanguageSelector";
+import { Link } from "react-router-dom";
 
 export default function AdminHeader() {
   return (
@@ -77,9 +78,9 @@ export default function AdminHeader() {
             <nav className="header-nav">
               <LanguageSelector variant="header" />
               <span>Already a partner?</span>
-              <a href="#" className="header-btn">
-                Sign in
-              </a>
+             <Link to="/admin-hotel/sign-in" className="header-btn">
+              Sign in
+            </Link>
               <a href="#" className="header-btn">
                 Help
               </a>
