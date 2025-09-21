@@ -22,6 +22,9 @@ import AdminSignInPage from "./pages/PartnerSignInPage.tsx";
 import OwnerPage from "./pages/OwnerPage.tsx";
 import AdminHotelPage from "./pages/AdminHotelPage.tsx";
 import AdminHotelSignInPage from "./pages/AdminHotelSignInPage.tsx";
+import ComingSoonPage from "./pages/ComingSoonPage.tsx";
+import FlightsPage from "./pages/FlightsPage.tsx";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -43,6 +46,8 @@ const router = createBrowserRouter([
       { path: "/owner/sign-in", element: <AdminSignInPage /> },
       { path: "/admin-hotel", element: <AdminHotelPage /> },
       { path: "/admin-hotel/sign-in", element: <AdminHotelSignInPage /> },
+      { path: "/flights", element: <FlightsPage /> },
+      { path: "*", element: <ComingSoonPage /> },
     ],
   },
 ]);
