@@ -18,6 +18,7 @@ import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
 import ListYourPropertyPage from "./pages/ListYourPropertyPage.tsx";
 import PartnerRegisterPage from "./pages/PartnerRegisterPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
+import AdminSignInPage from "./pages/AdminSignInPage.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
       { path: "/admin", element: <AdminPage /> },
+      { path: "/admin/sign-in", element: <AdminSignInPage /> },
     ],
   },
 ]);

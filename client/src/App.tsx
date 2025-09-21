@@ -5,8 +5,9 @@ import { Outlet, useLocation } from "react-router-dom";
 
 export default function App() {
   const { pathname } = useLocation();
+  
   const hideHeader =
-    pathname === "/list-your-property" || pathname.startsWith("/list-your-property/") || pathname === "/partner-register";
+    pathname === "/list-your-property" || pathname.startsWith("/list-your-property/") || pathname === "/partner-register"|| pathname === "/admin/sign-in";
 
   return (
     <div className="min-h-screen">
