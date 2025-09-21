@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useSearchStore } from "@/stores/search";
 
 interface PriceSummaryProps {
   totalSelectedRooms: number;
@@ -11,6 +12,24 @@ export default function PriceSummary({
   totalPrice,
   firstSelectedRoom,
 }: PriceSummaryProps) {
+  const { picker } = useSearchStore();
+
+  // Calculate number of nights
+  const calculateNights = () => {
+    if (picker.range.from && picker.range.to) {
+      const from = new Date(picker.range.from);
+      const to = new Date(picker.range.to);
+      const diffTime = Math.abs(to.getTime() - from.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return Math.max(1, diffDays);
+    }
+    return 1; // Default to 1 night if no dates selected
+  };
+
+  const nights = calculateNights();
+  const pricePerRoom = firstSelectedRoom?.pricePerNight || 0;
+  const totalPriceForNights = totalPrice * nights;
+
   if (totalSelectedRooms === 0) {
     return (
       <div>
@@ -33,7 +52,11 @@ export default function PriceSummary({
           {totalSelectedRooms !== 1 ? "s" : ""} for
         </div>
         <div className="text-xl font-bold text-gray-900">
-          ₪ {totalPrice.toLocaleString()}
+          ₪ {totalPriceForNights.toLocaleString()}
+        </div>
+        <div className="text-xs text-gray-500">
+          ₪ {pricePerRoom.toLocaleString()} per room × {nights}{" "}
+          {nights === 1 ? "night" : "nights"}
         </div>
         <div className="text-xs text-gray-500">
           Additional charges may apply
