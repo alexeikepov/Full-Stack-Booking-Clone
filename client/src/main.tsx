@@ -18,7 +18,7 @@ import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
 import ListYourPropertyPage from "./pages/ListYourPropertyPage.tsx";
 import PartnerRegisterPage from "./pages/PartnerRegisterPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
-import AdminSignInPage from "./pages/AdminSignInPage.tsx";
+import AdminSignInPage from "./pages/PartnerSignInPage.tsx";
 import OwnerPage from "./pages/OwnerPage.tsx";
 const router = createBrowserRouter([
   {
