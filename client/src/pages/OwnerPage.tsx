@@ -92,7 +92,7 @@ const mockHotels = [
   },
 ];
 
-export default function AdminPage() {
+export default function OwnerPage() {
   const [applications, setApplications] = useState(mockHotelApplications);
   const [hotels, setHotels] = useState(mockHotels);
   const [searchTerm, setSearchTerm] = useState("");
