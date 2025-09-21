@@ -204,8 +204,9 @@ export default function PartnerRegisterPage() {
 
               <div className="hr" />
 
+              {/* Fixed: route to our admin sign-in page */}
               <Link
-                to="/login"
+                to="/admin/sign-in"
                 className="inline-flex h-[52px] w-full items-center justify-center rounded-[8px] border-2 border-[#0071c2] bg-white text-[18px] font-semibold text-[#0071c2] hover:bg-[#eaf3ff] active:bg-[#d7e8ff] focus:outline-none focus:ring-2 focus:ring-[#99c2e8]"
               >
                 Sign in
