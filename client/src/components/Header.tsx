@@ -15,16 +15,17 @@ function NavPill({
   tab,
   onClick,
   active,
+  href,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   tab: "stays" | "flights" | "cars" | "attractions" | "taxis";
   onClick: (t: any) => void;
   active: boolean;
+  href?: string;
 }) {
-  return (
-    <button
-      onClick={() => onClick(tab)}
+  const content = (
+    <div
       className={[
         "flex items-center gap-2 rounded-full px-4 py-2 text-sm transition",
         active
@@ -34,8 +35,18 @@ function NavPill({
     >
       <Icon className="h-4 w-4" />
       <span>{label}</span>
-    </button>
+    </div>
   );
+
+  if (href) {
+    return (
+      <Link to={href} onClick={() => onClick(tab)}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <button onClick={() => onClick(tab)}>{content}</button>;
 }
 
 export default function Header() {
@@ -103,6 +114,7 @@ export default function Header() {
               tab="stays"
               onClick={setActiveTab}
               active={activeTab === "stays"}
+              href="/"
             />
             <NavPill
               icon={Plane}
@@ -110,6 +122,7 @@ export default function Header() {
               tab="flights"
               onClick={setActiveTab}
               active={activeTab === "flights"}
+              href="/flights"
             />
             <NavPill
               icon={CarFront}
@@ -117,6 +130,7 @@ export default function Header() {
               tab="cars"
               onClick={setActiveTab}
               active={activeTab === "cars"}
+              href="/car-rental"
             />
             <NavPill
               icon={Sparkles}
@@ -124,9 +138,11 @@ export default function Header() {
               tab="attractions"
               onClick={setActiveTab}
               active={activeTab === "attractions"}
+              href="/attractions"
             />
 
-            <button
+            <Link
+              to="/airport-taxis"
               onClick={() => setActiveTab("taxis")}
               className={[
                 "ml-1 flex items-center gap-2 rounded-full px-4 py-2 text-sm transition",
@@ -139,7 +155,7 @@ export default function Header() {
                 TAXI
               </span>
               <span>Airport taxis</span>
-            </button>
+            </Link>
           </div>
         )}
       </div>
