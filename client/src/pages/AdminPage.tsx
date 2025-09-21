@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import EditHotelDialog from "@/components/EditHotelDialog";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import { useEffect } from "react";
+import AdminHeader from "@/components/AdminHeader";
 
 // Mock data for demonstration
 const mockHotelApplications = [
@@ -200,10 +201,17 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AdminHeader />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Owner Panel</h1>
-          <p className="text-gray-600">Manage hotels and owner applications</p>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Owner Panel
+            </h1>
+            <p className="text-gray-600">
+              Manage hotels and owner applications
+            </p>
+          </div>
         </div>
 
         <Tabs className="space-y-6">

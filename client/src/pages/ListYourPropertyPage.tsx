@@ -1,7 +1,7 @@
 // src/pages/ListYourPropertyPage.tsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import LanguageSelector from "@/components/LanguageSelector";
+import AdminHeader from "@/components/AdminHeader";
 
 import importPropertyDetailsImg from "../img/ListYourPropertyPageImg/Import your property details.png";
 import startFastImg from "../img/ListYourPropertyPageImg/Start fast with review scores.png";
@@ -50,16 +50,7 @@ b,strong{font-weight:700}
 .btn{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 24px;border:0;border-radius:4px;background:var(--blue);color:#fff;font-weight:500;font-size:16px;cursor:pointer;text-decoration:none}
 .btn:hover{background:#0059bc}
 
-/* HEADER */
-.page-header{background:var(--blue-dark);color:#fff;padding:12px 0}
-.header-in{display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:24px;font-weight:bold;color:#fff;text-decoration:none}
-.header-nav{display:flex;align-items:center;gap:16px}
-.header-nav span{font-size:14px}
-.header-nav .language-selector{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:4px;background:transparent;color:#fff;border:none;cursor:pointer;transition:background-color 0.2s}
-.header-nav .language-selector:hover{background:rgba(255,255,255,0.1)}
-.header-btn{display:inline-block;padding:8px 12px;border:1px solid #fff;border-radius:4px;color:#fff;text-decoration:none;font-size:14px;background:transparent}
-.header-btn:hover{background:rgba(255,255,255,0.1)}
+/* HEADER - стили перенесены в AdminHeader компонент */
 
 /* HERO */
 .hero-section{background:var(--blue-dark);color:#fff;padding:32px 0 64px}
@@ -232,24 +223,7 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
 
   return (
     <>
-      <header className="page-header">
-        <div className="wrap header-in">
-          <a href="#" className="logo">
-            Booking.com
-          </a>
-          <nav className="header-nav">
-  <LanguageSelector variant="header" />
-  <span>Already a partner?</span>
-  <Link to="/admin/sign-in" className="header-btn">
-    Sign in
-  </Link>
-  <a href="#" className="header-btn">
-    Help
-  </a>
-</nav>
-
-        </div>
-      </header>
+      <AdminHeader />
 
       <main>
         <section className="hero-section">
