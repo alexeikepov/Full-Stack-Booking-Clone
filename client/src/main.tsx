@@ -6,7 +6,7 @@ import App from "./App";
 import { queryClient } from "@/lib/queryClient";
 import "./index.css";
 import HomePage from "@/pages/HomePage";
-import SearchPage  from "@/pages/SearchPage";
+import SearchPage from "@/pages/SearchPage";
 import HotelPage from "@/pages/HotelPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -17,22 +17,24 @@ import WishlistPage from "./pages/SavedListsPage.tsx";
 import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
 import ListYourPropertyPage from "./pages/ListYourPropertyPage.tsx";
 import PartnerRegisterPage from "./pages/PartnerRegisterPage.tsx";
+import AdminPage from "./pages/AdminPage.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "search", element: <SearchPage  /> },
+      { path: "search", element: <SearchPage /> },
       { path: "hotel/:id", element: <HotelPage /> },
       { path: "account", element: <AccountPage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },
-      { path:"/account/bookings", element: <BookingsPage />},
-      { path:"/account/saved", element: <WishlistPage />},
-      { path:"/account/reviews", element: <ReviewsTimelinePage />},
-      { path:"list-your-property", element: <ListYourPropertyPage />},
+      { path: "/account/bookings", element: <BookingsPage /> },
+      { path: "/account/saved", element: <WishlistPage /> },
+      { path: "/account/reviews", element: <ReviewsTimelinePage /> },
+      { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
+      { path: "/admin", element: <AdminPage /> },
     ],
   },
 ]);
