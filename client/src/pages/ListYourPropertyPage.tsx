@@ -238,15 +238,16 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
             Booking.com
           </a>
           <nav className="header-nav">
-            <LanguageSelector variant="header" />
-            <span>Already a partner?</span>
-            <a href="#" className="header-btn">
-              Sign in
-            </a>
-            <a href="#" className="header-btn">
-              Help
-            </a>
-          </nav>
+  <LanguageSelector variant="header" />
+  <span>Already a partner?</span>
+  <Link to="/admin/sign-in" className="header-btn">
+    Sign in
+  </Link>
+  <a href="#" className="header-btn">
+    Help
+  </a>
+</nav>
+
         </div>
       </header>
 

@@ -17,6 +17,8 @@ import WishlistPage from "./pages/SavedListsPage.tsx";
 import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
 import ListYourPropertyPage from "./pages/ListYourPropertyPage.tsx";
 import PartnerRegisterPage from "./pages/PartnerRegisterPage.tsx";
+import AdminPage from "./pages/AdminPage.tsx";
+import AdminSignInPage from "./pages/AdminSignInPage.tsx";
 import OwnerPage from "./pages/OwnerPage.tsx";
 const router = createBrowserRouter([
   {
@@ -34,7 +36,12 @@ const router = createBrowserRouter([
       { path: "/account/reviews", element: <ReviewsTimelinePage /> },
       { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
+
+      { path: "/admin", element: <AdminPage /> },
+      { path: "/admin/sign-in", element: <AdminSignInPage /> },
+
       { path: "/owner", element: <OwnerPage /> },
+
     ],
   },
 ]);
