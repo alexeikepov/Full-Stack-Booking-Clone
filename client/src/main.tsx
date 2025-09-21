@@ -20,6 +20,8 @@ import PartnerRegisterPage from "./pages/PartnerRegisterPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import AdminSignInPage from "./pages/PartnerSignInPage.tsx";
 import OwnerPage from "./pages/OwnerPage.tsx";
+import AdminHotelPage from "./pages/AdminHotelPage.tsx";
+import AdminHotelSignInPage from "./pages/AdminHotelSignInPage.tsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -37,11 +39,10 @@ const router = createBrowserRouter([
       { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
 
-      { path: "/admin", element: <AdminPage /> },
-      { path: "/admin/sign-in", element: <AdminSignInPage /> },
-
-      { path: "/owner", element: <OwnerPage /> },
-
+      { path: "/owner", element: <AdminPage /> },
+      { path: "/owner/sign-in", element: <AdminSignInPage /> },
+      { path: "/admin-hotel", element: <AdminHotelPage /> },
+      { path: "/admin-hotel/sign-in", element: <AdminHotelSignInPage /> },
     ],
   },
 ]);
