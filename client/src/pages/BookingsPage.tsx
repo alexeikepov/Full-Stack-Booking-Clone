@@ -272,6 +272,54 @@ export default function BookingsPage() {
             Booking.com is part of Booking Holdings Inc., the world leader in
             online travel and related services.
           </div>
+
+          {/* Partner Logos */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-6">
+            <div className="text-blue-800 font-bold text-sm">Booking.com</div>
+            <div className="text-blue-600 font-bold text-sm flex items-center gap-1">
+              priceline
+              <span className="text-orange-500 text-xs">®</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="bg-orange-500 text-white px-1 py-1 text-xs font-bold">
+                K
+              </div>
+              <div className="bg-orange-500 text-white px-1 py-1 text-xs font-bold">
+                A
+              </div>
+              <div className="bg-orange-500 text-white px-1 py-1 text-xs font-bold">
+                Y
+              </div>
+              <div className="bg-orange-500 text-white px-1 py-1 text-xs font-bold">
+                A
+              </div>
+              <div className="bg-orange-500 text-white px-1 py-1 text-xs font-bold">
+                K
+              </div>
+            </div>
+            <div className="text-gray-700 font-bold text-sm flex flex-col items-center gap-1">
+              <div>agoda</div>
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                  <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <span className="text-gray-700 font-bold text-xs">
+                <span className="font-normal">Open</span>
+                <span className="font-bold">Table</span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

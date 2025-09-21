@@ -42,7 +42,6 @@ export default function AccountPage({
   user?: UserLite;
 }) {
   const { setShowTabs } = useNavigationTabsStore();
-  const geniusLabel = `Genius Level ${user.geniusLevel ?? 3}`;
 
   // Generate initials from name
   const initials = user?.name
@@ -162,7 +161,7 @@ export default function AccountPage({
                   </div>
                 </div>
                 <Link
-                  to="/account/credits"
+                  to="/account/rewards"
                   className="text-[#0071c2] text-[13px] font-medium hover:underline"
                 >
                   More details
@@ -175,7 +174,7 @@ export default function AccountPage({
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Section title="Payment information">
             <Row
-              to="/account/wallet"
+              to="/account/rewards"
               icon={<Wallet className="h-4 w-4" />}
               label="Rewards & Wallet"
             />
