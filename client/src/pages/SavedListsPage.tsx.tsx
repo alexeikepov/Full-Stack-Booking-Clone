@@ -1,10 +1,8 @@
 // src/pages/SavedListsPage.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import Footer from "@/components/Footer";
-import { useNavigationTabsStore } from "@/stores/navigationTabs";
-import { useNavigationStore } from "@/stores/navigation";
 
 function BluePill(props: React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -46,14 +44,6 @@ const ITEM = {
 };
 
 export default function SavedListsPage() {
-  const { setShowTabs } = useNavigationTabsStore();
-  const { activeTab, setActiveTab } = useNavigationStore();
-
-  useEffect(() => {
-    setShowTabs(true);
-    return () => setShowTabs(true);
-  }, [setShowTabs]);
-
   return (
     <div className="min-h-screen bg-white text-[#1a1a1a]">
       <main className="mx-auto max-w-[1128px] px-4 pt-6">
@@ -80,13 +70,13 @@ export default function SavedListsPage() {
           </button>
         </div>
 
-        <h1 className="mb-1 text-[28px] font-bold text-[#1a1a1a]">
-          Mitzpe Ramon
-        </h1>
+        <h1 className="mb-1 text-[28px] font-bold text-[#1a1a1a]">Mitzpe Ramon</h1>
+        <h2 className="mb-3 text-[18px] font-semibold">Stays</h2>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <TagPlain>
-            <span className="text-[#d23b3b]">♥</span>1 saved property
+            <span className="text-[#d23b3b]">♥</span>
+            1 saved property
           </TagPlain>
           <BluePill>Mon 15 Sept – Wed 17 Sept</BluePill>
           <BluePill>2 adults · 0 children · 1 room</BluePill>
@@ -105,56 +95,24 @@ export default function SavedListsPage() {
         <div className="mx-auto max-w-[1128px] px-4">
           <div className="py-3">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <Link to="#" className={railLink}>
-                Countries
-              </Link>
-              <Link to="#" className={railLink}>
-                Regions
-              </Link>
-              <Link to="#" className={railLink}>
-                Cities
-              </Link>
-              <Link to="#" className={railLink}>
-                Districts
-              </Link>
-              <Link to="#" className={railLink}>
-                Airports
-              </Link>
-              <Link to="#" className={railLink}>
-                Hotels
-              </Link>
-              <Link to="#" className={railLink}>
-                Places of interest
-              </Link>
+              <Link to="#" className={railLink}>Countries</Link>
+              <Link to="#" className={railLink}>Regions</Link>
+              <Link to="#" className={railLink}>Cities</Link>
+              <Link to="#" className={railLink}>Districts</Link>
+              <Link to="#" className={railLink}>Airports</Link>
+              <Link to="#" className={railLink}>Hotels</Link>
+              <Link to="#" className={railLink}>Places of interest</Link>
               <span className="text-[12px] text-[#6b7280]">•</span>
-              <Link to="#" className={railLink}>
-                Holiday Homes
-              </Link>
-              <Link to="#" className={railLink}>
-                Apartments
-              </Link>
-              <Link to="#" className={railLink}>
-                Resorts
-              </Link>
-              <Link to="#" className={railLink}>
-                Villas
-              </Link>
-              <Link to="#" className={railLink}>
-                Hostels
-              </Link>
-              <Link to="#" className={railLink}>
-                B&amp;Bs
-              </Link>
-              <Link to="#" className={railLink}>
-                Guest Houses
-              </Link>
+              <Link to="#" className={railLink}>Holiday Homes</Link>
+              <Link to="#" className={railLink}>Apartments</Link>
+              <Link to="#" className={railLink}>Resorts</Link>
+              <Link to="#" className={railLink}>Villas</Link>
+              <Link to="#" className={railLink}>Hostels</Link>
+              <Link to="#" className={railLink}>B&amp;Bs</Link>
+              <Link to="#" className={railLink}>Guest Houses</Link>
               <span className="text-[12px] text-[#6b7280]">•</span>
-              <Link to="#" className={railLink}>
-                Unique places to stay
-              </Link>
-              <Link to="#" className={railLink}>
-                Reviews
-              </Link>
+              <Link to="#" className={railLink}>Unique places to stay</Link>
+              <Link to="#" className={railLink}>Reviews</Link>
             </div>
           </div>
         </div>
@@ -172,11 +130,7 @@ function HotelCard() {
   return (
     <article className="w-[320px] overflow-hidden rounded-[10px] border border-[#e6eaf0] bg-white shadow-[0_1px_2px_rgba(0,0,0,.04)]">
       <div className="relative">
-        <img
-          src={ITEM.img}
-          alt={ITEM.name}
-          className="h-[180px] w-full object-cover"
-        />
+        <img src={ITEM.img} alt={ITEM.name} className="h-[180px] w-full object-cover" />
 
         {/* Heart keeps identical geometry; only fill/stroke change */}
         <button
@@ -206,9 +160,7 @@ function HotelCard() {
             {ITEM.rating.toFixed(1)}
           </span>
           <span className="text-[12px] text-[#1a1a1a]">{ITEM.ratingText}</span>
-          <span className="text-[12px] text-[#6b7280]">
-            {ITEM.reviews} reviews
-          </span>
+          <span className="text-[12px] text-[#6b7280]">{ITEM.reviews} reviews</span>
         </div>
 
         <div className="mt-2 space-y-1 text-[12px] text-[#3b3f46]">

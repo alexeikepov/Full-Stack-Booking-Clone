@@ -1,13 +1,16 @@
-import { Outlet } from "react-router-dom";
 import Header from "@/components/Header";
 import { CartSheet } from "@/components/CartSheet";
 import { ConfirmModal } from "@/components/ConfirmModal";
-
+import { Outlet, useLocation } from "react-router-dom";
 
 export default function App() {
+  const { pathname } = useLocation();
+  const hideHeader =
+    pathname === "/list-your-property" || pathname.startsWith("/list-your-property/") || pathname === "/partner-register";
+
   return (
     <div className="min-h-screen">
-      <Header />
+      {!hideHeader && <Header />}
       <main className="mx-auto">
         <Outlet />
       </main>
