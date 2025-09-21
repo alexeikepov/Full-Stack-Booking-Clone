@@ -24,6 +24,7 @@ import AdminHotelPage from "./pages/AdminHotelPage.tsx";
 import AdminHotelSignInPage from "./pages/AdminHotelSignInPage.tsx";
 import ComingSoonPage from "./pages/ComingSoonPage.tsx";
 import FlightsPage from "./pages/FlightsPage.tsx";
+import RewardsWalletPage from "./pages/RewardsWalletPage";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: "/account/bookings", element: <BookingsPage /> },
       { path: "/account/saved", element: <WishlistPage /> },
       { path: "/account/reviews", element: <ReviewsTimelinePage /> },
+      { path: "/account/rewards", element: <RewardsWalletPage /> },
       { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
 
