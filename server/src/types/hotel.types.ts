@@ -89,11 +89,10 @@ export type Room = {
   bedrooms?: number;
   bathrooms?: number;
 
-  photos?: string[];
-  amenities?: string[];
-  facilities?: string[];
-  categories?: string[];
-  media?: Media[];
+  amenitiesRoom?: string[];
+  facilitiesRoom?: string[];
+  categorieRoom?: string[];
+  mediaRoom?: Media[];
   availableRooms: number; 
   reservations: RoomReservation[];
 };
