@@ -43,7 +43,7 @@ export default function RewardsWalletPage() {
 
       {/* White card section */}
       <div className="mx-auto max-w-[1128px] -mt-8 pb-10">
-        <div className="bg-white rounded-xl shadow-lg p-6 mx-auto max-w-[600px]">
+        <div className="bg-white rounded-xl shadow-lg p-6 mx-auto max-w-[800px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left section - Wallet balance */}
             <div className="flex items-start gap-4">
@@ -142,7 +142,7 @@ export default function RewardsWalletPage() {
           <span className="text-black text-base">Got a coupon code? </span>
           <Link
             to="/account/rewards/add-coupon"
-            className="text-[#003b95] text-base underline hover:no-underline"
+            className="text-[#0066cc] text-base hover:text-[#0052a3] hover:bg-[#d6e4ff] px-2 py-1 rounded transition-colors"
           >
             Add coupon into Wallet
           </Link>
@@ -159,7 +159,7 @@ export default function RewardsWalletPage() {
             </h2>
             <Link
               to="/help/faq"
-              className="text-[#003b95] text-sm underline hover:no-underline"
+              className="text-[#0066cc] text-sm hover:text-[#0052a3] hover:bg-[#d6e4ff] px-2 py-1 rounded transition-colors"
             >
               Need help? Visit FAQs
             </Link>
