@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,14 +14,16 @@ const schema = z.object({
 });
 
 type LoginValues = z.infer<typeof schema>;
+type UserRole = "OWNER" | "HOTEL_ADMIN" | "USER";
 
 type LoginResponse = {
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; role: UserRole };
   token: string;
 };
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { signIn } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -43,14 +45,22 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.message || "Login failed");
+        throw new Error(err?.error || err?.message || "Login failed");
       }
 
       const data: LoginResponse = await res.json();
+
       localStorage.setItem("auth_token", data.token);
       signIn(data.user);
 
-      navigate("/");
+      const redirect = params.get("redirect");
+      if (redirect) {
+        navigate(redirect, { replace: true });
+        return;
+      }
+
+      const dest = data.user.role === "OWNER" ? "/owner" : "/";
+      navigate(dest, { replace: true });
     } catch (e: any) {
       setServerError(e?.message || "Login failed");
     }
@@ -92,10 +102,7 @@ export default function LoginPage() {
 
             {serverError && <p className="text-sm text-red-600">{serverError}</p>}
 
-            <Button
-              type="submit"
-              className="w-full bg-[#0071c2] hover:bg-[#005999]"
-            >
+            <Button type="submit" className="w-full bg-[#0071c2] hover:bg-[#005999]">
               Sign in
             </Button>
           </form>
