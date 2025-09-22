@@ -18,10 +18,9 @@ import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
 import ListYourPropertyPage from "./pages/ListYourPropertyPage.tsx";
 import PartnerRegisterPage from "./pages/PartnerRegisterPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
-import AdminSignInPage from "./pages/PartnerSignInPage.tsx";
 import OwnerPage from "./pages/OwnerPage.tsx";
 import AdminHotelPage from "./pages/AdminHotelPage.tsx";
-import AdminHotelSignInPage from "./pages/AdminHotelSignInPage.tsx";
+import AdminHotelSignInPage from "./pages/PartnerSignInPage.tsx";
 import ComingSoonPage from "./pages/ComingSoonPage.tsx";
 import FlightsPage from "./pages/FlightsPage.tsx";
 import RewardsWalletPage from "./pages/RewardsWalletPage";
@@ -44,9 +43,8 @@ const router = createBrowserRouter([
       { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
 
-      { path: "/owner", element: <AdminPage /> },
-      { path: "/owner/sign-in", element: <AdminSignInPage /> },
-      { path: "/admin-hotel", element: <AdminHotelPage /> },
+      { path: "/owner", element: <OwnerPage /> },
+      { path: "/adminhotel", element: <AdminHotelPage /> },
       { path: "/admin-hotel/sign-in", element: <AdminHotelSignInPage /> },
       { path: "/flights", element: <FlightsPage /> },
       { path: "*", element: <ComingSoonPage /> },

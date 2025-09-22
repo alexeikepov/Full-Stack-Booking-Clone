@@ -1,5 +1,5 @@
 // src/pages/ListYourPropertyPage.tsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import AdminHeader from "@/components/AdminHeader";
 
@@ -20,148 +20,53 @@ interface TestimonialCardProps {
   imgSrc: string;
 }
 
-export default function ListYourPropertyPage() {
-  useEffect(() => {
-    const id = "join-booking-clone-styles";
-    if (document.getElementById(id)) return;
-    const s = document.createElement("style");
-    s.id = id;
-    s.innerHTML = `
-:root{
-  --blue-darker:#003b95;
-  --blue-dark:#003b95;
-  --blue:#006ce4;
-  --ink-black:#262626;
-  --ink-grey:#595959;
-  --line-grey:#e0e0e0;
-  --gold:#ffb700;
-  --green:#008009;
-  --tick-ring:#D9D9D9;
-  --body-bg:#fff;
+const btn =
+  "inline-flex h-10 items-center justify-center rounded-md bg-[#006ce4] px-6 text-[16px] font-semibold text-white hover:bg-[#0059bc]";
+
+const h2 = "text-[32px] leading-[1.2] font-bold mb-6 text-left";
+
+function Tick() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="11.5" fill="none" stroke="#D9D9D9" />
+      <path
+        d="M7 12.1579L10.0588 15L17 8"
+        stroke="#262626"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
-*{box-sizing:border-box}
-html,body,#root{height:100%}
-body{margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:var(--ink-black);background:var(--body-bg)}
-a{color:var(--blue);text-decoration:none}
-a:hover{text-decoration:underline}
-b,strong{font-weight:700}
 
-.wrap{max-width:1128px;margin:0 auto;padding:0 24px}
-.btn{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 24px;border:0;border-radius:4px;background:var(--blue);color:#fff;font-weight:500;font-size:16px;cursor:pointer;text-decoration:none}
-.btn:hover{background:#0059bc}
+function ChevronDown({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
-/* HEADER - стили перенесены в AdminHeader компонент */
+function TestimonialCard({ quote, name, role, imgSrc }: TestimonialCardProps) {
+  return (
+    <div className="mb-6 break-inside-avoid rounded-lg border border-[#ffb700] bg-white p-6">
+      <p className="mb-4 text-[16px] leading-7 text-[#595959]">"{quote}"</p>
+      <div className="flex items-center gap-3">
+        <img src={imgSrc} alt={name} className="h-12 w-12 rounded-full object-cover" />
+        <div className="text-[14px]">
+          <div className="font-bold text-[#262626]">{name}</div>
+          <div className="text-[#595959]">{role}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-/* HERO */
-.hero-section{background:var(--blue-dark);color:#fff;padding:32px 0 64px}
-.hero-join-banner{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;padding:4px 10px;border-radius:4px;font-size:14px;font-weight:500;margin-bottom:24px}
-.hero-grid{display:grid;gap:32px;align-items:start}
-@media(min-width:992px){.hero-grid{grid-template-columns:1fr 400px}}
-.h1{margin:0 0 8px;font-weight:700;letter-spacing:-.5px;font-size:52px;line-height:1.1}
-.h1 .accent{display:inline;background:linear-gradient(180deg,#31b4ff 0%,#0a6adf 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.subt{color:rgba(255,255,255,.9);font-size:18px;line-height:1.5;max-width:550px;margin:0}
-
-/* CARD */
-.card{background:#fff;border-radius:8px;border:4px solid var(--gold);box-shadow:0 4px 16px rgba(0,0,0,.15)}
-.card-b{padding:20px}
-.card h3{margin:0 0 4px;font-size:20px;font-weight:700;color:var(--ink-black)}
-.card small{display:block;color:var(--ink-grey);font-size:14px;margin-bottom:12px}
-.card-row{display:flex;gap:12px;align-items:center;margin:12px 0}
-.card-row span{font-size:14px;line-height:1.4;color:var(--ink-black)}
-.card .btn{margin-top:16px;width:100%;font-size:16px;font-weight:bold;height:44px}
-.card-note{margin-top:16px;border-top:1px solid var(--line-grey);padding-top:16px;font-size:14px;color:var(--ink-black)}
-.card-note a{font-weight:700}
-
-/* SECTIONS */
-.section{padding:56px 0}
-.h2{font-size:32px;line-height:1.2;font-weight:700;margin:0 0 24px;text-align:left}
-.cols{display:grid;gap:48px}
-@media(min-width:768px){.cols-3{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:768px){.cols-2{grid-template-columns:repeat(2,1fr)}}
-.col h4{margin:0 0 12px;font-size:18px;line-height:1.4;font-weight:700}
-.feature-line{display:flex;gap:12px;align-items:flex-start;margin:12px 0;font-size:16px;line-height:1.5;color:var(--ink-grey)}
-
-/* LEFT-START */
-.left-start{text-align:left}
-.left-start .image-col{text-align:left}
-.left-start .image-col img{margin:0 0 16px 0}
-
-/* IMAGE TRIO */
-.image-col{text-align:center}
-.image-col img{margin:0 auto 16px;height:64px}
-.image-col h4{font-size:16px;font-weight:bold}
-.image-col p{font-size:14px;color:var(--ink-grey);line-height:1.5;max-width:300px;margin:0 auto}
-
-/* GLOBAL STATS (transparent bg) */
-.global-section{background-color:transparent;text-align:left}
-.global-grid{display:grid;gap:32px;align-items:center}
-@media(min-width:768px){.global-grid{grid-template-columns:repeat(3,1fr)}}
-.stat-num{font-size:48px;font-weight:700;margin:0 0 8px;color:var(--blue-darker)}
-.stat-desc{font-size:16px;line-height:1.5;color:var(--ink-grey)}
-
-/* TESTIMONIALS (grey bg) */
-.testimonials-section{background-color:#f5f5f5}
-.testimonials-grid{column-count:2;column-gap:24px}
-@media(max-width:767px){.testimonials-grid{column-count:1}}
-.testimonial-card{background:#fff;border:1px solid var(--gold);border-radius:8px;padding:24px;margin-bottom:24px;break-inside:avoid}
-.testimonial-quote{font-size:16px;line-height:1.6;color:var(--ink-grey);margin:0 0 16px}
-.testimonial-author{display:flex;align-items:center;gap:12px}
-.testimonial-author img{width:48px;height:48px;border-radius:50%}
-.testimonial-author .author-info{font-size:14px}
-.author-info .name{font-weight:700;color:var(--ink-black)}
-.author-info .role{color:var(--ink-grey)}
-
-/* FAQ */
-.faq-grid{display:grid;gap:24px;max-width:1128px;margin:0 auto}
-@media(min-width:768px){.faq-grid{grid-template-columns:repeat(2,1fr)}}
-.faq-item{border:1px solid var(--line-grey);border-radius:8px;padding:16px 24px;background:#fff}
-button.faq-question{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;cursor:pointer;width:100%;background:transparent;border:0;padding:0;color:var(--ink-black)}
-.faq-answer{color:var(--ink-grey);font-size:16px;line-height:1.6;margin-top:12px;max-height:0;overflow:hidden;transition:max-height .3s ease}
-.faq-item.open .faq-answer{max-height:500px}
-.faq-divider{height:1px;background:var(--line-grey);margin:16px 0}
-.chev{transition:transform .2s ease}
-.faq-item.open .chev{transform:rotate(180deg)}
-
-/* FOOTER */
-.footer{background:var(--blue-darker);color:#fff;padding:72px 0 0}
-.footer a{color:#fff;text-decoration:underline}
-.footer .wrap{max-width:1200px}
-
-.footer-top{display:grid;gap:48px;align-items:center}
-@media(min-width:992px){.footer-top{grid-template-columns:1fr 380px}}
-
-.footer-cta h2{font-size:44px;line-height:1.1;margin:0}
-
-.reg-card{background:#fff;border:4px solid var(--gold);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
-.reg-card-b{padding:20px}
-.reg-card h3{margin:0 0 12px;color:#000;font-size:20px;font-weight:700}
-.reg-list{margin:0 0 16px;padding:0;list-style:none;display:grid;gap:10px}
-.reg-line{display:flex;align-items:center;gap:10px;color:#262626;font-size:14px}
-.reg-btn{display:flex;align-items:center;justify-content:center;height:40px;width:100%;border-radius:4px;background:var(--blue);color:#fff;text-decoration:none;font-weight:600;border:0}
-.reg-btn:hover{background:#0059bc}
-.reg-btn span{margin-left:8px}
-
-.footer-divider{border-top:1px solid rgba(255,255,255,.35);margin:56px 0 32px}
-
-.footer-links-row{display:grid;gap:32px}
-@media(min-width:992px){.footer-links-row{grid-template-columns:repeat(3,1fr)}}
-.footer-col h4{margin:0 0 12px;font-size:16px;font-weight:700}
-.footer-col ul{margin:0;padding:0;list-style:none}
-.footer-col li{margin:0 0 8px}
-.footer-col a{font-size:14px}
-
-.footer-meta{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-top:24px;padding:16px 0}
-.footer-bottom-links{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.footer-bottom-links .sep{opacity:.6}
-.copyright{margin:0;color:rgba(255,255,255,.85);font-size:12px}
-`;
-    document.head.appendChild(s);
-    return () => {
-      const styleEl = document.getElementById(id);
-      if (styleEl) styleEl.remove();
-    };
-  }, []);
-
+export default function ListYourPropertyPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const faqs = [
@@ -175,97 +80,55 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
     },
   ];
 
-  const TestimonialCard = ({
-    quote,
-    name,
-    role,
-    imgSrc,
-  }: TestimonialCardProps) => (
-    <div className="testimonial-card">
-      <p className="testimonial-quote">"{quote}"</p>
-      <div className="testimonial-author">
-        <img src={imgSrc} alt={name} />
-        <div className="author-info">
-          <div className="name">{name}</div>
-          <div className="role">{role}</div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const Tick = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="11.5" fill="none" stroke="var(--tick-ring)" />
-      <path
-        d="M7 12.1579L10.0588 15L17 8"
-        stroke="var(--ink-black)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  const ChevronDown = ({ className = "" }: { className?: string }) => (
-    <svg
-      className={className}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-
   return (
     <>
       <AdminHeader />
 
       <main>
-        <section className="hero-section">
-          <div className="wrap">
-            <div className="hero-join-banner">
+        <section className="bg-[#003b95] py-8 text-white">
+          <div className="mx-auto max-w-[1128px] px-6">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-md bg-[#008009] px-3 py-1 text-[14px] font-medium text-white">
               Join 29,278,209 other listings already on Booking.com
             </div>
-            <div className="hero-grid">
+
+            <div className="grid items-start gap-8 lg:grid-cols-[1fr_400px]">
               <div>
-                <h1 className="h1">
-                  List your <span className="accent">apartment</span>
+                <h1 className="mb-2 text-[52px] font-bold leading-[1.1] tracking-[-0.5px]">
+                  List your <span className="bg-gradient-to-b from-[#31b4ff] to-[#0a6adf] bg-clip-text text-transparent">apartment</span>
                   <br />
                   on Booking.com
                 </h1>
-                <p className="subt">
-                  List on one of the world’s most downloaded travel apps to earn
-                  more, faster and expand into new markets.
+                <p className="max-w-[550px] text-[18px] leading-7 text-white/90">
+                  List on one of the world’s most downloaded travel apps to earn more, faster and expand into new markets.
                 </p>
               </div>
 
-              <div className="card">
-                <div className="card-b">
-                  <h3>Register for free</h3>
-                  <small>
+              <div className="rounded-lg border-4 border-[#ffb700] bg-white text-[#262626] shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
+                <div className="p-5">
+                  <h3 className="mb-1 text-[20px] font-bold">Register for free</h3>
+                  <small className="mb-3 block text-[14px] text-[#595959]">
                     45% of hosts get their first booking within a week
                   </small>
-                  <div className="card-row">
+
+                  <div className="my-3 flex items-center gap-3">
                     <Tick />
-                    <span>
+                    <span className="text-[14px] leading-[1.4]">
                       Choose instant bookings or <b>Request to Book</b>
                     </span>
                   </div>
-                  <div className="card-row">
+
+                  <div className="my-3 flex items-center gap-3">
                     <Tick />
-                    <span>We’ll facilitate payments for you</span>
+                    <span className="text-[14px] leading-[1.4]">We’ll facilitate payments for you</span>
                   </div>
-                  <Link to="/partner-register" className="btn">
+
+                  <Link to="/partner-register" className={`${btn} mt-4 w-full h-11 text-[16px] font-bold`}>
                     Start registration →
                   </Link>
-                  <div className="card-note">
+
+                  <div className="mt-4 border-t border-[#e0e0e0] pt-4 text-[14px] text-[#262626]">
                     Already started a registration?{" "}
-                    <Link to="/partner-register">
+                    <Link to="/partner-register" className="font-bold underline decoration-transparent hover:decoration-inherit">
                       Continue your registration
                     </Link>
                   </div>
@@ -275,64 +138,65 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
           </div>
         </section>
 
-        <section className="section">
-          <div className="wrap">
-            <h2 className="h2">Host worry-free. We’ve got your back</h2>
-            <div className="cols cols-3">
-              <div className="col">
-                <h4>Your rental, your rules</h4>
-                <div className="feature-line">
+        <section className="py-14">
+          <div className="mx-auto max-w-[1128px] px-6">
+            <h2 className={h2}>Host worry-free. We’ve got your back</h2>
+
+            <div className="grid gap-12 md:grid-cols-3">
+              <div>
+                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">Your rental, your rules</h4>
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
-                    Accept or decline bookings with{" "}
-                    <a href="#">Request to Book</a>.
+                    Accept or decline bookings with <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">Request to Book</a>.
                   </span>
                 </div>
-                <div className="feature-line">
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
-                  <span>
-                    Manage your guests’ expectations by setting up clear house
-                    rules.
-                  </span>
+                  <span>Manage your guests’ expectations by setting up clear house rules.</span>
                 </div>
-                <div style={{ marginTop: "24px" }}>
-                  <Link to="/partner-register" className="btn">
+
+                <div className="mt-6">
+                  <Link to="/partner-register" className={btn}>
                     Start registration
                   </Link>
                 </div>
-                <div style={{ marginTop: 12, color: "#6b7280", fontSize: 12 }}>
+
+                <div className="mt-3 text-[12px] text-[#6b7280]">
                   *Currently available for guest bookings made via iOS.
                 </div>
               </div>
-              <div className="col">
-                <h4>Get to know your guests</h4>
-                <div className="feature-line">
+
+              <div>
+                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">Get to know your guests</h4>
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
-                  <span>
-                    Chat with your guests before accepting their stay with
-                    pre-booking messaging.*
-                  </span>
+                  <span>Chat with your guests before accepting their stay with pre-booking messaging.*</span>
                 </div>
-                <div className="feature-line">
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>Access guest travel history insights.</span>
                 </div>
               </div>
-              <div className="col">
-                <h4>Stay protected</h4>
-                <div className="feature-line">
+
+              <div>
+                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">Stay protected</h4>
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
-                    Protection against <a href="#">liability claims</a> from
-                    guests and neighbours up to €/$/£1,000,000 for every
-                    reservation.
+                    Protection against <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">liability claims</a> from guests and neighbours up to €/$/£1,000,000 for every reservation.
                   </span>
                 </div>
-                <div className="feature-line">
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
-                    Selection of <a href="#">damage protection</a> options for
-                    you to choose.
+                    Selection of <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">damage protection</a> options for you to choose.
                   </span>
                 </div>
               </div>
@@ -340,160 +204,152 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
           </div>
         </section>
 
-        <section className="section" style={{ backgroundColor: "#f5f5f5" }}>
-          <div className="wrap">
-            <h2 className="h2">
-              Take control of your finances with Payments by Booking.com
-            </h2>
-            <div className="cols cols-2">
-              <div className="col">
-                <div className="feature-line">
+        <section className="bg-[#f5f5f5] py-14">
+          <div className="mx-auto max-w-[1128px] px-6">
+            <h2 className={h2}>Take control of your finances with Payments by Booking.com</h2>
+
+            <div className="grid gap-12 md:grid-cols-2">
+              <div>
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
                     <b>Payments made easy</b>
                     <br />
-                    We facilitate the payment process for you, freeing up your
-                    time to grow your business.
+                    We facilitate the payment process for you, freeing up your time to grow your business.
                   </span>
                 </div>
-                <div className="feature-line">
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
                     <b>Greater revenue security</b>
                     <br />
-                    Whenever guests complete prepaid reservations at your
-                    property and pay online, you are guaranteed payment.
+                    Whenever guests complete prepaid reservations at your property and pay online, you are guaranteed payment.
                   </span>
                 </div>
-                <div className="feature-line">
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
                     <b>More control over your cash flow</b>
                     <br />
-                    Choose your payout method and timing based on regional
-                    availability.
+                    Choose your payout method and timing based on regional availability.
                   </span>
                 </div>
               </div>
-              <div className="col">
-                <div className="feature-line">
+
+              <div>
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
                     <b>Daily payouts in select markets</b>
                     <br />
-                    Get payouts faster! We’ll send your payouts 24 hours after
-                    guest checkout.
+                    Get payouts faster! We’ll send your payouts 24 hours after guest checkout.
                   </span>
                 </div>
-                <div className="feature-line">
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
                     <b>One-stop solution for multiple listings</b>
                     <br />
-                    Save time managing finances with group invoicing and
-                    reconciliation.
+                    Save time managing finances with group invoicing and reconciliation.
                   </span>
                 </div>
-                <div className="feature-line">
+
+                <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
                     <b>Reduced risk</b>
                     <br />
-                    We help you stay compliant with regulatory changes and
-                    reduce the risk of fraud and chargebacks.
+                    We help you stay compliant with regulatory changes and reduce the risk of fraud and chargebacks.
                   </span>
                 </div>
               </div>
             </div>
-            <div style={{ marginTop: "24px", textAlign: "left" }}>
-              <Link to="/partner-register" className="btn">
+
+            <div className="mt-6 text-left">
+              <Link to="/partner-register" className={btn}>
                 Start registration
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="section left-start">
-          <div className="wrap">
-            <h2 className="h2">Simple to begin and stay ahead</h2>
-            <div className="cols cols-3">
-              <div className="image-col">
-                <img
-                  src={importPropertyDetailsImg}
-                  alt="Import property details icon"
-                />
-                <h4>Import your property details</h4>
-                <p>
-                  Seamlessly import your property information from other travel
-                  websites and avoid overbooking with calendar sync.
+        <section className="py-14">
+          <div className="mx-auto max-w-[1128px] px-6">
+            <h2 className={h2}>Simple to begin and stay ahead</h2>
+
+            <div className="grid gap-12 md:grid-cols-3">
+              <div className="text-center md:text-left">
+                <img src={importPropertyDetailsImg} alt="Import property details icon" className="mx-auto mb-4 h-16 md:mx-0" />
+                <h4 className="text-[16px] font-bold">Import your property details</h4>
+                <p className="mx-auto max-w-[300px] text-[14px] leading-6 text-[#595959] md:mx-0">
+                  Seamlessly import your property information from other travel websites and avoid overbooking with calendar sync.
                 </p>
               </div>
-              <div className="image-col">
-                <img
-                  src={startFastImg}
-                  alt="Start fast with review scores icon"
-                />
-                <h4>Start fast with review scores</h4>
-                <p>
-                  Your review scores on other travel websites are converted and
-                  displayed on your property page before your first Booking.com
-                  guests leave their reviews.
+
+              <div className="text-center md:text-left">
+                <img src={startFastImg} alt="Start fast with review scores icon" className="mx-auto mb-4 h-16 md:mx-0" />
+                <h4 className="text-[16px] font-bold">Start fast with review scores</h4>
+                <p className="mx-auto max-w-[300px] text-[14px] leading-6 text-[#595959] md:mx-0">
+                  Your review scores on other travel websites are converted and displayed on your property page before your first Booking.com guests leave their reviews.
                 </p>
               </div>
-              <div className="image-col">
-                <img src={standOutImg} alt="Stand out in the market icon" />
-                <h4>Stand out in the market</h4>
-                <p>
-                  The "New to Booking.com" label helps you stand out in our
-                  search results.
+
+              <div className="text-center md:text-left">
+                <img src={standOutImg} alt="Stand out in the market icon" className="mx-auto mb-4 h-16 md:mx-0" />
+                <h4 className="text-[16px] font-bold">Stand out in the market</h4>
+                <p className="mx-auto max-w-[300px] text-[14px] leading-6 text-[#595959] md:mx-0">
+                  The "New to Booking.com" label helps you stand out in our search results.
                 </p>
               </div>
             </div>
-            <div style={{ marginTop: "32px" }}>
-              <Link to="/partner-register" className="btn">
+
+            <div className="mt-8">
+              <Link to="/partner-register" className={btn}>
                 Start registration
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="section global-section">
-          <div className="wrap">
-            <h2 className="h2">Reach a unique global customer base</h2>
+        <section className="py-14">
+          <div className="mx-auto max-w-[1128px] px-6 text-left">
+            <h2 className={h2}>Reach a unique global customer base</h2>
 
-            <div className="global-grid">
+            <div className="grid items-center gap-8 md:grid-cols-3">
               <div>
-                <div className="stat-num">1.8+ billion</div>
-                <div className="stat-desc">
-                  holiday rental guests since 2010.
-                </div>
+                <div className="text-[48px] font-bold text-[#003b95]">1.8+ billion</div>
+                <div className="text-[16px] leading-6 text-[#595959]">holiday rental guests since 2010.</div>
               </div>
               <div>
-                <div className="stat-num">1 in every 3</div>
-                <div className="stat-desc">
+                <div className="text-[48px] font-bold text-[#003b95]">1 in every 3</div>
+                <div className="text-[16px] leading-6 text-[#595959]">
                   room nights booked in 2024 was a holiday rental.
                 </div>
               </div>
               <div>
-                <div className="stat-num">48% of nights</div>
-                <div className="stat-desc">
+                <div className="text-[48px] font-bold text-[#003b95]">48% of nights</div>
+                <div className="text-[16px] leading-6 text-[#595959]">
                   booked were for international stays at the end of 2023.
                 </div>
               </div>
             </div>
 
-            <div style={{ textAlign: "left", marginTop: 32 }}>
-              <Link to="/partner-register" className="btn">
+            <div className="mt-8">
+              <Link to="/partner-register" className={btn}>
                 Start registration
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="section testimonials-section">
-          <div className="wrap">
-            <h2 className="h2">What hosts like you say</h2>
-            <div className="testimonials-grid">
+        <section className="bg-[#f5f5f5] py-14">
+          <div className="mx-auto max-w-[1128px] px-6">
+            <h2 className={h2}>What hosts like you say</h2>
+
+            <div className="columns-1 gap-6 md:columns-2">
               <TestimonialCard
                 quote="I was able to list within 15 minutes, and no more than two hours later, I had my first booking!"
                 name="Parley Rose"
@@ -532,36 +388,44 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
               />
             </div>
 
-            <div style={{ textAlign: "left", marginTop: "32px" }}>
-              <Link to="/partner-register" className="btn">
+            <div className="mt-8 text-left">
+              <Link to="/partner-register" className={btn}>
                 Start registration
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="section">
-          <div className="wrap">
-            <h2 className="h2">Your questions answered</h2>
+        <section className="py-14">
+          <div className="mx-auto max-w-[1128px] px-6">
+            <h2 className={h2}>Your questions answered</h2>
 
-            <div className="faq-grid">
+            <div className="grid gap-6 md:grid-cols-2">
               {faqs.map((item, i) => {
                 const isOpen = openFaq === i;
                 return (
-                  <div key={i} className={`faq-item ${isOpen ? "open" : ""}`}>
+                  <div
+                    key={i}
+                    className={`rounded-lg border border-[#e0e0e0] bg-white p-4 ${isOpen ? "pb-5" : ""}`}
+                  >
                     <button
-                      className="faq-question"
+                      className="flex w-full items-center justify-between text-left text-[16px] font-bold text-[#262626]"
                       onClick={() => setOpenFaq(isOpen ? null : i)}
                       aria-expanded={isOpen}
                       aria-controls={`faq-panel-${i}`}
                     >
                       <span>{item.q}</span>
-                      <ChevronDown className="chev" />
+                      <ChevronDown className={`h-6 w-6 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                     </button>
 
-                    <div className="faq-divider" />
+                    <div className="my-4 h-px w-full bg-[#e0e0e0]" />
 
-                    <div id={`faq-panel-${i}`} className="faq-answer">
+                    <div
+                      id={`faq-panel-${i}`}
+                      className={`text-[16px] leading-7 text-[#595959] transition-[max-height] duration-300 ${
+                        isOpen ? "max-h-[500px]" : "max-h-0 overflow-hidden"
+                      }`}
+                    >
                       {item.a}
                     </div>
                   </div>
@@ -569,13 +433,13 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
               })}
             </div>
 
-            <p className="faq-note" style={{ textAlign: "left" }}>
+            <p className="mt-6 text-left text-[16px] text-[#595959]">
               Still have questions? Find answers to all your questions on our{" "}
-              <a href="#">FAQ</a>.
+              <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">FAQ</a>.
             </p>
 
-            <div style={{ textAlign: "left", marginTop: "16px" }}>
-              <Link to="/partner-register" className="btn">
+            <div className="mt-4 text-left">
+              <Link to="/partner-register" className={btn}>
                 Start registration
               </Link>
             </div>
@@ -583,131 +447,79 @@ button.faq-question{display:flex;justify-content:space-between;align-items:cente
         </section>
       </main>
 
-      <footer className="footer">
-        <div className="wrap">
-          <div className="footer-top">
-            <div className="footer-cta">
-              <h2>
-                Sign up and start
-                <br />
-                welcoming guests today!
-              </h2>
+      <footer className="bg-[#003b95] pt-[72px] text-white">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <div className="grid items-center gap-12 lg:grid-cols-[1fr_380px]">
+            <div>
+              <h2 className="text-[44px] font-bold leading-[1.1]">Sign up and start<br />welcoming guests today!</h2>
             </div>
 
-            <div className="reg-card">
-              <div className="reg-card-b">
-                <h3>Register for free</h3>
-                <ul className="reg-list">
-                  <li className="reg-line">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M7 12.9l2.7 2.7L17 9.3"
-                        fill="none"
-                        stroke="#008009"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+            <div className="rounded-lg border-4 border-[#ffb700] bg-white text-black shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
+              <div className="p-5">
+                <h3 className="mb-3 text-[20px] font-bold">Register for free</h3>
+                <ul className="mb-4 grid gap-2">
+                  <li className="flex items-center gap-2 text-[14px] text-[#262626]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     45% of hosts get their first booking within a week
                   </li>
-                  <li className="reg-line">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M7 12.9l2.7 2.7L17 9.3"
-                        fill="none"
-                        stroke="#008009"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                  <li className="flex items-center gap-2 text-[14px] text-[#262626]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Choose instant bookings or Request to Book
                   </li>
-                  <li className="reg-line">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M7 12.9l2.7 2.7L17 9.3"
-                        fill="none"
-                        stroke="#008009"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                  <li className="flex items-center gap-2 text-[14px] text-[#262626]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     We’ll facilitate payments for you
                   </li>
                 </ul>
-                <Link to="/partner-register" className="reg-btn">
-                  Start registration <span>→</span>
+                <Link to="/partner-register" className="inline-flex h-10 w-full items-center justify-center rounded-md bg-[#006ce4] font-semibold text-white hover:bg-[#0059bc]">
+                  Start registration <span className="ml-2">→</span>
                 </Link>
               </div>
             </div>
           </div>
 
-          <div className="footer-divider" />
+          <div className="my-14 border-t border-white/35" />
 
-          <div className="footer-links-row">
-            <div className="footer-col">
-              <h4>Discover</h4>
-              <ul>
-                <li>
-                  <a href="#">Trust and Safety</a>
-                </li>
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div>
+              <h4 className="mb-3 text-[16px] font-bold">Discover</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="underline">Trust and Safety</a></li>
               </ul>
             </div>
-            <div className="footer-col">
-              <h4>Useful links</h4>
-              <ul>
-                <li>
-                  <a href="#">Extranet</a>
-                </li>
-                <li>
-                  <a href="#">Pulse for Android</a>
-                </li>
-                <li>
-                  <a href="#">Pulse for iOS</a>
-                </li>
+
+            <div>
+              <h4 className="mb-3 text-[16px] font-bold">Useful links</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="underline">Extranet</a></li>
+                <li><a href="#" className="underline">Pulse for Android</a></li>
+                <li><a href="#" className="underline">Pulse for iOS</a></li>
               </ul>
             </div>
-            <div className="footer-col">
-              <h4>Help and communities</h4>
-              <ul>
-                <li>
-                  <a href="#">Partner Help</a>
-                </li>
-                <li>
-                  <a href="#">Partner Community</a>
-                </li>
-                <li>
-                  <a href="#">How-to videos</a>
-                </li>
+
+            <div>
+              <h4 className="mb-3 text-[16px] font-bold">Help and communities</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="underline">Partner Help</a></li>
+                <li><a href="#" className="underline">Partner Community</a></li>
+                <li><a href="#" className="underline">How-to videos</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="footer-meta">
-            <div className="footer-bottom-links">
-              <a href="#">About Us</a>
-              <span className="sep">|</span>
-              <a href="#">Privacy and Cookie Statement</a>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 py-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <a href="#" className="underline">About Us</a>
+              <span className="opacity-60">|</span>
+              <a href="#" className="underline">Privacy and Cookie Statement</a>
             </div>
-            <p className="copyright">© Copyright Booking.com 2025</p>
+            <p className="m-0 text-[12px] text-white/85">© Copyright Booking.com 2025</p>
           </div>
         </div>
       </footer>
