@@ -400,6 +400,13 @@ export default function AdminHotelPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       queryClient.invalidateQueries({ queryKey: ["owner-analytics"] });
+      setIsEditDialogOpen(false);
+      setIsAddDialogOpen(false);
+      setSelectedHotel(null);
+    },
+    onError: (err: any) => {
+      console.error("Create hotel failed", err?.response?.data || err);
+      alert("Failed to create hotel. Please check required fields.");
     },
   });
 
@@ -424,9 +431,13 @@ export default function AdminHotelPage() {
       });
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       queryClient.invalidateQueries({ queryKey: ["owner-analytics"] });
+      setIsEditDialogOpen(false);
+      setIsAddDialogOpen(false);
+      setSelectedHotel(null);
     },
-    onError: () => {
-      // fall back to refetch
+    onError: (err: any) => {
+      console.error("Update hotel failed", err?.response?.data || err);
+      alert("Failed to save changes. Please review fields and try again.");
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
     },
   });
@@ -521,8 +532,57 @@ export default function AdminHotelPage() {
         };
       });
 
+    const deepClean = (obj: any): any => {
+      if (obj == null) return undefined as any;
+      if (Array.isArray(obj)) return obj.map(deepClean).filter((v) => v !== undefined);
+      if (typeof obj === "object") {
+        const out: any = {};
+        Object.entries(obj).forEach(([k, v]) => {
+          const cleaned = deepClean(v as any);
+          if (
+            cleaned !== undefined &&
+            !(typeof cleaned === "string" && cleaned.trim() === "") &&
+            !(Array.isArray(cleaned) && cleaned.length === 0)
+          ) {
+            out[k] = cleaned;
+          }
+        });
+        return out;
+      }
+      return obj;
+    };
+
     const loc = updatedHotel.location || selectedHotel?.location;
     const validLocation = loc && typeof loc.lat === "number" && typeof loc.lng === "number" && !Number.isNaN(loc.lat) && !Number.isNaN(loc.lng);
+
+    const baseFacilities = {
+      ...(selectedHotel?.facilities || {}),
+      ...((updatedHotel.facilities as any) || {}),
+      languagesSpoken: updatedHotel.languagesSpoken || (selectedHotel as any)?.facilities?.languagesSpoken || [],
+    };
+
+    // Merge and sanitize houseRules to match server schema and avoid empty required strings
+    const mergedHouseRules = {
+      ...(selectedHotel?.houseRules || {}),
+      ...((updatedHotel.houseRules as any) || {}),
+    } as any;
+    mergedHouseRules.checkIn = {
+      ...(selectedHotel?.houseRules?.checkIn || {}),
+      ...((updatedHotel.houseRules?.checkIn as any) || {}),
+    };
+    if (!mergedHouseRules.checkIn.time || String(mergedHouseRules.checkIn.time).trim() === "") {
+      mergedHouseRules.checkIn.time = "15:00";
+    }
+    mergedHouseRules.checkOut = {
+      ...(selectedHotel?.houseRules?.checkOut || {}),
+      ...((updatedHotel.houseRules?.checkOut as any) || {}),
+    };
+    if (!mergedHouseRules.checkOut.time || String(mergedHouseRules.checkOut.time).trim() === "") {
+      mergedHouseRules.checkOut.time = "11:00";
+    }
+    if (mergedHouseRules.ageRestriction) {
+      if (mergedHouseRules.ageRestriction.minimumAge === "") mergedHouseRules.ageRestriction.minimumAge = null;
+    }
 
     const base: any = {
       name: updatedHotel.name,
@@ -532,10 +592,14 @@ export default function AdminHotelPage() {
       stars: Number(updatedHotel.stars ?? 0),
       shortDescription: updatedHotel.shortDescription,
       description: updatedHotel.description,
-      facilities: updatedHotel.facilities || selectedHotel?.facilities || {},
-      propertyHighlights: updatedHotel.propertyHighlights || selectedHotel?.propertyHighlights,
-      houseRules: updatedHotel.houseRules || selectedHotel?.houseRules,
-      surroundings: updatedHotel.surroundings || selectedHotel?.surroundings,
+      facilities: deepClean(baseFacilities),
+      propertyHighlights: deepClean(updatedHotel.propertyHighlights || selectedHotel?.propertyHighlights),
+      houseRules: deepClean(mergedHouseRules),
+      surroundings: deepClean(updatedHotel.surroundings || selectedHotel?.surroundings),
+      overview: deepClean(updatedHotel.overview || selectedHotel?.overview),
+      mostPopularFacilities: Array.isArray(updatedHotel.mostPopularFacilities) ? updatedHotel.mostPopularFacilities : (selectedHotel?.mostPopularFacilities || []),
+      categories: Array.isArray(updatedHotel.categories) ? updatedHotel.categories : (selectedHotel?.categories || []),
+      travellersQuestions: deepClean(updatedHotel.travellersQuestions || selectedHotel?.travellersQuestions || []),
       media: Array.isArray(updatedHotel.media)
         ? updatedHotel.media
         : Array.isArray(updatedHotel.images)
@@ -557,9 +621,6 @@ export default function AdminHotelPage() {
     } else {
       createHotelMutation.mutate(base);
     }
-    setIsEditDialogOpen(false);
-    setIsAddDialogOpen(false);
-    setSelectedHotel(null);
   };
 
   const handleCloseDialog = () => {
