@@ -9,6 +9,14 @@ const UserSchema = new Schema(
     role: { type: String, enum: ["OWNER", "HOTEL_ADMIN", "USER"], default: "USER" },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     managedHotels: [{ type: Schema.Types.ObjectId, ref: "Hotel" }],
+    // Owner application workflow
+    requestedOwner: { type: Boolean, default: false, index: true },
+    ownerApplicationStatus: {
+      type: String,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+      index: true,
+    },
   
     createdAt: { type: Date, default: Date.now },
   },

@@ -947,7 +947,7 @@ export default function AdminHotelPage() {
                                   <div className="bg-gray-50 p-2 rounded-md">
                                     <div className="text-[11px] text-gray-500">Rooms</div>
                                     <div className="text-base font-semibold">{hotel.rooms}</div>
-                                  </div>
+                                    </div>
                                   {/* Live analytics per hotel */}
                                   <HotelKpisMini hotelId={String(hotel.id)} formatCurrency={formatCurrency} />
                                 </div>
