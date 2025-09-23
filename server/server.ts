@@ -15,6 +15,7 @@ import meRoutes from "./src/routes/me";
 import hotelRoutes from "./src/routes/hotels";
 import reservationRoutes from "./src/routes/reservations";
 import reviewRoutes from "./src/routes/reviews";
+import wishlistRoutes from "./src/routes/wishlists";
 import cron from "node-cron";
 import { ReservationModel } from "./src/models/Reservation";
 import searchHistoryRoutes from "./src/routes/searchHistory";
@@ -53,6 +54,7 @@ async function start() {
   app.use("/api/hotels", hotelRoutes);
   app.use("/api/reservations", reservationRoutes);
   app.use("/api/reviews", reviewRoutes);
+  app.use("/api/wishlists", wishlistRoutes);
   app.use("/api", trendingCitiesRoutes);
   app.use("/api", searchHistoryRoutes);
 

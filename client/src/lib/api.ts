@@ -100,7 +100,7 @@ export type SpecialRequestData = {
 };
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
   withCredentials: true,
 });
 
@@ -112,6 +112,20 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Add response interceptor to handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid, redirect to login
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export type SearchHotelsParams = {
   q?: string;
@@ -352,5 +366,88 @@ export async function approveSpecialRequest(
   const res = await api.patch(
     `/api/reservations/${reservationId}/special-request/${requestId}/approve`
   );
+  return res.data;
+}
+
+// Wishlist types
+export type Wishlist = {
+  _id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  hotelIds: any[];
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateWishlistData = {
+  name: string;
+  description?: string;
+  isPublic?: boolean;
+};
+
+export type UpdateWishlistData = Partial<CreateWishlistData>;
+
+// Wishlist API functions
+export async function getWishlists(): Promise<Wishlist[]> {
+  const res = await api.get("/api/wishlists");
+  return res.data;
+}
+
+export async function getWishlistById(wishlistId: string): Promise<Wishlist> {
+  const res = await api.get(`/api/wishlists/${wishlistId}`);
+  return res.data;
+}
+
+export async function createWishlist(
+  data: CreateWishlistData
+): Promise<Wishlist> {
+  const res = await api.post("/api/wishlists", data);
+  return res.data;
+}
+
+export async function updateWishlist(
+  wishlistId: string,
+  data: UpdateWishlistData
+): Promise<Wishlist> {
+  const res = await api.put(`/api/wishlists/${wishlistId}`, data);
+  return res.data;
+}
+
+export async function deleteWishlist(wishlistId: string): Promise<void> {
+  await api.delete(`/api/wishlists/${wishlistId}`);
+}
+
+export async function addHotelToWishlist(
+  wishlistId: string,
+  hotelId: string
+): Promise<Wishlist> {
+  const res = await api.post(`/api/wishlists/${wishlistId}/hotels`, {
+    hotelId,
+  });
+  return res.data;
+}
+
+export async function removeHotelFromWishlist(
+  wishlistId: string,
+  hotelId: string
+): Promise<Wishlist> {
+  const res = await api.delete(
+    `/api/wishlists/${wishlistId}/hotels/${hotelId}`
+  );
+  return res.data;
+}
+
+export async function checkHotelInWishlist(hotelId: string): Promise<{
+  isInWishlist: boolean;
+  wishlists: Array<{ _id: string; name: string }>;
+}> {
+  const res = await api.get(`/api/wishlists/check/${hotelId}`);
+  return res.data;
+}
+
+export async function getPublicWishlist(wishlistId: string): Promise<Wishlist> {
+  const res = await api.get(`/api/wishlists/public/${wishlistId}`);
   return res.data;
 }
