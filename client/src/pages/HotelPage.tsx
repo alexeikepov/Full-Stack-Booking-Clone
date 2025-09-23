@@ -202,7 +202,7 @@ export default function HotelPage() {
       <HotelHeader hotel={hotel} />
       <HotelGallery hotel={hotel} />
 
-      <div className="space-y-8">
+      <div className="space-y-10">
         <HotelOverview hotel={hotel} />
         <HotelInfoPrices hotel={hotel} isLoading={isLoading} />
         <GuestReviews hotel={hotel} />
@@ -217,3 +217,4 @@ export default function HotelPage() {
     </div>
   );
 }
+ 
