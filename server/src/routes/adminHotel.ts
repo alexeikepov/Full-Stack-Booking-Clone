@@ -21,17 +21,24 @@ router.get("/hotels", requireAuth, async (req: AuthedRequest, res, next) => {
     const filter = { $or: [{ ownerId: userId }, { adminIds: userId }] } as any;
     const hotels = await HotelModel.find(filter).sort({ createdAt: -1 }).lean();
     res.json(
-      hotels.map((h: any) => ({
-        id: String(h._id),
-        name: h.name,
-        city: h.city,
-        address: h.address,
-        averageRating: h.averageRating ?? 0,
-        reviewsCount: h.reviewsCount ?? 0,
-        rooms: Array.isArray(h.rooms) ? h.rooms.length : 0,
-        status: h.status ?? "active",
-        createdAt: h.createdAt,
-      }))
+      hotels.map((h: any) => {
+        const approved = h.approvalStatus === "APPROVED";
+        const visible = h.isVisible !== false; // default true
+        const status = approved && visible ? "active" : "inactive";
+        return {
+          id: String(h._id),
+          name: h.name,
+          city: h.city,
+          address: h.address,
+          averageRating: h.averageRating ?? 0,
+          reviewsCount: h.reviewsCount ?? 0,
+          rooms: Array.isArray(h.rooms) ? h.rooms.length : 0,
+          status,
+          isVisible: visible,
+          approvalStatus: h.approvalStatus,
+          createdAt: h.createdAt,
+        };
+      })
     );
   } catch (err) {
     next(err);
@@ -201,6 +208,24 @@ router.get("/analytics", requireAuth, async (req: AuthedRequest, res, next) => {
       monthlyBookings: rows.map((r) => r.bookings),
       topPerformingHotels,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/admin-hotel/hotels/:id/visibility
+router.patch("/hotels/:id/visibility", requireAuth, async (req: AuthedRequest, res, next) => {
+  try {
+    if (!isOwnerOrAdmin(req.user?.role)) return res.status(403).json({ error: "Forbidden" });
+    const { id } = req.params;
+    const { isVisible } = req.body as { isVisible: boolean };
+    const updated = await HotelModel.findOneAndUpdate(
+      { _id: id, $or: [{ ownerId: req.user!.id }, { adminIds: req.user!.id }] },
+      { isVisible: !!isVisible },
+      { new: true }
+    ).lean();
+    if (!updated) return res.status(404).json({ error: "Hotel not found" });
+    res.json({ id: String(updated._id), isVisible: updated.isVisible });
   } catch (err) {
     next(err);
   }

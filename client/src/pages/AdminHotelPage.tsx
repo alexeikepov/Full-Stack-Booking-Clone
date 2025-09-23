@@ -41,6 +41,7 @@ import {
   updateReservationStatus,
   getHotelReviews,
   respondToReview,
+  setHotelVisibility,
 } from "@/lib/api";
 
 // Mock data for hotel owner's hotels
@@ -481,15 +482,30 @@ export default function AdminHotelPage() {
     deleteHotelMutation.mutate(id);
   };
 
-  const handleToggleHotelStatus = (id: string) => {
-    const hotel = hotels.find((h: any) => String(h.id) === String(id));
-    if (hotel) {
-      const newStatus = hotel.status === "active" ? "inactive" : "active";
-      updateHotelMutation.mutate({
-        hotelId: String(id),
-        hotelData: { ...hotel, status: newStatus },
+  const handleToggleHotelStatus = (id: any) => {
+    const hotel = (hotels as any[]).find((h: any) => String(h.id) === String(id));
+    if (!hotel) return;
+    const currentlyVisible = hotel.isVisible !== false;
+    const nextVisible = !currentlyVisible;
+
+    // Optimistic update
+    queryClient.setQueryData(["owner-hotels"], (prev: any) => {
+      if (!Array.isArray(prev)) return prev;
+      return prev.map((h: any) =>
+        String(h.id) === String(id)
+          ? { ...h, isVisible: nextVisible, status: nextVisible && h.approvalStatus === "APPROVED" ? "active" : "inactive" }
+          : h
+      );
+    });
+
+    setHotelVisibility(String(id), nextVisible)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
+      })
+      .catch(() => {
+        alert("Failed to change visibility.");
+        queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       });
-    }
   };
 
   const handleSaveHotel = (updatedHotel: any) => {

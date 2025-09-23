@@ -529,3 +529,8 @@ export async function getHotelById(hotelId: string) {
   const res = await api.get(`/api/hotels/${hotelId}`);
   return res.data;
 }
+
+export async function setHotelVisibility(hotelId: string, isVisible: boolean) {
+  const res = await api.patch(`/api/admin-hotel/hotels/${hotelId}/visibility`, { isVisible });
+  return res.data as { id: string; isVisible: boolean };
+}
