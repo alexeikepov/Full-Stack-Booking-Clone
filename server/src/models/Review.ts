@@ -19,6 +19,7 @@ const ReviewSchema = new Schema(
     // Basic review info
     rating: { type: Number, min: 1, max: 10, required: true },
     comment: { type: String, default: "" },
+    negative: { type: String, default: "" },
 
     // Guest info
     guestName: { type: String, required: true }, // "Michael", "Josh"

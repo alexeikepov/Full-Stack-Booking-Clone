@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createReview } from "@/lib/api";
+import { createReview, updateMyReviewForHotel } from "@/lib/api";
 
 // Define CreateReviewData type locally to avoid import issues
 export type CreateReviewData = {
   rating: number;
   comment: string;
+  negative?: string;
   guestName: string;
   guestCountry: string;
   guestInitial: string;
@@ -55,7 +56,17 @@ export default function CreateReviewForm({
   const queryClient = useQueryClient();
 
   const createReviewMutation = useMutation({
-    mutationFn: (data: CreateReviewData) => createReview(hotelId, data),
+    mutationFn: async (data: CreateReviewData) => {
+      try {
+        return await createReview(hotelId, data);
+      } catch (e: any) {
+        if (e?.response?.status === 409) {
+          // Already exists → update instead
+          return await updateMyReviewForHotel(hotelId, data);
+        }
+        throw e;
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hotel", hotelId] });
       queryClient.invalidateQueries({ queryKey: ["reviews", hotelId] });
@@ -234,21 +245,39 @@ export default function CreateReviewForm({
           </div>
         </div>
 
-        {/* Comment */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Your Review
-          </label>
-          <textarea
-            value={formData.comment}
-            onChange={(e) => handleInputChange("comment", e.target.value)}
-            rows={4}
-            maxLength={2000}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Share your experience..."
-          />
-          <div className="text-xs text-gray-500 text-right">
-            {formData.comment.length}/2000 characters
+        {/* Positive/Negative */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              What did you like?
+            </label>
+            <textarea
+              value={formData.comment}
+              onChange={(e) => handleInputChange("comment", e.target.value)}
+              rows={6}
+              maxLength={2000}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Positive aspects..."
+            />
+            <div className="text-xs text-gray-500 text-right">
+              {formData.comment.length}/2000
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              What could be improved?
+            </label>
+            <textarea
+              value={formData.negative || ""}
+              onChange={(e) => handleInputChange("negative", e.target.value)}
+              rows={6}
+              maxLength={2000}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Negative aspects (optional)..."
+            />
+            <div className="text-xs text-gray-500 text-right">
+              {(formData.negative?.length || 0)}/2000
+            </div>
           </div>
         </div>
 

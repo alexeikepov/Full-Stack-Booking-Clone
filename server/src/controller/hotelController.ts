@@ -39,6 +39,7 @@ const updateHotelSchema = createHotelSchema.partial();
 const reviewCreateSchema = z.object({
   rating: z.number().int().min(1).max(10),
   comment: z.string().max(2000).optional().default(""),
+  negative: z.string().max(2000).optional().default(""),
 
   // Guest info
   guestName: z.string().min(1).max(100),
@@ -989,6 +990,7 @@ export async function createReview(
       user: userId,
       rating: dto.rating,
       comment: dto.comment,
+      negative: dto.negative,
       guestName: dto.guestName,
       guestCountry: dto.guestCountry,
       guestInitial: dto.guestInitial,
