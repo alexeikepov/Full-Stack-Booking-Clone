@@ -237,8 +237,25 @@ export async function getMe() {
     email: string;
     phone?: string;
     role?: string;
+    ownerApplicationStatus?: "none" | "pending" | "approved" | "rejected";
     genius?: { level: number; completedLast24Months: number; nextThreshold: number | null; remaining: number };
   };
+}
+
+// ----- Auth (Partner) -----
+export type AuthResponse = {
+  user: { id: string; name: string; email: string; phone?: string; role?: string };
+  token: string;
+};
+
+export async function registerUser(params: { name: string; email: string; phone: string; password: string }): Promise<AuthResponse> {
+  const res = await api.post("/api/users/register", params);
+  return res.data as AuthResponse;
+}
+
+export async function loginUser(params: { email: string; password: string }): Promise<AuthResponse> {
+  const res = await api.post("/api/users/login", params);
+  return res.data as AuthResponse;
 }
 
 export async function createReview(
