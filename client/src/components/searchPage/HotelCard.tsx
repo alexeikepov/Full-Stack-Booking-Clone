@@ -113,7 +113,7 @@ export default function HotelCard({
       aria-label={liked ? "Remove from favorites" : "Add to favorites"}
       aria-pressed={liked}
       onClick={(e) => toggleLike(e, hotelId)}
-      className="absolute right-2 top-2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-0"
+      className="absolute right-2 top-2 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow hover:bg-white focus:outline-none focus:ring-0"
     >
       <Heart
         className={`h-5 w-5 ${liked ? "text-red-600" : "text-[#003b95]"}`}
@@ -125,32 +125,32 @@ export default function HotelCard({
 
   if (variant === "grid") {
     return (
-      <Card className="w-[216px] overflow-hidden rounded-xl border border-[#e7e7e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] pt-0 focus:outline-none focus:ring-0">
+      <Card className="relative w-[252px] overflow-hidden rounded-xl border border-[#e7e7e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-0 mb-3 focus:outline-none focus:ring-0">
+        <Link
+          to={buildHotelUrl(hotelId)}
+          className="absolute inset-0 z-10 focus:outline-none focus:ring-0"
+          aria-label={`Open ${hotel.name}`}
+        />
         <div className="relative">
-          <Link to={buildHotelUrl(hotelId)} className="block w-full focus:outline-none focus:ring-0">
+          <div className="block w-full">
             <img
               src={getPrimaryImage(hotel)}
               alt={hotel.name}
-              className="h-[216px] w-[216px] object-cover"
+              className="h-[310px] w-[252px] object-cover"
               loading="lazy"
             />
-          </Link>
+          </div>
           {LikeButton}
         </div>
         <div className="p-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <Link
-                to={buildHotelUrl(hotelId)}
-                className="line-clamp-2 text-[16px] font-semibold text-[#0071c2] hover:underline focus:outline-none focus:ring-0"
-              >
+              <div className="line-clamp-2 text-[16px] font-semibold text-[#0071c2]">
                 {hotel.name}
-              </Link>
+              </div>
               {!!hotel.stars && <span className="text-[#febb02]">{starsRow(hotel.stars)}</span>}
               <div className="mt-0.5 text-[12px]">
-                <Link to="#" className="text-[#0071c2] hover:underline">
-                  {hotel.city}
-                </Link>
+                <span className="text-[#0071c2]">{hotel.city}</span>
                 <span className="text-muted-foreground"> • 2.7 km from centre</span>
               </div>
             </div>
@@ -196,13 +196,6 @@ export default function HotelCard({
                   <div className="text-sm text-muted-foreground">Price unavailable</div>
                 )}
               </div>
-
-              <Link
-                to={buildHotelUrl(hotelId)}
-                className="inline-flex items-center rounded-md bg-[#0071c2] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-[#005fa3] focus:outline-none focus:ring-0"
-              >
-                See availability
-              </Link>
             </div>
           </div>
         </div>
@@ -211,8 +204,8 @@ export default function HotelCard({
   }
 
   return (
-    <Card className="min-h-[274px] overflow-hidden rounded-xl border border-[#e7e7e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] py-2 focus:outline-none focus:ring-0">
-      <div className="flex flex-col gap-1.5 px-2 sm:flex-row sm:gap-2.5">
+    <Card className="min-h-[274px] overflow-hidden rounded-xl border border-[#e7e7e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-3 pb-0 mb-3 focus:outline-none focus:ring-0">
+      <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-2.5">
         <div className="relative shrink-0 overflow-hidden rounded-lg sm:h-[240px] sm:w-[240px]">
           <Link to={buildHotelUrl(hotelId)} className="block h-full w-full focus:outline-none focus:ring-0">
             <img
@@ -247,7 +240,7 @@ export default function HotelCard({
             {featuresLine}
           </div>
 
-          <div className="mt-auto pt-0.5" />
+          <div className="mt-auto" />
         </div>
 
         <div className="flex shrink-0 flex-col items-end justify-between gap-2 sm:w-[232px]">

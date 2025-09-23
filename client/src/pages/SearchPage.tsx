@@ -505,7 +505,7 @@ export default function SearchPage() {
           <div
             className={`flex-1 ${
               view === "grid"
-                ? "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"
+                ? "grid grid-cols-1 gap-x-[4px] gap-y-[10px] pt-[6px] sm:grid-cols-2 lg:grid-cols-3"
                 : "space-y-3"
             }`}
           >
