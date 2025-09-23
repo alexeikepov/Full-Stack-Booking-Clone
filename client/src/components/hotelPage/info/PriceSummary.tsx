@@ -1,18 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/stores/search";
+import { useState } from "react";
+import BookingModal from "../booking/BookingModal";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface PriceSummaryProps {
   totalSelectedRooms: number;
   totalPrice: number;
   firstSelectedRoom: any;
+  hotel: any;
+  selectedRooms: Record<string, number>;
 }
 
 export default function PriceSummary({
   totalSelectedRooms,
   totalPrice,
   firstSelectedRoom,
+  hotel,
+  selectedRooms,
 }: PriceSummaryProps) {
   const { picker } = useSearchStore();
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Calculate number of nights
   const calculateNights = () => {
@@ -30,10 +41,22 @@ export default function PriceSummary({
   const pricePerRoom = firstSelectedRoom?.pricePerNight || 0;
   const totalPriceForNights = totalPrice * nights;
 
+  const handleReserveClick = () => {
+    if (!user) {
+      alert("Please log in to make a reservation");
+      navigate("/login");
+      return;
+    }
+    setIsBookingModalOpen(true);
+  };
+
   if (totalSelectedRooms === 0) {
     return (
       <div>
-        <Button className="bg-[#0071c2] hover:bg-[#005fa3] text-white px-4 py-2 text-sm font-medium">
+        <Button
+          onClick={handleReserveClick}
+          className="bg-[#0071c2] hover:bg-[#005fa3] text-white px-4 py-2 text-sm font-medium"
+        >
           I'll reserve
         </Button>
         <div className="mt-3 text-sm text-gray-600">
@@ -55,8 +78,9 @@ export default function PriceSummary({
           ₪ {totalPriceForNights.toLocaleString()}
         </div>
         <div className="text-xs text-gray-500">
-          ₪ {pricePerRoom.toLocaleString()} per room × {nights}{" "}
-          {nights === 1 ? "night" : "nights"}
+          ₪ {pricePerRoom.toLocaleString()} per room per night ×{" "}
+          {totalSelectedRooms} room{totalSelectedRooms !== 1 ? "s" : ""} ×{" "}
+          {nights} {nights === 1 ? "night" : "nights"}
         </div>
         <div className="text-xs text-gray-500">
           Additional charges may apply
@@ -64,7 +88,10 @@ export default function PriceSummary({
       </div>
 
       {/* Reserve button */}
-      <Button className="w-full bg-[#0071c2] hover:bg-[#005fa3] text-white py-3 text-base font-medium">
+      <Button
+        onClick={handleReserveClick}
+        className="w-full bg-[#0071c2] hover:bg-[#005fa3] text-white py-3 text-base font-medium"
+      >
         I'll reserve
       </Button>
 
@@ -80,7 +107,7 @@ export default function PriceSummary({
           <div className="text-base font-bold text-gray-900">Your package:</div>
 
           {/* Breakfast - показываем если есть в amenities */}
-          {firstSelectedRoom.amenities.some((a: string) =>
+          {(firstSelectedRoom.amenities || []).some((a: string) =>
             /breakfast/i.test(a)
           ) && (
             <div className="flex items-center gap-2 text-sm text-gray-700">
@@ -90,10 +117,10 @@ export default function PriceSummary({
           )}
 
           {/* High-speed internet - показываем если есть WiFi */}
-          {(firstSelectedRoom.amenities.some((a: string) =>
+          {((firstSelectedRoom.amenities || []).some((a: string) =>
             /wifi|internet/i.test(a)
           ) ||
-            firstSelectedRoom.facilities.some((a: string) =>
+            (firstSelectedRoom.facilities || []).some((a: string) =>
               /wifi|internet/i.test(a)
             )) && (
             <div className="flex items-center gap-2 text-sm text-green-600">
@@ -103,7 +130,7 @@ export default function PriceSummary({
           )}
 
           {/* Free cancellation - показываем если есть в categories */}
-          {firstSelectedRoom.categories.some((c: string) =>
+          {(firstSelectedRoom.categories || []).some((c: string) =>
             /free cancellation/i.test(c)
           ) && (
             <div className="flex items-center gap-2 text-sm text-green-600">
@@ -113,7 +140,7 @@ export default function PriceSummary({
           )}
 
           {/* No prepayment - показываем если есть в categories */}
-          {firstSelectedRoom.categories.some((c: string) =>
+          {(firstSelectedRoom.categories || []).some((c: string) =>
             /no prepayment/i.test(c)
           ) && (
             <div className="flex items-center gap-2 text-sm text-green-600">
@@ -123,7 +150,7 @@ export default function PriceSummary({
           )}
 
           {/* Genius discount - показываем если есть в categories */}
-          {firstSelectedRoom.categories.some((c: string) =>
+          {(firstSelectedRoom.categories || []).some((c: string) =>
             /genius/i.test(c)
           ) && (
             <div className="flex items-center gap-2 text-sm text-[#0071c2]">
@@ -133,18 +160,20 @@ export default function PriceSummary({
           )}
 
           {/* Показываем реальные amenities с бэка */}
-          {firstSelectedRoom.amenities.map((amenity: string, index: number) => (
-            <div
-              key={index}
-              className="flex items-center gap-2 text-sm text-green-600"
-            >
-              <span>✓</span>
-              <span>{amenity}</span>
-            </div>
-          ))}
+          {(firstSelectedRoom.amenities || []).map(
+            (amenity: string, index: number) => (
+              <div
+                key={index}
+                className="flex items-center gap-2 text-sm text-green-600"
+              >
+                <span>✓</span>
+                <span>{amenity}</span>
+              </div>
+            )
+          )}
 
           {/* Показываем реальные facilities с бэка */}
-          {firstSelectedRoom.facilities.map(
+          {(firstSelectedRoom.facilities || []).map(
             (facility: string, index: number) => (
               <div
                 key={`facility-${index}`}
@@ -157,6 +186,17 @@ export default function PriceSummary({
           )}
         </div>
       )}
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        hotel={hotel}
+        selectedRooms={selectedRooms}
+        totalPrice={totalPriceForNights}
+        pricePerNight={totalPrice}
+        firstSelectedRoom={firstSelectedRoom}
+      />
     </div>
   );
 }

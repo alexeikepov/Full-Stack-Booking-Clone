@@ -3,10 +3,15 @@ interface RoomAmenitiesProps {
 }
 
 export default function RoomAmenities({ room }: RoomAmenitiesProps) {
+  // Safely check if arrays exist and have content
+  const amenities = room.amenities || [];
+  const facilities = room.facilities || [];
+  const categories = room.categories || [];
+
   return (
     <div className="space-y-2 text-[14px]">
       {/* Breakfast */}
-      {room.amenities.some((a: string) => /breakfast/i.test(a)) && (
+      {amenities.some((a: string) => /breakfast/i.test(a)) && (
         <div className="flex items-center gap-2">
           <span>☕</span>
           <span>
@@ -16,8 +21,8 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
       )}
 
       {/* High-speed internet */}
-      {(room.amenities.some((a: string) => /wifi|internet/i.test(a)) ||
-        room.facilities.some((a: string) => /wifi|internet/i.test(a))) && (
+      {(amenities.some((a: string) => /wifi|internet/i.test(a)) ||
+        facilities.some((a: string) => /wifi|internet/i.test(a))) && (
         <div className="flex items-center gap-2 text-green-600">
           <span>✓</span>
           <span>Includes high-speed internet</span>
@@ -25,7 +30,7 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
       )}
 
       {/* Free cancellation */}
-      {room.categories.some((c: string) => /free cancellation/i.test(c)) && (
+      {categories.some((c: string) => /free cancellation/i.test(c)) && (
         <div className="flex items-center gap-2 text-green-600">
           <span>✓</span>
           <span>Free cancellation</span>
@@ -33,7 +38,7 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
       )}
 
       {/* No prepayment */}
-      {room.categories.some((c: string) => /no prepayment/i.test(c)) && (
+      {categories.some((c: string) => /no prepayment/i.test(c)) && (
         <div className="flex items-center gap-2 text-green-600">
           <span>✓</span>
           <span>No prepayment needed – pay at the property</span>
@@ -41,7 +46,7 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
       )}
 
       {/* Genius discount */}
-      {room.categories.some((c: string) => /genius/i.test(c)) && (
+      {categories.some((c: string) => /genius/i.test(c)) && (
         <div className="flex items-center gap-2 text-[#0071c2]">
           <span>🏷️</span>
           <span>Genius discount may be available</span>

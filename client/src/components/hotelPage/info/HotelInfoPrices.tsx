@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { Hotel } from "@/types/hotel";
 import { useSearchStore } from "@/stores/search";
+import { getHotelRooms } from "@/lib/api";
 import SearchBar from "./SearchBar";
 import RoomTableHeader from "./RoomTableHeader";
 import RoomRow from "../rooms/RoomRow";
@@ -16,7 +18,6 @@ export default function HotelInfoPrices({
   hotel,
   isLoading = false,
 }: HotelInfoPricesProps) {
-  const rooms = hotel.rooms || [];
   const [isSticky, setIsSticky] = useState(false);
   const [selectedRooms, setSelectedRooms] = useState<Record<string, number>>(
     {}
@@ -24,7 +25,33 @@ export default function HotelInfoPrices({
   const tableRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
 
-  const { adults, children, rooms: searchRooms, setRooms } = useSearchStore();
+  const {
+    adults,
+    children,
+    rooms: searchRooms,
+    setRooms,
+    from,
+    to,
+  } = useSearchStore();
+
+  // Fetch rooms from backend with availability data
+  const {
+    data: roomsData,
+    isLoading: roomsLoading,
+    error: roomsError,
+  } = useQuery({
+    queryKey: ["hotelRooms", hotel.id || hotel._id?.$oid, from, to],
+    queryFn: () =>
+      getHotelRooms(hotel.id || hotel._id?.$oid, {
+        from: from?.toISOString().split("T")[0],
+        to: to?.toISOString().split("T")[0],
+      }),
+    enabled: Boolean(hotel.id || hotel._id?.$oid),
+    retry: 1,
+  });
+
+  // Use backend data if available, otherwise fallback to hotel data
+  const rooms = roomsData?.rooms || hotel.rooms || [];
 
   // Calculate required rooms based on specific logic: 2 adults + 1 child = 1 room
   const calculateRequiredRooms = (adults: number, children: number) => {
@@ -81,7 +108,7 @@ export default function HotelInfoPrices({
     }));
   };
 
-  // Calculate total price for selected rooms
+  // Calculate total price for selected rooms (per night)
   const calculateTotalPrice = () => {
     let total = 0;
     Object.entries(selectedRooms).forEach(([roomId, count]) => {
@@ -94,6 +121,9 @@ export default function HotelInfoPrices({
     });
     return total;
   };
+
+  // Calculate price per night for all selected rooms
+  const pricePerNight = calculateTotalPrice(); // This already includes room count
 
   // Get total selected rooms count
   const totalSelectedRooms = Object.values(selectedRooms).reduce(
@@ -168,11 +198,23 @@ export default function HotelInfoPrices({
         <SearchBar requiredRooms={requiredRooms} />
 
         {/* Loading indicator */}
-        {isLoading && (
+        {(isLoading || roomsLoading) && (
           <div className="flex items-center justify-center py-8">
             <div className="flex items-center gap-2 text-blue-600">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
               <span className="text-sm">Updating prices...</span>
+            </div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {roomsError && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <p className="text-red-600 mb-2">
+                Failed to load room availability
+              </p>
+              <p className="text-gray-500 text-sm">Please try again later</p>
             </div>
           </div>
         )}
@@ -201,7 +243,7 @@ export default function HotelInfoPrices({
 
                 return (
                   <RoomRow
-                    key={room._id.$oid}
+                    key={room._id || room.id}
                     room={room}
                     index={index}
                     isFirstOfType={isFirstOfType}
@@ -210,9 +252,11 @@ export default function HotelInfoPrices({
                     getRoomId={getRoomId}
                     totalSelectedRooms={totalSelectedRooms}
                     totalPrice={calculateTotalPrice()}
+                    pricePerNight={pricePerNight}
                     firstSelectedRoom={firstSelectedRoom}
                     adults={adults}
                     children={children}
+                    hotel={hotel}
                   />
                 );
               })}
