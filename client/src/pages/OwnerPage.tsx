@@ -25,133 +25,108 @@ import EditHotelDialog from "@/components/EditHotelDialog";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import { useEffect } from "react";
 import AdminHeader from "@/components/AdminHeader";
-
-// Mock data for demonstration
-const mockHotelApplications = [
-  {
-    id: 1,
-    hotelName: "Grand Hotel Moscow",
-    ownerName: "John Smith",
-    email: "john.smith@email.com",
-    phone: "+1 (555) 123-4567",
-    status: "pending",
-    submittedAt: "2024-01-15",
-    description: "Luxury hotel in the center of Moscow with 200 rooms",
-  },
-  {
-    id: 2,
-    hotelName: "St. Petersburg Plaza",
-    ownerName: "Maria Johnson",
-    email: "maria.johnson@email.com",
-    phone: "+1 (555) 987-6543",
-    status: "approved",
-    submittedAt: "2024-01-10",
-    description: "Modern hotel on Nevsky Prospect",
-  },
-  {
-    id: 3,
-    hotelName: "Kazan Center",
-    ownerName: "Alex Brown",
-    email: "alex.brown@email.com",
-    phone: "+1 (555) 555-1234",
-    status: "rejected",
-    submittedAt: "2024-01-08",
-    description: "Business hotel in Kazan city center",
-  },
-];
-
-const mockHotels = [
-  {
-    id: 1,
-    name: "Grand Hotel Moscow",
-    location: "Moscow, Russia",
-    rating: 4.8,
-    rooms: 200,
-    status: "active",
-    owner: "John Smith",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: 2,
-    name: "St. Petersburg Plaza",
-    location: "St. Petersburg, Russia",
-    rating: 4.6,
-    rooms: 150,
-    status: "active",
-    owner: "Maria Johnson",
-    createdAt: "2024-01-10",
-  },
-  {
-    id: 3,
-    name: "Kazan Center",
-    location: "Kazan, Russia",
-    rating: 4.2,
-    rooms: 100,
-    status: "inactive",
-    owner: "Alex Brown",
-    createdAt: "2024-01-08",
-  },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { approveAdminApplication, getAdminApplications, rejectAdminApplication, getOwnerHotels, setHotelVisibility, deleteHotel as apiDeleteHotel, getHotelById, updateHotel as apiUpdateHotel } from "@/lib/api";
 
 export default function OwnerPage() {
-  const [applications, setApplications] = useState(mockHotelApplications);
-  const [hotels, setHotels] = useState(mockHotels);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("applications");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [selectedHotel, setSelectedHotel] = useState<any>(null);
   const { setShowTabs } = useNavigationTabsStore();
+  const qc = useQueryClient();
 
   // Hide navigation tabs on admin page
   useEffect(() => {
     setShowTabs(false);
-
-    // Restore tabs when component unmounts
     return () => {
       setShowTabs(true);
     };
   }, [setShowTabs]);
 
-  const handleApproveApplication = (id: number) => {
-    setApplications((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, status: "approved" } : app))
-    );
+  // Load admin applications
+  const { data: applicationsData } = useQuery({
+    queryKey: ["adminApplications"],
+    queryFn: () => getAdminApplications({ status: undefined }),
+  });
+  const applications = (applicationsData?.items || []).map((u: any) => ({
+    id: String(u._id),
+    ownerName: u.name,
+    email: u.email,
+    phone: u.phone,
+    status: u.ownerApplicationStatus,
+    submittedAt: new Date(u.createdAt).toISOString().slice(0, 10),
+    description: "",
+    hotelName: "",
+  }));
+
+  // Load hotels the current user can manage (platform owner can also use this for now)
+  const { data: hotelsData } = useQuery({
+    queryKey: ["ownerHotels"],
+    queryFn: () => getOwnerHotels(),
+  });
+  const hotels = (hotelsData || []).map((h: any) => ({
+    id: String(h.id || h._id),
+    name: h.name,
+    location: [h.address, h.city].filter(Boolean).join(", "),
+    rating: h.averageRating ?? 0,
+    rooms: h.rooms ?? 0,
+    status: h.status,
+    approvalStatus: h.approvalStatus || "PENDING",
+    owner: "",
+    createdAt: h.createdAt ? new Date(h.createdAt).toLocaleDateString() : "",
+    isVisible: h.isVisible !== false,
+  }));
+
+  const approveMut = useMutation({
+    mutationFn: (userId: string) => approveAdminApplication(userId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminApplications"] }),
+  });
+  const rejectMut = useMutation({
+    mutationFn: (userId: string) => rejectAdminApplication(userId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminApplications"] }),
+  });
+  const deleteHotelMut = useMutation({
+    mutationFn: (hotelId: string) => apiDeleteHotel(hotelId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ownerHotels"] }),
+  });
+  const updateHotelMut = useMutation({
+    mutationFn: ({ hotelId, data }: { hotelId: string; data: any }) => apiUpdateHotel(hotelId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ownerHotels"] }),
+  });
+
+  const handleApproveApplication = (id: string) => {
+    approveMut.mutate(id);
   };
 
-  const handleRejectApplication = (id: number) => {
-    setApplications((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, status: "rejected" } : app))
-    );
+  const handleRejectApplication = (id: string) => {
+    rejectMut.mutate(id);
   };
 
-  const handleDeleteHotel = (id: number) => {
-    setHotels((prev) => prev.filter((hotel) => hotel.id !== id));
+  const handleDeleteHotel = (id: string) => {
+    deleteHotelMut.mutate(id);
   };
 
-  const handleToggleHotelStatus = (id: number) => {
-    setHotels((prev) =>
-      prev.map((hotel) =>
-        hotel.id === id
-          ? {
-              ...hotel,
-              status: hotel.status === "active" ? "inactive" : "active",
-            }
-          : hotel
-      )
-    );
+  const handleEditHotel = async (hotel: any) => {
+    try {
+      const full = await getHotelById(String(hotel.id));
+      setSelectedHotel(full);
+      setIsEditDialogOpen(true);
+    } catch {
+      setSelectedHotel(hotel);
+      setIsEditDialogOpen(true);
+    }
   };
 
-  const handleEditHotel = (hotel: any) => {
-    setSelectedHotel(hotel);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleSaveHotel = (updatedHotel: any) => {
-    setHotels((prev) =>
-      prev.map((hotel) => (hotel.id === updatedHotel.id ? updatedHotel : hotel))
-    );
-    setIsEditDialogOpen(false);
-    setSelectedHotel(null);
+  const handleSaveHotel = async (updatedHotel: any) => {
+    try {
+      const hotelId = String(updatedHotel.id || updatedHotel._id || selectedHotel?.id);
+      await updateHotelMut.mutateAsync({ hotelId, data: updatedHotel });
+      setIsEditDialogOpen(false);
+      setSelectedHotel(null);
+    } catch (e) {
+      alert("Update failed");
+    }
   };
 
   const handleCloseEditDialog = () => {
@@ -161,8 +136,8 @@ export default function OwnerPage() {
 
   const filteredApplications = applications.filter(
     (app) =>
-      app.hotelName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+      app.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredHotels = hotels.filter(
@@ -172,21 +147,13 @@ export default function OwnerPage() {
   );
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      pending: "default",
-      approved: "default",
-      rejected: "destructive",
-      active: "default",
-      inactive: "secondary",
-    } as const;
-
     const colors = {
       pending: "bg-yellow-100 text-yellow-800",
       approved: "bg-green-100 text-green-800",
       rejected: "bg-red-100 text-red-800",
       active: "bg-green-100 text-green-800",
       inactive: "bg-gray-100 text-gray-800",
-    };
+    } as const;
 
     return (
       <Badge className={colors[status as keyof typeof colors]}>
@@ -205,7 +172,7 @@ export default function OwnerPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Owner Panel</h1>
-          <p className="text-gray-600">Manage hotels and owner applications</p>
+          <p className="text-gray-600">Manage hotels and admin applications</p>
         </div>
 
         <Tabs className="space-y-6">
@@ -218,7 +185,7 @@ export default function OwnerPage() {
               onClick={() => setActiveTab("applications")}
             >
               <Users className="h-4 w-4" />
-              Owner Applications
+              Admin Applications
             </TabsTrigger>
             <TabsTrigger
               value="hotels"
@@ -236,15 +203,15 @@ export default function OwnerPage() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Hotel Owner Applications</CardTitle>
+                  <CardTitle>Hotel Admin Applications</CardTitle>
                   <CardDescription>
-                    Review and approve applications from hotel owners
+                    Review and approve applications from users requesting hotel admin role
                   </CardDescription>
                   <div className="flex items-center gap-4 mt-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                       <Input
-                        placeholder="Search by hotel name or owner..."
+                        placeholder="Search by name or email..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
@@ -263,16 +230,9 @@ export default function OwnerPage() {
                           <div className="flex justify-between items-start">
                             <div className="space-y-2">
                               <h3 className="text-lg font-semibold">
-                                {application.hotelName}
+                                {application.ownerName}
                               </h3>
-                              <p className="text-gray-600">
-                                {application.description}
-                              </p>
                               <div className="space-y-1 text-sm text-gray-500">
-                                <p>
-                                  <strong>Owner:</strong>{" "}
-                                  {application.ownerName}
-                                </p>
                                 <p>
                                   <strong>Email:</strong> {application.email}
                                 </p>
@@ -280,8 +240,7 @@ export default function OwnerPage() {
                                   <strong>Phone:</strong> {application.phone}
                                 </p>
                                 <p>
-                                  <strong>Submitted:</strong>{" "}
-                                  {application.submittedAt}
+                                  <strong>Submitted:</strong> {application.submittedAt}
                                 </p>
                               </div>
                             </div>
@@ -291,9 +250,7 @@ export default function OwnerPage() {
                                 <div className="flex space-x-2">
                                   <Button
                                     size="sm"
-                                    onClick={() =>
-                                      handleApproveApplication(application.id)
-                                    }
+                                    onClick={() => handleApproveApplication(application.id)}
                                     className="bg-green-600 hover:bg-green-700"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-1" />
@@ -302,9 +259,7 @@ export default function OwnerPage() {
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() =>
-                                      handleRejectApplication(application.id)
-                                    }
+                                    onClick={() => handleRejectApplication(application.id)}
                                   >
                                     <XCircle className="h-4 w-4 mr-1" />
                                     Reject
@@ -359,25 +314,23 @@ export default function OwnerPage() {
                               <div className="flex items-center space-x-4 text-sm text-gray-500">
                                 <span>⭐ {hotel.rating}</span>
                                 <span>🏨 {hotel.rooms} rooms</span>
-                                <span>👤 {hotel.owner}</span>
                                 <span>📅 {hotel.createdAt}</span>
                               </div>
                             </div>
                             <div className="flex flex-col items-end space-y-2">
                               {getStatusBadge(hotel.status)}
-                              <div className="flex space-x-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    handleToggleHotelStatus(hotel.id)
+                              <div className="flex items-center gap-2">
+                                <select
+                                  value={hotel.approvalStatus}
+                                  onChange={(e) =>
+                                    updateHotelMut.mutate({ hotelId: hotel.id, data: { approvalStatus: e.target.value } })
                                   }
+                                  className="h-9 rounded border px-2 text-sm"
                                 >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  {hotel.status === "active"
-                                    ? "Deactivate"
-                                    : "Activate"}
-                                </Button>
+                                  <option value="PENDING">Pending</option>
+                                  <option value="APPROVED">Approved</option>
+                                  <option value="REJECTED">Rejected</option>
+                                </select>
                                 <Button
                                   size="sm"
                                   variant="outline"

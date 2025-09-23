@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import EditHotelDialog from "@/components/EditHotelDialog";
-import AddHotelDialog from "@/components/AddHotelDialog";
+// import AddHotelDialog from "@/components/AddHotelDialog"; // removed, using EditHotelDialog for full add
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import AdminHeader from "@/components/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -352,12 +352,40 @@ function HotelKpis({ hotelId }: { hotelId: string }) {
   );
 }
 
+function HotelKpisMini({ hotelId, formatCurrency }: { hotelId: string; formatCurrency: (n: number) => string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["owner-analytics-mini", hotelId],
+    queryFn: () => getOwnerAnalytics({ hotelId }),
+    staleTime: 60_000,
+  });
+  const totalBookings = Number(data?.totalBookings || 0);
+  const totalRevenue = Number(data?.totalRevenue || 0);
+  const averageOccupancy = Number(data?.averageOccupancy || 0);
+  return (
+    <>
+      <div className="bg-gray-50 p-2 rounded-md">
+        <div className="text-[11px] text-gray-500">Bookings</div>
+        <div className="text-base font-semibold">{isLoading ? "…" : totalBookings}</div>
+      </div>
+      <div className="bg-gray-50 p-2 rounded-md">
+        <div className="text-[11px] text-gray-500">Revenue</div>
+        <div className="text-base font-semibold">{isLoading ? "…" : formatCurrency(totalRevenue)}</div>
+      </div>
+      <div className="bg-gray-50 p-2 rounded-md">
+        <div className="text-[11px] text-gray-500">Occupancy</div>
+        <div className="text-base font-semibold">{isLoading ? "…" : `${averageOccupancy}%`}</div>
+      </div>
+    </>
+  );
+}
+
 export default function AdminHotelPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("hotels");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState<any>(null);
+  const [isAdding, setIsAdding] = useState(false);
   const [reservationStatus, setReservationStatus] = useState<string>("");
   const { setShowTabs } = useNavigationTabsStore();
   const queryClient = useQueryClient();
@@ -461,16 +489,18 @@ export default function AdminHotelPage() {
     };
   }, [setShowTabs]);
 
-  // Preselect first hotel when list loads
+  // Preselect first hotel when list loads (skip while adding/new dialog open)
   useEffect(() => {
-    if (!selectedHotel && Array.isArray(hotels) && hotels.length > 0) {
+    if (!isEditDialogOpen && !isAdding && !selectedHotel && Array.isArray(hotels) && hotels.length > 0) {
       setSelectedHotel(hotels[0]);
     }
-  }, [hotels, selectedHotel]);
+  }, [hotels, selectedHotel, isEditDialogOpen, isAdding]);
 
   const handleAddHotel = () => {
+    setIsAdding(true);
     setSelectedHotel(null);
-    setIsAddDialogOpen(true);
+    setIsEditDialogOpen(true);
+    setIsAddDialogOpen(false);
   };
 
   const handleEditHotel = (hotel: any) => {
@@ -509,7 +539,7 @@ export default function AdminHotelPage() {
   };
 
   const handleSaveHotel = (updatedHotel: any) => {
-    const id = updatedHotel?.id ?? selectedHotel?.id;
+    const id = updatedHotel?.id; // only trust explicit id from dialog
     const sanitizeRooms = (rooms: any[]) =>
       (rooms || []).map((r) => {
         const pricePerNight = Number(r.pricePerNight ?? 0);
@@ -643,6 +673,7 @@ export default function AdminHotelPage() {
     setIsEditDialogOpen(false);
     setIsAddDialogOpen(false);
     setSelectedHotel(null);
+    setIsAdding(false);
   };
 
   const filteredHotels = (hotels as any[]).filter((hotel: any) => {
@@ -728,16 +759,6 @@ export default function AdminHotelPage() {
             >
               <Star className="h-4 w-4" />
               Reviews
-            </TabsTrigger>
-            <TabsTrigger
-              value="add-hotel"
-              className={`flex items-center gap-2 ${
-                activeTab === "add-hotel" ? "bg-white shadow-sm" : ""
-              }`}
-              onClick={() => setActiveTab("add-hotel")}
-            >
-              <Plus className="h-4 w-4" />
-              Add Hotel
             </TabsTrigger>
           </TabsList>
 
@@ -828,9 +849,9 @@ export default function AdminHotelPage() {
                                   </div>
 
                                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                                    <span>
+                                      <span>
                                       Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
-                                    </span>
+                                      </span>
                                     {hotel.lastBooking && (
                                       <span>Last booking: {hotel.lastBooking}</span>
                                     )}
@@ -900,6 +921,7 @@ export default function AdminHotelPage() {
                           <CardContent className="pt-6">
                             <div className="flex justify-between items-start">
                               <div className="space-y-3 flex-1">
+                                {/* Header */}
                                 <div className="flex items-center gap-3">
                                   <h3 className="text-xl font-semibold">
                                     {hotel.name}
@@ -907,42 +929,40 @@ export default function AdminHotelPage() {
                                   {getStatusBadge(hotel.status)}
                                 </div>
 
-                                <div className="flex items-center gap-4 text-gray-600">
+                                {/* Subheader: location & rating */}
+                                <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
                                   <div className="flex items-center gap-1">
                                     <MapPin className="h-4 w-4" />
-                                    {hotel.address}
+                                    <span className="truncate max-w-[360px]">{hotel.address || hotel.city}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Star className="h-4 w-4 text-yellow-500" />
-                                    {hotel.averageRating} ({hotel.reviewsCount}{" "}
-                                    reviews)
+                                    <span className="font-medium">{hotel.averageRating ?? 0}</span>
+                                    <span className="text-gray-500">({hotel.reviewsCount} reviews)</span>
                                   </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <Building2 className="h-4 w-4" />
-                                      Rooms
+                                {/* KPIs */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                  <div className="bg-gray-50 p-2 rounded-md">
+                                    <div className="text-[11px] text-gray-500">Rooms</div>
+                                    <div className="text-base font-semibold">{hotel.rooms}</div>
                                     </div>
-                                    <div className="text-lg font-semibold">
-                                      {hotel.rooms}
-                                    </div>
-                                  </div>
-                                  <Fragment>
-                                    <HotelKpis hotelId={String(hotel.id)} />
-                                  </Fragment>
+                                  {/* Live analytics per hotel */}
+                                  <HotelKpisMini hotelId={String(hotel.id)} formatCurrency={formatCurrency} />
                                 </div>
 
-                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                  <span>
+                                {/* Meta */}
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                                    <span>
                                     Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
-                                  </span>
+                                    </span>
                                   {hotel.lastBooking && (
                                     <span>Last booking: {hotel.lastBooking}</span>
                                   )}
                                 </div>
 
+                                {/* Contact */}
                                 <div className="flex items-center gap-4 text-sm">
                                   {hotel.contactInfo?.phone && (
                                     <div className="flex items-center gap-1">
@@ -985,7 +1005,7 @@ export default function AdminHotelPage() {
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => handleDeleteHotel(String(hotel.id))}
+                                    onClick={() => handleDeleteHotel(hotel.id)}
                                     disabled={deleteHotelMutation.isPending}
                                   >
                                     <Trash2 className="h-4 w-4 mr-1" />
@@ -1196,7 +1216,7 @@ export default function AdminHotelPage() {
                               <td className="py-2 pr-3">{r.status}</td>
                               <td className="py-2 pr-3">
                                 <div className="flex gap-2">
-                                  <Button
+                      <Button
                                     size="sm"
                                     variant="secondary"
                                     onClick={() => updateReservationStatus(String(r._id || r.id), "CONFIRMED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
@@ -1216,14 +1236,14 @@ export default function AdminHotelPage() {
                                     onClick={() => updateReservationStatus(String(r._id || r.id), "CANCELLED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
                                   >
                                     Cancel
-                                  </Button>
-                                </div>
+                      </Button>
+                    </div>
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
-                    </div>
+                  </div>
                   )}
                 </CardContent>
               </Card>
@@ -1266,53 +1286,18 @@ export default function AdminHotelPage() {
             </div>
           )}
 
-          {activeTab === "add-hotel" && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add New Hotel</CardTitle>
-                  <CardDescription>
-                    Fill in the information about the new hotel to add it to the
-                    platform
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="text-center py-12">
-                      <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Add New Hotel
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        Click the button below to open the form for adding a new
-                        hotel
-                      </p>
-                      <Button
-                        onClick={handleAddHotel}
-                        size="lg"
-                        className="flex items-center gap-2"
-                      >
-                        <Plus className="h-5 w-5" />
-                        Add Hotel
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {/* Removed separate AddHotelDialog; full add uses EditHotelDialog */}
+          {/* <AddHotelDialog
+            isOpen={isAddDialogOpen}
+            onClose={handleCloseDialog}
+            onSave={handleSaveHotel}
+          /> */}
         </Tabs>
 
         <EditHotelDialog
           isOpen={isEditDialogOpen}
           onClose={handleCloseDialog}
           hotel={selectedHotel}
-          onSave={handleSaveHotel}
-        />
-
-        <AddHotelDialog
-          isOpen={isAddDialogOpen}
-          onClose={handleCloseDialog}
           onSave={handleSaveHotel}
         />
       </div>

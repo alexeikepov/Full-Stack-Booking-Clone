@@ -534,3 +534,24 @@ export async function setHotelVisibility(hotelId: string, isVisible: boolean) {
   const res = await api.patch(`/api/admin-hotel/hotels/${hotelId}/visibility`, { isVisible });
   return res.data as { id: string; isVisible: boolean };
 }
+
+// ----- Platform owner: admin applications -----
+export async function getAdminApplications(params?: { status?: "pending" | "approved" | "rejected" }) {
+  const res = await api.get("/api/users/admin-applications", { params });
+  return res.data as { items: Array<{ _id: string; name: string; email: string; phone: string; ownerApplicationStatus: string; role: string; requestedOwner: boolean; createdAt: string }> };
+}
+
+export async function approveAdminApplication(userId: string) {
+  const res = await api.patch(`/api/users/${userId}/admin-approve`, { action: "approve" });
+  return res.data as { id: string; role: string; ownerApplicationStatus: string };
+}
+
+export async function rejectAdminApplication(userId: string) {
+  const res = await api.patch(`/api/users/${userId}/admin-approve`, { action: "reject" });
+  return res.data as { id: string; role: string; ownerApplicationStatus: string };
+}
+
+export async function requestAdminRole() {
+  const res = await api.post("/api/users/request-admin");
+  return res.data as { ok: true; ownerApplicationStatus: string };
+}
