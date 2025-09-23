@@ -13,9 +13,11 @@ interface RoomRowProps {
   getRoomId: (room: any) => string;
   totalSelectedRooms: number;
   totalPrice: number;
+  pricePerNight: number;
   firstSelectedRoom: any;
   adults: number;
   children: number;
+  hotel: any;
 }
 
 export default function RoomRow({
@@ -27,9 +29,11 @@ export default function RoomRow({
   getRoomId,
   totalSelectedRooms,
   totalPrice,
+  pricePerNight,
   firstSelectedRoom,
   adults,
   children,
+  hotel,
 }: RoomRowProps) {
   console.log(
     `RoomRow ${index}: ${room.name}, isFirstOfType: ${isFirstOfType}`
@@ -47,7 +51,7 @@ export default function RoomRow({
   const pricePerRoom = room.pricePerNight;
 
   return (
-    <div key={room._id.$oid}>
+    <div key={room._id || room.id}>
       {/* Row grid mirrors header widths */}
       <div
         className={`grid grid-cols-[minmax(320px,1.2fr)_140px_220px_1.8fr_88px_180px] gap-0 p-0 divide-x divide-[#e6e6e6] ${
@@ -70,10 +74,18 @@ export default function RoomRow({
           <RoomSpecifications room={room} />
 
           {/* Availability warning */}
-          <div className="flex items-center gap-2 text-red-600 text-sm">
-            <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-            <span>Only {room.availableRooms} left on our site</span>
-          </div>
+          {room.availableRooms !== undefined && room.availableRooms > 0 && (
+            <div className="flex items-center gap-2 text-red-600 text-sm">
+              <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+              <span>Only {room.availableRooms} left on our site</span>
+            </div>
+          )}
+          {room.availableRooms === 0 && (
+            <div className="flex items-center gap-2 text-red-600 text-sm">
+              <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+              <span>Sold out</span>
+            </div>
+          )}
 
           {/* Categories */}
           {room.categories && room.categories.length > 0 && (
@@ -81,7 +93,7 @@ export default function RoomRow({
               <div className="flex flex-wrap gap-1">
                 {room.categories.map((category: string, idx: number) => (
                   <span
-                    key={`category-${room._id.$oid}-${idx}`}
+                    key={`category-${room._id || room.id}-${idx}`}
                     className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
                   >
                     {category}
@@ -93,15 +105,17 @@ export default function RoomRow({
 
           {/* Amenities from backend */}
           <div className="space-y-1 text-sm">
-            {room.amenities.slice(0, 6).map((amenity: string, idx: number) => (
-              <div
-                key={`amenity-${room._id.$oid}-${idx}`}
-                className="flex items-center gap-2"
-              >
-                <span className="text-green-600">✓</span>
-                <span>{amenity}</span>
-              </div>
-            ))}
+            {(room.amenities || [])
+              .slice(0, 6)
+              .map((amenity: string, idx: number) => (
+                <div
+                  key={`amenity-${room._id || room.id}-${idx}`}
+                  className="flex items-center gap-2"
+                >
+                  <span className="text-green-600">✓</span>
+                  <span>{amenity}</span>
+                </div>
+              ))}
           </div>
         </div>
 
@@ -113,14 +127,17 @@ export default function RoomRow({
         >
           <div className="text-left">
             <div className="text-2xl text-gray-600 mb-1">
-              {Array.from({ length: Math.min(room.capacity, 4) }, (_, i) => (
-                <span
-                  key={`person-${room._id.$oid}-${i}`}
-                  className="inline-block mr-1"
-                >
-                  <MdPerson className="text-gray-600" size={22} />
-                </span>
-              ))}
+              {Array.from(
+                { length: Math.min(room.capacity || 2, 4) },
+                (_, i) => (
+                  <span
+                    key={`person-${room._id || room.id}-${i}`}
+                    className="inline-block mr-1"
+                  >
+                    <MdPerson className="text-gray-600" size={22} />
+                  </span>
+                )
+              )}
             </div>
           </div>
         </div>
@@ -177,7 +194,10 @@ export default function RoomRow({
               <PriceSummary
                 totalSelectedRooms={totalSelectedRooms}
                 totalPrice={totalPrice}
+                pricePerNight={pricePerNight}
                 firstSelectedRoom={firstSelectedRoom}
+                hotel={hotel}
+                selectedRooms={selectedRooms}
               />
             </div>
           ) : null}

@@ -16,7 +16,8 @@ export default function RoomSelector({
   const [isOpen, setIsOpen] = useState(false);
   const roomId = getRoomId(room);
   const currentCount = selectedRooms[roomId] || 0;
-  const maxRooms = Math.min(room.availableRooms, 5);
+  const availableRooms = room.availableRooms || 0;
+  const maxRooms = Math.min(availableRooms, 5);
 
   const options = Array.from({ length: maxRooms + 1 }, (_, i) => i);
 

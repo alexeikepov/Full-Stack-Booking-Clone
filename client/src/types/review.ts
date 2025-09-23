@@ -1,9 +1,9 @@
-import { ID } from "./common";
+// src/types/review.ts
 
 export type Review = {
-  id: ID;
-  hotel: ID;
-  user: ID;
+  _id: { $oid: string };
+  hotel: { $oid: string };
+  user: { $oid: string };
 
   // Basic review info
   rating: number; // 1-10
@@ -45,15 +45,54 @@ export type Review = {
   // Review status
   status?: "PENDING" | "APPROVED" | "REJECTED" | "HIDDEN";
   moderatedAt?: Date;
-  moderatedBy?: ID;
+  moderatedBy?: { $oid: string };
 
   // Response from hotel
   hotelResponse?: {
     text?: string;
     respondedAt?: Date;
-    respondedBy?: ID;
+    respondedBy?: { $oid: string };
   };
 
   createdAt: Date;
   updatedAt?: Date;
+};
+
+export type ReviewStats = {
+  totalReviews: number;
+  averageRating: number;
+  ratingDistribution: Record<number, number>;
+  travelTypeDistribution: Record<string, number>;
+};
+
+export type CreateReviewData = {
+  rating: number;
+  comment?: string;
+  guestName: string;
+  guestCountry: string;
+  guestInitial: string;
+  categoryRatings?: {
+    staff?: number;
+    comfort?: number;
+    freeWifi?: number;
+    facilities?: number;
+    valueForMoney?: number;
+    cleanliness?: number;
+    location?: number;
+  };
+  stayDate?: string;
+  roomType?: string;
+  travelType?:
+    | "BUSINESS"
+    | "LEISURE"
+    | "COUPLE"
+    | "FAMILY"
+    | "FRIENDS"
+    | "SOLO";
+};
+
+export type UpdateReviewData = Partial<CreateReviewData>;
+
+export type HotelResponseData = {
+  text: string;
 };

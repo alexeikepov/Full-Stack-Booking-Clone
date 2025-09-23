@@ -17,6 +17,7 @@ import {
   suggestCities,
   facetsSnapshot,
 } from "../controller/hotelController";
+import { getReviewStats } from "../controller/reviewController";
 import { requireAuth, maybeAuth } from "../middlewares/auth";
 
 const router = Router();
@@ -27,6 +28,7 @@ router.get("/:id", getHotelById);
 router.get("/:hotelId/availability", getAvailability);
 router.get("/:hotelId/rooms", getHotelRooms); // החזרת כל החדרים של מלון
 router.get("/:hotelId/reviews", listReviews);
+router.get("/:hotelId/reviews/stats", getReviewStats);
 
 // Reviews: user-scoped but hotel-specific
 router.get("/:hotelId/reviews/me", requireAuth, getMyReviewForHotel);

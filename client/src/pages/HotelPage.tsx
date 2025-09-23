@@ -73,7 +73,8 @@ export default function HotelPage() {
       if (data && data.rooms) {
         data.rooms = data.rooms.map((room: any) => ({
           ...room,
-          id: room._id?.$oid || room._id || room.id,
+          id: room._id || room.id,
+          _id: room._id || room.id,
         }));
       }
 

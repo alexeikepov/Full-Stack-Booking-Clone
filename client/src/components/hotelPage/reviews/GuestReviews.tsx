@@ -1,21 +1,51 @@
 import type { Hotel } from "@/types/hotel";
 import ReactCountryFlag from "react-country-flag";
+import { useQuery } from "@tanstack/react-query";
+import { getHotelReviews, getReviewStats } from "@/lib/api";
+import { useState } from "react";
+import ReviewCard from "./ReviewCard";
+import CreateReviewForm from "./CreateReviewForm";
 
 interface GuestReviewsProps {
   hotel: Hotel;
 }
 
 export default function GuestReviews({ hotel }: GuestReviewsProps) {
-  // Используем данные с бэка, если есть, иначе fallback значения
-  const categoryRatings = hotel.categoryRatings || {
-    staff: 9.5,
-    comfort: 9.1,
-    freeWifi: 9.9,
-    facilities: 8.8,
-    valueForMoney: 8.8,
-    cleanliness: 9.3,
-    location: 9.5,
-  };
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "rating_high" | "rating_low" | "helpful"
+  >("newest");
+
+  // Fetch reviews from backend
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    error: reviewsError,
+  } = useQuery({
+    queryKey: ["reviews", hotel.id || hotel._id?.$oid, sortBy],
+    queryFn: () =>
+      getHotelReviews(hotel.id || hotel._id?.$oid, { sort: sortBy, limit: 10 }),
+    retry: 1,
+  });
+
+  // Fetch review stats
+  const { data: reviewStats } = useQuery({
+    queryKey: ["reviewStats", hotel.id || hotel._id?.$oid],
+    queryFn: () => getReviewStats(hotel.id || hotel._id?.$oid),
+  });
+
+  // Use backend data if available, otherwise fallback to hotel data
+  const categoryRatings = reviewStats?.categoryAverages ||
+    hotel.guestReviews?.categories ||
+    hotel.categoryRatings || {
+      staff: 9.5,
+      comfort: 9.1,
+      freeWifi: 9.9,
+      facilities: 8.8,
+      valueForMoney: 8.8,
+      cleanliness: 9.3,
+      location: 9.5,
+    };
 
   const categoryNames = hotel.categoryNames || {
     staff: "Staff",
@@ -39,38 +69,21 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
     "Noise",
     "Bed",
   ];
-  const guestReviews = hotel.guestReviews || [
-    {
-      id: "1",
-      reviewerName: "Michael",
-      reviewerInitial: "M",
-      country: "Israel",
-      countryCode: "IL",
-      reviewText:
-        "Wonderful and stylish hotel, big and clean rooms, nice location. We've got complimentary wine bottle for a little waiting time which was really nice too.",
-      rating: 9.2,
-    },
-    {
-      id: "2",
-      reviewerName: "Josh",
-      reviewerInitial: "J",
-      country: "United States",
-      countryCode: "US",
-      reviewText:
-        "This is my second stay at this hotel, and both times have been fantastic. The staff is consistently kind, welcoming, and helpful, which really adds to the experience. The rooms are beautiful—well-designed, stylish, and very comfortable. Everything...",
-      rating: 9.5,
-    },
-    {
-      id: "3",
-      reviewerName: "Josh",
-      reviewerInitial: "J",
-      country: "United States",
-      countryCode: "US",
-      reviewText:
-        "had the pleasure of staying at Villa Albi. I can honestly say it exceeded all my expectations. From the moment I checked in, the staff was incredibly welcoming and attentive, making me feel right at home. The check-in process was smooth and...",
-      rating: 9.8,
-    },
-  ];
+
+  // Use reviews from backend if available
+  const guestReviews = reviewsData || hotel.guestReviews || [];
+  const totalReviews =
+    reviewStats?.totalReviews ||
+    hotel.guestReviews?.totalReviews ||
+    hotel.reviewsCount ||
+    375;
+  const averageRating =
+    reviewStats?.averageRating ||
+    hotel.guestReviews?.overallRating ||
+    hotel.averageRating ||
+    8.9;
+  const ratingLabel =
+    hotel.guestReviews?.overallLabel || hotel.ratingLabel || "Fabulous";
 
   // Функция для получения флага страны
   const getCountryFlag = (country: string) => {
@@ -184,14 +197,14 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
           <h2 className="text-2xl font-bold text-gray-900">Guest reviews</h2>
           <div className="flex items-center gap-4">
             <div className="bg-[#003b95] text-white px-4 py-2 rounded font-bold text-lg">
-              {hotel.averageRating?.toFixed(1) || "8.9"}
+              {averageRating.toFixed(1)}
             </div>
             <div>
               <div className="font-bold text-lg text-gray-900">
-                {hotel.ratingLabel || "Fabulous"}
+                {ratingLabel}
               </div>
               <div className="text-sm text-gray-600">
-                {hotel.reviewsCount || 375} reviews
+                {totalReviews} reviews
               </div>
             </div>
             <button className="text-[#0071c2] hover:underline font-medium">
@@ -268,50 +281,90 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
           </div>
         </div>
 
-        {/* Guests who stayed here loved section */}
+        {/* Reviews section */}
         <div className="mt-12">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Guests who stayed here loved
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Recent Reviews
+            </h3>
 
-          <div className="relative">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {guestReviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                      {review.reviewerInitial}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900 mb-1">
-                        {review.reviewerName}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                        {getCountryFlag(review.country)}
-                        <span>{review.country}</span>
-                      </div>
-                      <div className="text-gray-700 text-sm leading-relaxed">
-                        "{review.reviewText}"
-                      </div>
-                      <button className="text-[#0071c2] text-sm font-medium mt-2 hover:underline">
-                        Read more
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="flex items-center space-x-4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="rating_high">Highest Rating</option>
+                <option value="rating_low">Lowest Rating</option>
+                <option value="helpful">Most Helpful</option>
+              </select>
 
-            {/* Action button */}
-            <div className="flex items-center mt-6">
-              <button className="px-6 py-2 border border-[#0071c2] text-[#0071c2] rounded-lg font-medium hover:bg-[#0071c2] hover:text-white transition-colors">
-                Read all reviews
+              <button
+                onClick={() => setShowCreateForm(!showCreateForm)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+              >
+                Write a Review
               </button>
             </div>
           </div>
+
+          {/* Create Review Form */}
+          {showCreateForm && (
+            <div className="mb-8">
+              <CreateReviewForm
+                hotelId={hotel.id || hotel._id?.$oid}
+                onSuccess={() => setShowCreateForm(false)}
+                onCancel={() => setShowCreateForm(false)}
+              />
+            </div>
+          )}
+
+          {/* Reviews List */}
+          <div className="space-y-6">
+            {reviewsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading reviews...</p>
+              </div>
+            ) : reviewsError ? (
+              <div className="text-center py-8">
+                <p className="text-red-600 mb-2">Failed to load reviews</p>
+                <p className="text-gray-500 text-sm">Please try again later</p>
+              </div>
+            ) : guestReviews.length > 0 ? (
+              guestReviews.map((review) => (
+                <ReviewCard
+                  key={review._id || review.id}
+                  review={review}
+                  onVoteHelpful={(reviewId) => {
+                    // Handle vote helpful
+                    console.log("Vote helpful for review:", reviewId);
+                  }}
+                  onReport={(reviewId) => {
+                    // Handle report
+                    console.log("Report review:", reviewId);
+                  }}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600">
+                  No reviews yet. Be the first to write a review!
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Load More Button */}
+          {guestReviews.length > 0 && (
+            <div className="flex items-center justify-center mt-8">
+              <button className="px-6 py-2 border border-[#0071c2] text-[#0071c2] rounded-lg font-medium hover:bg-[#0071c2] hover:text-white transition-colors">
+                Load More Reviews
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
