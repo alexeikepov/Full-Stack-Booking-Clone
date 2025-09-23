@@ -34,6 +34,7 @@ router.get("/", requireAuth, async (req: AuthedRequest, res, next) => {
       email: me.email,
       phone: me.phone,
       role: me.role,
+      ownerApplicationStatus: me.ownerApplicationStatus || "none",
       genius: {
         level,
         completedLast24Months: completedCount,

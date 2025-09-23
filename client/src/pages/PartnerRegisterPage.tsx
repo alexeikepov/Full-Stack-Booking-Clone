@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import PartnerRegisterHeader from "@/components/PartnerRegisterHeader";
+import { registerUser, requestAdminRole, getMe } from "@/lib/api";
 
 type Step = "email" | "contact" | "password";
 
@@ -20,6 +21,7 @@ export default function PartnerRegisterPage() {
   const [showBanner, setShowBanner] = useState(true);
   const [step, setStep] = useState<Step>("email");
   const [isLeaving, setIsLeaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [pwFocused, setPwFocused] = useState(false);
   const [pwTouched, setPwTouched] = useState(false);
@@ -108,12 +110,35 @@ export default function PartnerRegisterPage() {
     password.length > 0 ||
     confirm.length > 0;
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
+    if (submitting) return;
     setPwTouched(true);
     setConfirmTouched(true);
     const res = passwordSchema.safeParse({ password, confirm });
     if (!res.success) return;
-    navigate("/AdminHotel");
+    try {
+      setSubmitting(true);
+      const fullName = `${firstName} ${lastName}`.trim();
+      const cleanEmail = email.trim();
+      const cleanPhone = `+972${String(phone).replace(/\D/g, "")}`;
+      const auth = await registerUser({ name: fullName, email: cleanEmail, phone: cleanPhone, password });
+      localStorage.setItem("auth_token", auth.token);
+      localStorage.setItem("user", JSON.stringify(auth.user));
+      await requestAdminRole();
+      const me = await getMe();
+      if (me.ownerApplicationStatus === "pending") {
+        navigate("/owner/waiting-approval");
+      } else if (me.role === "HOTEL_ADMIN") {
+        navigate("/AdminHotel");
+      } else {
+        navigate("/partner-register");
+      }
+    } catch (e: any) {
+      const msg = e?.response?.data?.error || "Registration failed";
+      alert(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -163,6 +188,7 @@ export default function PartnerRegisterPage() {
         )}
 
         <div className="mx-auto w-full max-w-[400px] stage">
+          {/* email */}
           {step === "email" && (
             <section className={isLeaving ? "panel leaving" : "panel entering"}>
               <h1 className="text-[21px] font-bold text-[#1f2937]">
@@ -246,12 +272,13 @@ export default function PartnerRegisterPage() {
             </section>
           )}
 
+          {/* contact */}
           {step === "contact" && (
             <section className={isLeaving ? "panel leaving" : "panel entering"}>
               <h1 className="text-[21px] font-bold text-[#1f2937]">
                 Contact details
               </h1>
-              <p className="mt-2 text-[13.5px] leading-6 text-[#4b5563]">
+              <p className="mt-2 text=[13.5px] leading-6 text-[#4b5563]">
                 Your full name and phone number are needed to ensure the
                 security of your Booking.com account.
               </p>
@@ -337,6 +364,7 @@ export default function PartnerRegisterPage() {
             </section>
           )}
 
+          {/* password */}
           {step === "password" && (
             <section className={isLeaving ? "panel leaving" : "panel entering"}>
               <h1 className="text-[21px] font-bold text-[#1f2937]">
@@ -347,7 +375,7 @@ export default function PartnerRegisterPage() {
                 lowercase letters and numbers.
               </p>
 
-              <label className="mt-6 block text-[12px] font-semibold tracking-wide text-[#374151]">
+              <label className="mt-6 block text-[12px] font-semibold tracking-wide text[#374151]">
                 Password
               </label>
               <input
@@ -362,7 +390,7 @@ export default function PartnerRegisterPage() {
                 placeholder="Enter a password"
               />
 
-              <label className="mt-4 block text-[12px] font-semibold tracking-wide text-[#374151]">
+              <label className="mt-4 block text-[12px] font-semibold tracking-wide text[#374151]">
                 Confirm password
               </label>
               <input
@@ -402,9 +430,9 @@ export default function PartnerRegisterPage() {
               <button
                 className="btn-primary mt-2"
                 onClick={handleCreateAccount}
-                disabled={!passwordValid}
+                disabled={!passwordValid || submitting}
               >
-                Create account
+                {submitting ? "Creating account..." : "Create account"}
               </button>
 
               <div className="hr" />
