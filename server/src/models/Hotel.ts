@@ -152,25 +152,25 @@ const HotelSchema = new Schema(
     // Hotel facilities
     facilities: {
       general: { type: [String], default: [] }, // ["Non-smoking rooms", "Family rooms", "Free WiFi", "Terrace", "Daily housekeeping", "Tea/coffee maker in all rooms", "Good breakfast"]
-      greatForStay: { type: [String], default: [] }, // ["Private bathroom", "Air conditioning", "Free WiFi", "Family rooms", "Flat-screen TV", "Shower", "Non-smoking rooms", "Luggage storage", "Laundry", "Designated smoking area"]
-      bathroom: { type: [String], default: [] }, // ["Bathroom", "Toilet paper", "Towels", "Bath or shower", "Slippers", "Private bathroom", "Toilet", "Free toiletries", "Hairdryer", "Shower"]
-      bedroom: { type: [String], default: [] }, // ["Linen", "Wardrobe or closet", "Extra long beds (> 2 metres)"]
-      view: { type: [String], default: [] }, // ["City view"]
-      outdoors: { type: [String], default: [] }, // ["Outdoor furniture", "Terrace"]
-      kitchen: { type: [String], default: [] }, // ["Coffee machine", "Stovetop", "Electric kettle", "Refrigerator"]
-      roomAmenities: { type: [String], default: [] }, // ["Socket near the bed"]
-      livingArea: { type: [String], default: [] }, // ["Seating Area"]
-      mediaTechnology: { type: [String], default: [] }, // ["Streaming service (like Netflix)", "Flat-screen TV", "Satellite channels", "TV"]
-      foodDrink: { type: [String], default: [] }, // ["Wine/champagne", "Additional charge", "Tea/Coffee maker"]
+      greatForStay: { type: [String], default: [] },
+      bathroom: { type: [String], default: [] },
+      bedroom: { type: [String], default: [] },
+      view: { type: [String], default: [] },
+      outdoors: { type: [String], default: [] },
+      kitchen: { type: [String], default: [] },
+      roomAmenities: { type: [String], default: [] },
+      livingArea: { type: [String], default: [] },
+      mediaTechnology: { type: [String], default: [] },
+      foodDrink: { type: [String], default: [] },
       internet: {
         type: String,
         default: "WiFi is available in the rooms and is free of charge.",
       },
       parking: { type: String, default: "No parking available." },
-      receptionServices: { type: [String], default: [] }, // ["Invoice provided"]
-      safetySecurity: { type: [String], default: [] }, // ["Fire extinguishers", "CCTV outside property", "CCTV in common areas", "Key access"]
-      generalFacilities: { type: [String], default: [] }, // ["Designated smoking area", "Air conditioning", "Non-smoking throughout", "Mosquito net", "Heating", "Soundproofing", "Private entrance", "Family rooms", "Non-smoking rooms", "Iron"]
-      languagesSpoken: { type: [String], default: [] }, // ["German", "English", "Spanish", "Hebrew"]
+      receptionServices: { type: [String], default: [] },
+      safetySecurity: { type: [String], default: [] },
+      generalFacilities: { type: [String], default: [] },
+      languagesSpoken: { type: [String], default: [] },
     },
 
     // Guest reviews summary
@@ -358,7 +358,9 @@ const HotelSchema = new Schema(
 );
 
 HotelSchema.index({ city: 1, stars: -1, averageRating: -1 });
-HotelSchema.index({ categories: 1, "rooms.pricePerNight": 1 });
+// Replace invalid compound multikey index with two separate indexes
+HotelSchema.index({ categories: 1 });
+HotelSchema.index({ "rooms.pricePerNight": 1 });
 HotelSchema.index(
   {
     name: "text",
@@ -371,3 +373,23 @@ HotelSchema.index(
 );
 
 export const HotelModel = model("Hotel", HotelSchema);
+
+// Attempt to drop legacy parallel arrays index if it exists to prevent
+// "cannot index parallel arrays [rooms] [categories]" errors.
+(async () => {
+  try {
+    const indexes = await HotelModel.collection.indexes();
+    const bad = indexes.find((ix: any) => {
+      const keys = Object.keys(ix.key || {});
+      return keys.includes("categories") && keys.includes("rooms.pricePerNight");
+    });
+    if (bad?.name) {
+      await HotelModel.collection.dropIndex(bad.name);
+      // Recreate safe separate indexes (in case missing)
+      await HotelModel.collection.createIndex({ categories: 1 });
+      await HotelModel.collection.createIndex({ "rooms.pricePerNight": 1 });
+    }
+  } catch (err) {
+    // ignore errors on startup (e.g., collection not yet created)
+  }
+})();

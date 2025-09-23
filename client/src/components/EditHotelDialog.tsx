@@ -79,6 +79,11 @@ export default function EditHotelDialog({
       restaurantsCafes: [] as { name: string; type: string; distance: string }[],
       publicTransport: [] as { name: string; type: string; distance: string }[],
     },
+    overview: {},
+    mostPopularFacilities: [] as string[],
+    categories: [] as string[],
+    travellersQuestions: [] as { question: string; answer: string }[],
+    languagesSpoken: [] as string[],
   });
   const [loading, setLoading] = useState(false);
   const [newMediaUrl, setNewMediaUrl] = useState("");
@@ -137,6 +142,11 @@ export default function EditHotelDialog({
             parties: { allowed: false, note: "" },
           },
           surroundings: full.surroundings || { nearbyAttractions: [], restaurantsCafes: [], publicTransport: [] },
+          overview: full.overview || {},
+          mostPopularFacilities: toStringArray(full.mostPopularFacilities),
+          categories: toStringArray(full.categories),
+          travellersQuestions: Array.isArray(full.travellersQuestions) ? full.travellersQuestions.map((q: any) => ({ question: q.question || "", answer: q.answer || "" })) : [],
+          languagesSpoken: toStringArray(full.languagesSpoken),
         });
       } finally {
         setLoading(false);
@@ -264,6 +274,8 @@ export default function EditHotelDialog({
   // helpers to edit arrays by csv
   const csv = (arr?: string[]) => (Array.isArray(arr) ? arr.join(", ") : "");
   const parseCsv = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
+  const toStringArray = (v: any): string[] => (Array.isArray(v) ? v.map((x) => String(x)).filter(Boolean) : typeof v === "string" ? parseCsv(v) : []);
+  const csvSafe = (v: any) => toStringArray(v).join(", ");
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -293,56 +305,64 @@ export default function EditHotelDialog({
                     }} />
                     Show all
                   </label>
-                </div>
-              </div>
+            </div>
+          </div>
 
               {(showAll || activeTab === "general") && (
                 <div className="space-y-4">
                   {/* general content */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+            <div className="space-y-2">
                       <Label htmlFor="name">Name</Label>
                       <Input id="name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="status">Status</Label>
-                      <select
-                        id="status"
-                        value={formData.status}
-                        onChange={(e) => handleChange("status", e.target.value)}
+                      <div className="text-xs text-gray-500">Hotel display name shown to guests.</div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <select
+                id="status"
+                value={formData.status}
+                onChange={(e) => handleChange("status", e.target.value)}
                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </div>
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <div className="text-xs text-gray-500">Active = visible and bookable, Inactive = hidden.</div>
+            </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="address">Address</Label>
                       <Input id="address" value={formData.address} onChange={(e) => handleChange("address", e.target.value)} />
+                      <div className="text-xs text-gray-500">Street and number (you may include ZIP).</div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="city">City</Label>
                       <Input id="city" value={formData.city} onChange={(e) => handleChange("city", e.target.value)} />
+                      <div className="text-xs text-gray-500">City/town of the property.</div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="country">Country</Label>
                       <Input id="country" value={formData.country} onChange={(e) => handleChange("country", e.target.value)} />
+                      <div className="text-xs text-gray-500">Country (e.g., Israel).</div>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="shortDescription">Short description</Label>
                     <Input id="shortDescription" value={formData.shortDescription} onChange={(e) => handleChange("shortDescription", e.target.value)} placeholder="A concise marketing sentence" />
+                    <div className="text-xs text-gray-500">One short marketing sentence (used in teasers).</div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="description">Description</Label>
                     <Textarea id="description" value={formData.description} onChange={(e) => handleChange("description", e.target.value)} rows={5} placeholder="Full property description" />
+                    <div className="text-xs text-gray-500">Full property description, facilities and highlights.</div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="stars">Stars</Label>
                       <Input id="stars" type="number" min="1" max="5" step="1" value={formData.stars} onChange={(e) => handleChange("stars", parseInt(e.target.value || "0"))} />
+                      <div className="text-xs text-gray-500">Star rating 1–5 (if applicable).</div>
                     </div>
                   </div>
                 </div>
@@ -354,10 +374,12 @@ export default function EditHotelDialog({
                     <div className="space-y-2">
                       <Label htmlFor="lat">Latitude</Label>
                       <Input id="lat" type="number" step="0.000001" value={formData.location?.lat ?? 0} onChange={(e) => handleLocation("lat", parseFloat(e.target.value || "0"))} />
+                      <div className="text-xs text-gray-500">Latitude (decimal degrees).</div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lng">Longitude</Label>
                       <Input id="lng" type="number" step="0.000001" value={formData.location?.lng ?? 0} onChange={(e) => handleLocation("lng", parseFloat(e.target.value || "0"))} />
+                      <div className="text-xs text-gray-500">Longitude (decimal degrees).</div>
                     </div>
                   </div>
                 </div>
@@ -368,6 +390,7 @@ export default function EditHotelDialog({
                   <div className="space-y-2">
                     <Label htmlFor="generalFacilities">Facilities (comma separated)</Label>
                     <Input id="generalFacilities" value={generalFacilitiesCsv} onChange={(e) => setFormData((prev: any) => ({ ...prev, facilities: { ...(prev.facilities || {}), general: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) } }))} />
+                    <div className="text-xs text-gray-500">Separate items with commas (e.g., Free WiFi, Terrace, Family rooms).</div>
                   </div>
                 </div>
               )}
@@ -480,6 +503,7 @@ export default function EditHotelDialog({
                               <div>
                                 <Label className="text-xs">Features (comma separated)</Label>
                                 <Input value={(room.features || []).join(", ")} onChange={(e) => updateRoom(idx, "features", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
+                                <div className="text-xs text-gray-500">Example: Balcony, City view, Coffee machine.</div>
                               </div>
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
@@ -497,6 +521,7 @@ export default function EditHotelDialog({
                                         {url ? <img src={url} alt="room" className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
                                       </div>
                                       <Input value={url} onChange={(e) => updateRoomPhoto(idx, i, e.target.value)} />
+                                      <div className="text-xs text-gray-500">Paste an image URL (e.g., https://images...).</div>
                                       <Button type="button" variant="destructive" onClick={() => removeRoomPhoto(idx, i)}>
                                         Remove
                                       </Button>
@@ -521,7 +546,7 @@ export default function EditHotelDialog({
 
               {(showAll || activeTab === "media") && (
                 <div className="space-y-4">
-                  <div className="space-y-2">
+            <div className="space-y-2">
                     <Label htmlFor="newMedia">Add image URL</Label>
                     <div className="flex gap-2">
                       <Input id="newMedia" placeholder="https://..." value={newMediaUrl} onChange={(e) => setNewMediaUrl(e.target.value)} />
@@ -626,17 +651,102 @@ export default function EditHotelDialog({
                       <Textarea rows={3} value={(formData.surroundings?.publicTransport || []).map((a: any) => `${a.name} | ${a.type} | ${a.distance}`).join("\n")} onChange={(e) => setFormData((p: any) => ({ ...p, surroundings: { ...(p.surroundings || {}), publicTransport: e.target.value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => { const [name, type, distance] = l.split("|").map((x) => x.trim()); return { name, type, distance }; }) } }))} />
                     </div>
                   </div>
+
+                  <div className="space-y-3">
+                    <div className="text-sm font-medium">Overview sections</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">Info & Prices</Label>
+                        <Textarea rows={3} value={formData.overview?.infoAndPrices || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), infoAndPrices: e.target.value } }))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">Activity</Label>
+                        <Textarea rows={3} value={formData.overview?.activity || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), activity: e.target.value } }))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">Facilities (overview text)</Label>
+                        <Textarea rows={3} value={formData.overview?.facilities || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), facilities: e.target.value } }))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">House Rules (overview text)</Label>
+                        <Textarea rows={3} value={formData.overview?.houseRules || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), houseRules: e.target.value } }))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">Fine Print</Label>
+                        <Textarea rows={3} value={formData.overview?.finePrint || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), finePrint: e.target.value } }))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">Guest Reviews (overview text)</Label>
+                        <Textarea rows={3} value={formData.overview?.guestReviews || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), guestReviews: e.target.value } }))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">Travellers Asking</Label>
+                        <Textarea rows={3} value={formData.overview?.travellersAsking || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), travellersAsking: e.target.value } }))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <Label className="text-xs">Hotel Surroundings</Label>
+                        <Textarea rows={3} value={formData.overview?.hotelSurroundings || ""} onChange={(e) => setFormData((p: any) => ({ ...p, overview: { ...(p.overview || {}), hotelSurroundings: e.target.value } }))} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="text-sm font-medium">Most popular facilities & Categories</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs">Most popular facilities (comma separated)</Label>
+                        <Input value={csvSafe(formData.mostPopularFacilities)} onChange={(e) => setFormData((p: any) => ({ ...p, mostPopularFacilities: parseCsv(e.target.value) }))} />
+                        <div className="text-xs text-gray-500">Comma-separated list of top amenities shown on the card.</div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Categories (comma separated)</Label>
+                        <Input value={csvSafe(formData.categories)} onChange={(e) => setFormData((p: any) => ({ ...p, categories: parseCsv(e.target.value) }))} />
+                        <div className="text-xs text-gray-500">Tags (e.g., Family, Business, Beachfront).</div>
+                      </div>
+            </div>
+          </div>
+
+                  <div className="space-y-3">
+                    <div className="text-sm font-medium">Travellers questions</div>
+                    <div className="space-y-2">
+                      {(formData.travellersQuestions || []).map((q: any, i: number) => (
+                        <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-2 border rounded p-2">
+                          <div>
+                            <Label className="text-xs">Question</Label>
+                            <Input value={q.question} onChange={(e) => setFormData((p: any) => { const list = [...(p.travellersQuestions || [])]; list[i] = { ...list[i], question: e.target.value }; return { ...p, travellersQuestions: list }; })} />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Answer</Label>
+                            <Input value={q.answer} onChange={(e) => setFormData((p: any) => { const list = [...(p.travellersQuestions || [])]; list[i] = { ...list[i], answer: e.target.value }; return { ...p, travellersQuestions: list }; })} />
+                          </div>
+                          <div className="md:col-span-2 flex justify-end">
+                            <Button type="button" variant="destructive" size="sm" onClick={() => setFormData((p: any) => ({ ...p, travellersQuestions: (p.travellersQuestions || []).filter((_: any, idx: number) => idx !== i) }))}>Remove</Button>
+                          </div>
+                        </div>
+                      ))}
+                      <Button type="button" variant="outline" size="sm" onClick={() => setFormData((p: any) => ({ ...p, travellersQuestions: [ ...(p.travellersQuestions || []), { question: "", answer: "" } ] }))}>Add question</Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="text-sm font-medium">Languages</div>
+                    <div>
+                      <Label className="text-xs">Languages spoken (comma separated)</Label>
+                      <Input value={csvSafe(formData.languagesSpoken)} onChange={(e) => setFormData((p: any) => ({ ...p, languagesSpoken: parseCsv(e.target.value) }))} />
+                      <div className="text-xs text-gray-500">Example: Hebrew, English, Russian.</div>
+                    </div>
+                  </div>
                 </div>
               )}
             </Tabs>
 
-            <DialogFooter>
+          <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-                Cancel
-              </Button>
+              Cancel
+            </Button>
               <Button type="submit" disabled={loading}>Save Changes</Button>
-            </DialogFooter>
-          </form>
+          </DialogFooter>
+        </form>
         </div>
       </DialogContent>
     </Dialog>
