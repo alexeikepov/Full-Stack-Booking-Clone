@@ -30,6 +30,11 @@ export default function HotelPage() {
     setActiveTab("stays");
   }, [setActiveTab]);
 
+  // Reset scroll to top when hotel page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
   // Update search store from URL parameters
   useEffect(() => {
     setSearchParams(searchParams);
@@ -218,4 +223,3 @@ export default function HotelPage() {
     </div>
   );
 }
- 

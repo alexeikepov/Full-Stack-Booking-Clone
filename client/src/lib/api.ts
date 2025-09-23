@@ -375,7 +375,23 @@ export type Wishlist = {
   userId: string;
   name: string;
   description?: string;
-  hotelIds: any[];
+  hotelIds: Array<{
+    _id: string;
+    name: string;
+    city: string;
+    location?: {
+      lat: number;
+      lng: number;
+    };
+    images?: Array<{
+      url: string;
+    }>;
+    rating?: number;
+    price?: number;
+    averageRating?: number;
+    reviewsCount?: number;
+    stars?: number;
+  }>;
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;
