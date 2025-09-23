@@ -132,7 +132,7 @@ export type Hotel = {
     languagesSpoken?: string[];
   };
 
-  // Guest reviews summary
+  // Guest reviews summary (aggregated)
   guestReviews?: {
     overallRating: number;
     overallLabel: string;
@@ -189,7 +189,7 @@ export type Hotel = {
   adminIds: { $oid: string }[];
   amenityIds: { $oid: string }[];
   media: { url: string; type?: string }[];
-  categories: string;
+  categories: string[];
   averageRating: number;
   reviewsCount: number;
   ratingLabel?: string; // "Fabulous", "Good", "Excellent"
@@ -214,15 +214,6 @@ export type Hotel = {
   highScoreCategories?: string[]; // categories that show arrow
   highScoreTexts?: Record<string, string>; // custom text for high scores
   reviewTopics?: string[]; // topics for filter buttons
-  guestReviews?: {
-    id: string;
-    reviewerName: string;
-    reviewerInitial: string;
-    country: string;
-    countryCode: string;
-    reviewText: string;
-    rating: number;
-  }[];
   ownerId: { $oid: string };
   approvalStatus: HotelApprovalStatus;
   submittedAt: { $date: string };
