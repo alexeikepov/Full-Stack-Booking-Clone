@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import {
   Card,
   CardContent,
@@ -296,6 +296,61 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
   );
 }
 
+function HotelKpis({ hotelId }: { hotelId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["owner-analytics", hotelId],
+    queryFn: () => getOwnerAnalytics({ hotelId }),
+    staleTime: 60_000,
+  });
+
+  const currency = (amount: number) =>
+    new Intl.NumberFormat("he-IL", {
+      style: "currency",
+      currency: "ILS",
+      minimumFractionDigits: 0,
+    }).format(Number.isFinite(amount) ? amount : 0);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="bg-gray-50 p-3 rounded-lg h-[66px] animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  const totalBookings = Number(data?.totalBookings || 0);
+  const totalRevenue = Number(data?.totalRevenue || 0);
+  const averageOccupancy = Number(data?.averageOccupancy || 0);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Calendar className="h-4 w-4" />
+          Bookings
+        </div>
+        <div className="text-lg font-semibold">{totalBookings}</div>
+      </div>
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <DollarSign className="h-4 w-4" />
+          Revenue
+        </div>
+        <div className="text-lg font-semibold">{currency(totalRevenue)}</div>
+      </div>
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <TrendingUp className="h-4 w-4" />
+          Occupancy
+        </div>
+        <div className="text-lg font-semibold">{averageOccupancy}%</div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminHotelPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("hotels");
@@ -351,9 +406,28 @@ export default function AdminHotelPage() {
   const updateHotelMutation = useMutation({
     mutationFn: ({ hotelId, hotelData }: { hotelId: string; hotelData: any }) =>
       updateHotel(hotelId, hotelData),
-    onSuccess: () => {
+    onSuccess: (updated: any, vars) => {
+      // Optimistically update cache
+      queryClient.setQueryData(["owner-hotels"], (prev: any) => {
+        if (!Array.isArray(prev)) return prev;
+        return prev.map((h: any) =>
+          String(h.id) === String(vars.hotelId)
+            ? {
+                ...h,
+                name: updated?.name ?? vars.hotelData?.name ?? h.name,
+                city: updated?.city ?? h.city,
+                address: updated?.address ?? h.address,
+                status: updated?.status ?? vars.hotelData?.status ?? h.status,
+              }
+            : h
+        );
+      });
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       queryClient.invalidateQueries({ queryKey: ["owner-analytics"] });
+    },
+    onError: () => {
+      // fall back to refetch
+      queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
     },
   });
 
@@ -392,31 +466,96 @@ export default function AdminHotelPage() {
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteHotel = (id: number) => {
-    deleteHotelMutation.mutate(id.toString());
+  const handleDeleteHotel = (id: string) => {
+    deleteHotelMutation.mutate(id);
   };
 
-  const handleToggleHotelStatus = (id: number) => {
-    const hotel = hotels.find((h: any) => h.id === id);
+  const handleToggleHotelStatus = (id: string) => {
+    const hotel = hotels.find((h: any) => String(h.id) === String(id));
     if (hotel) {
       const newStatus = hotel.status === "active" ? "inactive" : "active";
       updateHotelMutation.mutate({
-        hotelId: id.toString(),
+        hotelId: String(id),
         hotelData: { ...hotel, status: newStatus },
       });
     }
   };
 
   const handleSaveHotel = (updatedHotel: any) => {
-    if (updatedHotel.id) {
-      // Edit existing hotel
+    const id = updatedHotel?.id ?? selectedHotel?.id;
+    const sanitizeRooms = (rooms: any[]) =>
+      (rooms || []).map((r) => {
+        const pricePerNight = Number(r.pricePerNight ?? 0);
+        const photos = Array.isArray(r.photos)
+          ? r.photos
+          : Array.isArray(r.media)
+          ? r.media.map((m: any) => (typeof m === "string" ? m : m?.url)).filter((x: any) => typeof x === "string" && x)
+          : [];
+        return {
+          _id: r._id,
+          name: r.name || "",
+          roomType: r.roomType || r.type || "STANDARD",
+          capacity: Number(r.capacity ?? r.maxAdults ?? 1),
+          maxAdults: Number(r.maxAdults ?? 0),
+          maxChildren: Number(r.maxChildren ?? 0),
+          pricePerNight,
+          totalRooms: Number(r.totalRooms ?? r.totalUnits ?? 1),
+          sizeSqm: Number(r.sizeSqm ?? 0),
+          bedrooms: Number(r.bedrooms ?? 0),
+          bathrooms: Number(r.bathrooms ?? 1),
+          features: Array.isArray(r.features)
+            ? r.features
+            : typeof r.features === "string"
+            ? r.features.split(",").map((s: string) => s.trim()).filter(Boolean)
+            : [],
+          photos,
+          media: photos,
+          pricing: {
+            basePrice: pricePerNight,
+            currency: "₪",
+            includesBreakfast: Boolean(r?.pricing?.includesBreakfast ?? false),
+            freeCancellation: Boolean(r?.pricing?.freeCancellation ?? true),
+            noPrepayment: Boolean(r?.pricing?.noPrepayment ?? true),
+            priceMatch: Boolean(r?.pricing?.priceMatch ?? true),
+          },
+        };
+      });
+
+    const loc = updatedHotel.location || selectedHotel?.location;
+    const validLocation = loc && typeof loc.lat === "number" && typeof loc.lng === "number" && !Number.isNaN(loc.lat) && !Number.isNaN(loc.lng);
+
+    const base: any = {
+      name: updatedHotel.name,
+      address: updatedHotel.address,
+      city: updatedHotel.city,
+      country: updatedHotel.country,
+      stars: Number(updatedHotel.stars ?? 0),
+      shortDescription: updatedHotel.shortDescription,
+      description: updatedHotel.description,
+      facilities: updatedHotel.facilities || selectedHotel?.facilities || {},
+      propertyHighlights: updatedHotel.propertyHighlights || selectedHotel?.propertyHighlights,
+      houseRules: updatedHotel.houseRules || selectedHotel?.houseRules,
+      surroundings: updatedHotel.surroundings || selectedHotel?.surroundings,
+      media: Array.isArray(updatedHotel.media)
+        ? updatedHotel.media
+        : Array.isArray(updatedHotel.images)
+        ? updatedHotel.images
+        : [],
+      status: updatedHotel.status || selectedHotel?.status,
+    };
+
+    if (validLocation) base.location = loc;
+
+    const mappedRooms = sanitizeRooms(updatedHotel.rooms || []);
+    if (mappedRooms.length > 0) base.rooms = mappedRooms;
+
+    if (id) {
       updateHotelMutation.mutate({
-        hotelId: updatedHotel.id.toString(),
-        hotelData: updatedHotel,
+        hotelId: String(id),
+        hotelData: base,
       });
     } else {
-      // Add new hotel
-      createHotelMutation.mutate(updatedHotel);
+      createHotelMutation.mutate(base);
     }
     setIsEditDialogOpen(false);
     setIsAddDialogOpen(false);
@@ -429,11 +568,10 @@ export default function AdminHotelPage() {
     setSelectedHotel(null);
   };
 
-  const filteredHotels = hotels.filter(
-    (hotel: any) =>
-      hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hotel.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredHotels = (hotels as any[]).filter((hotel: any) => {
+    const hay = `${hotel.name || ""} ${hotel.city || ""} ${hotel.address || ""}`.toLowerCase();
+    return hay.includes(searchTerm.toLowerCase());
+  });
 
   const getStatusBadge = (status: string) => {
     const colors = {
@@ -607,41 +745,17 @@ export default function AdminHotelPage() {
                                         {hotel.rooms}
                                       </div>
                                     </div>
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Calendar className="h-4 w-4" />
-                                        Bookings
-                                      </div>
-                                      <div className="text-lg font-semibold">
-                                        {hotel.totalBookings}
-                                      </div>
-                                    </div>
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <DollarSign className="h-4 w-4" />
-                                        Revenue
-                                      </div>
-                                      <div className="text-lg font-semibold">
-                                        {formatCurrency(hotel.revenue)}
-                                      </div>
-                                    </div>
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <TrendingUp className="h-4 w-4" />
-                                        Occupancy
-                                      </div>
-                                      <div className="text-lg font-semibold">
-                                        {hotel.occupancy}%
-                                      </div>
-                                    </div>
+                                    <Fragment>
+                                      <HotelKpis hotelId={String(hotel.id)} />
+                                    </Fragment>
                                   </div>
 
                                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                                    <span>Created: {hotel.createdAt}</span>
+                                    <span>
+                                      Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
+                                    </span>
                                     {hotel.lastBooking && (
-                                      <span>
-                                        Last booking: {hotel.lastBooking}
-                                      </span>
+                                      <span>Last booking: {hotel.lastBooking}</span>
                                     )}
                                   </div>
 
@@ -667,7 +781,7 @@ export default function AdminHotelPage() {
                                       size="sm"
                                       variant="outline"
                                       onClick={() =>
-                                        handleToggleHotelStatus(hotel.id)
+                                        handleToggleHotelStatus(String(hotel.id))
                                       }
                                     >
                                       <Eye className="h-4 w-4 mr-1" />
@@ -686,9 +800,7 @@ export default function AdminHotelPage() {
                                     <Button
                                       size="sm"
                                       variant="destructive"
-                                      onClick={() =>
-                                        handleDeleteHotel(hotel.id)
-                                      }
+                                      onClick={() => handleDeleteHotel(String(hotel.id))}
                                     >
                                       <Trash2 className="h-4 w-4 mr-1" />
                                       Delete
@@ -740,42 +852,17 @@ export default function AdminHotelPage() {
                                       {hotel.rooms}
                                     </div>
                                   </div>
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <Calendar className="h-4 w-4" />
-                                      Bookings
-                                    </div>
-                                    <div className="text-lg font-semibold">
-                                      {hotel.totalBookings}
-                                    </div>
-                                  </div>
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <DollarSign className="h-4 w-4" />
-                                      Revenue
-                                    </div>
-                                    <div className="text-lg font-semibold">
-                                      {formatCurrency(hotel.revenue)}
-                                    </div>
-                                  </div>
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <TrendingUp className="h-4 w-4" />
-                                      Occupancy
-                                    </div>
-                                    <div className="text-lg font-semibold">
-                                      {hotel.occupancy}%
-                                    </div>
-                                  </div>
+                                  <Fragment>
+                                    <HotelKpis hotelId={String(hotel.id)} />
+                                  </Fragment>
                                 </div>
 
                                 <div className="flex items-center gap-4 text-sm text-gray-500">
-                                  <span>Created: {hotel.createdAt}</span>
+                                  <span>
+                                    Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
+                                  </span>
                                   {hotel.lastBooking && (
-                                    <span>
-                                      Последнее бронирование:{" "}
-                                      {hotel.lastBooking}
-                                    </span>
+                                    <span>Last booking: {hotel.lastBooking}</span>
                                   )}
                                 </div>
 
@@ -801,7 +888,7 @@ export default function AdminHotelPage() {
                                     size="sm"
                                     variant="outline"
                                     onClick={() =>
-                                      handleToggleHotelStatus(hotel.id)
+                                      handleToggleHotelStatus(String(hotel.id))
                                     }
                                     disabled={updateHotelMutation.isPending}
                                   >
@@ -816,16 +903,16 @@ export default function AdminHotelPage() {
                                     onClick={() => handleEditHotel(hotel)}
                                   >
                                     <Edit className="h-4 w-4 mr-1" />
-                                    Редактировать
+                                    Edit
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => handleDeleteHotel(hotel.id)}
+                                    onClick={() => handleDeleteHotel(String(hotel.id))}
                                     disabled={deleteHotelMutation.isPending}
                                   >
                                     <Trash2 className="h-4 w-4 mr-1" />
-                                    Удалить
+                                    Delete
                                   </Button>
                                 </div>
                               </div>
