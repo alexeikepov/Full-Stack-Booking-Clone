@@ -242,6 +242,38 @@ export async function getMe() {
   };
 }
 
+// ----- Search History -----
+export type LastSearch = {
+  city?: string;
+  from?: string; // ISO string
+  to?: string;   // ISO string
+  adults?: number;
+  children?: number;
+  rooms?: number;
+  createdAt?: string;
+};
+
+export async function getMyLastSearch(): Promise<LastSearch | null> {
+  try {
+    const res = await api.get("/api/me/last-search");
+    return res.data as LastSearch;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    throw err;
+  }
+}
+
+export async function saveMyLastSearch(filters: {
+  city?: string;
+  from?: string | Date;
+  to?: string | Date;
+  adults?: number;
+  children?: number;
+  rooms?: number;
+}): Promise<void> {
+  await api.post("/api/me/last-search", filters);
+}
+
 // ----- Auth (Partner) -----
 export type AuthResponse = {
   user: { id: string; name: string; email: string; phone?: string; role?: string };
