@@ -69,6 +69,7 @@ export default function ReviewsTimelinePage() {
             const m = it.hotel?.media || [];
             return m.find((x: any) => x?.url)?.url || m[0]?.url;
           })();
+          const hotelResponseText = it.hotelResponse?.text || it.response || it.reply || "";
           return {
             id: String(it._id),
             hotel: it.hotel?.name || "",
@@ -82,6 +83,7 @@ export default function ReviewsTimelinePage() {
             status: it.status || "APPROVED",
             categoryRatings: it.categoryRatings,
             reviewedYear: dt.getFullYear(),
+            response: hotelResponseText || undefined,
           };
         });
         setReviews(mapped);
