@@ -14,6 +14,8 @@ import userRoutes from "./src/routes/users";
 import meRoutes from "./src/routes/me";
 import hotelRoutes from "./src/routes/hotels";
 import reservationRoutes from "./src/routes/reservations";
+import reviewRoutes from "./src/routes/reviews";
+import wishlistRoutes from "./src/routes/wishlists";
 import cron from "node-cron";
 import { ReservationModel } from "./src/models/Reservation";
 import searchHistoryRoutes from "./src/routes/searchHistory";
@@ -22,8 +24,8 @@ async function start() {
   const app = express();
 
   // Trust proxy (required on some hosts)
-const trustProxy = process.env.NODE_ENV === "production" ? 1 : false;
-app.set("trust proxy", trustProxy);
+  const trustProxy = process.env.NODE_ENV === "production" ? 1 : false;
+  app.set("trust proxy", trustProxy);
   // CORS (set exact client origin)
   app.use(cors({ origin: config.clientUrl, credentials: true }));
 
@@ -51,6 +53,8 @@ app.set("trust proxy", trustProxy);
   app.use("/api", meRoutes);
   app.use("/api/hotels", hotelRoutes);
   app.use("/api/reservations", reservationRoutes);
+  app.use("/api/reviews", reviewRoutes);
+  app.use("/api/wishlists", wishlistRoutes);
   app.use("/api", trendingCitiesRoutes);
   app.use("/api", searchHistoryRoutes);
 
@@ -75,7 +79,9 @@ app.set("trust proxy", trustProxy);
       { to: { $lt: now }, status: { $in: ["PENDING", "CONFIRMED"] } },
       { $set: { status: "COMPLETED" } }
     );
-    console.log(`✅ Cron: ${result.modifiedCount} reservations marked as COMPLETED`);
+    console.log(
+      `✅ Cron: ${result.modifiedCount} reservations marked as COMPLETED`
+    );
   });
 
   // Graceful shutdown

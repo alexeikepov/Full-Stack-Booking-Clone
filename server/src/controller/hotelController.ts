@@ -37,8 +37,33 @@ const createHotelSchema = z.object({
 const updateHotelSchema = createHotelSchema.partial();
 
 const reviewCreateSchema = z.object({
-  rating: z.number().int().min(1).max(5),
+  rating: z.number().int().min(1).max(10),
   comment: z.string().max(2000).optional().default(""),
+
+  // Guest info
+  guestName: z.string().min(1).max(100),
+  guestCountry: z.string().min(1).max(100),
+  guestInitial: z.string().min(1).max(5),
+
+  // Detailed ratings
+  categoryRatings: z
+    .object({
+      staff: z.number().int().min(1).max(10).optional(),
+      comfort: z.number().int().min(1).max(10).optional(),
+      freeWifi: z.number().int().min(1).max(10).optional(),
+      facilities: z.number().int().min(1).max(10).optional(),
+      valueForMoney: z.number().int().min(1).max(10).optional(),
+      cleanliness: z.number().int().min(1).max(10).optional(),
+      location: z.number().int().min(1).max(10).optional(),
+    })
+    .optional(),
+
+  // Stay details
+  stayDate: z.string().optional(),
+  roomType: z.string().optional(),
+  travelType: z
+    .enum(["BUSINESS", "LEISURE", "COUPLE", "FAMILY", "FRIENDS", "SOLO"])
+    .optional(),
 });
 
 const reviewUpdateSchema = reviewCreateSchema.partial();
@@ -699,10 +724,34 @@ export async function getHotelRooms(
       const booked = hasRange ? Number(bookedByType[key] ?? 0) : 0;
       const available = Math.max(0, total - booked);
       return {
-        roomType: key,
+        _id: r._id || r.id,
+        id: r._id || r.id,
+        name: r.name,
+        roomType: r.roomType || key,
+        roomCategory: r.roomCategory || "Standard",
+        capacity: r.capacity || 2,
+        maxAdults: r.maxAdults || 2,
+        maxChildren: r.maxChildren || 0,
         pricePerNight: r.pricePerNight,
+        sizeSqm: r.sizeSqm || 0,
+        bedrooms: r.bedrooms || 1,
+        bathrooms: r.bathrooms || 1,
         totalRooms: total,
         availableRooms: hasRange ? available : total,
+        amenities: r.amenities || [],
+        facilities: r.facilities || [],
+        categories: r.categories || [],
+        features: r.features || [],
+        specialFeatures: r.specialFeatures || {},
+        pricing: r.pricing || {
+          basePrice: r.pricePerNight,
+          currency: "₪",
+          freeCancellation: true,
+          noPrepayment: true,
+          priceMatch: false,
+        },
+        photos: r.photos || [],
+        media: r.media || [],
       };
     });
 
@@ -940,6 +989,13 @@ export async function createReview(
       user: userId,
       rating: dto.rating,
       comment: dto.comment,
+      guestName: dto.guestName,
+      guestCountry: dto.guestCountry,
+      guestInitial: dto.guestInitial,
+      categoryRatings: dto.categoryRatings,
+      stayDate: dto.stayDate ? new Date(dto.stayDate) : undefined,
+      roomType: dto.roomType,
+      travelType: dto.travelType,
     });
 
     await recomputeHotelRating(hotelId);
