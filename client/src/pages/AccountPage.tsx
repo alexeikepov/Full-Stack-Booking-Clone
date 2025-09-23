@@ -1,6 +1,8 @@
 // src/pages/AccountPage.tsx
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getMe } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import {
   CreditCard,
   Wallet,
@@ -15,7 +17,6 @@ import {
   BriefcaseBusiness,
 } from "lucide-react";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
-import { useAuth } from "@/context/AuthContext";
 
 import perkStays from "@/img/account images/perk-stays.png";
 import perkCars from "@/img/account images/perk-cars.png";
@@ -25,8 +26,19 @@ import perkPriority from "@/img/account images/perk-priority.png";
 import highestGenius from "@/img/account images/perk-highest-genius.png";
 
 export default function AccountPage() {
+  const { signIn, user: authUser } = useAuth();
+  const [loadingMe, setLoadingMe] = useState(false);
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingMe(true);
+        const me = await getMe();
+        signIn({ id: me.id, name: me.name, email: me.email, genius: me.genius });
+      } catch {}
+      finally { setLoadingMe(false); }
+    })();
+  }, []);
   const { setShowTabs } = useNavigationTabsStore();
-  const { user: authUser } = useAuth();
 
   // Generate initials from name
   const initials = authUser?.name
@@ -34,12 +46,12 @@ export default function AccountPage() {
         .trim()
         .split(/\s+/)
         .slice(0, 2)
-        .map((n) => n[0]?.toUpperCase() ?? "")
+        .map((n: string) => n[0]?.toUpperCase() ?? "")
         .join("") || "U"
     : "U";
 
   // Default values for demo purposes
-  const geniusLevel = 3;
+  const geniusLevel = authUser?.genius?.level ?? 1;
   const rewardsCount = 5;
   const creditsCount = 0;
 
@@ -143,15 +155,34 @@ export default function AccountPage() {
             {/* Top right panel: Genius level */}
             <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
               <div className="px-6 py-8">
-                <div className="flex flex-col items-center gap-4">
-                  <img
-                    src={highestGenius}
-                    alt=""
-                    className="h-16 w-16 object-contain"
-                  />
-                  <div className="text-[16px] font-semibold text-center">
-                    You're at the highest Genius level!
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <img src={highestGenius} alt="" className="h-16 w-16 object-contain" />
+                  <div className="text-[16px] font-semibold">
+                    Genius Level {geniusLevel}
                   </div>
+                  {authUser?.genius?.nextThreshold ? (
+                    <>
+                      <div className="text-[13px] text-black/70">
+                        {authUser.genius.completedLast24Months} bookings in the last 24 months
+                      </div>
+                      <div className="w-full max-w-[220px]">
+                        <div className="h-2 w-full overflow-hidden rounded bg-[#eef2f7]">
+                          <div
+                            className="h-2 bg-[#003b95]"
+                            style={{ width: `${Math.min(100, Math.round((authUser.genius.completedLast24Months / (authUser.genius.nextThreshold || 1)) * 100))}%` }}
+                          />
+                        </div>
+                        <div className="mt-2 text-[12px] text-black/60">
+                          {authUser.genius.remaining} more to reach Level {geniusLevel + 1}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-[13px] text-black/70">You're at the highest Genius level</div>
+                  )}
+                  <Link to="/account/genius" className="mt-1 text-[13px] font-medium text-[#0071c2] hover:underline">
+                    View Genius details
+                  </Link>
                 </div>
               </div>
             </div>

@@ -10,6 +10,7 @@ import rateLimit from "express-rate-limit";
 import { config } from "./src/config";
 import { notFound, errorHandler } from "./src/middlewares/errors";
 import trendingCitiesRoutes from "./src/routes/trendingCities";
+import adminHotelRoutes from "./src/routes/adminHotel";
 import userRoutes from "./src/routes/users";
 import meRoutes from "./src/routes/me";
 import hotelRoutes from "./src/routes/hotels";
@@ -55,6 +56,7 @@ async function start() {
   app.use("/api/reservations", reservationRoutes);
   app.use("/api/reviews", reviewRoutes);
   app.use("/api/wishlists", wishlistRoutes);
+  app.use("/api/admin-hotel", adminHotelRoutes);
   app.use("/api", trendingCitiesRoutes);
   app.use("/api", searchHistoryRoutes);
 
