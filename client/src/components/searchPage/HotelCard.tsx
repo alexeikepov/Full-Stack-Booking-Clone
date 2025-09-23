@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import type { Hotel } from "@/types/hotel";
 import { Card } from "@/components/ui/card";
 import { Heart } from "lucide-react";
+import WishlistDialog from "@/components/ui/WishlistDialog";
+import { useAuth } from "@/context/AuthContext";
 
 const fmt = (n: number, currency = "ILS") =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency }).format(n);
@@ -50,15 +52,32 @@ export default function HotelCard({
 }: Props) {
   const [params] = useSearchParams();
   const [liked, setLiked] = useState<boolean>(initialLiked);
+  const [showWishlistDialog, setShowWishlistDialog] = useState(false);
+  const { user } = useAuth();
 
   const toggleLike = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    setLiked((prev) => {
-      const next = !prev;
-      onToggleLike?.(id, next);
-      return next;
-    });
+    
+    if (!user) {
+      // If user is not logged in, show wishlist dialog to prompt login
+      setShowWishlistDialog(true);
+      return;
+    }
+    
+    if (!liked) {
+      // If not liked, show wishlist dialog to choose where to save
+      setShowWishlistDialog(true);
+    } else {
+      // If already liked, remove from wishlist (this would need additional API call)
+      setLiked(false);
+      onToggleLike?.(id, false);
+    }
+  };
+
+  const handleWishlistSuccess = () => {
+    setLiked(true);
+    onToggleLike?.(hotelId, true);
   };
 
   const getHotelId = (hotel: Hotel): string => {
@@ -199,6 +218,14 @@ export default function HotelCard({
             </div>
           </div>
         </div>
+
+        <WishlistDialog
+          isOpen={showWishlistDialog}
+          onClose={() => setShowWishlistDialog(false)}
+          hotelId={hotelId}
+          hotelName={hotel.name}
+          onSuccess={handleWishlistSuccess}
+        />
       </Card>
     );
   }
@@ -290,6 +317,14 @@ export default function HotelCard({
           </div>
         </div>
       </div>
+
+      <WishlistDialog
+        isOpen={showWishlistDialog}
+        onClose={() => setShowWishlistDialog(false)}
+        hotelId={hotelId}
+        hotelName={hotel.name}
+        onSuccess={handleWishlistSuccess}
+      />
     </Card>
   );
 }
