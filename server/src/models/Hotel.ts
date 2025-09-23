@@ -257,6 +257,7 @@ const HotelSchema = new Schema(
       default: "PENDING",
       index: true,
     },
+    isVisible: { type: Boolean, default: true, index: true },
     submittedAt: { type: Date, default: Date.now },
     approvedAt: { type: Date },
 
