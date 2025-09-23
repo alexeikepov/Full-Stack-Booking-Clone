@@ -245,7 +245,14 @@ export async function listReservations(
     const wantsAll =
       (req.query.all === "1" || req.query.all === "true") &&
       isAdmin(req.user?.role);
-    const filter = wantsAll ? {} : { user: req.user!.id };
+    const q = req.query as any;
+    const filter: any = wantsAll ? {} : { user: req.user!.id };
+    if (q.status) filter.status = q.status;
+    if (q.hotelId && isAdmin(req.user?.role)) {
+      try {
+        filter.hotel = new mongoose.Types.ObjectId(String(q.hotelId));
+      } catch {}
+    }
 
     const list = await ReservationModel.find(filter)
       .sort({ createdAt: -1 })
@@ -705,3 +712,5 @@ export async function deleteReservation(
     next(err);
   }
 }
+
+

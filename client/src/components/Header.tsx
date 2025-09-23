@@ -1,8 +1,9 @@
 // src/components/Header.tsx
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Bed, Plane, CarFront, Sparkles, HelpCircle } from "lucide-react";
 import * as React from "react";
 import { useAuth } from "@/context/AuthContext";
+//
 import { useNavigationStore } from "@/stores/navigation";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import CurrencySelector from "./CurrencySelector";
@@ -53,6 +54,7 @@ export default function Header() {
   const { user, isLoading, signOut } = useAuth();
   const { activeTab, setActiveTab } = useNavigationStore();
   const { showTabs } = useNavigationTabsStore();
+  const geniusLevel = user?.genius?.level ?? 1;
 
   return (
     <header className="w-full bg-[#003b95] text-white">
@@ -100,7 +102,15 @@ export default function Header() {
             )}
 
             {!isLoading && user && (
-              <ProfileMenu user={user} onSignOut={signOut} />
+              <div className="flex items-center gap-3">
+                {user.genius?.level !== undefined && (
+                  <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-xs font-medium">
+                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-[3px] bg-[#febb02] text-[10px] font-bold text-black">G</span>
+                    <span>Level {geniusLevel}</span>
+                  </span>
+                )}
+                <ProfileMenu user={user} onSignOut={signOut} />
+              </div>
             )}
           </div>
         </div>

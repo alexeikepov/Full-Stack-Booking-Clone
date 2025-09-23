@@ -180,10 +180,11 @@ export async function deleteHotel(hotelId: string) {
   return res.data;
 }
 
-export async function getOwnerAnalytics() {
+export async function getOwnerAnalytics(params?: { hotelId?: string }) {
   const token = localStorage.getItem("admin_hotel_token");
   const res = await api.get("/api/admin-hotel/analytics", {
     headers: { Authorization: `Bearer ${token}` },
+    params,
   });
   return res.data;
 }
@@ -240,6 +241,18 @@ export async function getMyReviews(params?: { page?: number; limit?: number }) {
     }
     throw err;
   }
+}
+
+export async function getMe() {
+  const res = await api.get("/api/me");
+  return res.data as {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    role?: string;
+    genius?: { level: number; completedLast24Months: number; nextThreshold: number | null; remaining: number };
+  };
 }
 
 export async function createReview(
@@ -364,6 +377,19 @@ export async function updateReservationStatus(
   const res = await api.patch(`/api/reservations/${reservationId}/status`, {
     status,
   });
+  return res.data;
+}
+
+// -------- Reviews (Admin) ---------
+// Note: use the existing getHotelReviews defined above (/api/hotels/:id/reviews)
+
+export async function respondToReview(reviewId: string, text: string) {
+  const token = localStorage.getItem("admin_hotel_token");
+  const res = await api.post(
+    `/api/reviews/${reviewId}/response`,
+    { text },
+    { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+  );
   return res.data;
 }
 
