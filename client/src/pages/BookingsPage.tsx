@@ -1,6 +1,6 @@
 // src/pages/BookingsPage.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api, getReservations } from "@/lib/api";
 import globeImg from "@/img/MyBooking/Bookings.png";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
@@ -15,6 +15,7 @@ type Trip = {
   quantity: number;
   pricePerNight: number;
   totalPrice: number;
+  hotelId?: string;
 };
 
 type ApiPayload = {
@@ -87,6 +88,7 @@ export default function BookingsPage() {
           quantity: Number(r.quantity) || 1,
           pricePerNight: Number(r.pricePerNight) || 0,
           totalPrice: Number(r.totalPrice) || 0,
+          hotelId: String(r.hotel?._id || r.hotel?.id || ""),
         }));
 
         const past: Trip[] = [];
@@ -232,7 +234,9 @@ export default function BookingsPage() {
               ? Array.from({ length: 6 }).map((_, i) => (
                   <TripSkeleton key={i} />
                 ))
-              : trips.map((t) => <TripCard key={t.id} trip={t} />)}
+              : trips.map((t) => (
+                  <TripCard key={t.id} trip={t} canReview={tab === "past"} />
+                ))}
           </div>
           {editing && (
             <EditReservationModal
@@ -436,23 +440,20 @@ function UpcomingTrip({
   onAfterCancel: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
 
   const toggle = () => setOpen((v) => !v);
   const handleEdit = () => {
     setOpen(false);
     onEdit();
   };
-  const onCancel = async () => {
-    setOpen(false);
-    const ok = confirm("Cancel this reservation?");
-    if (!ok) return;
+  const doCancel = async () => {
     try {
       await api.patch(`/api/reservations/${trip.id}/cancel`);
-      // Optimistically reflect cancellation at top (move to cancelled)
       const evt = new CustomEvent("reservation-cancelled", { detail: { id: trip.id } });
       window.dispatchEvent(evt);
       onAfterCancel(trip.id);
-      alert("Reservation cancelled");
+      setShowCancel(false);
     } catch (e: any) {
       alert(e?.response?.data?.error || "Failed to cancel reservation");
     }
@@ -503,7 +504,10 @@ function UpcomingTrip({
             </button>
             <button
               className="block w-full px-3 py-2 text-left text-[#b00020] hover:bg-[#fff2f2]"
-              onClick={onCancel}
+              onClick={() => {
+                setOpen(false);
+                setShowCancel(true);
+              }}
               role="menuitem"
             >
               Cancel
@@ -511,19 +515,41 @@ function UpcomingTrip({
           </div>
         )}
       </div>
+
+      {showCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-5">
+            <div className="mb-3 text-[18px] font-semibold">Cancel reservation</div>
+            <div className="space-y-2 text-[14px] text-black/70">
+              <div>Are you sure you want to cancel this reservation?</div>
+              <div className="rounded bg-[#f6f7fb] p-3 text-[13px]">
+                <div className="font-medium text-black">{trip.city}</div>
+                <div className="text-black/60">{fmtRange(trip.from, trip.to)}</div>
+              </div>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <button onClick={() => setShowCancel(false)} className="flex-1 rounded border px-3 py-2">Keep reservation</button>
+              <button onClick={doCancel} className="flex-1 rounded bg-[#b00020] px-3 py-2 text-white">Confirm cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 /* Components */
 
-function TripCard({ trip }: { trip: Trip }) {
+function TripCard({ trip, canReview = false }: { trip: Trip; canReview?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   return (
-    <div className="flex items-center gap-5 rounded-[12px] bg-white px-5 py-5 min-h-[108px]">
+    <div className="flex items-center justify-between rounded-[12px] bg-white px-5 py-5 min-h-[108px]">
+      <div className="flex items-center gap-5">
       <img
         src={trip.imageUrl}
         alt=""
-        className="h-[84px] w-[80px] rounded object-cover ring-1 ring-black/10"
+          className="h-[84px] w-[80px] rounded object-cover ring-1 ring-black/10"
       />
       <div className="min-w-0">
         <div className="truncate text-[15px] font-medium hover:underline">
@@ -534,6 +560,38 @@ function TripCard({ trip }: { trip: Trip }) {
           {trip.bookings === 1 ? "" : "s"}
         </div>
       </div>
+      </div>
+      {canReview && trip.hotelId && (
+        <div className="relative">
+          <button
+            aria-haspopup="menu"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="h-9 w-9 grid place-items-center rounded-full hover:bg-black/5"
+          >
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-black/60" />
+            <span className="mx-[2px] inline-block h-1.5 w-1.5 rounded-full bg-black/60" />
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-black/60" />
+          </button>
+          {open && (
+            <div
+              role="menu"
+              className="absolute right-0 mt-2 w-40 overflow-hidden rounded-md border border-black/10 bg-white py-1 text-[14px] shadow-md"
+            >
+              <button
+                className="block w-full px-3 py-2 text-left hover:bg-[#f6f7fb]"
+                onClick={() => {
+                  setOpen(false);
+                  navigate(`/reviews/write?hotelId=${encodeURIComponent(trip.hotelId!)}`);
+                }}
+                role="menuitem"
+              >
+                Write a review
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
