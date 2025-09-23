@@ -54,9 +54,23 @@ router.post("/hotels", requireAuth, async (req: AuthedRequest, res, next) => {
       name: payload.name,
       city: payload.city,
       address: payload.address,
+      country: payload.country,
       description: payload.description,
+      shortDescription: payload.shortDescription,
+      location: payload.location,
       rooms: payload.rooms || [],
-      images: payload.images || [],
+      media: payload.media || [],
+      facilities: payload.facilities || {},
+      propertyHighlights: payload.propertyHighlights || {},
+      houseRules: payload.houseRules || undefined,
+      surroundings: payload.surroundings || undefined,
+      overview: payload.overview || undefined,
+      mostPopularFacilities: payload.mostPopularFacilities || [],
+      categories: payload.categories || [],
+      travellersQuestions: payload.travellersQuestions || [],
+      ownerId: req.user!.id,
+      adminIds: [req.user!.id],
+      isVisible: true,
     });
     res.status(201).json({ id: hotel.id, name: hotel.name, city: hotel.city, address: hotel.address });
   } catch (err) {
@@ -72,7 +86,7 @@ router.put("/hotels/:id", requireAuth, async (req: AuthedRequest, res, next) => 
     const update = req.body || {};
     const hotel = await HotelModel.findByIdAndUpdate(id, update, { new: true, runValidators: true }).lean();
     if (!hotel) return res.status(404).json({ error: "Hotel not found" });
-    res.json({ id: String(hotel._id), name: hotel.name, city: hotel.city, address: hotel.address });
+    res.json({ id: String(hotel._id), name: hotel.name, city: hotel.city, address: hotel.address, status: hotel.approvalStatus === "APPROVED" && hotel.isVisible !== false ? "active" : "inactive" });
   } catch (err) {
     next(err);
   }
@@ -113,9 +127,6 @@ router.get("/analytics", requireAuth, async (req: AuthedRequest, res, next) => {
 
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
-    const occEnd = new Date(now); // occupancy window end (today)
-    const occStart = new Date(now);
-    occStart.setDate(occStart.getDate() - 30); // last 30 days
 
     const match: any = {
       status: { $in: ["COMPLETED", "CHECKED_OUT"] },
@@ -136,8 +147,8 @@ router.get("/analytics", requireAuth, async (req: AuthedRequest, res, next) => {
       { $sort: { "_id.y": 1, "_id.m": 1 } },
     ]);
 
-    const totalRevenue = rows.reduce((s, r) => s + (r.revenue || 0), 0);
-    const totalBookings = rows.reduce((s, r) => s + (r.bookings || 0), 0);
+    const totalRevenue = rows.reduce((s: any, r: any) => s + (r.revenue || 0), 0);
+    const totalBookings = rows.reduce((s: any, r: any) => s + (r.bookings || 0), 0);
 
     // Total reviews (optionally per hotel)
     const reviewFilter: any = {};
@@ -160,52 +171,20 @@ router.get("/analytics", requireAuth, async (req: AuthedRequest, res, next) => {
       bookings: r.bookings,
     }));
 
-    // ---- Average Occupancy (last 30 days) ----
-    // Total rooms across selected hotels
-    let totalRooms = 0;
-    if (filterHotels.length) {
-      const selectedHotels = await HotelModel.find({ _id: { $in: filterHotels.map((id) => new Types.ObjectId(String(id))) } })
-        .select("rooms")
-        .lean();
-      totalRooms = selectedHotels.reduce((sum, h: any) => sum + (Array.isArray(h.rooms) ? h.rooms.length : 0), 0);
-    }
-
-    // If there are no rooms, occupancy is 0 to avoid division by zero
-    let averageOccupancy = 0;
-    if (totalRooms > 0) {
-      const occMatch: any = {
-        status: { $in: ["CONFIRMED", "COMPLETED", "CHECKED_OUT"] },
-        checkIn: { $lte: occEnd },
-        checkOut: { $gte: occStart },
-      };
-      if (filterHotels.length)
-        occMatch.hotel = { $in: filterHotels.map((id) => new Types.ObjectId(String(id))) };
-
-      const occReservations = await ReservationModel.find(occMatch)
-        .select("checkIn checkOut quantity")
-        .lean();
-
-      // Compute occupied room-nights overlapping with [occStart, occEnd]
-      const msPerDay = 1000 * 60 * 60 * 24;
-      let occupiedRoomNights = 0;
-      for (const r of occReservations as any[]) {
-        const from = new Date(Math.max(new Date(r.checkIn).getTime(), occStart.getTime()));
-        const to = new Date(Math.min(new Date(r.checkOut).getTime(), occEnd.getTime()));
-        const nights = Math.max(0, Math.ceil((to.getTime() - from.getTime()) / msPerDay));
-        occupiedRoomNights += nights * (Number(r.quantity) || 1);
-      }
-
-      const totalRoomNights = totalRooms * 30; // 30-day window
-      averageOccupancy = Math.round((occupiedRoomNights / Math.max(1, totalRoomNights)) * 100);
-    }
+    // --- Average Occupancy (as monthly index) ---
+    // Compute average monthly bookings over all months on record (within window)
+    const monthsCount = rows.length || 1;
+    const overallMonthlyAvg = totalBookings / monthsCount;
+    const latestMonthBookings = rows.length ? rows[rows.length - 1].bookings : 0;
+    const averageOccupancy = overallMonthlyAvg > 0 ? Math.round((latestMonthBookings / overallMonthlyAvg) * 100) : 0;
 
     res.json({
       totalRevenue,
       totalBookings,
       totalReviews,
       averageOccupancy,
-      monthlyRevenue: rows.map((r) => r.revenue),
-      monthlyBookings: rows.map((r) => r.bookings),
+      monthlyRevenue: rows.map((r: any) => r.revenue),
+      monthlyBookings: rows.map((r: any) => r.bookings),
       topPerformingHotels,
     });
   } catch (err) {

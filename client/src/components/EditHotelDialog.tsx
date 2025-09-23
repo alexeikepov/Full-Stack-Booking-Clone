@@ -90,6 +90,45 @@ export default function EditHotelDialog({
   const [expandedRooms, setExpandedRooms] = useState<Record<number, boolean>>({});
   const [showAll, setShowAll] = useState(false);
 
+  const initialBlank = () => ({
+    name: "",
+    address: "",
+    city: "",
+    country: "",
+    stars: 0,
+    shortDescription: "",
+    description: "",
+    location: { lat: 0, lng: 0 },
+    facilities: { general: [] as string[] },
+    rooms: [] as any[],
+    status: "active",
+    media: [] as string[],
+    propertyHighlights: { perfectFor: "", locationScore: 0, locationDescription: "", roomsWith: [] as string[] },
+    houseRules: {
+      checkIn: { time: "15:00", note: "", advanceNotice: "" },
+      checkOut: { time: "11:00" },
+      cancellation: { policy: "", conditions: "" },
+      children: { welcome: "", searchNote: "", cotPolicy: { ageRange: "", cotPrice: "", note: "", additionalInfo: "", availability: "", noExtraBeds: "", subjectToAvailability: "" } },
+      ageRestriction: { hasRestriction: false, minimumAge: null as number | null, note: "" },
+      pets: { allowed: false, note: "" },
+      paymentMethods: { methods: [] as string[] },
+      parties: { allowed: false, note: "" },
+    },
+    surroundings: { nearbyAttractions: [], restaurantsCafes: [], publicTransport: [] },
+    overview: {},
+    mostPopularFacilities: [] as string[],
+    categories: [] as string[],
+    travellersQuestions: [] as { question: string; answer: string }[],
+    languagesSpoken: [] as string[],
+  });
+
+  useEffect(() => {
+    if (isOpen && !hotel) {
+      setFormData(initialBlank());
+      setExpandedRooms({});
+    }
+  }, [isOpen, hotel]);
+
   useEffect(() => {
     const load = async () => {
       if (!hotel) return;
@@ -157,9 +196,8 @@ export default function EditHotelDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hotel) return;
     const payload = { ...formData };
-    onSave({ id: hotel.id, ...payload });
+    onSave(hotel ? { id: hotel.id, ...payload } : payload);
     onClose();
   };
 
@@ -281,8 +319,8 @@ export default function EditHotelDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[980px]">
         <DialogHeader>
-          <DialogTitle>Edit Hotel</DialogTitle>
-          <DialogDescription>Update all hotel information</DialogDescription>
+          <DialogTitle>{hotel ? "Edit Hotel" : "Add Hotel"}</DialogTitle>
+          <DialogDescription>{hotel ? "Update all hotel information" : "Create a new hotel with full details"}</DialogDescription>
         </DialogHeader>
 
         <div ref={scrollRef} className="max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
@@ -504,8 +542,8 @@ export default function EditHotelDialog({
                                 <Label className="text-xs">Features (comma separated)</Label>
                                 <Input value={(room.features || []).join(", ")} onChange={(e) => updateRoom(idx, "features", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
                                 <div className="text-xs text-gray-500">Example: Balcony, City view, Coffee machine.</div>
-                              </div>
-                              <div className="space-y-2">
+            </div>
+            <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                   <div className="text-sm font-medium">Room photos</div>
                                   <div className="flex gap-2">
@@ -725,8 +763,8 @@ export default function EditHotelDialog({
                         </div>
                       ))}
                       <Button type="button" variant="outline" size="sm" onClick={() => setFormData((p: any) => ({ ...p, travellersQuestions: [ ...(p.travellersQuestions || []), { question: "", answer: "" } ] }))}>Add question</Button>
-                    </div>
-                  </div>
+            </div>
+          </div>
 
                   <div className="space-y-3">
                     <div className="text-sm font-medium">Languages</div>
