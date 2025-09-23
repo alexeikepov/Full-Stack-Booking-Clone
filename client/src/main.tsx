@@ -17,7 +17,6 @@ import WishlistPage from "./pages/SavedListsPage.tsx";
 import ReviewsTimelinePage from "./pages/ReviewsTimelinePage.tsx";
 import ListYourPropertyPage from "./pages/ListYourPropertyPage.tsx";
 import PartnerRegisterPage from "./pages/PartnerRegisterPage.tsx";
-import AdminPage from "./pages/AdminPage.tsx";
 import OwnerPage from "./pages/OwnerPage.tsx";
 import AdminHotelPage from "./pages/AdminHotelPage.tsx";
 import AdminHotelSignInPage from "./pages/PartnerSignInPage.tsx";
