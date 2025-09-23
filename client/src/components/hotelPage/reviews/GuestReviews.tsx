@@ -300,26 +300,10 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
                 <option value="rating_low">Lowest Rating</option>
                 <option value="helpful">Most Helpful</option>
               </select>
-
-              <button
-                onClick={() => setShowCreateForm(!showCreateForm)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
-              >
-                Write a Review
-              </button>
             </div>
           </div>
 
-          {/* Create Review Form */}
-          {showCreateForm && (
-            <div className="mb-8">
-              <CreateReviewForm
-                hotelId={hotel.id || hotel._id?.$oid}
-                onSuccess={() => setShowCreateForm(false)}
-                onCancel={() => setShowCreateForm(false)}
-              />
-            </div>
-          )}
+          {/* Create Review Form - removed per requirement, reviews are written from bookings */}
 
           {/* Reviews List */}
           <div className="space-y-6">
