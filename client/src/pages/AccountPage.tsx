@@ -15,6 +15,7 @@ import {
   BriefcaseBusiness,
 } from "lucide-react";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
+import { useAuth } from "@/context/AuthContext";
 
 import perkStays from "@/img/account images/perk-stays.png";
 import perkCars from "@/img/account images/perk-cars.png";
@@ -23,29 +24,13 @@ import perkUpgrade from "@/img/account images/perk-upgrades.png";
 import perkPriority from "@/img/account images/perk-priority.png";
 import highestGenius from "@/img/account images/perk-highest-genius.png";
 
-type UserLite = {
-  name?: string | null;
-  geniusLevel?: number | null;
-  rewardsCount?: number | null;
-  creditsCount?: number | null;
-  initials?: string | null;
-};
-
-export default function AccountPage({
-  user = {
-    name: "Alexei Kepiv",
-    geniusLevel: 3,
-    rewardsCount: 5,
-    creditsCount: 0,
-  },
-}: {
-  user?: UserLite;
-}) {
+export default function AccountPage() {
   const { setShowTabs } = useNavigationTabsStore();
+  const { user: authUser } = useAuth();
 
   // Generate initials from name
-  const initials = user?.name
-    ? user.name
+  const initials = authUser?.name
+    ? authUser.name
         .trim()
         .split(/\s+/)
         .slice(0, 2)
@@ -53,10 +38,34 @@ export default function AccountPage({
         .join("") || "U"
     : "U";
 
+  // Default values for demo purposes
+  const geniusLevel = 3;
+  const rewardsCount = 5;
+  const creditsCount = 0;
+
   useEffect(() => {
     setShowTabs(false);
     return () => setShowTabs(true);
   }, [setShowTabs]);
+
+  if (!authUser) {
+    return (
+      <div className="min-h-screen bg-[#f2f5f9] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Please sign in</h1>
+          <p className="text-gray-600 mb-6">
+            You need to be signed in to view your account.
+          </p>
+          <Link
+            to="/login"
+            className="inline-block bg-[#0a5ad6] text-white px-6 py-2 rounded-md hover:bg-[#0950b5]"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f2f5f9] text-[#1a1a1a]">
@@ -79,9 +88,7 @@ export default function AccountPage({
               <span className="text-white text-2xl font-bold">Welcome</span>
               <span className="text-lg font-medium">
                 <span className="text-white">Genius </span>
-                <span className="text-[#febb02]">
-                  Level {user?.geniusLevel ?? 3}
-                </span>
+                <span className="text-[#febb02]">Level {geniusLevel}</span>
               </span>
             </div>
           </div>
@@ -93,7 +100,7 @@ export default function AccountPage({
           <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
             <div className="px-6 pt-8 pb-6">
               <div className="text-[16px] font-semibold">
-                You have {user.rewardsCount ?? 5} Genius rewards
+                You have {rewardsCount} Genius rewards
               </div>
               <div className="mt-3 text-[13px] text-black/60">
                 Enjoy rewards and discounts on select stays and rental cars
@@ -157,7 +164,7 @@ export default function AccountPage({
                     No Credits or vouchers yet
                   </div>
                   <div className="text-[13px] text-black font-bold">
-                    {user.creditsCount ?? 0}
+                    {creditsCount}
                   </div>
                 </div>
                 <Link

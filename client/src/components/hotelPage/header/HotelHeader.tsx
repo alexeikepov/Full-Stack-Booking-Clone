@@ -1,5 +1,6 @@
 import type { Hotel } from "@/types/hotel";
 import { Button } from "@/components/ui/button";
+import HotelStars from "./HotelStars";
 
 interface HotelHeaderProps {
   hotel: Hotel;
@@ -11,8 +12,9 @@ export default function HotelHeader({ hotel }: HotelHeaderProps) {
       <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            {/* Yellow thumbs up icon */}
+            {/* Hotel stars and yellow thumbs up icon */}
             <div className="flex items-center gap-3 mb-3">
+              <HotelStars stars={hotel.stars} />
               <div className="w-6 h-6 bg-yellow-400 rounded flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-white"
