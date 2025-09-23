@@ -1,11 +1,28 @@
-import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
+import { CartSheet } from "@/components/CartSheet";
+import { ConfirmModal } from "@/components/ConfirmModal";
+import { Outlet, useLocation } from "react-router-dom";
 
-function App() {
+export default function App() {
+  const { pathname } = useLocation();
+
+  const hideHeader =
+    pathname === "/list-your-property" ||
+    pathname.startsWith("/list-your-property/") ||
+    pathname === "/partner-register" ||
+    pathname === "/owner" ||
+    pathname === "/owner/sign-in" ||
+    pathname === "/admin-hotel" ||
+    pathname === "/admin-hotel/sign-in";
+
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
+    <div className="min-h-screen">
+      {!hideHeader && <Header />}
+      <main className="mx-auto">
+        <Outlet />
+      </main>
+      <CartSheet />
+      <ConfirmModal />
     </div>
   );
 }
-
-export default App;

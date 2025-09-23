@@ -19,26 +19,86 @@ export type Hotel = {
   rooms: Room[];
   adminIds: ID[];
   amenityIds?: ID[];
-  media?: Media[];
+  amenities?: Amenity[];
+  media: Media[];
+  categories?: string[];
+  averageRating?: number;
+  reviewsCount?: number;
+  ownerId: ID;
   approvalStatus: HotelApprovalStatus;
   submittedAt: Date;
   approvedAt?: Date;
   createdAt?: Date;
+  updatedAt?: Date;
+
+  houseRules: {
+    checkIn: {
+      time: string;
+      note: string;
+      advanceNotice: string;
+    };
+    checkOut: {
+      time: string;
+    };
+    cancellation: {
+      policy: string;
+      conditions: string;
+    };
+    children: {
+      welcome: string;
+      searchNote: string;
+      cotPolicy: {
+        ageRange: string;
+        cotPrice: string;
+        note: string;
+        additionalInfo: string;
+        availability: string;
+        noExtraBeds: string;
+        subjectToAvailability: string;
+      };
+    };
+    ageRestriction: {
+      hasRestriction: boolean;
+      minimumAge?: number;
+      note: string;
+    };
+    pets: {
+      allowed: boolean;
+      note: string;
+    };
+    paymentMethods: {
+      methods: string[];
+    };
+    parties: {
+      allowed: boolean;
+      note: string;
+    };
+  };
 };
 
 export type Room = {
   id: ID;
   name: string;
   capacity: number;
+  maxAdults: number;
+  maxChildren: number;
+
   pricePerNight: number;
-  photos?: string[];
-  amenities?: string[];
-  media?: Media[];
+
+  sizeSqm?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+
+  amenitiesRoom?: string[];
+  facilitiesRoom?: string[];
+  categorieRoom?: string[];
+  mediaRoom?: Media[];
+  availableRooms: number; 
   reservations: RoomReservation[];
 };
 
 export type RoomReservation = {
   reservationId: ID;
-  checkIn: string; // ISODateKey
-  checkOut: string; // ISODateKey
+  checkIn: string;
+  checkOut: string;
 };

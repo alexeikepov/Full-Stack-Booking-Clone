@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 import { ReservationModel } from "../models/Reservation";
 import { HotelModel } from "../models/Hotel";
@@ -24,7 +24,11 @@ function isAdmin(role?: string) {
 }
 
 // POST /api/reservations
-export async function createReservation(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function createReservation(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const dto = createReservationSchema.parse(req.body);
 
@@ -37,10 +41,14 @@ export async function createReservation(req: AuthedRequest, res: Response, next:
     const hotel = await HotelModel.findById(dto.hotelId).lean();
     if (!hotel) return res.status(404).json({ error: "Hotel not found" });
 
-    const roomInfo = hotel.rooms?.find((r: any) => r.roomType === dto.roomType);
-    if (!roomInfo) return res.status(400).json({ error: "Room type not available in hotel" });
+    const roomInfo = (hotel as any).rooms?.find(
+      (r: any) => r.roomType === dto.roomType
+    );
+    if (!roomInfo)
+      return res
+        .status(400)
+        .json({ error: "Room type not available in hotel" });
 
-    // בדיקת זמינות: כמה הוזמן לחדר הזה בתאריכים חופפים
     const hotelObjectId = new Types.ObjectId(dto.hotelId);
     const overlap = await ReservationModel.aggregate<{ qty: number }>([
       {
@@ -57,11 +65,17 @@ export async function createReservation(req: AuthedRequest, res: Response, next:
     ]);
 
     const alreadyBooked = overlap[0]?.qty ?? 0;
-    const totalRooms = roomInfo.totalRooms ?? 0;
+    const totalRooms =
+      roomInfo.totalRooms ??
+      roomInfo.availableRooms ??
+      roomInfo.totalUnits ??
+      0;
     const availableNow = Math.max(0, totalRooms - alreadyBooked);
 
     if (dto.quantity > availableNow) {
-      return res.status(409).json({ error: "Not enough rooms available", available: availableNow });
+      return res
+        .status(409)
+        .json({ error: "Not enough rooms available", available: availableNow });
     }
 
     const created = await ReservationModel.create({
@@ -78,7 +92,6 @@ export async function createReservation(req: AuthedRequest, res: Response, next:
       notes: dto.notes ?? "",
     });
 
-    // אופציונלי: להחזיר גם פרטי מלון בסיסיים
     const populated = await ReservationModel.findById(created._id)
       .populate("hotel", "name city address")
       .select("-__v")
@@ -91,9 +104,15 @@ export async function createReservation(req: AuthedRequest, res: Response, next:
 }
 
 // GET /api/reservations
-export async function listReservations(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function listReservations(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const wantsAll = (req.query.all === "1" || req.query.all === "true") && isAdmin(req.user?.role);
+    const wantsAll =
+      (req.query.all === "1" || req.query.all === "true") &&
+      isAdmin(req.user?.role);
     const filter = wantsAll ? {} : { user: req.user!.id };
 
     const list = await ReservationModel.find(filter)
@@ -109,29 +128,120 @@ export async function listReservations(req: AuthedRequest, res: Response, next: 
 }
 
 // GET /api/reservations/:id
-export async function getReservationById(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function getReservationById(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid reservation id" });
+    }
+
     const r = await ReservationModel.findById(id)
       .populate("hotel", "name city address")
       .select("-__v")
       .lean();
 
     if (!r) return res.status(404).json({ error: "Reservation not found" });
-    if (!isAdmin(req.user?.role) && String(r.user) !== String(req.user!.id)) {
+    if (
+      !isAdmin(req.user?.role) &&
+      String((r as any).user) !== String(req.user!.id)
+    ) {
       return res.status(403).json({ error: "Forbidden" });
     }
-
     res.json(r);
   } catch (err) {
     next(err);
   }
 }
 
+// GET /api/reservations/:id/cancel (user)
+export async function getCancellationReesevatioByID(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const rows = await ReservationModel.find({
+      user: userId,
+      status: "CANCELLED",
+    })
+      .populate("hotel", "name city address")
+      .select("-__v")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET /api/reservations/:id/past (user)
+export async function getPastReservationByID(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const rows = await ReservationModel.find({
+      user: userId,
+      status: "COMPLETED",
+    })
+      .populate("hotel", "name city address")
+      .select("-__v")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET /api/reservations/my/active
+export async function getMyActiveReservations(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const rows = await ReservationModel.find({
+      user: userId,
+      status: { $in: ["PENDING", "CONFIRMED"] },
+    })
+      .populate("hotel", "name city address")
+      .select("-__v")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!rows.length)
+      return res.status(404).json({ error: "No active reservations" });
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
 // PATCH /api/reservations/:id/cancel  (user or admin)
-export async function cancelReservation(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function cancelReservation(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid reservation id" });
+    }
+
     const r = await ReservationModel.findById(id);
     if (!r) return res.status(404).json({ error: "Reservation not found" });
 
@@ -139,22 +249,32 @@ export async function cancelReservation(req: AuthedRequest, res: Response, next:
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    if (r.status === "CANCELLED") {
-      return res.json(r); // כבר מבוטל
+    if (r.status !== "CANCELLED") {
+      r.status = "CANCELLED";
+      await r.save();
     }
 
-    r.status = "CANCELLED";
-    await r.save();
-    res.json(r);
+    const populated = await ReservationModel.findById(id)
+      .populate("hotel", "name city address")
+      .select("-__v")
+      .lean();
+
+    res.json(populated ?? r);
   } catch (err) {
     next(err);
   }
 }
 
 // PATCH /api/reservations/:id/status  (admin only)
-export async function updateReservationStatus(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function updateReservationStatus(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    if (!isAdmin(req.user?.role)) return res.status(403).json({ error: "Admin only" });
+    if (!isAdmin(req.user?.role)) {
+      return res.status(403).json({ error: "Admin only" });
+    }
 
     const { id } = req.params;
     const { status } = updateStatusSchema.parse(req.body);
@@ -163,9 +283,15 @@ export async function updateReservationStatus(req: AuthedRequest, res: Response,
       id,
       { status },
       { new: true }
-    ).select("-__v");
+    )
+      .populate("hotel", "name city address")
+      .select("-__v")
+      .lean();
 
-    if (!r) return res.status(404).json({ error: "Reservation not found" });
+    if (!r) {
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+
     res.json(r);
   } catch (err) {
     next(err);
@@ -173,11 +299,20 @@ export async function updateReservationStatus(req: AuthedRequest, res: Response,
 }
 
 // DELETE /api/reservations/:id  (admin only)
-export async function deleteReservation(req: AuthedRequest, res: Response, next: NextFunction) {
+export async function deleteReservation(
+  req: AuthedRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    if (!isAdmin(req.user?.role)) return res.status(403).json({ error: "Admin only" });
+    if (!isAdmin(req.user?.role))
+      return res.status(403).json({ error: "Admin only" });
 
     const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid reservation id" });
+    }
+
     const r = await ReservationModel.findByIdAndDelete(id);
     if (!r) return res.status(404).json({ error: "Reservation not found" });
     res.json({ message: "Reservation deleted" });
