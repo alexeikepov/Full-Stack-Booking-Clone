@@ -149,41 +149,27 @@ export async function searchHotels(params: SearchHotelsParams) {
 
 // Admin Hotel management API functions
 export async function getOwnerHotels() {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.get("/api/admin-hotel/hotels", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.get("/api/admin-hotel/hotels");
   return res.data;
 }
 
 export async function createHotel(hotelData: any) {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.post("/api/admin-hotel/hotels", hotelData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.post("/api/admin-hotel/hotels", hotelData);
   return res.data;
 }
 
 export async function updateHotel(hotelId: string, hotelData: any) {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.put(`/api/admin-hotel/hotels/${hotelId}`, hotelData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.put(`/api/admin-hotel/hotels/${hotelId}`, hotelData);
   return res.data;
 }
 
 export async function deleteHotel(hotelId: string) {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.delete(`/api/admin-hotel/hotels/${hotelId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.delete(`/api/admin-hotel/hotels/${hotelId}`);
   return res.data;
 }
 
 export async function getOwnerAnalytics(params?: { hotelId?: string }) {
-  const token = localStorage.getItem("admin_hotel_token");
   const res = await api.get("/api/admin-hotel/analytics", {
-    headers: { Authorization: `Bearer ${token}` },
     params,
   });
   return res.data;
@@ -384,11 +370,9 @@ export async function updateReservationStatus(
 // Note: use the existing getHotelReviews defined above (/api/hotels/:id/reviews)
 
 export async function respondToReview(reviewId: string, text: string) {
-  const token = localStorage.getItem("admin_hotel_token");
   const res = await api.post(
     `/api/reviews/${reviewId}/response`,
-    { text },
-    { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+    { text }
   );
   return res.data;
 }
@@ -538,5 +522,10 @@ export async function checkHotelInWishlist(hotelId: string): Promise<{
 
 export async function getPublicWishlist(wishlistId: string): Promise<Wishlist> {
   const res = await api.get(`/api/wishlists/public/${wishlistId}`);
+  return res.data;
+}
+
+export async function getHotelById(hotelId: string) {
+  const res = await api.get(`/api/hotels/${hotelId}`);
   return res.data;
 }
