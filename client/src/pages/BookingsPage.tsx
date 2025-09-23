@@ -1,6 +1,7 @@
 // src/pages/BookingsPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { api, getReservations } from "@/lib/api";
 import globeImg from "@/img/MyBooking/Bookings.png";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 
@@ -11,6 +12,9 @@ type Trip = {
   to: string;
   bookings: number;
   imageUrl: string;
+  quantity: number;
+  pricePerNight: number;
+  totalPrice: number;
 };
 
 type ApiPayload = {
@@ -18,8 +22,7 @@ type ApiPayload = {
   cancelled: Trip[];
 };
 
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE_URL?.replace(/\/+$/, "") || "";
+//
 
 export default function BookingsPage() {
   const { setShowTabs } = useNavigationTabsStore();
@@ -27,6 +30,8 @@ export default function BookingsPage() {
   const [data, setData] = useState<ApiPayload>({ past: [], cancelled: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [upcoming, setUpcoming] = useState<Trip | null>(null);
+  const [editing, setEditing] = useState<Trip | null>(null);
 
   useEffect(() => {
     setShowTabs(false);
@@ -38,30 +43,105 @@ export default function BookingsPage() {
     (async () => {
       try {
         setError(null);
-        const res = await fetch(`${API_BASE}/api/bookings`, {
-          signal: ctrl.signal,
-          headers: { Accept: "application/json" },
+        const rows: any[] = await getReservations().catch((err) => {
+          throw err;
         });
-        if (!res.ok) {
-          setError(`HTTP ${res.status}`);
-          setData({ past: DEMO_PAST, cancelled: DEMO_CANCELLED });
+
+        const toIso = (d: any) => {
+          try {
+            const dt = new Date(d);
+            if (isNaN(+dt)) return String(d ?? "");
+            return dt.toISOString().split("T")[0];
+          } catch {
+            return String(d ?? "");
+          }
+        };
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const getHotelImage = (hotel: any): string => {
+          if (!hotel) return "";
+          const media = Array.isArray(hotel.media) ? hotel.media : [];
+          const primary = media.find((m: any) => m?.url)?.url || media[0]?.url;
+          if (primary) return String(primary);
+          const rooms = Array.isArray(hotel.rooms) ? hotel.rooms : [];
+          for (const r of rooms) {
+            const rmMedia = Array.isArray(r?.media) ? r.media : [];
+            const rmUrl = rmMedia.find((m: any) => m?.url)?.url || rmMedia[0]?.url;
+            if (rmUrl) return String(rmUrl);
+            if (Array.isArray(r?.photos) && r.photos[0]) return String(r.photos[0]);
+          }
+          return "";
+        };
+
+        const mapped: Trip[] = rows.map((r: any) => ({
+          id: String(r._id || r.id),
+          city: r.hotel?.city || r.hotel?.name || "",
+          from: toIso(r.checkIn),
+          to: toIso(r.checkOut),
+          bookings: 1,
+          imageUrl:
+            getHotelImage(r.hotel) ||
+            "https://images.unsplash.com/photo-1501117716987-c8e004f568d5?q=80&w=800&auto=format&fit=crop",
+          quantity: Number(r.quantity) || 1,
+          pricePerNight: Number(r.pricePerNight) || 0,
+          totalPrice: Number(r.totalPrice) || 0,
+        }));
+
+        const past: Trip[] = [];
+        const cancelled: Trip[] = [];
+        const upcoming: Trip[] = [];
+        for (const r of rows) {
+          const trip = mapped.find((t) => t.id === String(r._id || r.id));
+          if (!trip) continue;
+          const status = String(r.status || "").toUpperCase();
+          const ci = new Date(trip.from);
+          const co = new Date(trip.to);
+          co.setHours(0, 0, 0, 0);
+          if (status === "CANCELLED") {
+            cancelled.push(trip);
+          } else if (status === "COMPLETED" || +co < +today) {
+            past.push(trip);
+          } else if (status === "PENDING" || status === "CONFIRMED") {
+            if (+ci >= +today) upcoming.push(trip);
+          }
+        }
+
+        setData({ past, cancelled });
+        if (upcoming.length) {
+          const nearest = upcoming.sort(
+            (a, b) => +new Date(a.from) - +new Date(b.from)
+          )[0];
+          setUpcoming(nearest);
         } else {
-          const json = (await res.json()) as ApiPayload;
-          setData({
-            past: Array.isArray(json.past) ? json.past : [],
-            cancelled: Array.isArray(json.cancelled) ? json.cancelled : [],
-          });
+          setUpcoming(null);
         }
       } catch (e: any) {
         if (e?.name !== "AbortError") {
-          setError("Network error");
+          setError(e?.response?.data?.error || "Failed to load reservations");
           setData({ past: DEMO_PAST, cancelled: DEMO_CANCELLED });
         }
       } finally {
         setLoading(false);
       }
     })();
-    return () => ctrl.abort();
+    const onCancelled = (e: any) => {
+      const id = e?.detail?.id;
+      if (!id) return;
+      setUpcoming((prev) => (prev && prev.id === id ? null : prev));
+      setData((prev) => ({
+        past: prev.past,
+        cancelled: prev.cancelled.concat(
+          prev.past.find((t) => t.id === id) || []
+        ),
+      }));
+    };
+    window.addEventListener("reservation-cancelled", onCancelled as any);
+    return () => {
+      ctrl.abort();
+      window.removeEventListener("reservation-cancelled", onCancelled as any);
+    };
   }, []);
 
   const trips = useMemo(
@@ -86,8 +166,17 @@ export default function BookingsPage() {
         </div>
 
         {/* Left column under the title */}
-        <section className="mt-10 w-[800px]">
-          {/* Hero */}
+        <section className="mt-10 w-[920px]">
+          {/* Top area: Upcoming reservation if exists, else hero */}
+          {upcoming ? (
+            <UpcomingTrip
+              trip={upcoming}
+              onEdit={() => setEditing(upcoming)}
+              onAfterCancel={(id) => {
+                if (upcoming && upcoming.id === id) setUpcoming(null);
+              }}
+            />
+          ) : (
           <div className="flex items-start gap-6">
             <img
               src={globeImg}
@@ -102,6 +191,7 @@ export default function BookingsPage() {
               </div>
             </div>
           </div>
+          )}
 
           {/* Tabs under the hero */}
           <div className="mt-8 flex items-center gap-2">
@@ -137,13 +227,23 @@ export default function BookingsPage() {
           )}
 
           {/* Trips grid */}
-          <div className="mt-10 grid w-[800px] grid-cols-3 gap-4">
+          <div className="mt-10 grid w-[920px] grid-cols-3 gap-4">
             {loading
               ? Array.from({ length: 6 }).map((_, i) => (
                   <TripSkeleton key={i} />
                 ))
               : trips.map((t) => <TripCard key={t.id} trip={t} />)}
           </div>
+          {editing && (
+            <EditReservationModal
+              trip={editing}
+              onClose={() => setEditing(null)}
+              onSaved={(updated) => {
+                setEditing(null);
+                if (upcoming && upcoming.id === updated.id) setUpcoming(updated);
+              }}
+            />)
+          }
         </section>
       </main>
 
@@ -326,15 +426,104 @@ export default function BookingsPage() {
   );
 }
 
+function UpcomingTrip({
+  trip,
+  onEdit,
+  onAfterCancel,
+}: {
+  trip: Trip;
+  onEdit: () => void;
+  onAfterCancel: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const toggle = () => setOpen((v) => !v);
+  const handleEdit = () => {
+    setOpen(false);
+    onEdit();
+  };
+  const onCancel = async () => {
+    setOpen(false);
+    const ok = confirm("Cancel this reservation?");
+    if (!ok) return;
+    try {
+      await api.patch(`/api/reservations/${trip.id}/cancel`);
+      // Optimistically reflect cancellation at top (move to cancelled)
+      const evt = new CustomEvent("reservation-cancelled", { detail: { id: trip.id } });
+      window.dispatchEvent(evt);
+      onAfterCancel(trip.id);
+      alert("Reservation cancelled");
+    } catch (e: any) {
+      alert(e?.response?.data?.error || "Failed to cancel reservation");
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between rounded-[16px] bg-[#f5f7fb] px-5 py-5">
+      <div className="flex items-center gap-5">
+        <img
+          src={trip.imageUrl}
+          alt=""
+          className="h-[96px] w-[96px] rounded object-cover ring-1 ring-black/10"
+        />
+        <div className="min-w-0">
+          <div className="text-[18px] font-semibold text-[#1a1a1a]">
+            Upcoming trip to {trip.city}
+          </div>
+          <div className="mt-1 text-[14px] text-black/60">
+            {fmtRange(trip.from, trip.to)} · {trip.bookings} booking
+            {trip.bookings === 1 ? "" : "s"}
+          </div>
+        </div>
+      </div>
+
+      <div className="relative">
+        <button
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={toggle}
+          className="h-9 w-9 grid place-items-center rounded-full hover:bg-black/5"
+        >
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-black/60" />
+          <span className="mx-[2px] inline-block h-1.5 w-1.5 rounded-full bg-black/60" />
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-black/60" />
+        </button>
+
+        {open && (
+          <div
+            role="menu"
+            className="absolute right-0 mt-2 w-40 overflow-hidden rounded-md border border-black/10 bg-white py-1 text-[14px] shadow-md"
+          >
+            <button
+              className="block w-full px-3 py-2 text-left hover:bg-[#f6f7fb]"
+              onClick={handleEdit}
+              role="menuitem"
+            >
+              Edit
+            </button>
+            <button
+              className="block w-full px-3 py-2 text-left text-[#b00020] hover:bg-[#fff2f2]"
+              onClick={onCancel}
+              role="menuitem"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* Components */
 
 function TripCard({ trip }: { trip: Trip }) {
   return (
-    <div className="flex items-center gap-4 rounded-[12px] border border-[#e6eaf0] bg-white px-4 py-4 hover:border-[#cfd7e2]">
+    <div className="flex items-center gap-5 rounded-[12px] bg-white px-5 py-5 min-h-[108px]">
       <img
         src={trip.imageUrl}
         alt=""
-        className="h-[56px] w-[72px] rounded object-cover ring-1 ring-black/10"
+        className="h-[84px] w-[80px] rounded object-cover ring-1 ring-black/10"
       />
       <div className="min-w-0">
         <div className="truncate text-[15px] font-medium hover:underline">
@@ -351,8 +540,8 @@ function TripCard({ trip }: { trip: Trip }) {
 
 function TripSkeleton() {
   return (
-    <div className="flex items-center gap-4 rounded-[12px] border border-[#e6eaf0] bg-white px-4 py-4">
-      <div className="h-[56px] w-[72px] rounded bg-[#eef2f7]" />
+    <div className="flex items-center gap-5 rounded-[12px] bg-white px-5 py-5 min-h-[108px]">
+      <div className="h-[84px] w-[80px] rounded bg-[#eef2f7]" />
       <div className="flex-1">
         <div className="h-4 w-28 rounded bg-[#eef2f7]" />
         <div className="mt-2 h-4 w-48 rounded bg-[#eef2f7]" />
@@ -360,17 +549,168 @@ function TripSkeleton() {
     </div>
   );
 }
+function EditReservationModal({
+  trip,
+  onClose,
+  onSaved,
+}: {
+  trip: Trip;
+  onClose: () => void;
+  onSaved: (t: Trip) => void;
+}) {
+  const [from, setFrom] = useState(trip.from);
+  const [to, setTo] = useState(trip.to);
+  const [qty, setQty] = useState(trip.quantity);
+  const [saving, setSaving] = useState(false);
+  
+  const toLocalISO = (d: Date) => {
+    const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return z.toISOString().split("T")[0];
+  };
+  const todayIso = (() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return toLocalISO(d);
+  })();
+  const nextDayOf = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + 1);
+      return toLocalISO(d);
+    } catch {
+      return dateStr;
+    }
+  };
 
-function FooterTopLink({ children }: { children: React.ReactNode }) {
+  const nights = (() => {
+    try {
+      const f = new Date(from);
+      const t = new Date(to);
+      const diff = Math.ceil((+t - +f) / 86400000);
+      return Math.max(1, diff);
+    } catch {
+      return 1;
+    }
+  })();
+
+  const newTotal = trip.pricePerNight * nights * qty;
+  const diff = newTotal - trip.totalPrice;
+  const isRangeValid = (() => {
+    try {
+      const f = new Date(from);
+      const t = new Date(to);
+      return +t > +f;
+    } catch {
+      return false;
+    }
+  })();
+  const isFromInPast = from < todayIso;
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await api.patch(`/api/reservations/${trip.id}`, {
+        checkIn: from,
+        checkOut: to,
+        quantity: qty,
+      });
+      onSaved({ ...trip, from, to, quantity: qty, totalPrice: newTotal });
+    } catch (e: any) {
+      alert(e?.response?.data?.error || "Failed to update reservation");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <Link
-      to="#"
-      className="underline decoration-white/85 underline-offset-4 hover:decoration-white"
-    >
-      {children}
-    </Link>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-md rounded-lg bg-white p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="text-[18px] font-semibold">Edit reservation</div>
+          <button onClick={onClose} className="h-8 w-8 rounded-full hover:bg-black/5">✕</button>
+        </div>
+
+        <div className="space-y-3 text-[14px]">
+          <label className="block">
+            <div className="mb-1 text-[13px] text-black/70">Check-in</div>
+            <input
+              type="date"
+              value={from}
+              min={todayIso}
+              onChange={(e) => {
+                let v = e.target.value;
+                // Prevent past check-in
+                if (v < todayIso) v = todayIso;
+                setFrom(v);
+                // If checkout is not after new checkin, move checkout to next day
+                try {
+                  const nf = new Date(v);
+                  const nt = new Date(to);
+                  if (!(+nt > +nf)) {
+                    setTo(nextDayOf(v));
+                  }
+                } catch {}
+              }}
+              className="w-full rounded border px-3 py-2"
+            />
+            {isFromInPast && (
+              <div className="mt-1 text-[12px] text-[#b00020]">Check-in cannot be in the past.</div>
+            )}
+          </label>
+          <label className="block">
+            <div className="mb-1 text-[13px] text-black/70">Check-out</div>
+            <input
+              type="date"
+              value={to}
+              min={nextDayOf(from)}
+              onChange={(e) => {
+                const v = e.target.value;
+                // Enforce to > from
+                try {
+                  const nf = new Date(from);
+                  const nt = new Date(v);
+                  if (+nt <= +nf) {
+                    setTo(nextDayOf(from));
+                  } else {
+                    setTo(v);
+                  }
+                } catch {
+                  setTo(v);
+                }
+              }}
+              className="w-full rounded border px-3 py-2"
+            />
+          </label>
+          <label className="block">
+            <div className="mb-1 text-[13px] text-black/70">Rooms</div>
+            <input type="number" min={1} value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))} className="w-full rounded border px-3 py-2" />
+          </label>
+
+          <div className="mt-2 rounded bg-[#f6f7fb] p-3 text-[13px]">
+            <div>Original total: ₪{trip.totalPrice.toLocaleString()}</div>
+            <div>New total: ₪{newTotal.toLocaleString()}</div>
+            <div className={diff >= 0 ? "text-[#b00020]" : "text-green-700"}>
+              {diff >= 0 ? `Additional to pay: ₪${diff.toLocaleString()}` : `Refund: ₪${Math.abs(diff).toLocaleString()}`}
+            </div>
+            <div className="text-black/60">({nights} night{nights === 1 ? "" : "s"} × ₪{trip.pricePerNight.toLocaleString()} × {qty} room{qty === 1 ? "" : "s"})</div>
+            {!isRangeValid && (
+              <div className="mt-1 text-[12px] text-[#b00020]">Check-out must be after check-in.</div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <button onClick={onClose} className="flex-1 rounded border px-3 py-2">Cancel</button>
+          <button onClick={save} disabled={saving || !isRangeValid} className="flex-1 rounded bg-[#0071c2] px-3 py-2 text-white disabled:opacity-50">
+            {saving ? "Saving..." : "Save changes"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
+
+//
 
 function FooterCol({ title, items }: { title: string; items: string[] }) {
   return (
@@ -421,6 +761,9 @@ const DEMO_PAST: Trip[] = [
     bookings: 1,
     imageUrl:
       "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop",
+    quantity: 1,
+    pricePerNight: 450,
+    totalPrice: 450,
   },
   {
     id: "sofia-0311",
@@ -430,6 +773,9 @@ const DEMO_PAST: Trip[] = [
     bookings: 1,
     imageUrl:
       "https://images.unsplash.com/photo-1558981285-6f0c94958bb6?q=80&w=800&auto=format&fit=crop",
+    quantity: 1,
+    pricePerNight: 450,
+    totalPrice: 1800,
   },
   {
     id: "bucharest-0418",
@@ -439,6 +785,9 @@ const DEMO_PAST: Trip[] = [
     bookings: 1,
     imageUrl:
       "https://images.unsplash.com/photo-1567005231563-5d0c5e77f876?q=80&w=800&auto=format&fit=crop",
+    quantity: 1,
+    pricePerNight: 350,
+    totalPrice: 1400,
   },
   {
     id: "thailand-0919",
@@ -448,6 +797,9 @@ const DEMO_PAST: Trip[] = [
     bookings: 2,
     imageUrl:
       "https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?q=80&w=800&auto=format&fit=crop",
+    quantity: 2,
+    pricePerNight: 300,
+    totalPrice: 13800,
   },
   {
     id: "telaviv-0905",
@@ -457,6 +809,9 @@ const DEMO_PAST: Trip[] = [
     bookings: 2,
     imageUrl:
       "https://images.unsplash.com/photo-1505764706515-aa95265c5abc?q=80&w=800&auto=format&fit=crop",
+    quantity: 2,
+    pricePerNight: 600,
+    totalPrice: 19200,
   },
   {
     id: "sofia-0905",
@@ -466,6 +821,9 @@ const DEMO_PAST: Trip[] = [
     bookings: 1,
     imageUrl:
       "https://images.unsplash.com/photo-1567005231563-5d0c5e77f876?q=80&w=800&auto=format&fit=crop",
+    quantity: 1,
+    pricePerNight: 400,
+    totalPrice: 2000,
   },
 ];
 
@@ -478,5 +836,8 @@ const DEMO_CANCELLED: Trip[] = [
     bookings: 1,
     imageUrl:
       "https://images.unsplash.com/photo-1526481280698-8fcc13fd4fd8?q=80&w=800&auto=format&fit=crop",
+    quantity: 1,
+    pricePerNight: 500,
+    totalPrice: 1000,
   },
 ];

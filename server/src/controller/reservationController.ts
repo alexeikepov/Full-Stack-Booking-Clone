@@ -249,7 +249,7 @@ export async function listReservations(
 
     const list = await ReservationModel.find(filter)
       .sort({ createdAt: -1 })
-      .populate("hotel", "name city address")
+      .populate("hotel", "name city address media rooms")
       .select("-__v")
       .lean();
 
