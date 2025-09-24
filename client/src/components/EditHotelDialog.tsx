@@ -16,6 +16,7 @@ import { getHotelById } from "@/lib/api";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SurroundingsSection from "@/components/ui/SurroundingsSection";
 import FacilitiesManager from "@/components/ui/FacilitiesManager";
+import FacilitiesSection from "@/components/ui/FacilitiesSection";
 
 interface Hotel {
   id: string | number;
@@ -75,7 +76,6 @@ export default function EditHotelDialog({
       receptionServices: [] as any[],
       safetySecurity: [] as any[],
       generalFacilities: [] as any[],
-      languagesSpoken: [] as any[],
     },
     rooms: [] as any[],
     status: "active",
@@ -114,18 +114,25 @@ export default function EditHotelDialog({
     },
     surroundings: {
       nearbyAttractions: [] as { name: string; distance: string }[],
+      topAttractions: [] as { name: string; distance: string }[],
       restaurantsCafes: [] as {
         name: string;
         type: string;
         distance: string;
       }[],
+      naturalBeauty: [] as {
+        name: string;
+        type: string;
+        distance: string;
+      }[],
       publicTransport: [] as { name: string; type: string; distance: string }[],
+      closestAirports: [] as { name: string; distance: string }[],
     },
     overview: {},
-    mostPopularFacilities: [] as string[],
-    categories: [] as string[],
+    mostPopularFacilities: [] as {
+      name: string;
+    }[],
     travellersQuestions: [] as { question: string; answer: string }[],
-    languagesSpoken: [] as string[],
   });
   const [loading, setLoading] = useState(false);
   const [newMediaUrl, setNewMediaUrl] = useState("");
@@ -160,7 +167,6 @@ export default function EditHotelDialog({
       receptionServices: [] as any[],
       safetySecurity: [] as any[],
       generalFacilities: [] as any[],
-      languagesSpoken: [] as any[],
     },
     rooms: [] as any[],
     status: "active",
@@ -206,10 +212,10 @@ export default function EditHotelDialog({
       closestAirports: [],
     },
     overview: {},
-    mostPopularFacilities: [] as string[],
-    categories: [] as string[],
+    mostPopularFacilities: [] as {
+      name: string;
+    }[],
     travellersQuestions: [] as { question: string; answer: string }[],
-    languagesSpoken: [] as string[],
   });
 
   useEffect(() => {
@@ -348,12 +354,35 @@ export default function EditHotelDialog({
           },
           surroundings: full.surroundings || {
             nearbyAttractions: [],
+            topAttractions: [],
             restaurantsCafes: [],
+            naturalBeauty: [],
             publicTransport: [],
+            closestAirports: [],
           },
           overview: full.overview || {},
-          mostPopularFacilities: toStringArray(full.mostPopularFacilities),
-          categories: toStringArray(full.categories),
+          mostPopularFacilities: Array.isArray(full.mostPopularFacilities)
+            ? full.mostPopularFacilities.map((item: any) =>
+                typeof item === "string"
+                  ? { name: item, distance: "", type: "" }
+                  : {
+                      name: item.name || "",
+                      distance: item.distance || "",
+                      type: item.type || "",
+                    }
+              )
+            : [],
+          categories: Array.isArray(full.categories)
+            ? full.categories.map((item: any) =>
+                typeof item === "string"
+                  ? { name: item, distance: "", type: "" }
+                  : {
+                      name: item.name || "",
+                      distance: item.distance || "",
+                      type: item.type || "",
+                    }
+              )
+            : [],
           travellersQuestions: Array.isArray(full.travellersQuestions)
             ? full.travellersQuestions.map((q: any) => ({
                 question: q.question || "",
@@ -460,7 +489,12 @@ export default function EditHotelDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...formData };
+    const payload = {
+      ...formData,
+      mostPopularFacilities: formData.mostPopularFacilities
+        .map((item: any) => item.name)
+        .filter((name: string) => name.trim()),
+    };
     onSave(hotel ? { id: hotel.id, ...payload } : payload);
     onClose();
   };
@@ -599,7 +633,6 @@ export default function EditHotelDialog({
       : typeof v === "string"
       ? parseCsv(v)
       : [];
-  const csvSafe = (v: any) => toStringArray(v).join(", ");
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -1705,47 +1738,21 @@ export default function EditHotelDialog({
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-6">
                     <div className="text-sm font-medium">
-                      Most popular facilities & Categories
+                      Most popular facilities
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs">
-                          Most popular facilities (comma separated)
-                        </Label>
-                        <Input
-                          value={csvSafe(formData.mostPopularFacilities)}
-                          onChange={(e) =>
-                            setFormData((p: any) => ({
-                              ...p,
-                              mostPopularFacilities: parseCsv(e.target.value),
-                            }))
-                          }
-                        />
-                        <div className="text-xs text-gray-500">
-                          Comma-separated list of top amenities shown on the
-                          card.
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs">
-                          Categories (comma separated)
-                        </Label>
-                        <Input
-                          value={csvSafe(formData.categories)}
-                          onChange={(e) =>
-                            setFormData((p: any) => ({
-                              ...p,
-                              categories: parseCsv(e.target.value),
-                            }))
-                          }
-                        />
-                        <div className="text-xs text-gray-500">
-                          Tags (e.g., Family, Business, Beachfront).
-                        </div>
-                      </div>
-                    </div>
+
+                    <FacilitiesSection
+                      title="Most Popular Facilities"
+                      items={formData.mostPopularFacilities || []}
+                      onUpdate={(items) =>
+                        setFormData((p: any) => ({
+                          ...p,
+                          mostPopularFacilities: items,
+                        }))
+                      }
+                    />
                   </div>
 
                   <div className="space-y-3">
@@ -1833,27 +1840,6 @@ export default function EditHotelDialog({
                       >
                         Add question
                       </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="text-sm font-medium">Languages</div>
-                    <div>
-                      <Label className="text-xs">
-                        Languages spoken (comma separated)
-                      </Label>
-                      <Input
-                        value={csvSafe(formData.languagesSpoken)}
-                        onChange={(e) =>
-                          setFormData((p: any) => ({
-                            ...p,
-                            languagesSpoken: parseCsv(e.target.value),
-                          }))
-                        }
-                      />
-                      <div className="text-xs text-gray-500">
-                        Example: Hebrew, English, Russian.
-                      </div>
                     </div>
                   </div>
                 </div>

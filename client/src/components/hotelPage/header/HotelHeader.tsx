@@ -2,12 +2,34 @@ import type { Hotel } from "@/types/hotel";
 import { Button } from "@/components/ui/button";
 import HotelStars from "./HotelStars";
 import WishlistButton from "@/components/WishlistButton";
+import PriceMatchModal from "@/components/ui/PriceMatchModal";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 interface HotelHeaderProps {
   hotel: Hotel;
 }
 
 export default function HotelHeader({ hotel }: HotelHeaderProps) {
+  const navigate = useNavigate();
+  const [isPriceMatchModalOpen, setIsPriceMatchModalOpen] = useState(false);
+
+  const handleShareClick = () => {
+    // Navigate to Coming Soon page
+    navigate("/coming-soon");
+  };
+
+  const handlePriceMatchClick = () => {
+    setIsPriceMatchModalOpen(true);
+  };
+
+  const handleReserveClick = () => {
+    const availabilityElement = document.getElementById("info");
+    if (availabilityElement) {
+      availabilityElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-6xl px-4 py-6">
@@ -59,13 +81,18 @@ export default function HotelHeader({ hotel }: HotelHeaderProps) {
           <div className="flex flex-col items-end gap-4">
             {/* Top row: Heart, Share, Reserve */}
             <div className="flex items-center gap-3">
-              <WishlistButton 
-                hotelId={hotel.id || hotel._id} 
+              <WishlistButton
+                hotelId={hotel.id || hotel._id}
+                hotelName={hotel.name}
                 className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 size="md"
               />
 
-              <button className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
+              <button
+                onClick={handleShareClick}
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                title="Share"
+              >
                 <svg
                   className="w-5 h-5"
                   fill="none"
@@ -81,7 +108,10 @@ export default function HotelHeader({ hotel }: HotelHeaderProps) {
                 </svg>
               </button>
 
-              <Button className="bg-[#0071c2] hover:bg-[#005fa3] px-6 py-2 text-base font-semibold rounded-sm">
+              <Button 
+                onClick={handleReserveClick}
+                className="bg-[#0071c2] hover:bg-[#005fa3] px-6 py-2 text-base font-semibold rounded-sm"
+              >
                 Reserve
               </Button>
             </div>
@@ -101,13 +131,22 @@ export default function HotelHeader({ hotel }: HotelHeaderProps) {
                   d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                 />
               </svg>
-              <span className="text-sm font-medium hover:bg-blue-50 rounded px-2 py-1 cursor-pointer transition-colors">
+              <span
+                onClick={handlePriceMatchClick}
+                className="text-sm font-medium hover:bg-blue-50 rounded px-2 py-1 cursor-pointer transition-colors"
+              >
                 We Price Match
               </span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Price Match Modal */}
+      <PriceMatchModal
+        isOpen={isPriceMatchModalOpen}
+        onClose={() => setIsPriceMatchModalOpen(false)}
+      />
     </div>
   );
 }
