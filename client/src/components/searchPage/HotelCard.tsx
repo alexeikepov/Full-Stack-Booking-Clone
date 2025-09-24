@@ -11,8 +11,47 @@ const fmt = (n: number, currency = "ILS") =>
 
 const safeFixed = (v: unknown, d = 1) => {
   const n = Number(v);
-  return Number.isFinite(n) ? n.toFixed(d) : "New";
+  return Number.isFinite(n) ? n.toFixed(d) : "NEW";
 };
+
+function coerceNumber(value: any): number {
+  const direct = Number(value);
+  if (Number.isFinite(direct)) return direct;
+  if (value && typeof value === "object") {
+    if (typeof value.$numberInt === "string") return Number(value.$numberInt);
+    if (typeof value.$numberDouble === "string") return Number(value.$numberDouble);
+    if (typeof value.$numberDecimal === "string") return Number(value.$numberDecimal);
+    if (typeof value.value === "number") return value.value;
+    if (typeof value.value === "string") return Number(value.value);
+  }
+  try {
+    const str = String(value);
+    const n = Number(str);
+    return Number.isFinite(n) ? n : NaN;
+  } catch {
+    return NaN;
+  }
+}
+
+function getDistanceText(hotel: Hotel): string | null {
+  const anyHotel = hotel as any;
+  const text: string | undefined = anyHotel.distanceFromCenterText;
+  if (text) return text;
+  const km: number | undefined = anyHotel.distanceFromCenterKm;
+  if (typeof km === "number" && Number.isFinite(km)) return `${km.toFixed(1)} km from centre`;
+  return null;
+}
+
+function getRatingLabel(hotel: Hotel, ratingStr: string) {
+  if (hotel.ratingLabel) return hotel.ratingLabel;
+  if (ratingStr === "New") return "New";
+  const n = Number(ratingStr);
+  if (!Number.isFinite(n)) return "Review";
+  if (n >= 8.5) return "Excellent";
+  if (n >= 8) return "Very good";
+  if (n >= 7) return "Good";
+  return "Review";
+}
 
 function getPrimaryImage(hotel: Hotel): string {
   const hotelImage: string | undefined =
@@ -107,9 +146,12 @@ export default function HotelCard({
     return `/hotel/${hotelId}${queryString ? `?${queryString}` : ""}`;
   };
 
-  const rating = hotel.averageRating ?? null;
-  const ratingStr = rating === null ? "New" : safeFixed(rating, 1);
-  const reviews = hotel.reviewsCount ?? 0;
+  // Show ONLY real backend stats: averageRating and reviewsCount
+  // Strict: show rating only if backend provided both averageRating and reviewsCount
+  const reviews = coerceNumber((hotel as any)?.reviewsCount) || 0;
+  const ratingNumber = coerceNumber((hotel as any)?.averageRating);
+  const hasRealRating = reviews > 0 && Number.isFinite(ratingNumber) && ratingNumber > 0;
+  const ratingStr = hasRealRating ? safeFixed(ratingNumber, 1) : "";
 
   const total = Number.isFinite(Number((hotel as any).totalPrice))
     ? Number((hotel as any).totalPrice)
@@ -121,9 +163,30 @@ export default function HotelCard({
   const isTotal = total !== null;
 
   const firstRoom = hotel.rooms?.[0];
-  const featuresLine = firstRoom
-    ? `${firstRoom.name} — ${firstRoom.bedrooms} bedroom${firstRoom.bedrooms > 1 ? "s" : ""} | ${firstRoom.bathrooms} bathroom${firstRoom.bathrooms > 1 ? "s" : ""} — ${firstRoom.sizeSqm} m²`
-    : "Room details unavailable";
+  const featuresLine = (() => {
+    if (!firstRoom) return "";
+    const typeOrName = (firstRoom.roomType || firstRoom.roomCategory || firstRoom.name || "").toString();
+    const title = typeOrName ? typeOrName.toUpperCase() : "STANDARD";
+    const bedrooms = Number(firstRoom.bedrooms) || 0;
+    const bathrooms = Number(firstRoom.bathrooms) || 0;
+    const size = Number(firstRoom.sizeSqm) || 0;
+    const parts: string[] = [];
+    if (title) parts.push(title);
+    if (bedrooms > 0) parts.push(`${bedrooms} bedroom${bedrooms > 1 ? "s" : ""}`);
+    if (bathrooms > 0) parts.push(`${bathrooms} bathroom${bathrooms > 1 ? "s" : ""}`);
+    const right = [] as string[];
+    if (parts.length > 1) {
+      // title — details (bed/bath)
+      const [head, ...rest] = parts;
+      const left = `${head} — ${rest.join(" | ")}`;
+      if (size > 0) right.push(`${size} m²`);
+      return right.length ? `${left} — ${right.join(" | ")}` : left;
+    }
+    // only title
+    const only = title;
+    const withSize = size > 0 ? `${only}${only ? " — " : ""}${size} m²` : only;
+    return withSize || "";
+  })();
 
   const hotelId = getHotelId(hotel);
 
@@ -170,28 +233,22 @@ export default function HotelCard({
               {!!hotel.stars && <span className="text-[#febb02]">{starsRow(hotel.stars)}</span>}
               <div className="mt-0.5 text-[12px]">
                 <span className="text-[#0071c2]">{hotel.city}</span>
-                <span className="text-muted-foreground"> • 2.7 km from centre</span>
+                {getDistanceText(hotel) && (
+                  <span className="text-muted-foreground"> • {getDistanceText(hotel)}</span>
+                )}
               </div>
             </div>
-            <div className="flex items-start gap-2">
-              <div className="rounded bg-[#003b95] px-2 py-1 text-[11px] font-semibold text-white">
-                {ratingStr}
-              </div>
-              <div className="text-right">
-                <div className="text-[11px] font-medium">
-                  {ratingStr === "New"
-                    ? "New"
-                    : Number(ratingStr) >= 8.5
-                    ? "Excellent"
-                    : Number(ratingStr) >= 8
-                    ? "Very good"
-                    : Number(ratingStr) >= 7
-                    ? "Good"
-                    : "Review"}
+            {hasRealRating && (
+              <div className="flex items-start gap-2">
+                <div className="rounded bg-[#003b95] px-2 py-1 text-[11px] font-semibold text-white">
+                  {ratingStr}
                 </div>
-                <div className="text-[11px] text-muted-foreground">{reviews} reviews</div>
+                <div className="text-right">
+                  <div className="text-[11px] font-medium">{getRatingLabel(hotel, ratingStr)}</div>
+                  <div className="text-[11px] text-muted-foreground">{`${reviews} reviews`}</div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="mt-1 border-l border-[#e7e7e7] pl-2 text-[12px] text-muted-foreground">
@@ -260,7 +317,9 @@ export default function HotelCard({
             <Link to="#" className="text-[#0071c2] hover:underline">
               {hotel.city}
             </Link>
-            <span className="text-muted-foreground"> • 2.7 km from centre</span>
+            {getDistanceText(hotel) && (
+              <span className="text-muted-foreground"> • {getDistanceText(hotel)}</span>
+            )}
           </div>
 
           <div className="mt-0.5 border-l border-[#e7e7e7] pl-2 text-[12px] text-muted-foreground">
@@ -271,25 +330,17 @@ export default function HotelCard({
         </div>
 
         <div className="flex shrink-0 flex-col items-end justify-between gap-2 sm:w-[232px]">
-          <div className="flex items-start gap-2">
-            <div className="rounded bg-[#003b95] px-2 py-1 text-xs font-semibold text-white">
-              {ratingStr}
-            </div>
-            <div className="text-right">
-              <div className="text-[12px] font-medium">
-                {ratingStr === "New"
-                  ? "New"
-                  : Number(ratingStr) >= 8.5
-                  ? "Excellent"
-                  : Number(ratingStr) >= 8
-                  ? "Very good"
-                  : Number(ratingStr) >= 7
-                  ? "Good"
-                  : "Review"}
+          {hasRealRating && (
+            <div className="flex items-start gap-2">
+              <div className="rounded bg-[#003b95] px-2 py-1 text-xs font-semibold text-white">
+                {ratingStr}
               </div>
-              <div className="text-[11px] text-muted-foreground">{reviews} reviews</div>
+              <div className="text-right">
+                <div className="text-[12px] font-medium">{getRatingLabel(hotel, ratingStr)}</div>
+                <div className="text-[11px] text-muted-foreground">{`${reviews} reviews`}</div>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex flex-col items-end gap-1.5">
             <div className="text-right">
