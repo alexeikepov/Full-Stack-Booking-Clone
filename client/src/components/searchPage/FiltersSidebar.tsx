@@ -93,17 +93,24 @@ export default function FiltersSidebar({ bounds, value, onChange, facets }: Prop
         const show = expanded[g.key] ?? false;
         const items = (() => {
           if (g.key === "categories") {
-            const split = g.items.flatMap((it) => {
+            const counter = new Map<string, { id: string; label: string; count: number }>();
+            for (const it of g.items) {
               const parts = (it.label ?? "").includes("|")
                 ? (it.label ?? "").split("|").map((s) => s.trim()).filter(Boolean)
                 : [it.label];
-              return parts.map((label) => ({
-                id: `cat_${String(label).toLowerCase()}`,
-                label,
-                count: it.count,
-              }));
-            });
-            return show ? split : split.slice(0, 10);
+              for (const raw of parts) {
+                const label = String(raw);
+                const key = label.toLowerCase();
+                const prev = counter.get(key);
+                if (prev) {
+                  prev.count += it.count;
+                } else {
+                  counter.set(key, { id: `cat_${key}`, label, count: it.count });
+                }
+              }
+            }
+            const arr = Array.from(counter.values());
+            return show ? arr : arr.slice(0, 10);
           }
           return show ? g.items : g.items.slice(0, 10);
         })();

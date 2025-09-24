@@ -509,6 +509,8 @@ export default function SearchPage() {
           </InfoNotice>
         </div>
 
+        {/* Map removed (use sidebar toggle only) */}
+
         <div className="mt-3 flex items-start gap-4 pb-10">
           <FiltersSidebar
             bounds={{ min: minBound, max: maxBound }}
