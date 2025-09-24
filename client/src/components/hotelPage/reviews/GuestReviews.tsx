@@ -3,19 +3,24 @@ import ReactCountryFlag from "react-country-flag";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelReviews, getReviewStats } from "@/lib/api";
 import { useState } from "react";
-import ReviewCard from "./ReviewCard";
-import CreateReviewForm from "./CreateReviewForm";
+import ReviewCard, { type Review as ReviewCardType } from "./ReviewCard";
 
 interface GuestReviewsProps {
   hotel: Hotel;
 }
 
 export default function GuestReviews({ hotel }: GuestReviewsProps) {
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "rating_high" | "rating_low" | "helpful"
   >("newest");
+
+  // Normalize hotel id across possible shapes (id | _id | _id.$oid)
+  const hotelId =
+    (hotel as any)?.id ||
+    (hotel as any)?._id?.$oid ||
+    (hotel as any)?._id ||
+    "";
 
   // Fetch reviews from backend
   const {
@@ -23,23 +28,22 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
     isLoading: reviewsLoading,
     error: reviewsError,
   } = useQuery({
-    queryKey: ["reviews", hotel.id || hotel._id?.$oid, sortBy],
-    queryFn: () =>
-      getHotelReviews(hotel.id || hotel._id?.$oid, { sort: sortBy, limit: 10 }),
+    queryKey: ["reviews", hotelId, sortBy],
+    queryFn: () => getHotelReviews(String(hotelId), { sort: sortBy, limit: 10 }),
     retry: 1,
   });
 
   // Fetch review stats
   const { data: reviewStats } = useQuery({
-    queryKey: ["reviewStats", hotel.id || hotel._id?.$oid],
-    queryFn: () => getReviewStats(hotel.id || hotel._id?.$oid),
+    queryKey: ["reviewStats", hotelId],
+    queryFn: () => getReviewStats(String(hotelId)),
   });
 
   // Fetch all reviews for modal (enabled only when modal is open)
   const { data: allReviewsData, isLoading: allReviewsLoading } = useQuery({
-    queryKey: ["reviews", hotel.id || hotel._id?.$oid, "all", "newest"],
+    queryKey: ["reviews", hotelId, "all", "newest"],
     queryFn: () =>
-      getHotelReviews(hotel.id || hotel._id?.$oid, {
+      getHotelReviews(String(hotelId), {
         sort: "newest",
         limit: 1000,
       }),
@@ -237,17 +241,17 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             <div className="space-y-4">
               <CategoryItem
                 name={categoryNames.staff}
-                score={categoryRatings.staff}
+                score={categoryRatings.staff ?? 0}
               />
               <CategoryItem
                 name={categoryNames.comfort}
-                score={categoryRatings.comfort}
+                score={categoryRatings.comfort ?? 0}
               />
               <CategoryItem
-                name={categoryNames.freeWifi}
-                score={categoryRatings.freeWifi}
+                name={(categoryNames as any).freeWifi ?? (categoryNames as any).wifi ?? "Free WiFi"}
+                score={(categoryRatings as any).freeWifi ?? (categoryRatings as any).wifi ?? 0}
                 showArrow={highScoreCategories.includes("freeWifi")}
-                arrowText={highScoreTexts.freeWifi}
+                arrowText={(highScoreTexts as any).freeWifi ?? (highScoreTexts as any).wifi}
               />
             </div>
 
@@ -255,23 +259,25 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             <div className="space-y-4">
               <CategoryItem
                 name={categoryNames.facilities}
-                score={categoryRatings.facilities}
+                score={categoryRatings.facilities ?? 0}
               />
-              <CategoryItem
-                name={categoryNames.valueForMoney}
-                score={categoryRatings.valueForMoney}
-              />
+              {(
+                <CategoryItem
+                  name={(categoryNames as any).valueForMoney ?? (categoryNames as any).value ?? "Value for money"}
+                  score={(categoryRatings as any).valueForMoney ?? (categoryRatings as any).value ?? 0}
+                />
+              )}
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
               <CategoryItem
                 name={categoryNames.cleanliness}
-                score={categoryRatings.cleanliness}
+                score={categoryRatings.cleanliness ?? 0}
               />
               <CategoryItem
                 name={categoryNames.location}
-                score={categoryRatings.location}
+                score={categoryRatings.location ?? 0}
                 showArrow={highScoreCategories.includes("location")}
                 arrowText={highScoreTexts.location}
               />
@@ -334,9 +340,9 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
                 <p className="text-gray-500 text-sm">Please try again later</p>
               </div>
             ) : guestReviews.length > 0 ? (
-              guestReviews.map((review) => (
+              guestReviews.map((review: ReviewCardType) => (
                 <ReviewCard
-                  key={review._id || review.id}
+                  key={(review as any)._id}
                   review={review}
                   onVoteHelpful={(reviewId) => {
                     // Handle vote helpful
