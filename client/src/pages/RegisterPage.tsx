@@ -26,6 +26,18 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [sending, setSending] = useState(false);
+
+  // Normalize local numbers (e.g., 0522226889) to E.164 (+972522226889 default)
+  const normalizePhone = (raw: string) => {
+    const s = raw.replace(/\D/g, "");
+    if (raw.trim().startsWith("+")) return `+${s}`;
+    if (/^0\d{8,10}$/.test(s)) return `+972${s.substring(1)}`;
+    if (/^\d{6,15}$/.test(s)) return `+${s}`;
+    return raw.trim();
+  };
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(schema),
@@ -36,6 +48,40 @@ export default function RegisterPage() {
     setServerError(null);
     try {
       const base = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+      // Step 1: ensure OTP has been sent
+      if (!otpSent) {
+        setSending(true);
+        const resReq = await fetch(`${base}/api/auth/otp/request`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ phone: normalizePhone(values.phone) }),
+        });
+        setSending(false);
+        if (!resReq.ok) {
+          const err = await resReq.json().catch(() => ({}));
+          throw new Error(err?.error || "Failed to send verification code");
+        }
+        setOtpSent(true);
+        return; // ask user to enter the code
+      }
+
+      // Step 2: verify code before registering
+      if (!otpCode || otpCode.replace(/\D/g, "").length !== 6) {
+        throw new Error("Enter the 6-digit verification code");
+      }
+      const resVer = await fetch(`${base}/api/auth/otp/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ phone: normalizePhone(values.phone), code: otpCode.trim() }),
+      });
+      if (!resVer.ok) {
+        const err = await resVer.json().catch(() => ({}));
+        throw new Error(err?.error || "Invalid verification code");
+      }
+
       const res = await fetch(`${base}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,11 +163,32 @@ export default function RegisterPage() {
               )}
             />
 
+            {otpSent && (
+              <div>
+                <FormLabel>Enter 6-digit code</FormLabel>
+                <Input
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                />
+              </div>
+            )}
+
             {serverError && <p className="text-sm text-red-600">{serverError}</p>}
 
-            <Button type="submit" className="w-full bg-[#0071c2] hover:bg-[#005999]">
-              Register
-            </Button>
+            <div className="flex gap-2">
+              {!otpSent ? (
+                <Button type="submit" disabled={sending} className="flex-1 bg-[#0071c2] hover:bg-[#005999]">
+                  {sending ? "Sending..." : "Send code"}
+                </Button>
+              ) : (
+                <Button type="submit" className="flex-1 bg-[#0071c2] hover:bg-[#005999]">
+                  Verify & Register
+                </Button>
+              )}
+            </div>
           </form>
         </Form>
 

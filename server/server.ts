@@ -20,6 +20,7 @@ import wishlistRoutes from "./src/routes/wishlists";
 import cron from "node-cron";
 import { ReservationModel } from "./src/models/Reservation";
 import searchHistoryRoutes from "./src/routes/searchHistory";
+import authRoutes from "./src/routes/auth";
 
 async function start() {
   const app = express();
@@ -51,6 +52,7 @@ async function start() {
 
   // Routes
   app.use("/api/users", userRoutes);
+  app.use("/api/auth", authRoutes);
   app.use("/api", meRoutes);
   app.use("/api/hotels", hotelRoutes);
   app.use("/api/reservations", reservationRoutes);
