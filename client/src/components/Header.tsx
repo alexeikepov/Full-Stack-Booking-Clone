@@ -9,6 +9,7 @@ import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSelector from "./LanguageSelector";
 import ProfileMenu from "./ProfileMenu";
+import { useTranslation } from "react-i18next";
 
 function NavPill({
   icon: Icon,
@@ -51,6 +52,7 @@ function NavPill({
 }
 
 export default function Header() {
+  const { t } = useTranslation();
   const { user, isLoading, signOut } = useAuth();
   const { activeTab, setActiveTab } = useNavigationStore();
   const { showTabs } = useNavigationTabsStore();
@@ -66,7 +68,7 @@ export default function Header() {
             className="text-[26px] font-bold tracking-tight leading-none"
             aria-label="Booking Home"
           >
-            Booking<span className="text-[#febb02]">.com</span>
+            {t("brand")}
           </Link>
 
           <div className="flex items-center gap-3 text-sm">
@@ -81,7 +83,7 @@ export default function Header() {
               to="/list-your-property"
               className="hidden md:inline-block rounded-full px-3 py-1 font-medium hover:bg-white/10"
             >
-              List your property
+              {t("listYourProperty")}
             </NavLink>
 
             {!isLoading && !user && (
@@ -90,13 +92,13 @@ export default function Header() {
                   to="/register"
                   className="rounded-md bg-white px-4 py-2 text-[#0071c2] hover:bg-white/90"
                 >
-                  Register
+                  {t("register")}
                 </Link>
                 <Link
                   to="/login"
                   className="rounded-md bg-white px-4 py-2 text-[#0071c2] hover:bg-white/90"
                 >
-                  Sign in
+                  {t("signIn")}
                 </Link>
               </div>
             )}
@@ -106,7 +108,7 @@ export default function Header() {
                 {user.genius?.level !== undefined && (
                   <span className="hidden md:inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-xs font-medium">
                     <span className="inline-flex h-4 w-4 items-center justify-center rounded-[3px] bg-[#febb02] text-[10px] font-bold text-black">G</span>
-                    <span>Level {geniusLevel}</span>
+                    <span>{t("geniusLevel", { level: geniusLevel })}</span>
                   </span>
                 )}
                 <ProfileMenu user={user} onSignOut={signOut} />
@@ -120,7 +122,7 @@ export default function Header() {
           <div className="flex h-12 items-center gap-2">
             <NavPill
               icon={Bed}
-              label="Stays"
+              label={t("tabs.stays")}
               tab="stays"
               onClick={setActiveTab}
               active={activeTab === "stays"}
@@ -128,7 +130,7 @@ export default function Header() {
             />
             <NavPill
               icon={Plane}
-              label="Flights"
+              label={t("tabs.flights")}
               tab="flights"
               onClick={setActiveTab}
               active={activeTab === "flights"}
@@ -136,7 +138,7 @@ export default function Header() {
             />
             <NavPill
               icon={CarFront}
-              label="Car rental"
+              label={t("tabs.cars")}
               tab="cars"
               onClick={setActiveTab}
               active={activeTab === "cars"}
@@ -144,7 +146,7 @@ export default function Header() {
             />
             <NavPill
               icon={Sparkles}
-              label="Attractions"
+              label={t("tabs.attractions")}
               tab="attractions"
               onClick={setActiveTab}
               active={activeTab === "attractions"}
@@ -162,9 +164,9 @@ export default function Header() {
               ].join(" ")}
             >
               <span className="inline-flex items-center justify-center rounded-sm border border-white/70 px-1 text-[10px] leading-4 tracking-[0.08em]">
-                TAXI
+                {t("tabs.taxisBadge")}
               </span>
-              <span>Airport taxis</span>
+              <span>{t("tabs.taxis")}</span>
             </Link>
           </div>
         )}

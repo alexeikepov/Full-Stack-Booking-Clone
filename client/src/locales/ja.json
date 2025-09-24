@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "宿泊施設を登録",
+  "register": "登録",
+  "signIn": "ログイン",
+  "geniusLevel": "Geniusレベル{{level}}",
+  "tabs": {
+    "stays": "宿泊施設",
+    "flights": "航空券",
+    "cars": "レンタカー",
+    "attractions": "観光スポット",
+    "taxis": "空港タクシー",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "次の宿泊先を見つけよう",
+      "subtitle": "ホテル、アパートメントなどで低価格を検索..."
+    },
+    "offers": {
+      "title": "お得情報",
+      "subtitle": "あなたのためのプロモーション、割引、特別オファー"
+    },
+    "card1": {
+      "kicker": "バケーションレンタル",
+      "title": "バケーションレンタルで夢を叶えよう",
+      "subtitle": "家、ヴィラ、シャレーなどから選べます",
+      "cta": "予約する"
+    },
+    "card2": {
+      "title": "クイックゲットウェイ、素敵な時間",
+      "subtitle": "Getaway Dealで最大20%節約",
+      "cta": "宿泊費を節約"
+    },
+    "trending": {
+      "title": "人気の目的地",
+      "subtitle": "イスラエルからの旅行者に最も人気の選択肢"
+    },
+    "propertyTypes": {
+      "title": "宿泊施設タイプで探す",
+      "items": {
+        "hotels": "ホテル",
+        "apartments": "アパートメント",
+        "resorts": "リゾート",
+        "villas": "ヴィラ",
+        "cabins": "キャビン",
+        "cottages": "コテージ",
+        "glamping": "グランピング",
+        "serviced-apartments": "サービスアパートメント",
+        "holiday-homes": "バケーションレンタル",
+        "guest-houses": "ゲストハウス",
+        "hostels": "ホステル",
+        "motels": "モーテル"
+      }
+    },
+    "tripPlanner": {
+      "title": "簡単で素早い旅行プランナー",
+      "subtitle": "ムードを選んでイスラエルの最高の目的地を発見",
+      "categories": {
+        "festivals": "フェスティバル",
+        "artMusic": "アート＆ミュージック",
+        "beachRelaxation": "ビーチリラクゼーション",
+        "gastronomyWine": "ガストロノミー＆ワイン",
+        "shoppingMarkets": "ショッピング＆マーケット",
+        "culturalExploration": "文化的探求"
+      },
+      "kmAway": "{{km}}km先"
+    },
+    "banner": {
+      "titleLine1": "次の冒険で",
+      "titleLine2": "家のような居心地を感じませんか？",
+      "cta": "バケーションレンタルを発見"
+    },
+    "popular": {
+      "title": "イスラエルからの旅行者に人気",
+      "tabs": {
+        "domestic": "国内都市",
+        "international": "国際都市",
+        "regions": "地域",
+        "countries": "国",
+        "places": "宿泊施設"
+      },
+      "showMore": "+ もっと表示",
+      "showLess": "− 少なく表示"
+    },
+    "travelMore": {
+      "title": "もっと旅行、少ない料金",
+      "boxTitle": "ログインして節約",
+      "boxSubtitle": "参加施設で10%以上節約 — 青いGeniusラベルを探してください",
+      "features": {
+        "freeCancellation": {
+          "title": "今すぐ予約、現地で支払い",
+          "subtitle": "ほとんどの客室で無料キャンセル",
+          "imgAlt": "チェックリストイラスト"
+        },
+        "worldwide": {
+          "title": "世界中に200万件以上の宿泊施設",
+          "subtitle": "ホテル、ゲストハウス、アパートメントなど...",
+          "imgAlt": "地球イラスト"
+        },
+        "support247": {
+          "title": "信頼できる24時間365日のカスタマーサポート",
+          "subtitle": "いつでもお手伝いします",
+          "imgAlt": "カスタマーサポートイラスト"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "どこに行きますか？",
+    "cta": "検索",
+    "breadcrumb": {
+      "home": "ホーム",
+      "country": "イスラエル",
+      "city": "都市",
+      "results": "検索結果"
+    },
+    "count": { "propertiesFound": "件の宿泊施設が見つかりました" },
+    "view": { "list": "リスト", "grid": "グリッド" },
+    "notice": { "conflict": "この地域に宿泊することを決定する前に、政府の旅行警告を確認してください。この地域は紛争の影響を受けているとみなされる可能性があります。" },
+    "error": { "title": "ホテル読み込みエラー", "description": "ホテルデータの読み込みに失敗しました。再試行してください。", "retry": "再試行" },
+    "sort": {
+      "by": "並び替え:",
+      "labels": {
+        "top_picks": "一人旅に最適",
+        "price_low": "価格（安い順）",
+        "price_high": "価格（高い順）",
+        "rating_high": "評価（高い順）",
+        "rating_low": "評価（低い順）",
+        "distance_low": "中心部からの距離",
+        "reviews_high": "最高評価"
+      }
+    },
+    "filters": {
+      "budget": "あなたの予算（1泊あたり）",
+      "categories": "カテゴリー",
+      "review": "レビュー評価",
+      "meals": "食事",
+      "stars": "星評価",
+      "ptype": "宿泊施設タイプ",
+      "facilities": "人気フィルター",
+      "payment": "支払いオプション",
+      "distance": "中心部からの距離",
+      "neighborhood": "地区",
+      "brands": "ブランド",
+      "showAll": "すべて表示",
+      "showLess": "少なく表示"
+    }
+  }
+}

@@ -1,7 +1,9 @@
 // src/components/HolidayRentalsBanner.tsx
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function HolidayRentalsBanner() {
+  const { t } = useTranslation();
   return (
     <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 py-8">
       <Link to="/holiday-rentals" className="block group">
@@ -20,9 +22,8 @@ export default function HolidayRentalsBanner() {
 
               <div className="relative z-10 mx-auto max-w-[760px] text-left text-white">
                 <h3 className="text-[22px] md:text-[28px] font-bold leading-snug tracking-tight">
-                  Want to feel at home on your
-                  <br />
-                  next adventure?
+                  {t("home.banner.titleLine1")}<br />
+                  {t("home.banner.titleLine2")}
                 </h3>
 
                 <span
@@ -32,7 +33,7 @@ export default function HolidayRentalsBanner() {
                              text-sm md:text-[15px] font-medium shadow-sm
                              transition-colors group-hover:bg-white/95"
                 >
-                  Discover holiday rentals
+                  {t("home.banner.cta")}
                 </span>
               </div>
             </div>

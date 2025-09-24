@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Irehistro ang inyong accommodation",
+  "register": "Magparehistro",
+  "signIn": "Mag-login",
+  "geniusLevel": "Genius level {{level}}",
+  "tabs": {
+    "stays": "Mga accommodation",
+    "flights": "Mga flight",
+    "cars": "Car rental",
+    "attractions": "Mga atraksyon",
+    "taxis": "Airport taxi",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Hanapin ang inyong susunod na accommodation",
+      "subtitle": "Maghanap ng mababang presyo sa mga hotel, apartment at marami pa..."
+    },
+    "offers": {
+      "title": "Mga offer",
+      "subtitle": "Mga promosyon, diskwento at espesyal na offer para sa inyo"
+    },
+    "card1": {
+      "kicker": "Mga holiday home",
+      "title": "Mangarap sa holiday home",
+      "subtitle": "Pumili mula sa mga bahay, villa, chalet at marami pa",
+      "cta": "Mag-book"
+    },
+    "card2": {
+      "title": "Mabilis na getaway, magagandang oras",
+      "subtitle": "Makatipid ng hanggang 20% sa Getaway Deal",
+      "cta": "Makatipid sa accommodation"
+    },
+    "trending": {
+      "title": "Mga sikat na destinasyon",
+      "subtitle": "Pinakasikat na mga pagpipilian para sa mga traveler mula sa Israel"
+    },
+    "propertyTypes": {
+      "title": "Mag-browse ayon sa uri ng accommodation",
+      "items": {
+        "hotels": "Mga hotel",
+        "apartments": "Mga apartment",
+        "resorts": "Mga resort",
+        "villas": "Mga villa",
+        "cabins": "Mga cabin",
+        "cottages": "Mga cottage",
+        "glamping": "Glamping",
+        "serviced-apartments": "Mga serviced apartment",
+        "holiday-homes": "Mga holiday home",
+        "guest-houses": "Mga guest house",
+        "hostels": "Mga hostel",
+        "motels": "Mga motel"
+      }
+    },
+    "tripPlanner": {
+      "title": "Simple at mabilis na trip planner",
+      "subtitle": "Pumili ng mood at tuklasin ang mga pinakamahusay na destinasyon sa Israel",
+      "categories": {
+        "festivals": "Mga festival",
+        "artMusic": "Art & Music",
+        "beachRelaxation": "Beach & Relaxation",
+        "gastronomyWine": "Gastronomy & Wine",
+        "shoppingMarkets": "Shopping & Markets",
+        "culturalExploration": "Cultural Exploration"
+      },
+      "kmAway": "{{km}} km ang layo"
+    },
+    "banner": {
+      "titleLine1": "Gusto nyo bang maging parang nasa bahay",
+      "titleLine2": "sa inyong susunod na adventure?",
+      "cta": "Tuklasin ang mga holiday home"
+    },
+    "popular": {
+      "title": "Sikat sa mga traveler mula sa Israel",
+      "tabs": {
+        "domestic": "Mga domestic na lungsod",
+        "international": "Mga international na lungsod",
+        "regions": "Mga rehiyon",
+        "countries": "Mga bansa",
+        "places": "Mga accommodation"
+      },
+      "showMore": "+ Magpakita pa",
+      "showLess": "− Magpakita ng mas kaunti"
+    },
+    "travelMore": {
+      "title": "Mag-travel ng mas marami, magbayad ng mas kaunti",
+      "boxTitle": "Mag-login at makatipid",
+      "boxSubtitle": "Makatipid ng 10% o higit pa sa mga participating na accommodation — hanapin ang asul na Genius label",
+      "features": {
+        "freeCancellation": {
+          "title": "Mag-book ngayon, magbayad sa accommodation",
+          "subtitle": "Libreng cancellation para sa karamihan ng mga room",
+          "imgAlt": "Checklist illustration"
+        },
+        "worldwide": {
+          "title": "+2 milyong accommodation sa buong mundo",
+          "subtitle": "Mga hotel, guest house, apartment at marami pa...",
+          "imgAlt": "Globe illustration"
+        },
+        "support247": {
+          "title": "Mapagkakatiwalaang customer service 24/7",
+          "subtitle": "Palagi kaming nandito para tumulong",
+          "imgAlt": "Customer service illustration"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Saan kayo pupunta?",
+    "cta": "Maghanap",
+    "breadcrumb": {
+      "home": "Home",
+      "country": "Israel",
+      "city": "Lungsod",
+      "results": "Mga resulta ng paghahanap"
+    },
+    "count": { "propertiesFound": "mga accommodation na nahanap" },
+    "view": { "list": "Lista", "grid": "Grid" },
+    "notice": { "conflict": "Pakitingnan ang travel warnings ng inyong gobyerno bago magdesisyon na mag-stay sa area na ito, na maaaring ituring na apektado ng conflict." },
+    "error": { "title": "Error sa pag-load ng mga hotel", "description": "Hindi ma-load ang data ng mga hotel. Pakisubukan ulit.", "retry": "Subukan ulit" },
+    "sort": {
+      "by": "I-sort ayon sa:",
+      "labels": {
+        "top_picks": "Pinakamahusay para sa solo travelers",
+        "price_low": "Presyo (mababa hanggang mataas)",
+        "price_high": "Presyo (mataas hanggang mababa)",
+        "rating_high": "Rating ng accommodation (pababa)",
+        "rating_low": "Rating ng accommodation (paakyat)",
+        "distance_low": "Distansya mula sa center",
+        "reviews_high": "Pinakamataas na rating"
+      }
+    },
+    "filters": {
+      "budget": "Inyong budget (per gabi)",
+      "categories": "Mga kategorya",
+      "review": "Review score",
+      "meals": "Mga pagkain",
+      "stars": "Star category",
+      "ptype": "Uri ng accommodation",
+      "facilities": "Mga sikat na filter",
+      "payment": "Mga payment option",
+      "distance": "Distansya mula sa center",
+      "neighborhood": "Mga kapitbahayan",
+      "brands": "Mga brand",
+      "showAll": "Ipakita lahat",
+      "showLess": "Ipakita ng mas kaunti"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { SortKey } from "@/utils/sortHotels";
 import { SORT_LABEL } from "@/utils/sortHotels";
+import { useTranslation } from "react-i18next";
 
 const ORDER: SortKey[] = [
   "top_picks",
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export default function SortBar({ value, onChange }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -37,7 +39,7 @@ export default function SortBar({ value, onChange }: Props) {
         className="inline-flex items-center gap-2 rounded-md bg-[#0071c2] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-[#005fa3]"
       >
         <span className="inline-block h-4 w-4 rounded-sm bg-white/20" />
-        Sort by: <span className="font-semibold">{SORT_LABEL[value]}</span>
+        {t("search.sort.by")} <span className="font-semibold">{t(`search.sort.labels.${value}`)}</span>
         <svg width="14" height="14" viewBox="0 0 20 20" className="opacity-90">
           <path fill="currentColor" d="M5 7l5 6 5-6H5z" />
         </svg>
@@ -57,7 +59,7 @@ export default function SortBar({ value, onChange }: Props) {
                     setOpen(false);
                   }}
                 >
-                  {SORT_LABEL[k]}
+                  {t(`search.sort.labels.${k}`)}
                 </button>
               </li>
             ))}

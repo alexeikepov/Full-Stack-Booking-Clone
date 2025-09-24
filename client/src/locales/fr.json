@@ -1,0 +1,152 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Inscrire votre établissement",
+  "register": "S’inscrire",
+  "signIn": "Se connecter",
+  "geniusLevel": "Niveau Genius {{level}}",
+  "tabs": {
+    "stays": "Hébergements",
+    "flights": "Vols",
+    "cars": "Voitures de location",
+    "attractions": "Attractions",
+    "taxis": "Taxis aéroport",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Trouvez votre prochain séjour",
+      "subtitle": "Recherchez des prix bas pour des hôtels, des appartements et plus encore…"
+    },
+    "offers": {
+      "title": "Offres",
+      "subtitle": "Promotions, offres et réductions pour vous"
+    },
+    "card1": {
+      "kicker": "Locations de vacances",
+      "title": "Vivez votre rêve dans une maison de vacances",
+      "subtitle": "Choisissez parmi des maisons, villas, chalets et plus",
+      "cta": "Réserver"
+    },
+    "card2": {
+      "title": "Escapade rapide, bons moments",
+      "subtitle": "Économisez jusqu’à 20% avec le Getaway Deal",
+      "cta": "Économiser sur les séjours"
+    },
+    "trending": {
+      "title": "Destinations tendances",
+      "subtitle": "Les choix les plus populaires pour les voyageurs d’Israël"
+    },
+    "propertyTypes": {
+      "title": "Parcourir par type d’hébergement",
+      "items": {
+        "hotels": "Hôtels",
+        "apartments": "Appartements",
+        "resorts": "Complexes hôteliers",
+        "villas": "Villas",
+        "cabins": "Cabines",
+        "cottages": "Cottages",
+        "glamping": "Glamping",
+        "serviced-apartments": "Appart’hôtels",
+        "holiday-homes": "Maisons de vacances",
+        "guest-houses": "Maisons d’hôtes",
+        "hostels": "Auberges de jeunesse",
+        "motels": "Motels"
+      }
+    },
+    "tripPlanner": {
+      "title": "Planificateur de voyage simple et rapide",
+      "subtitle": "Choisissez une ambiance et explorez les meilleures destinations en Israël",
+      "categories": {
+        "festivals": "Festivals",
+        "artMusic": "Art & Musique",
+        "beachRelaxation": "Détente à la plage",
+        "gastronomyWine": "Gastronomie & Vin",
+        "shoppingMarkets": "Shopping & Marchés",
+        "culturalExploration": "Découverte culturelle"
+      },
+      "kmAway": "à {{km}} km"
+    },
+    "banner": {
+      "titleLine1": "Envie de vous sentir comme chez vous",
+      "titleLine2": "lors de votre prochaine aventure ?",
+      "cta": "Découvrir les locations de vacances"
+    },
+    "popular": {
+      "title": "Populaire auprès des voyageurs d’Israël",
+      "tabs": {
+        "domestic": "Villes nationales",
+        "international": "Villes internationales",
+        "regions": "Régions",
+        "countries": "Pays",
+        "places": "Hébergements"
+      },
+      "showMore": "+ Voir plus",
+      "showLess": "− Voir moins"
+    },
+    "travelMore": {
+      "title": "Voyagez plus, payez moins",
+      "boxTitle": "Connectez‑vous et économisez",
+      "boxSubtitle": "Économisez 10% ou plus dans les établissements participants – repérez le label Genius bleu",
+      "features": {
+        "freeCancellation": {
+          "title": "Réservez maintenant, payez sur place",
+          "subtitle": "Annulation gratuite pour la plupart des chambres",
+          "imgAlt": "Illustration liste"
+        },
+        "worldwide": {
+          "title": "+2 millions d’hébergements dans le monde",
+          "subtitle": "Hôtels, maisons d’hôtes, appartements et plus...",
+          "imgAlt": "Illustration globe"
+        },
+        "support247": {
+          "title": "Service client fiable 24h/24 et 7j/7",
+          "subtitle": "Nous sommes toujours là pour vous aider",
+          "imgAlt": "Illustration service client"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Où allez‑vous ?",
+    "cta": "Rechercher",
+    "breadcrumb": {
+      "home": "Accueil",
+      "country": "Israël",
+      "city": "Ville",
+      "results": "Résultats de recherche"
+    },
+    "count": { "propertiesFound": "hébergements trouvés" },
+    "view": { "list": "Liste", "grid": "Grille" },
+    "notice": { "conflict": "Veuillez consulter les avis de voyage de votre gouvernement avant de décider de séjourner dans cette zone, qui peut être considérée comme affectée par un conflit." },
+    "error": { "title": "Erreur de chargement des hôtels", "description": "Échec du chargement des données des hôtels. Veuillez réessayer.", "retry": "Réessayer" },
+    "sort": {
+      "by": "Trier par :",
+      "labels": {
+        "top_picks": "Meilleures sélections pour voyageurs solo",
+        "price_low": "Prix (du plus bas au plus élevé)",
+        "price_high": "Prix (du plus élevé au plus bas)",
+        "rating_high": "Note de l’établissement (décroissante)",
+        "rating_low": "Note de l’établissement (croissante)",
+        "distance_low": "Distance du centre‑ville",
+        "reviews_high": "Mieux notés"
+      }
+    },
+    "filters": {
+      "budget": "Votre budget (par nuit)",
+      "categories": "Catégories",
+      "review": "Note des commentaires",
+      "meals": "Repas",
+      "stars": "Classement par étoiles",
+      "ptype": "Type d’hébergement",
+      "facilities": "Filtres populaires",
+      "payment": "Options de paiement",
+      "distance": "Distance du centre",
+      "neighborhood": "Quartiers",
+      "brands": "Marques",
+      "showAll": "Tout afficher",
+      "showLess": "Réduire"
+    }
+  }
+}
+
+

@@ -1,6 +1,7 @@
 // src/components/TrendingDestinations.tsx
 import { Link } from "react-router-dom";
 import "flag-icons/css/flag-icons.min.css";
+import { useTranslation } from "react-i18next";
 
 type Item = {
   city: string;
@@ -77,12 +78,11 @@ function Tile({ item, className }: { item: Item; className: string }) {
 }
 
 export default function TrendingDestinations() {
+  const { t } = useTranslation();
   return (
     <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 py-10">
-      <h2 className="text-[26px] font-bold">Trending destinations</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Most popular choices for travellers from Israel
-      </p>
+      <h2 className="text-[26px] font-bold">{t("home.trending.title")}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t("home.trending.subtitle")}</p>
 
       <div className="mt-6 grid grid-cols-12 gap-4">
         <Tile item={ROW1[0]} className="col-span-12 md:col-span-6 h-[280px]" />
