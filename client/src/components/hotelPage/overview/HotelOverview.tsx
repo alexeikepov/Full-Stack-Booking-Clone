@@ -20,6 +20,13 @@ export default function HotelOverview({ hotel }: HotelOverviewProps) {
     return Array.from(amenities).slice(0, 8);
   };
 
+  const handleReserveClick = () => {
+    const availabilityElement = document.getElementById("info");
+    if (availabilityElement) {
+      availabilityElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const features = hotel.mostPopularFacilities || getHotelAmenities();
 
   return (
@@ -39,20 +46,6 @@ export default function HotelOverview({ hotel }: HotelOverviewProps) {
                 </p>
               </div>
             )}
-
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-                Most popular facilities
-              </h2>
-              <div className="grid grid-cols-2 gap-3">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3 text-sm">
-                    <span className="text-green-600 text-lg">✓</span>
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Sidebar */}
@@ -129,7 +122,10 @@ export default function HotelOverview({ hotel }: HotelOverviewProps) {
               </div>
 
               {/* Reserve button */}
-              <button className="w-full bg-[#007BFF] text-white font-bold py-2 px-3 rounded text-sm hover:bg-[#0056b3] transition-colors mt-4">
+              <button
+                onClick={handleReserveClick}
+                className="w-full bg-[#007BFF] text-white font-bold py-2 px-3 rounded text-sm hover:bg-[#0056b3] transition-colors mt-4"
+              >
                 Reserve
               </button>
             </div>

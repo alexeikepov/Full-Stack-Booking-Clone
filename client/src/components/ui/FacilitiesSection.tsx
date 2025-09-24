@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import FacilitiesItem from "./FacilitiesItem";
+import FacilityItem from "@/components/ui/FacilityItem";
 
 interface FacilityItem {
   name: string;
@@ -22,7 +22,7 @@ export default function FacilitiesSection({
   icon,
 }: FacilitiesSectionProps) {
   const addItem = () => {
-    const newItem: FacilityItem = { name: "", available: true, note: "" };
+    const newItem = { name: "", available: true };
     onUpdate([...items, newItem]);
   };
 
@@ -58,17 +58,19 @@ export default function FacilitiesSection({
 
       <div className="space-y-2">
         {items.map((item, index) => (
-          <FacilitiesItem
+          <FacilityItem
             key={index}
             item={item}
-            onUpdate={(updatedItem) => updateItem(index, updatedItem)}
+            onUpdate={(updatedItem: FacilityItem) =>
+              updateItem(index, updatedItem)
+            }
             onRemove={() => removeItem(index)}
           />
         ))}
 
         {items.length === 0 && (
           <div className="text-center py-4 text-gray-500 text-sm">
-            No facilities added yet. Click "Add" to get started.
+            No items added yet. Click "Add" to get started.
           </div>
         )}
       </div>

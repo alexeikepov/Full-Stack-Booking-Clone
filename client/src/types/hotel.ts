@@ -109,7 +109,10 @@ export type Hotel = {
   };
 
   // Most popular facilities
-  mostPopularFacilities?: string[];
+  mostPopularFacilities?: (
+    | string
+    | { name: string; distance: string; type: string }
+  )[];
 
   // Hotel facilities
   facilities?: {
