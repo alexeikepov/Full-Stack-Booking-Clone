@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Înregistrează-ți proprietatea",
+  "register": "Înregistrează-te",
+  "signIn": "Conectează-te",
+  "geniusLevel": "Nivel Genius {{level}}",
+  "tabs": {
+    "stays": "Cazări",
+    "flights": "Zboruri",
+    "cars": "Închiriere auto",
+    "attractions": "Atracții",
+    "taxis": "Taxiuri aeroport",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Găsește-ți următoarea cazare",
+      "subtitle": "Caută prețuri mici la hoteluri, apartamente și multe altele..."
+    },
+    "offers": {
+      "title": "Oferte",
+      "subtitle": "Promoții, reduceri și oferte speciale pentru tine"
+    },
+    "card1": {
+      "kicker": "Case de vacanță",
+      "title": "Visă în casa de vacanță",
+      "subtitle": "Alege din case, vile, cabane și multe altele",
+      "cta": "Rezervă"
+    },
+    "card2": {
+      "title": "Escapadă rapidă, momente bune",
+      "subtitle": "Economisește până la 20% cu Getaway Deal",
+      "cta": "Economisește la cazare"
+    },
+    "trending": {
+      "title": "Destinații populare",
+      "subtitle": "Cele mai populare opțiuni pentru călătorii din Israel"
+    },
+    "propertyTypes": {
+      "title": "Explorează după tip de cazare",
+      "items": {
+        "hotels": "Hoteluri",
+        "apartments": "Apartamente",
+        "resorts": "Resorturi",
+        "villas": "Vile",
+        "cabins": "Cabane",
+        "cottages": "Case de țară",
+        "glamping": "Glamping",
+        "serviced-apartments": "Apart-hoteluri",
+        "holiday-homes": "Case de vacanță",
+        "guest-houses": "Case de oaspeți",
+        "hostels": "Hosteluri",
+        "motels": "Moteluri"
+      }
+    },
+    "tripPlanner": {
+      "title": "Planificator de călătorii simplu și rapid",
+      "subtitle": "Alege atmosfera și descoperă cele mai bune destinații din Israel",
+      "categories": {
+        "festivals": "Festivaluri",
+        "artMusic": "Artă și muzică",
+        "beachRelaxation": "Plajă și relaxare",
+        "gastronomyWine": "Gastronomie și vin",
+        "shoppingMarkets": "Cumpărături și piețe",
+        "culturalExploration": "Explorare culturală"
+      },
+      "kmAway": "la {{km}} km"
+    },
+    "banner": {
+      "titleLine1": "Vrei să te simți ca acasă",
+      "titleLine2": "la următoarea ta aventură?",
+      "cta": "Descoperă case de vacanță"
+    },
+    "popular": {
+      "title": "Popular printre călătorii din Israel",
+      "tabs": {
+        "domestic": "Orașe naționale",
+        "international": "Orașe internaționale",
+        "regions": "Regiuni",
+        "countries": "Țări",
+        "places": "Cazări"
+      },
+      "showMore": "+ Arată mai mult",
+      "showLess": "− Arată mai puțin"
+    },
+    "travelMore": {
+      "title": "Călătorește mai mult, plătește mai puțin",
+      "boxTitle": "Conectează-te și economisește",
+      "boxSubtitle": "Economisește 10% sau mai mult la proprietățile participante — caută eticheta albastră Genius",
+      "features": {
+        "freeCancellation": {
+          "title": "Rezervă acum, plătește la proprietate",
+          "subtitle": "Anulare gratuită pentru majoritatea camerelor",
+          "imgAlt": "Ilustrație listă de verificare"
+        },
+        "worldwide": {
+          "title": "+2 milioane de proprietăți în întreaga lume",
+          "subtitle": "Hoteluri, case de oaspeți, apartamente și multe altele...",
+          "imgAlt": "Ilustrație glob"
+        },
+        "support247": {
+          "title": "Suport clienți de încredere 24/7",
+          "subtitle": "Suntem mereu aici să te ajutăm",
+          "imgAlt": "Ilustrație suport clienți"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Unde mergi?",
+    "cta": "Caută",
+    "breadcrumb": {
+      "home": "Acasă",
+      "country": "Israel",
+      "city": "Oraș",
+      "results": "Rezultate căutare"
+    },
+    "count": { "propertiesFound": "proprietăți găsite" },
+    "view": { "list": "Listă", "grid": "Grilă" },
+    "notice": { "conflict": "Te rugăm să consulți avertismentele de călătorie ale guvernului tău înainte de a decide să te cazezi în această zonă, care poate fi considerată afectată de conflict." },
+    "error": { "title": "Eroare la încărcarea hotelurilor", "description": "Nu s-au putut încărca datele hotelurilor. Încearcă din nou.", "retry": "Încearcă din nou" },
+    "sort": {
+      "by": "Sortează după:",
+      "labels": {
+        "top_picks": "Cele mai bune pentru călătorii singuri",
+        "price_low": "Preț (de la cel mai mic la cel mai mare)",
+        "price_high": "Preț (de la cel mai mare la cel mai mic)",
+        "rating_high": "Evaluare proprietate (descrescător)",
+        "rating_low": "Evaluare proprietate (crescător)",
+        "distance_low": "Distanța până la centru",
+        "reviews_high": "Cele mai bine evaluate"
+      }
+    },
+    "filters": {
+      "budget": "Bugetul tău (pe noapte)",
+      "categories": "Categorii",
+      "review": "Scorul evaluărilor",
+      "meals": "Mese",
+      "stars": "Clasificare stele",
+      "ptype": "Tip cazare",
+      "facilities": "Filtre populare",
+      "payment": "Opțiuni plată",
+      "distance": "Distanța de la centru",
+      "neighborhood": "Cartiere",
+      "brands": "Mărci",
+      "showAll": "Arată tot",
+      "showLess": "Arată mai puțin"
+    }
+  }
+}

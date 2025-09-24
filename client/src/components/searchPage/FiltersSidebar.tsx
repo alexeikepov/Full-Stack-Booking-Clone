@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import MapToggle from "./MapToggle";
 import type { FacetGroup } from "@/utils/buildFacets";
+import { useTranslation } from "react-i18next";
 
 export type FiltersState = {
   priceMin?: number | null;
@@ -21,6 +22,7 @@ function currency(n: number) {
 }
 
 export default function FiltersSidebar({ bounds, value, onChange, facets }: Props) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const clamp = (v: number) => Math.min(bounds.max, Math.max(bounds.min, v));
 
@@ -48,7 +50,7 @@ export default function FiltersSidebar({ bounds, value, onChange, facets }: Prop
       <MapToggle />
 
       <div className="mt-3 rounded-lg border p-3">
-        <div className="mb-2 text-[13px] font-semibold">Your budget (per night)</div>
+        <div className="mb-2 text-[13px] font-semibold">{t("search.filters.budget")}</div>
 
         <div className="mb-2 flex h-14 items-end gap-0.5">
           {Array.from({ length: 26 }).map((_, i) => (
@@ -117,7 +119,7 @@ export default function FiltersSidebar({ bounds, value, onChange, facets }: Prop
         const selected = value.selected[g.key] ?? new Set<string>();
         return (
           <div key={g.key} className="mt-3 rounded-lg border p-3">
-            <div className="mb-1 text-[13px] font-semibold">{g.title}</div>
+            <div className="mb-1 text-[13px] font-semibold">{t(`search.filters.${g.title}`, g.title)}</div>
             <ul className="space-y-1 text-[13px]">
               {items.map((it) => (
                 <li key={it.id} className="flex items-center gap-2">
@@ -136,7 +138,7 @@ export default function FiltersSidebar({ bounds, value, onChange, facets }: Prop
                 className="mt-2 text-[12px] text-[#0071c2] hover:underline"
                 onClick={() => setExpanded((e) => ({ ...e, [g.key]: !show }))}
               >
-                {show ? "Show less" : g.showAllLabel ?? "Show all"}
+                {show ? t("search.filters.showLess") : g.showAllLabel ?? t("search.filters.showAll")}
               </button>
             )}
           </div>

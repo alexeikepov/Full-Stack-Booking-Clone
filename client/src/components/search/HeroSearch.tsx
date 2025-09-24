@@ -9,8 +9,10 @@ import type { PickerValue } from "./types";
 import type { DateRange } from "react-day-picker";
 import { useSearchStore } from "@/stores/search";
 import { getMyLastSearch, saveMyLastSearch } from "@/lib/api";
+import { useTranslation } from "react-i18next";
 
 export default function HeroSearch() {
+  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -125,7 +127,7 @@ export default function HeroSearch() {
                            text-black placeholder:text-black/90
                            dark:text-white dark:placeholder:text-white/60
                            font-semibold"
-                placeholder="Where are you going?"
+                placeholder={t("search.where")}
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 onKeyDown={(e) => {
@@ -156,7 +158,7 @@ export default function HeroSearch() {
             onClick={submit}
             className="h-14 rounded-md bg-[#0071c2] px-6 text-[18px] font-semibold text-white hover:bg-[#0a69b4]"
           >
-            Search
+            {t("search.cta")}
           </Button>
         </div>
       </div>

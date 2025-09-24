@@ -1,0 +1,107 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Cadastre sua propriedade",
+  "register": "Cadastrar",
+  "signIn": "Fazer login",
+  "geniusLevel": "Nível Genius {{level}}",
+  "tabs": {
+    "stays": "Hospedagens",
+    "flights": "Voos",
+    "cars": "Aluguel de carros",
+    "attractions": "Atrações",
+    "taxis": "Táxis do aeroporto",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": { "title": "Encontre sua próxima hospedagem", "subtitle": "Busque preços baixos em hotéis, apartamentos e muito mais..." },
+    "offers": { "title": "Ofertas", "subtitle": "Promoções, descontos e ofertas especiais para você" },
+    "card1": { "kicker": "Casas de temporada", "title": "Sonhe em uma casa de temporada", "subtitle": "Escolha entre casas, vilas, chalés e mais", "cta": "Reservar" },
+    "card2": { "title": "Escapada rápida, bons momentos", "subtitle": "Economize até 20% com o Getaway Deal", "cta": "Economizar na hospedagem" },
+    "trending": { "title": "Destinos em alta", "subtitle": "As escolhas mais populares para viajantes de Israel" },
+    "propertyTypes": {
+      "title": "Explore por tipo de hospedagem",
+      "items": {
+        "hotels": "Hotéis",
+        "apartments": "Apartamentos",
+        "resorts": "Resorts",
+        "villas": "Vilas",
+        "cabins": "Cabines",
+        "cottages": "Chalés",
+        "glamping": "Glamping",
+        "serviced-apartments": "Apart‑hotéis",
+        "holiday-homes": "Casas de temporada",
+        "guest-houses": "Pousadas",
+        "hostels": "Hostels",
+        "motels": "Moteis"
+      }
+    },
+    "tripPlanner": {
+      "title": "Planejador de viagens simples e rápido",
+      "subtitle": "Escolha o clima e descubra os melhores destinos em Israel",
+      "categories": {
+        "festivals": "Festivais",
+        "artMusic": "Arte e música",
+        "beachRelaxation": "Praia e relax",
+        "gastronomyWine": "Gastronomia e vinho",
+        "shoppingMarkets": "Compras e mercados",
+        "culturalExploration": "Exploração cultural"
+      },
+      "kmAway": "a {{km}} km"
+    },
+    "banner": { "titleLine1": "Quer se sentir em casa", "titleLine2": "na sua próxima aventura?", "cta": "Descobrir casas de temporada" },
+    "popular": {
+      "title": "Popular entre viajantes de Israel",
+      "tabs": { "domestic": "Cidades nacionais", "international": "Cidades internacionais", "regions": "Regiões", "countries": "Países", "places": "Hospedagens" },
+      "showMore": "+ Ver mais",
+      "showLess": "− Ver menos"
+    },
+    "travelMore": {
+      "title": "Viaje mais — pague menos",
+      "boxTitle": "Faça login e economize",
+      "boxSubtitle": "Economize 10% ou mais em propriedades participantes — procure o selo azul Genius",
+      "features": {
+        "freeCancellation": { "title": "Reserve agora, pague na propriedade", "subtitle": "Cancelamento grátis na maioria dos quartos", "imgAlt": "Ilustração de lista de verificação" },
+        "worldwide": { "title": "+2 milhões de hospedagens no mundo todo", "subtitle": "Hotéis, pousadas, apartamentos e mais...", "imgAlt": "Ilustração de globo" },
+        "support247": { "title": "Atendimento ao cliente confiável 24/7", "subtitle": "Sempre aqui para ajudar", "imgAlt": "Ilustração de atendimento" }
+      }
+    }
+  },
+  "search": {
+    "where": "Para onde você vai?",
+    "cta": "Buscar",
+    "breadcrumb": { "home": "Início", "country": "Israel", "city": "Cidade", "results": "Resultados da busca" },
+    "count": { "propertiesFound": "hospedagens encontradas" },
+    "view": { "list": "Lista", "grid": "Grade" },
+    "notice": { "conflict": "Consulte os avisos de viagem do seu governo antes de decidir se hospedar nesta área, que pode ser considerada afetada por conflitos." },
+    "error": { "title": "Erro ao carregar hotéis", "description": "Falha ao carregar dados de hotéis. Tente novamente.", "retry": "Tentar novamente" },
+    "sort": {
+      "by": "Ordenar por:",
+      "labels": {
+        "top_picks": "Melhores para viajantes solos",
+        "price_low": "Preço (menor para maior)",
+        "price_high": "Preço (maior para menor)",
+        "rating_high": "Nota do estabelecimento (decrescente)",
+        "rating_low": "Nota do estabelecimento (crescente)",
+        "distance_low": "Distância do centro",
+        "reviews_high": "Mais bem avaliados"
+      }
+    },
+    "filters": {
+      "budget": "Seu orçamento (por noite)",
+      "categories": "Categorias",
+      "review": "Nota dos comentários",
+      "meals": "Refeições",
+      "stars": "Categoria por estrelas",
+      "ptype": "Tipo de hospedagem",
+      "facilities": "Filtros populares",
+      "payment": "Opções de pagamento",
+      "distance": "Distância do centro",
+      "neighborhood": "Bairros",
+      "brands": "Marcas",
+      "showAll": "Mostrar tudo",
+      "showLess": "Mostrar menos"
+    }
+  }
+}
+
+

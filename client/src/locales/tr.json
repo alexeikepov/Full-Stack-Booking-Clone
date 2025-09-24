@@ -1,0 +1,107 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Tesisinizi listeleyin",
+  "register": "Kayıt ol",
+  "signIn": "Giriş yap",
+  "geniusLevel": "Genius seviyesi {{level}}",
+  "tabs": {
+    "stays": "Konaklamalar",
+    "flights": "Uçuşlar",
+    "cars": "Araç kiralama",
+    "attractions": "Gezilecek yerler",
+    "taxis": "Havalimanı taksileri",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": { "title": "Sıradaki konaklamanı bulun", "subtitle": "Oteller, daireler ve daha fazlasında düşük fiyatlar arayın..." },
+    "offers": { "title": "Fırsatlar", "subtitle": "Sizin için kampanyalar, indirimler ve özel teklifler" },
+    "card1": { "kicker": "Tatil evleri", "title": "Bir tatil evinde hayal kurun", "subtitle": "Evler, villalar, dağ evleri ve daha fazlasını seçin", "cta": "Rezervasyon yap" },
+    "card2": { "title": "Hızlı kaçamak, güzel anlar", "subtitle": "%20’ye varan tasarruf Getaway Deal ile", "cta": "Konaklamada tasarruf edin" },
+    "trending": { "title": "Popüler destinasyonlar", "subtitle": "İsrail’den gelen gezginler için en popüler seçenekler" },
+    "propertyTypes": {
+      "title": "Türe göre keşfedin",
+      "items": {
+        "hotels": "Oteller",
+        "apartments": "Daireler",
+        "resorts": "Tatil köyleri",
+        "villas": "Villalar",
+        "cabins": "Kulübeler",
+        "cottages": "Kır evleri",
+        "glamping": "Glamping",
+        "serviced-apartments": "Aparthotel",
+        "holiday-homes": "Tatil evleri",
+        "guest-houses": "Konukevleri",
+        "hostels": "Hosteller",
+        "motels": "Moteller"
+      }
+    },
+    "tripPlanner": {
+      "title": "Kolay ve hızlı seyahat planlayıcı",
+      "subtitle": "Ruh halinizi seçin ve İsrail’deki en iyi destinasyonları keşfedin",
+      "categories": {
+        "festivals": "Festivaller",
+        "artMusic": "Sanat ve müzik",
+        "beachRelaxation": "Plaj ve dinlenme",
+        "gastronomyWine": "Gastronomi ve şarap",
+        "shoppingMarkets": "Alışveriş ve pazarlar",
+        "culturalExploration": "Kültürel keşif"
+      },
+      "kmAway": "{{km}} km uzaklıkta"
+    },
+    "banner": { "titleLine1": "Bir sonraki maceranızda", "titleLine2": "kendinizi evinizde gibi hissetmek ister misiniz?", "cta": "Tatil evlerini keşfedin" },
+    "popular": {
+      "title": "İsrail’den gelen gezginler arasında popüler",
+      "tabs": { "domestic": "Yurtiçi şehirler", "international": "Uluslararası şehirler", "regions": "Bölgeler", "countries": "Ülkeler", "places": "Konaklama yerleri" },
+      "showMore": "+ Daha fazla göster",
+      "showLess": "− Daha az göster"
+    },
+    "travelMore": {
+      "title": "Daha çok seyahat edin — daha az ödeyin",
+      "boxTitle": "Giriş yapın ve tasarruf edin",
+      "boxSubtitle": "Katılımcı tesislerde %10 veya daha fazla tasarruf edin — mavi Genius rozetini arayın",
+      "features": {
+        "freeCancellation": { "title": "Şimdi rezervasyon yapın, tesiste ödeyin", "subtitle": "Çoğu oda için ücretsiz iptal", "imgAlt": "Kontrol listesi illüstrasyonu" },
+        "worldwide": { "title": "+2 milyon tesis dünya genelinde", "subtitle": "Oteller, konukevleri, daireler ve daha fazlası...", "imgAlt": "Küre illüstrasyonu" },
+        "support247": { "title": "Güvenilir 7/24 müşteri hizmetleri", "subtitle": "Her zaman yardım için buradayız", "imgAlt": "Müşteri hizmetleri illüstrasyonu" }
+      }
+    }
+  },
+  "search": {
+    "where": "Nereye gidiyorsunuz?",
+    "cta": "Ara",
+    "breadcrumb": { "home": "Ana sayfa", "country": "İsrail", "city": "Şehir", "results": "Arama sonuçları" },
+    "count": { "propertiesFound": "tesis bulundu" },
+    "view": { "list": "Liste", "grid": "Izgara" },
+    "notice": { "conflict": "Lütfen bu bölgede konaklamaya karar vermeden önce hükümetinizin yayınladığı seyahat uyarılarını kontrol edin; bu bölge çatışmadan etkilenmiş sayılabilir." },
+    "error": { "title": "Oteller yüklenemedi", "description": "Otel verileri yüklenemedi. Lütfen tekrar deneyin.", "retry": "Tekrar dene" },
+    "sort": {
+      "by": "Sırala:",
+      "labels": {
+        "top_picks": "Tek başına seyahat edenler için en iyiler",
+        "price_low": "Fiyat (düşükten yükseğe)",
+        "price_high": "Fiyat (yüksekten düşüğe)",
+        "rating_high": "Puan (azalan)",
+        "rating_low": "Puan (artan)",
+        "distance_low": "Merkeze uzaklık",
+        "reviews_high": "En çok beğenilen"
+      }
+    },
+    "filters": {
+      "budget": "Bütçeniz (gecelik)",
+      "categories": "Kategoriler",
+      "review": "Değerlendirme puanı",
+      "meals": "Yemekler",
+      "stars": "Yıldız sayısı",
+      "ptype": "Konaklama türü",
+      "facilities": "Popüler filtreler",
+      "payment": "Ödeme seçenekleri",
+      "distance": "Merkezden uzaklık",
+      "neighborhood": "Semtler",
+      "brands": "Markalar",
+      "showAll": "Tümünü göster",
+      "showLess": "Daha az göster"
+    }
+  }
+}
+
+

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type PropertyType = { key: string; title: string; image: string };
 
@@ -82,6 +83,7 @@ const PROPERTY_TYPES: PropertyType[] = [
 ];
 
 export default function PropertyTypesSection() {
+  const { t } = useTranslation();
   const trackRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -128,7 +130,7 @@ export default function PropertyTypesSection() {
   return (
     <section className="mx-auto w-full max-w-6xl mt-6 px-4 md:px-6 lg:px-8">
       <header className="mb-4 md:mb-4">
-        <h2 className="text-[26px] font-bold">Browse by property type</h2>
+        <h2 className="text-[26px] font-bold">{t("home.propertyTypes.title")}</h2>
       </header>
 
       <div className="relative">
@@ -164,22 +166,22 @@ export default function PropertyTypesSection() {
             [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
           "
         >
-          {PROPERTY_TYPES.map((t) => (
+          {PROPERTY_TYPES.map((pt) => (
             <Link
-              key={t.key}
-              to={`/search?type=${t.key}`}
+              key={pt.key}
+              to={`/search?type=${pt.key}`}
               className="group snap-start"
               style={{ minWidth: 260 }}
             >
               <div className="h-44 w-[250px] overflow-hidden rounded-md md:h-52">
                 <img
-                  src={t.image}
-                  alt={t.title}
+                  src={pt.image}
+                  alt={pt.title}
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                   loading="lazy"
                 />
               </div>
-              <div className="mt-3 ml-1 text-base font-bold">{t.title}</div>
+              <div className="mt-3 ml-1 text-base font-bold">{t(`home.propertyTypes.items.${pt.key}`)}</div>
             </Link>
           ))}
         </div>

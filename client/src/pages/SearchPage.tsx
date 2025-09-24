@@ -12,6 +12,7 @@ import InfoNotice from "@/components/searchPage/InfoNotice";
 import SortBar from "@/components/searchPage/SortBar";
 import { sortHotels, type SortKey } from "@/utils/sortHotels";
 import { buildFacets, type FacetGroup } from "@/utils/buildFacets";
+import { useTranslation } from "react-i18next";
 
 type ViewMode = "list" | "grid";
 
@@ -149,7 +150,7 @@ function categoriesFacet(hotels: Hotel[]): FacetGroup {
       label,
       count,
     }));
-  return { key: "categories", title: "Categories", items };
+  return { key: "categories", title: "categories", items };
 }
 
 function selectedCategoryTokens(selected: FiltersState["selected"]): string[] {
@@ -205,6 +206,7 @@ function NoResultsPanel({ city }: { city: string | null }) {
 }
 
 export default function SearchPage() {
+  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>(
     params.get("view") === "grid" ? "grid" : "list"
@@ -441,26 +443,26 @@ export default function SearchPage() {
         <div className="mx-auto max-w-6xl px-4 py-2">
           <nav className="text-sm text-gray-500">
             <Link to="/" className="text-[#0071c2] hover:underline">
-              Home
+              {t("search.breadcrumb.home")}
             </Link>
             <span className="mx-2">›</span>
             <Link to="#" className="text-[#0071c2] hover:underline">
-              Israel
+              {t("search.breadcrumb.country")}
             </Link>
             <span className="mx-2">›</span>
             <Link to="#" className="text-[#0071c2] hover:underline">
-              {params.get("city") ?? "City"}
+              {params.get("city") ?? t("search.breadcrumb.city")}
             </Link>
             <span className="mx-2">›</span>
-            <span>Search results</span>
+            <span>{t("search.breadcrumb.results")}</span>
           </nav>
         </div>
       </div>
 
       <div className="mx-auto max-w-[1112px] px-2 sm:px-0">
         <h1 className="text-[18px] font-semibold">
-          {params.get("city") ?? "city"}: {isLoading ? "…" : filtered.length}{" "}
-          properties found
+          {(params.get("city") ?? t("search.breadcrumb.city")) + ": "}
+          {isLoading ? "…" : filtered.length} {t("search.count.propertiesFound")}
         </h1>
 
         <div className="mt-2 flex items-center justify-between">
@@ -485,7 +487,7 @@ export default function SearchPage() {
                 view === "list" ? "bg-muted" : ""
               }`}
             >
-              List
+              {t("search.view.list")}
             </button>
             <button
               onClick={() => {
@@ -496,16 +498,14 @@ export default function SearchPage() {
                 view === "grid" ? "bg-muted" : ""
               }`}
             >
-              Grid
+              {t("search.view.grid")}
             </button>
           </div>
         </div>
 
         <div className="mt-2">
           <InfoNotice>
-            Please review any travel advisories provided by your government to
-            make an informed decision about your stay in this area, which may be
-            considered conflict-affected.
+            {t("search.notice.conflict")}
           </InfoNotice>
         </div>
 
@@ -541,18 +541,13 @@ export default function SearchPage() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-lg font-semibold text-red-600">
-                    Error loading hotels
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {error.message ||
-                      "Failed to load hotel data. Please try again."}
-                  </p>
+                  <h2 className="text-lg font-semibold text-red-600">{t("search.error.title")}</h2>
+                  <p className="mt-1 text-sm text-gray-600">{error.message || t("search.error.description")}</p>
                   <button
                     onClick={() => window.location.reload()}
                     className="mt-4 inline-flex items-center rounded-md bg-[#0071c2] px-4 py-2 text-sm font-medium text-white hover:bg-[#005fa3]"
                   >
-                    Retry
+                    {t("search.error.retry")}
                   </button>
                 </div>
               </div>

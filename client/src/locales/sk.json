@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registrujte svoje ubytovanie",
+  "register": "Registrovať sa",
+  "signIn": "Prihlásiť sa",
+  "geniusLevel": "Genius úroveň {{level}}",
+  "tabs": {
+    "stays": "Ubytovanie",
+    "flights": "Lety",
+    "cars": "Prenájom áut",
+    "attractions": "Atrakcie",
+    "taxis": "Letiskové taxíky",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Nájdite svoje ďalšie ubytovanie",
+      "subtitle": "Hľadajte nízke ceny v hoteloch, apartmánoch a ďalších..."
+    },
+    "offers": {
+      "title": "Ponuky",
+      "subtitle": "Propagácie, zľavy a špeciálne ponuky pre vás"
+    },
+    "card1": {
+      "kicker": "Dovolenkové domy",
+      "title": "Snívajte v dovolenkovom dome",
+      "subtitle": "Vyberte si z domov, vily, chaletov a ďalších",
+      "cta": "Rezervovať"
+    },
+    "card2": {
+      "title": "Rýchly útek, dobré chvíle",
+      "subtitle": "Ušetrite až 20% s Getaway Deal",
+      "cta": "Ušetriť na ubytovaní"
+    },
+    "trending": {
+      "title": "Populárne destinácie",
+      "subtitle": "Najpopulárnejšie voľby pre cestovateľov z Izraela"
+    },
+    "propertyTypes": {
+      "title": "Prehľadávajte podľa typu ubytovania",
+      "items": {
+        "hotels": "Hotely",
+        "apartments": "Apartmány",
+        "resorts": "Rezorty",
+        "villas": "Vily",
+        "cabins": "Chaty",
+        "cottages": "Chalupy",
+        "glamping": "Glamping",
+        "serviced-apartments": "Servisné apartmány",
+        "holiday-homes": "Dovolenkové domy",
+        "guest-houses": "Penzióny",
+        "hostels": "Hostely",
+        "motels": "Motely"
+      }
+    },
+    "tripPlanner": {
+      "title": "Jednoduchý a rýchly plánovač ciest",
+      "subtitle": "Vyberte si náladu a objavte najlepšie destinácie v Izraeli",
+      "categories": {
+        "festivals": "Festivaly",
+        "artMusic": "Umenie a hudba",
+        "beachRelaxation": "Pláž a relax",
+        "gastronomyWine": "Gastronómia a víno",
+        "shoppingMarkets": "Nakupovanie a trhy",
+        "culturalExploration": "Kultúrne prieskumy"
+      },
+      "kmAway": "{{km}} km ďaleko"
+    },
+    "banner": {
+      "titleLine1": "Chcete sa cítiť ako doma",
+      "titleLine2": "vo vašom ďalšom dobrodružstve?",
+      "cta": "Objavte dovolenkové domy"
+    },
+    "popular": {
+      "title": "Populárne medzi cestovateľmi z Izraela",
+      "tabs": {
+        "domestic": "Domáce mestá",
+        "international": "Medzinárodné mestá",
+        "regions": "Regióny",
+        "countries": "Krajiny",
+        "places": "Ubytovanie"
+      },
+      "showMore": "+ Zobraziť viac",
+      "showLess": "− Zobraziť menej"
+    },
+    "travelMore": {
+      "title": "Cestujte viac, platte menej",
+      "boxTitle": "Prihláste sa a ušetrite",
+      "boxSubtitle": "Ušetrite 10% alebo viac v zúčastnených ubytovaniach — hľadajte modrú Genius značku",
+      "features": {
+        "freeCancellation": {
+          "title": "Rezervujte teraz, plaťte na mieste",
+          "subtitle": "Bezplatné zrušenie pre väčšinu izieb",
+          "imgAlt": "Ilustrácia zoznamu"
+        },
+        "worldwide": {
+          "title": "+2 milióny ubytovaní po celom svete",
+          "subtitle": "Hotely, penzióny, apartmány a ďalšie...",
+          "imgAlt": "Ilustrácia zemegule"
+        },
+        "support247": {
+          "title": "Spoľahlivá zákaznícka podpora 24/7",
+          "subtitle": "Vždy sme tu, aby sme pomohli",
+          "imgAlt": "Ilustrácia zákazníckej podpory"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Kam idete?",
+    "cta": "Hľadať",
+    "breadcrumb": {
+      "home": "Domov",
+      "country": "Izrael",
+      "city": "Mesto",
+      "results": "Výsledky vyhľadávania"
+    },
+    "count": { "propertiesFound": "ubytovaní nájdených" },
+    "view": { "list": "Zoznam", "grid": "Mriežka" },
+    "notice": { "conflict": "Pred rozhodnutím o pobyte v tejto oblasti si prosím skontrolujte cestovné varovania vašej vlády, ktoré môžu byť považované za ovplyvnené konfliktom." },
+    "error": { "title": "Chyba pri načítavaní hotelov", "description": "Nepodarilo sa načítať údaje hotelov. Skúste to znova.", "retry": "Skúsiť znova" },
+    "sort": {
+      "by": "Zoradiť podľa:",
+      "labels": {
+        "top_picks": "Najlepšie pre solo cestovateľov",
+        "price_low": "Cena (od najnižšej po najvyššiu)",
+        "price_high": "Cena (od najvyššej po najnižšiu)",
+        "rating_high": "Hodnotenie ubytovania (klesajúco)",
+        "rating_low": "Hodnotenie ubytovania (stúpajúco)",
+        "distance_low": "Vzdialenosť od centra",
+        "reviews_high": "Najlepšie hodnotené"
+      }
+    },
+    "filters": {
+      "budget": "Váš rozpočet (za noc)",
+      "categories": "Kategórie",
+      "review": "Hodnotenie recenzií",
+      "meals": "Stravovanie",
+      "stars": "Hviezdičková kategória",
+      "ptype": "Typ ubytovania",
+      "facilities": "Populárne filtre",
+      "payment": "Možnosti platby",
+      "distance": "Vzdialenosť od centra",
+      "neighborhood": "Štvrti",
+      "brands": "Značky",
+      "showAll": "Zobraziť všetko",
+      "showLess": "Zobraziť menej"
+    }
+  }
+}

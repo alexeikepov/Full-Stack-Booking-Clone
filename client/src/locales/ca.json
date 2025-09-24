@@ -1,0 +1,115 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Publica el teu allotjament",
+  "register": "Registra’t",
+  "signIn": "Inicia sessió",
+  "geniusLevel": "Nivell Genius {{level}}",
+  "tabs": {
+    "stays": "Allotjaments",
+    "flights": "Vols",
+    "cars": "Lloguer de cotxes",
+    "attractions": "Atraccions",
+    "taxis": "Taxis de l’aeroport",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Troba la teva propera estada",
+      "subtitle": "Cerca preus baixos en hotels, apartaments i més..."
+    },
+    "offers": { "title": "Ofertes", "subtitle": "Promocions i descomptes per a tu" },
+    "card1": {
+      "kicker": "Cases de vacances",
+      "title": "Somia en una casa de vacances",
+      "subtitle": "Tria entre cases, viles, xalets i més",
+      "cta": "Reserva"
+    },
+    "card2": { "title": "Escapada ràpida, bons moments", "subtitle": "Estalvia fins a un 20% amb Getaway Deal", "cta": "Estalvia en allotjaments" },
+    "trending": { "title": "Destinacions de tendència", "subtitle": "Les opcions més populars per a viatgers d’Israel" },
+    "propertyTypes": {
+      "title": "Explora per tipus d’allotjament",
+      "items": {
+        "hotels": "Hotels",
+        "apartments": "Apartaments",
+        "resorts": "Resorts",
+        "villas": "Viles",
+        "cabins": "Cabanyes",
+        "cottages": "Cottages",
+        "glamping": "Glamping",
+        "serviced-apartments": "Aparthotels",
+        "holiday-homes": "Cases de vacances",
+        "guest-houses": "Cases d’hostes",
+        "hostels": "Albergs",
+        "motels": "Motels"
+      }
+    },
+    "tripPlanner": {
+      "title": "Planificador de viatges fàcil i ràpid",
+      "subtitle": "Tria l’ambient i descobreix les millors destinacions a Israel",
+      "categories": {
+        "festivals": "Festivals",
+        "artMusic": "Art i música",
+        "beachRelaxation": "Relax a la platja",
+        "gastronomyWine": "Gastronomia i vi",
+        "shoppingMarkets": "Compres i mercats",
+        "culturalExploration": "Exploració cultural"
+      },
+      "kmAway": "a {{km}} km"
+    },
+    "banner": { "titleLine1": "Vols sentir‑te com a casa", "titleLine2": "a la teva propera aventura?", "cta": "Descobreix cases de vacances" },
+    "popular": {
+      "title": "Popular entre viatgers d’Israel",
+      "tabs": { "domestic": "Ciutats nacionals", "international": "Ciutats internacionals", "regions": "Regions", "countries": "Països", "places": "Allotjaments" },
+      "showMore": "+ Mostra més",
+      "showLess": "− Mostra menys"
+    },
+    "travelMore": {
+      "title": "Viatja més, paga menys",
+      "boxTitle": "Inicia sessió i estalvia",
+      "boxSubtitle": "Estalvia un 10% o més en establiments participants — busca l’etiqueta blava Genius",
+      "features": {
+        "freeCancellation": { "title": "Reserva ara, paga a l’establiment", "subtitle": "Cancel·lació gratuïta a la majoria d’habitacions", "imgAlt": "Il·lustració de llista" },
+        "worldwide": { "title": "+2 milions d’allotjaments arreu del món", "subtitle": "Hotels, cases d’hostes, apartaments i més...", "imgAlt": "Il·lustració de globus" },
+        "support247": { "title": "Atenció al client fiable 24/7", "subtitle": "Sempre aquí per ajudar‑te", "imgAlt": "Il·lustració d’atenció al client" }
+      }
+    }
+  },
+  "search": {
+    "where": "On vas?",
+    "cta": "Cerca",
+    "breadcrumb": { "home": "Inici", "country": "Israel", "city": "Ciutat", "results": "Resultats de cerca" },
+    "count": { "propertiesFound": "allotjaments trobats" },
+    "view": { "list": "Llista", "grid": "Graella" },
+    "notice": { "conflict": "Consulta els avisos de viatge del teu govern abans de decidir allotjar‑te en aquesta zona, que pot considerar‑se afectada per un conflicte." },
+    "error": { "title": "Error en carregar hotels", "description": "No s’han pogut carregar les dades dels hotels. Torna‑ho a provar.", "retry": "Torna‑ho a provar" },
+    "sort": {
+      "by": "Ordena per:",
+      "labels": {
+        "top_picks": "Millors opcions per a viatgers solitaris",
+        "price_low": "Preu (de baix a alt)",
+        "price_high": "Preu (d’alt a baix)",
+        "rating_high": "Puntuació de l’establiment (descendent)",
+        "rating_low": "Puntuació de l’establiment (ascendent)",
+        "distance_low": "Distància al centre",
+        "reviews_high": "Millor valorats"
+      }
+    },
+    "filters": {
+      "budget": "El teu pressupost (per nit)",
+      "categories": "Categories",
+      "review": "Puntuació de ressenyes",
+      "meals": "Àpats",
+      "stars": "Categoria d’estrelles",
+      "ptype": "Tipus d’allotjament",
+      "facilities": "Filtres populars",
+      "payment": "Opcions de pagament",
+      "distance": "Distància del centre",
+      "neighborhood": "Barrïs",
+      "brands": "Marques",
+      "showAll": "Mostra-ho tot",
+      "showLess": "Mostra menys"
+    }
+  }
+}
+
+

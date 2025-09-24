@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registrirajte svoj smještaj",
+  "register": "Registriraj se",
+  "signIn": "Prijavi se",
+  "geniusLevel": "Genius razina {{level}}",
+  "tabs": {
+    "stays": "Smještaj",
+    "flights": "Letovi",
+    "cars": "Najam automobila",
+    "attractions": "Atrakcije",
+    "taxis": "Zračna luka taksi",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Pronađite svoj sljedeći smještaj",
+      "subtitle": "Tražite niske cijene u hotelima, apartmanima i više..."
+    },
+    "offers": {
+      "title": "Ponude",
+      "subtitle": "Promocije, popusti i posebne ponude za vas"
+    },
+    "card1": {
+      "kicker": "Kuće za odmor",
+      "title": "Sanjajte u kući za odmor",
+      "subtitle": "Birati između kuća, vila, chaleta i više",
+      "cta": "Rezerviraj"
+    },
+    "card2": {
+      "title": "Brza bijega, dobri trenuci",
+      "subtitle": "Uštedite do 20% s Getaway Deal",
+      "cta": "Uštedite na smještaju"
+    },
+    "trending": {
+      "title": "Popularne destinacije",
+      "subtitle": "Najpopularniji izbori za putnike iz Izraela"
+    },
+    "propertyTypes": {
+      "title": "Pregledajte po vrsti smještaja",
+      "items": {
+        "hotels": "Hoteli",
+        "apartments": "Apartmani",
+        "resorts": "Odmarališta",
+        "villas": "Vile",
+        "cabins": "Kolibe",
+        "cottages": "Kućice",
+        "glamping": "Glamping",
+        "serviced-apartments": "Servisni apartmani",
+        "holiday-homes": "Kuće za odmor",
+        "guest-houses": "Pansioni",
+        "hostels": "Hosteli",
+        "motels": "Moteli"
+      }
+    },
+    "tripPlanner": {
+      "title": "Jednostavan i brz planer putovanja",
+      "subtitle": "Odaberite raspoloženje i otkrijte najbolje destinacije u Izraelu",
+      "categories": {
+        "festivals": "Festivali",
+        "artMusic": "Umjetnost i glazba",
+        "beachRelaxation": "Plaža i opuštanje",
+        "gastronomyWine": "Gastronomija i vino",
+        "shoppingMarkets": "Shopping i tržnice",
+        "culturalExploration": "Kulturno istraživanje"
+      },
+      "kmAway": "{{km}} km daleko"
+    },
+    "banner": {
+      "titleLine1": "Želite se osjećati kao kod kuće",
+      "titleLine2": "u svojoj sljedećoj avanturi?",
+      "cta": "Otkrijte kuće za odmor"
+    },
+    "popular": {
+      "title": "Popularno među putnicima iz Izraela",
+      "tabs": {
+        "domestic": "Domaći gradovi",
+        "international": "Međunarodni gradovi",
+        "regions": "Regije",
+        "countries": "Zemlje",
+        "places": "Smještaj"
+      },
+      "showMore": "+ Prikaži više",
+      "showLess": "− Prikaži manje"
+    },
+    "travelMore": {
+      "title": "Putujte više, platite manje",
+      "boxTitle": "Prijavite se i uštedite",
+      "boxSubtitle": "Uštedite 10% ili više u sudjelujućim objektima — tražite plavu Genius oznaku",
+      "features": {
+        "freeCancellation": {
+          "title": "Rezervirajte sada, platite u objektu",
+          "subtitle": "Besplatno otkazivanje za većinu soba",
+          "imgAlt": "Ilustracija popisa"
+        },
+        "worldwide": {
+          "title": "+2 milijuna smještaja širom svijeta",
+          "subtitle": "Hoteli, pansioni, apartmani i više...",
+          "imgAlt": "Ilustracija globusa"
+        },
+        "support247": {
+          "title": "Pouzdana korisnička podrška 24/7",
+          "subtitle": "Uvijek smo tu da pomognemo",
+          "imgAlt": "Ilustracija korisničke podrške"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Kamo idete?",
+    "cta": "Pretraži",
+    "breadcrumb": {
+      "home": "Početna",
+      "country": "Izrael",
+      "city": "Grad",
+      "results": "Rezultati pretrage"
+    },
+    "count": { "propertiesFound": "smještaja pronađeno" },
+    "view": { "list": "Lista", "grid": "Mreža" },
+    "notice": { "conflict": "Molimo provjerite putna upozorenja vaše vlade prije odluke o boravku u ovom području, koje se može smatrati pogođenim sukobom." },
+    "error": { "title": "Greška u učitavanju hotela", "description": "Neuspješno učitavanje podataka hotela. Molimo pokušajte ponovno.", "retry": "Pokušaj ponovno" },
+    "sort": {
+      "by": "Sortiraj po:",
+      "labels": {
+        "top_picks": "Najbolje za solo putnike",
+        "price_low": "Cijena (od najniže do najviše)",
+        "price_high": "Cijena (od najviše do najniže)",
+        "rating_high": "Ocjena objekta (silazno)",
+        "rating_low": "Ocjena objekta (uzlazno)",
+        "distance_low": "Udaljenost od centra",
+        "reviews_high": "Najbolje ocijenjeni"
+      }
+    },
+    "filters": {
+      "budget": "Vaš proračun (po noći)",
+      "categories": "Kategorije",
+      "review": "Ocjena recenzija",
+      "meals": "Obroci",
+      "stars": "Kategorija zvjezdica",
+      "ptype": "Vrsta smještaja",
+      "facilities": "Popularni filteri",
+      "payment": "Opcije plaćanja",
+      "distance": "Udaljenost od centra",
+      "neighborhood": "Četvrti",
+      "brands": "Brendovi",
+      "showAll": "Prikaži sve",
+      "showLess": "Prikaži manje"
+    }
+  }
+}

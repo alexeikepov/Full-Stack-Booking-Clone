@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Zarejestruj swoją nieruchomość",
+  "register": "Zarejestruj się",
+  "signIn": "Zaloguj się",
+  "geniusLevel": "Poziom Genius {{level}}",
+  "tabs": {
+    "stays": "Noclegi",
+    "flights": "Loty",
+    "cars": "Wynajem samochodów",
+    "attractions": "Atrakcje",
+    "taxis": "Taksówki z lotniska",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Znajdź swój następny nocleg",
+      "subtitle": "Szukaj niskich cen hoteli, apartamentów i więcej..."
+    },
+    "offers": {
+      "title": "Oferty",
+      "subtitle": "Promocje, zniżki i specjalne oferty dla Ciebie"
+    },
+    "card1": {
+      "kicker": "Domy wakacyjne",
+      "title": "Marz w domu wakacyjnym",
+      "subtitle": "Wybieraj spośród domów, willi, chaletów i więcej",
+      "cta": "Zarezerwuj"
+    },
+    "card2": {
+      "title": "Szybka ucieczka, dobre chwile",
+      "subtitle": "Oszczędź do 20% z Getaway Deal",
+      "cta": "Oszczędzaj na noclegach"
+    },
+    "trending": {
+      "title": "Popularne destynacje",
+      "subtitle": "Najpopularniejsze wybory dla podróżników z Izraela"
+    },
+    "propertyTypes": {
+      "title": "Przeglądaj według typu zakwaterowania",
+      "items": {
+        "hotels": "Hotele",
+        "apartments": "Apartamenty",
+        "resorts": "Resorty",
+        "villas": "Wille",
+        "cabins": "Chaty",
+        "cottages": "Domeki",
+        "glamping": "Glamping",
+        "serviced-apartments": "Apartamenty z obsługą",
+        "holiday-homes": "Domy wakacyjne",
+        "guest-houses": "Pensjonaty",
+        "hostels": "Hostele",
+        "motels": "Motele"
+      }
+    },
+    "tripPlanner": {
+      "title": "Prosty i szybki planer podróży",
+      "subtitle": "Wybierz nastrój i odkryj najlepsze destynacje w Izraelu",
+      "categories": {
+        "festivals": "Festiwale",
+        "artMusic": "Sztuka i muzyka",
+        "beachRelaxation": "Relaks na plaży",
+        "gastronomyWine": "Gastronomia i wino",
+        "shoppingMarkets": "Zakupy i targi",
+        "culturalExploration": "Eksploracja kulturowa"
+      },
+      "kmAway": "w odległości {{km}} km"
+    },
+    "banner": {
+      "titleLine1": "Chcesz czuć się jak w domu",
+      "titleLine2": "podczas swojej następnej przygody?",
+      "cta": "Odkryj domy wakacyjne"
+    },
+    "popular": {
+      "title": "Popularne wśród podróżników z Izraela",
+      "tabs": {
+        "domestic": "Miasta krajowe",
+        "international": "Miasta międzynarodowe",
+        "regions": "Regiony",
+        "countries": "Kraje",
+        "places": "Noclegi"
+      },
+      "showMore": "+ Pokaż więcej",
+      "showLess": "− Pokaż mniej"
+    },
+    "travelMore": {
+      "title": "Podróżuj więcej, płac mniej",
+      "boxTitle": "Zaloguj się i oszczędzaj",
+      "boxSubtitle": "Oszczędzaj 10% lub więcej w uczestniczących obiektach: szukaj niebieskiej etykiety Genius",
+      "features": {
+        "freeCancellation": {
+          "title": "Rezerwuj teraz, płać w obiekcie",
+          "subtitle": "Bezpłatna anulacja dla większości pokoi",
+          "imgAlt": "Ilustracja listy kontrolnej"
+        },
+        "worldwide": {
+          "title": "+2 miliony obiektów na całym świecie",
+          "subtitle": "Hotele, pensjonaty, apartamenty i więcej...",
+          "imgAlt": "Ilustracja globu"
+        },
+        "support247": {
+          "title": "Niezawodna obsługa klienta 24/7",
+          "subtitle": "Zawsze jesteśmy tu, aby pomóc",
+          "imgAlt": "Ilustracja obsługi klienta"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Dokąd jedziesz?",
+    "cta": "Szukaj",
+    "breadcrumb": {
+      "home": "Strona główna",
+      "country": "Izrael",
+      "city": "Miasto",
+      "results": "Wyniki wyszukiwania"
+    },
+    "count": { "propertiesFound": "obiektów znaleziono" },
+    "view": { "list": "Lista", "grid": "Siatka" },
+    "notice": { "conflict": "Sprawdź ostrzeżenia podróżne swojego rządu przed podjęciem decyzji o pobycie w tym obszarze, który może być uznany za dotknięty konfliktem." },
+    "error": { "title": "Błąd ładowania hoteli", "description": "Nie udało się załadować danych hoteli. Spróbuj ponownie.", "retry": "Spróbuj ponownie" },
+    "sort": {
+      "by": "Sortuj według:",
+      "labels": {
+        "top_picks": "Najlepsze wybory dla podróżników solo",
+        "price_low": "Cena (od najniższej do najwyższej)",
+        "price_high": "Cena (od najwyższej do najniższej)",
+        "rating_high": "Ocena obiektu (malejąco)",
+        "rating_low": "Ocena obiektu (rosnąco)",
+        "distance_low": "Odległość od centrum",
+        "reviews_high": "Najlepiej oceniane"
+      }
+    },
+    "filters": {
+      "budget": "Twój budżet (za noc)",
+      "categories": "Kategorie",
+      "review": "Ocena recenzji",
+      "meals": "Posiłki",
+      "stars": "Klasyfikacja gwiazdkowa",
+      "ptype": "Typ zakwaterowania",
+      "facilities": "Popularne filtry",
+      "payment": "Opcje płatności",
+      "distance": "Odległość od centrum",
+      "neighborhood": "Dzielnice",
+      "brands": "Marki",
+      "showAll": "Pokaż wszystko",
+      "showLess": "Pokaż mniej"
+    }
+  }
+}

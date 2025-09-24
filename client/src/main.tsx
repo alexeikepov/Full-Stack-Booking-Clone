@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { queryClient } from "@/lib/queryClient";
 import "./index.css";
+import "./i18n";
 import HomePage from "@/pages/HomePage";
 import SearchPage from "@/pages/SearchPage";
 import HotelPage from "@/pages/HotelPage";
