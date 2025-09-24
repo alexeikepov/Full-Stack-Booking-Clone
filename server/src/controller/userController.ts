@@ -14,8 +14,18 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
     const exists = await UserModel.findOne({ email });
     if (exists) return res.status(409).json({ error: "Email already registered" });
 
+    // Normalize phone to E.164 when possible (keep original if cannot parse)
+    const normalizePhone = (raw: string) => {
+      const s = String(raw).replace(/\D/g, "");
+      if (String(raw).trim().startsWith("+")) return `+${s}`;
+      if (/^0\d{8,10}$/.test(s)) return `+972${s.substring(1)}`; // default to IL
+      if (/^\d{6,15}$/.test(s)) return `+${s}`;
+      return String(raw).trim();
+    };
+    const phoneNormalized = normalizePhone(phone);
+
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await UserModel.create({ name, email, phone, passwordHash, role: "USER" });
+    const user = await UserModel.create({ name, email, phone: phoneNormalized, passwordHash, role: "USER" });
 
     const token = signJwt({ id: user.id, role: user.role }, { expiresIn: "2h" });
     res.status(201).json({
