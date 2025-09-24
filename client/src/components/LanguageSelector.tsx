@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useLanguageCurrencyStore } from "@/stores/languageCurrency";
 import ReactCountryFlag from "react-country-flag";
+import i18n from "@/i18n";
 
 interface LanguageSelectorProps {
   variant?: "header" | "footer";
@@ -132,6 +133,11 @@ export default function LanguageSelector({
                       key={lang.code}
                       onClick={() => {
                         setLanguage(lang);
+                        localStorage.setItem("lang", lang.code);
+                        i18n.changeLanguage(lang.code);
+                        const isRtl = ["he", "ar"].some((l) => lang.code.startsWith(l));
+                        document.documentElement.dir = isRtl ? "rtl" : "ltr";
+                        document.documentElement.lang = lang.code;
                         setIsOpen(false);
                       }}
                       className="text-left p-3 hover:bg-gray-50 rounded-md transition-colors flex items-center gap-3"
@@ -167,6 +173,11 @@ export default function LanguageSelector({
                         key={lang.code}
                         onClick={() => {
                           setLanguage(lang);
+                          localStorage.setItem("lang", lang.code);
+                          i18n.changeLanguage(lang.code);
+                          const isRtl = ["he", "ar"].some((l) => lang.code.startsWith(l));
+                          document.documentElement.dir = isRtl ? "rtl" : "ltr";
+                          document.documentElement.lang = lang.code;
                           setIsOpen(false);
                         }}
                         className={`text-left p-3 hover:bg-gray-50 rounded-md transition-colors flex items-center gap-3 ${

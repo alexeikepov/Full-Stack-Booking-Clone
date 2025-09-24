@@ -1,0 +1,140 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "List your property",
+  "register": "Register",
+  "signIn": "Sign in",
+  "geniusLevel": "Level {{level}}",
+  "tabs": {
+    "stays": "Stays",
+    "flights": "Flights",
+    "cars": "Car rental",
+    "attractions": "Attractions",
+    "taxis": "Airport taxis",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Find your next stay",
+      "subtitle": "Search low prices on hotels, homes and much more…"
+    },
+    "offers": {
+      "title": "Offers",
+      "subtitle": "Promotions, deals and special offers for you"
+    },
+    "card1": {
+      "kicker": "Holiday rentals",
+      "title": "Live the dream in a holiday home",
+      "subtitle": "Choose from houses, villas, chalets and more",
+      "cta": "Book yours"
+    },
+    "card2": {
+      "title": "Quick escape, quality time",
+      "subtitle": "Save up to 20% with a Getaway Deal",
+      "cta": "Save on stays"
+    },
+    "trending": {
+      "title": "Trending destinations",
+      "subtitle": "Most popular choices for travellers from Israel"
+    },
+    "propertyTypes": {
+      "title": "Browse by property type",
+      "items": {
+        "hotels": "Hotels",
+        "apartments": "Apartments",
+        "resorts": "Resorts",
+        "villas": "Villas",
+        "cabins": "Cabins",
+        "cottages": "Cottages",
+        "glamping": "Glamping",
+        "serviced-apartments": "Serviced apartments",
+        "holiday-homes": "Holiday homes",
+        "guest-houses": "Guest houses",
+        "hostels": "Hostels",
+        "motels": "Motels"
+      }
+    },
+    "tripPlanner": {
+      "title": "Quick and easy trip planner",
+      "subtitle": "Pick a vibe and explore the top destinations in Israel",
+      "categories": {
+        "festivals": "Festivals",
+        "artMusic": "Art & Music",
+        "beachRelaxation": "Beach Relaxation",
+        "gastronomyWine": "Gastronomy & Wine",
+        "shoppingMarkets": "Shopping & Markets",
+        "culturalExploration": "Cultural Exploration"
+      },
+      "kmAway": "{{km}} km away"
+    },
+    "banner": {
+      "titleLine1": "Want to feel at home on your",
+      "titleLine2": "next adventure?",
+      "cta": "Discover holiday rentals"
+    },
+    "popular": {
+      "title": "Popular with travellers from Israel",
+      "tabs": {
+        "domestic": "Domestic cities",
+        "international": "International cities",
+        "regions": "Regions",
+        "countries": "Countries",
+        "places": "Places to stay"
+      },
+      "showMore": "+ Show more",
+      "showLess": "− Show less",
+      "footer": {
+        "countries": "Countries",
+        "regions": "Regions",
+        "cities": "Cities",
+        "districts": "Districts",
+        "airports": "Airports",
+        "hotels": "Hotels",
+        "placesOfInterest": "Places of interest",
+        "holidayHomes": "Holiday Homes",
+        "apartments": "Apartments",
+        "resorts": "Resorts",
+        "villas": "Villas",
+        "hostels": "Hostels",
+        "bnb": "B&Bs",
+        "guestHouses": "Guest Houses",
+        "uniquePlaces": "Unique places to stay",
+        "allDestinations": "All destinations",
+        "allFlightDestinations": "All flight destinations",
+        "allCarHire": "All car hire locations",
+        "allHolidayDestinations": "All holiday destinations",
+        "guides": "Guides",
+        "discover": "Discover",
+        "reviews": "Reviews",
+        "monthlyStays": "Discover monthly stays"
+      }
+    },
+    "travelMore": {
+      "title": "Travel more, spend less",
+      "boxTitle": "Sign in, save money",
+      "boxSubtitle": "Save 10% or more at participating properties – just look for the blue Genius label",
+      "features": {
+        "freeCancellation": {
+          "title": "Book now, pay at the property",
+          "subtitle": "FREE cancellation on most rooms",
+          "imgAlt": "Checklist illustration"
+        },
+        "worldwide": {
+          "title": "2+ million properties worldwide",
+          "subtitle": "Hotels, guest houses, apartments, and more...",
+          "imgAlt": "Globe illustration"
+        },
+        "support247": {
+          "title": "Trusted customer service you can rely on, 24/7",
+          "subtitle": "We're always here to help",
+          "imgAlt": "Customer support illustration"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Where are you going?",
+    "cta": "Search"
+  }
+}
+
+

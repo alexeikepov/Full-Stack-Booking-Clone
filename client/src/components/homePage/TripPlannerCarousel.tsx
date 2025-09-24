@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type Category =
   | "Festivals"
@@ -195,6 +196,7 @@ function buildHref(city: string) {
 }
 
 export default function TripPlannerCarousel() {
+  const { t } = useTranslation();
   const [active, setActive] = useState<Category>("Festivals");
   const trackRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
@@ -241,10 +243,8 @@ export default function TripPlannerCarousel() {
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 py-10">
-      <h2 className="text-[26px] font-bold">Quick and easy trip planner</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Pick a vibe and explore the top destinations in Israel
-      </p>
+      <h2 className="text-[26px] font-bold">{t("home.tripPlanner.title")}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t("home.tripPlanner.subtitle")}</p>
 
       {/* Табы */}
       <div
@@ -254,6 +254,15 @@ export default function TripPlannerCarousel() {
       >
         {CATEGORIES.map((cat) => {
           const isActive = cat === active;
+          const labelKeyMap: Record<Category, string> = {
+            "Festivals": "home.tripPlanner.categories.festivals",
+            "Art & Music": "home.tripPlanner.categories.artMusic",
+            "Beach Relaxation": "home.tripPlanner.categories.beachRelaxation",
+            "Gastronomy & Wine": "home.tripPlanner.categories.gastronomyWine",
+            "Shopping & Markets": "home.tripPlanner.categories.shoppingMarkets",
+            "Cultural Exploration": "home.tripPlanner.categories.culturalExploration",
+          };
+          const label = t(labelKeyMap[cat]);
           return (
             <button
               key={cat}
@@ -267,7 +276,7 @@ export default function TripPlannerCarousel() {
                   : "border border-transparent hover:bg-muted text-foreground",
               ].join(" ")}
             >
-              {cat}
+              {label}
             </button>
           );
         })}
@@ -303,6 +312,11 @@ export default function TripPlannerCarousel() {
           ].join(" ")}
         >
           {list.map((d) => {
+            const getDistance = (raw: string) => {
+              const m = raw.match(/^(\d+)\s*km\s*away$/i);
+              if (m) return t("home.tripPlanner.kmAway", { km: m[1] });
+              return raw;
+            };
             const content = (
               <div data-card className="flex-shrink-0 w-[220px] cursor-pointer">
                 <div className="h-[140px] w-full overflow-hidden rounded-xl">
@@ -315,7 +329,7 @@ export default function TripPlannerCarousel() {
                 </div>
                 <div className="mt-2 text-[15px] font-semibold">{d.city}</div>
                 <div className="text-xs text-muted-foreground">
-                  {d.distance}
+                  {getDistance(d.distance)}
                 </div>
               </div>
             );

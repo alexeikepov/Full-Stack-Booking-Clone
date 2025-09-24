@@ -2,17 +2,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export default function PopularWithTravellers() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("domestic");
   const [showMore, setShowMore] = useState(false);
 
   const tabs = [
-    { id: "domestic", label: "Domestic cities" },
-    { id: "international", label: "International cities" },
-    { id: "regions", label: "Regions" },
-    { id: "countries", label: "Countries" },
-    { id: "places", label: "Places to stay" },
+    { id: "domestic", label: t("home.popular.tabs.domestic") },
+    { id: "international", label: t("home.popular.tabs.international") },
+    { id: "regions", label: t("home.popular.tabs.regions") },
+    { id: "countries", label: t("home.popular.tabs.countries") },
+    { id: "places", label: t("home.popular.tabs.places") },
   ];
 
   const domesticCities = [
@@ -190,9 +192,7 @@ export default function PopularWithTravellers() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 py-8">
       <div className="mb-6">
-        <h2 className="text-[26px] font-bold text-gray-900 mb-4">
-          Popular with travellers from Israel
-        </h2>
+        <h2 className="text-[26px] font-bold text-gray-900 mb-4">{t("home.popular.title")}</h2>
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
@@ -248,7 +248,7 @@ export default function PopularWithTravellers() {
             variant="ghost"
             className="text-blue-600 hover:text-blue-700 p-0 h-auto font-normal"
           >
-            {showMore ? "− Show less" : "+ Show more"}
+            {showMore ? t("home.popular.showLess") : t("home.popular.showMore")}
           </Button>
         )}
       </div>
@@ -260,134 +260,134 @@ export default function PopularWithTravellers() {
             to="/countries"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Countries
+            {t("home.popular.footer.countries")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/regions" className="hover:text-gray-700 transition-colors">
-            Regions
+            {t("home.popular.footer.regions")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/cities" className="hover:text-gray-700 transition-colors">
-            Cities
+            {t("home.popular.footer.cities")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/districts"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Districts
+            {t("home.popular.footer.districts")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/airports"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Airports
+            {t("home.popular.footer.airports")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/hotels" className="hover:text-gray-700 transition-colors">
-            Hotels
+            {t("home.popular.footer.hotels")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/places-of-interest"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Places of interest
+            {t("home.popular.footer.placesOfInterest")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/holiday-homes"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Holiday Homes
+            {t("home.popular.footer.holidayHomes")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/apartments"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Apartments
+            {t("home.popular.footer.apartments")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/resorts" className="hover:text-gray-700 transition-colors">
-            Resorts
+            {t("home.popular.footer.resorts")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/villas" className="hover:text-gray-700 transition-colors">
-            Villas
+            {t("home.popular.footer.villas")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/hostels" className="hover:text-gray-700 transition-colors">
-            Hostels
+            {t("home.popular.footer.hostels")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/b-and-b" className="hover:text-gray-700 transition-colors">
-            B&Bs
+            {t("home.popular.footer.bnb")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/guest-houses"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Guest Houses
+            {t("home.popular.footer.guestHouses")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/unique-places"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Unique places to stay
+            {t("home.popular.footer.uniquePlaces")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/all-destinations"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            All destinations
+            {t("home.popular.footer.allDestinations")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/all-flight-destinations"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            All flight destinations
+            {t("home.popular.footer.allFlightDestinations")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/all-car-hire"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            All car hire locations
+            {t("home.popular.footer.allCarHire")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/all-holiday-destinations"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            All holiday destinations
+            {t("home.popular.footer.allHolidayDestinations")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/guides" className="hover:text-gray-700 transition-colors">
-            Guides
+            {t("home.popular.footer.guides")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/discover"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Discover
+            {t("home.popular.footer.discover")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link to="/reviews" className="hover:text-gray-700 transition-colors">
-            Reviews
+            {t("home.popular.footer.reviews")}
           </Link>
           <span className="text-gray-300">•</span>
           <Link
             to="/monthly-stays"
             className="hover:text-gray-700 transition-colors text-xs"
           >
-            Discover monthly stays
+            {t("home.popular.footer.monthlyStays")}
           </Link>
         </div>
       </div>

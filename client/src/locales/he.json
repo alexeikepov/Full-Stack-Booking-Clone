@@ -1,0 +1,140 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "רשום את מקום האירוח שלך",
+  "register": "הרשמה",
+  "signIn": "התחברות",
+  "geniusLevel": "רמת ג'יניוס {{level}}",
+  "tabs": {
+    "stays": "אירוח",
+    "flights": "טיסות",
+    "cars": "השכרת רכב",
+    "attractions": "אטרקציות",
+    "taxis": "מוניות לשדה התעופה",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "מצאו את השהייה הבאה שלכם",
+      "subtitle": "חפשו מחירים נמוכים בבתי מלון, דירות ועוד…"
+    },
+    "offers": {
+      "title": "מבצעים",
+      "subtitle": "הטבות, דילים ומבצעים מיוחדים בשבילכם"
+    },
+    "card1": {
+      "kicker": "דירות נופש",
+      "title": "תגשימו חלום בבית נופש",
+      "subtitle": "בחרו מבתים, וילות, צ׳לֶטים ועוד",
+      "cta": "הזמינו עכשיו"
+    },
+    "card2": {
+      "title": "בריחה מהירה, זמן איכות",
+      "subtitle": "חסכו עד 20% עם Getaway Deal",
+      "cta": "חסכו בלינות"
+    },
+    "trending": {
+      "title": "יעדים פופולריים",
+      "subtitle": "הבחירות המובילות עבור מטיילים מישראל"
+    },
+    "propertyTypes": {
+      "title": "עיינו לפי סוג מקום אירוח",
+      "items": {
+        "hotels": "מלונות",
+        "apartments": "דירות",
+        "resorts": "אתרי נופש",
+        "villas": "וילות",
+        "cabins": "בקתות",
+        "cottages": "קוטג'ים",
+        "glamping": "גלמפינג",
+        "serviced-apartments": "דירות שירות",
+        "holiday-homes": "בתי נופש",
+        "guest-houses": "בתי הארחה",
+        "hostels": "אכסניות",
+        "motels": "מוטלים"
+      }
+    },
+    "tripPlanner": {
+      "title": "מתכנן טיולים קל ומהיר",
+      "subtitle": "בחרו אווירה וגלו את היעדים המובילים בישראל",
+      "categories": {
+        "festivals": "פסטיבלים",
+        "artMusic": "אמנות ומוזיקה",
+        "beachRelaxation": "חופשת חוף",
+        "gastronomyWine": "קולינריה ויין",
+        "shoppingMarkets": "קניות ושווקים",
+        "culturalExploration": "חקירה תרבותית"
+      },
+      "kmAway": "‏{{km}} ק\"מ משם"
+    },
+    "banner": {
+      "titleLine1": "רוצים להרגיש בבית במהלך",
+      "titleLine2": "ההרפתקה הבאה?",
+      "cta": "גלו דירות נופש"
+    },
+    "popular": {
+      "title": "פופולרי בקרב מטיילים מישראל",
+      "tabs": {
+        "domestic": "ערים בארץ",
+        "international": "ערים בחו\"ל",
+        "regions": "אזורים",
+        "countries": "מדינות",
+        "places": "מקומות לינה"
+      },
+      "showMore": "+ הצג עוד",
+      "showLess": "− הצג פחות",
+      "footer": {
+        "countries": "מדינות",
+        "regions": "אזורים",
+        "cities": "ערים",
+        "districts": "מחוזות",
+        "airports": "שדות תעופה",
+        "hotels": "מלונות",
+        "placesOfInterest": "מוקדי עניין",
+        "holidayHomes": "בתי נופש",
+        "apartments": "דירות",
+        "resorts": "אתרי נופש",
+        "villas": "וילות",
+        "hostels": "אכסניות",
+        "bnb": "B&Bs",
+        "guestHouses": "בתי הארחה",
+        "uniquePlaces": "מקומות לינה ייחודיים",
+        "allDestinations": "כל היעדים",
+        "allFlightDestinations": "כל יעדי הטיסות",
+        "allCarHire": "כל מיקומי השכרת הרכב",
+        "allHolidayDestinations": "כל יעדי החופשות",
+        "guides": "מדריכים",
+        "discover": "גלו",
+        "reviews": "חוות דעת",
+        "monthlyStays": "גלו שהיות חודשיות"
+      }
+    },
+    "travelMore": {
+      "title": "מטיילים יותר, משלמים פחות",
+      "boxTitle": "התחברו וחסכו",
+      "boxSubtitle": "חיסכו 10% או יותר במקומות משתתפים — חפשו את תווית ג'יניוס הכחולה",
+      "features": {
+        "freeCancellation": {
+          "title": "הזמינו עכשיו, שלמו במקום האירוח",
+          "subtitle": "ביטול חינם ברוב החדרים",
+          "imgAlt": "איור צ'ק ליסט"
+        },
+        "worldwide": {
+          "title": "מעל 2 מיליון מקומות אירוח ברחבי העולם",
+          "subtitle": "מלונות, בתי הארחה, דירות ועוד...",
+          "imgAlt": "איור כדור הארץ"
+        },
+        "support247": {
+          "title": "שירות לקוחות אמין 24/7",
+          "subtitle": "אנחנו תמיד כאן בשבילכם",
+          "imgAlt": "איור שירות לקוחות"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "לאן תרצו לנסוע?",
+    "cta": "חיפוש"
+  }
+}
+
+
