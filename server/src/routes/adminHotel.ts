@@ -236,11 +236,9 @@ router.put(
           .json({ error: `Validation error: ${validationErrors}` });
       }
       if (err.name === "CastError") {
-        return res
-          .status(400)
-          .json({
-            error: `Invalid data format for field ${err.path}: ${err.message}`,
-          });
+        return res.status(400).json({
+          error: `Invalid data format for field ${err.path}: ${err.message}`,
+        });
       }
       next(err);
     }
