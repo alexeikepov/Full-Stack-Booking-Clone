@@ -1,4 +1,5 @@
 import { useState } from "react";
+import HotelsMap from "@/components/HotelsMap";
 import type { Hotel } from "@/types/hotel";
 import ReactCountryFlag from "react-country-flag";
 import { useQuery } from "@tanstack/react-query";
@@ -379,18 +380,10 @@ export default function HotelGallery({ hotel }: HotelGalleryProps) {
                 )}
 
               {/* Map section */}
-              <div className="flex-1 relative">
-                <div className="bg-blue-50 rounded-lg h-48 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <div className="text-lg font-semibold mb-2">
-                      Map will be here
-                    </div>
-                    <div className="text-sm">Google Maps integration</div>
-                  </div>
+              <div className="flex-1">
+                <div className="rounded-lg overflow-hidden border h-48">
+                  <HotelsMap hotels={[hotel]} />
                 </div>
-                <button className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-[#0071c2] text-white py-2 px-4 rounded text-sm font-medium hover:bg-[#005fa3] transition-colors">
-                  Show on map
-                </button>
               </div>
             </div>
           </div>
