@@ -44,7 +44,7 @@ export default function FiltersSidebar({ bounds, value, onChange, facets }: Prop
   };
 
   return (
-    <aside className="sticky top-[96px] hidden h-fit w-72 shrink-0 lg:block">
+    <aside className="hidden h-fit w-72 shrink-0 lg:block">
       <MapToggle />
 
       <div className="mt-3 rounded-lg border p-3">
@@ -91,7 +91,22 @@ export default function FiltersSidebar({ bounds, value, onChange, facets }: Prop
 
       {facets.map((g) => {
         const show = expanded[g.key] ?? false;
-        const items = show ? g.items : g.items.slice(0, 10);
+        const items = (() => {
+          if (g.key === "categories") {
+            const split = g.items.flatMap((it) => {
+              const parts = (it.label ?? "").includes("|")
+                ? (it.label ?? "").split("|").map((s) => s.trim()).filter(Boolean)
+                : [it.label];
+              return parts.map((label) => ({
+                id: `cat_${String(label).toLowerCase()}`,
+                label,
+                count: it.count,
+              }));
+            });
+            return show ? split : split.slice(0, 10);
+          }
+          return show ? g.items : g.items.slice(0, 10);
+        })();
         const selected = value.selected[g.key] ?? new Set<string>();
         return (
           <div key={g.key} className="mt-3 rounded-lg border p-3">
@@ -105,9 +120,7 @@ export default function FiltersSidebar({ bounds, value, onChange, facets }: Prop
                     onChange={() => toggle(g.key, it.id)}
                     className="h-4 w-4 accent-[#0071c2]"
                   />
-                  <span>
-                    {it.label} <span className="text-muted-foreground">{it.count}</span>
-                  </span>
+                  <span>{it.label} <span className="text-muted-foreground">{it.count}</span></span>
                 </li>
               ))}
             </ul>

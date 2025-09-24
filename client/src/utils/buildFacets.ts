@@ -19,7 +19,10 @@ export function buildFacets(hotels: Hotel[]): FacetGroup[] {
     if (rating >= 6) bump("review_6");
 
     const stars = asNum((h as any).stars);
-    if (stars) bump(`stars_${stars}`);
+    if (stars != null) {
+      const bucket = Math.floor(stars);
+      if (bucket >= 1) bump(`stars_${bucket}`);
+    }
 
     const ptype = asStr((h as any).propertyType ?? (h as any).type).toLowerCase();
     if (ptype) bump(`ptype_${ptype}`);
@@ -30,6 +33,17 @@ export function buildFacets(hotels: Hotel[]): FacetGroup[] {
     const meals = new Set(
       asArr<string>((h as any).meals).map((s) => s.toLowerCase())
     );
+    // Also infer meals from categories when present (split by '|')
+    const cats = new Set<string>();
+    for (const raw of asArr<string>((h as any).categories)) {
+      const parts = String(raw)
+        .split("|")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+      for (const p of parts) cats.add(p);
+    }
+    if (cats.has("breakfast included")) meals.add("breakfast included");
+    if (cats.has("all-inclusive") || cats.has("all inclusive")) meals.add("all-inclusive");
     if (meals.has("breakfast included")) bump("meal_breakfast");
     if (meals.has("all-inclusive") || meals.has("all inclusive")) bump("meal_all");
 
