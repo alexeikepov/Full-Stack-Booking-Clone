@@ -189,7 +189,222 @@ router.put(
           .filter((item: any) => item && item.trim());
       }
 
-      console.log("Attempting to update hotel:", id, "with data:", update);
+      // Fix houseRules structure - ensure required fields exist
+      if (!update.houseRules) {
+        // Set default houseRules if not provided
+        update.houseRules = {
+          checkIn: {
+            time: "15:00",
+            note: "Guests are required to show a photo identification and credit card upon check-in",
+            advanceNotice:
+              "You'll need to let the property know in advance what time you'll arrive.",
+          },
+          checkOut: {
+            time: "11:00",
+          },
+          cancellation: {
+            policy:
+              "Cancellation and prepayment policies vary according to accommodation type.",
+            conditions:
+              "Please check what conditions may apply to each option when making your selection.",
+          },
+          children: {
+            welcome: "Children of any age are welcome.",
+            searchNote:
+              "To see correct prices and occupancy information, please add the number of children in your group and their ages to your search.",
+            cotPolicy: {
+              ageRange: "0 - 2 years",
+              cotPrice: "₪70 per child, per night",
+              note: "Cot upon request",
+              additionalInfo:
+                "Prices for cots are not included in the total price, and will have to be paid for separately during your stay.",
+              availability:
+                "The number of cots allowed is dependent on the option you choose. Please check your selected option for more information.",
+              noExtraBeds:
+                "There are no extra beds available at this property.",
+              subjectToAvailability: "All cots are subject to availability.",
+            },
+          },
+          ageRestriction: {
+            hasRestriction: false,
+            minimumAge: null,
+            note: "There is no age requirement for check-in",
+          },
+          pets: {
+            allowed: false,
+            note: "Pets are not allowed.",
+          },
+          paymentMethods: {
+            methods: [
+              "American Express",
+              "Visa",
+              "MasterCard",
+              "JCB",
+              "Maestro",
+              "Discover",
+              "UnionPay",
+              "Cash",
+            ],
+          },
+          parties: {
+            allowed: false,
+            note: "Parties/events are not allowed",
+          },
+        };
+      } else if (update.houseRules) {
+        if (typeof update.houseRules === "string") {
+          // Convert string to proper structure
+          update.houseRules = {
+            checkIn: {
+              time: "15:00",
+              note: "Guests are required to show a photo identification and credit card upon check-in",
+              advanceNotice:
+                "You'll need to let the property know in advance what time you'll arrive.",
+            },
+            checkOut: {
+              time: "11:00",
+            },
+            cancellation: {
+              policy:
+                "Cancellation and prepayment policies vary according to accommodation type.",
+              conditions:
+                "Please check what conditions may apply to each option when making your selection.",
+            },
+            children: {
+              welcome: "Children of any age are welcome.",
+              searchNote:
+                "To see correct prices and occupancy information, please add the number of children in your group and their ages to your search.",
+              cotPolicy: {
+                ageRange: "0 - 2 years",
+                cotPrice: "₪70 per child, per night",
+                note: "Cot upon request",
+                additionalInfo:
+                  "Prices for cots are not included in the total price, and will have to be paid for separately during your stay.",
+                availability:
+                  "The number of cots allowed is dependent on the option you choose. Please check your selected option for more information.",
+                noExtraBeds:
+                  "There are no extra beds available at this property.",
+                subjectToAvailability: "All cots are subject to availability.",
+              },
+            },
+            ageRestriction: {
+              hasRestriction: false,
+              minimumAge: null,
+              note: "There is no age requirement for check-in",
+            },
+            pets: {
+              allowed: false,
+              note: "Pets are not allowed.",
+            },
+            paymentMethods: {
+              methods: [
+                "American Express",
+                "Visa",
+                "MasterCard",
+                "JCB",
+                "Maestro",
+                "Discover",
+                "UnionPay",
+                "Cash",
+              ],
+            },
+            parties: {
+              allowed: false,
+              note: "Parties/events are not allowed",
+            },
+          };
+        } else if (typeof update.houseRules === "object") {
+          // Ensure required nested fields exist
+          if (!update.houseRules.checkIn) {
+            update.houseRules.checkIn = {
+              time: "15:00",
+              note: "Guests are required to show a photo identification and credit card upon check-in",
+              advanceNotice:
+                "You'll need to let the property know in advance what time you'll arrive.",
+            };
+          }
+          if (!update.houseRules.checkOut) {
+            update.houseRules.checkOut = { time: "11:00" };
+          }
+        }
+      }
+
+      // Fix rooms structure - ensure required fields exist
+      if (
+        !update.rooms ||
+        !Array.isArray(update.rooms) ||
+        update.rooms.length === 0
+      ) {
+        // Set default room if no rooms provided
+        update.rooms = [
+          {
+            name: "Standard Room",
+            roomType: "STANDARD",
+            capacity: 2,
+            maxAdults: 2,
+            maxChildren: 0,
+            pricePerNight: 100,
+            totalRooms: 1,
+            totalUnits: 1,
+            sizeSqm: 25,
+            bedrooms: 1,
+            bathrooms: 1,
+            features: [],
+            amenities: [],
+            facilities: [],
+            categories: [],
+            photos: [],
+            media: [],
+            reservations: [],
+            pricing: {
+              basePrice: 100,
+              currency: "₪",
+              includesBreakfast: false,
+              freeCancellation: true,
+              noPrepayment: true,
+              priceMatch: true,
+            },
+          },
+        ];
+      } else if (update.rooms && Array.isArray(update.rooms)) {
+        update.rooms = update.rooms.map((room: any) => {
+          // Ensure required fields exist
+          if (!room.roomType) {
+            room.roomType = "STANDARD";
+          }
+          if (!room.totalRooms) {
+            room.totalRooms = room.totalUnits || 1;
+          }
+          if (!room.totalUnits) {
+            room.totalUnits = room.totalRooms || 1;
+          }
+          if (!room.pricing) {
+            room.pricing = {
+              basePrice: room.pricePerNight || 0,
+              currency: "₪",
+              includesBreakfast: false,
+              freeCancellation: true,
+              noPrepayment: true,
+              priceMatch: true,
+            };
+          } else if (!room.pricing.basePrice) {
+            room.pricing.basePrice = room.pricePerNight || 0;
+          }
+
+          return room;
+        });
+      }
+
+      console.log(
+        "Data processing completed. Final update data keys:",
+        Object.keys(update)
+      );
+      console.log(
+        "HouseRules structure:",
+        update.houseRules ? "✓ Present" : "✗ Missing"
+      );
+      console.log("Rooms count:", update.rooms ? update.rooms.length : 0);
+      console.log("Attempting to update hotel:", id);
 
       // For OWNER role, allow updating any hotel. For HOTEL_ADMIN, only allow updating owned/managed hotels
       let hotel;
