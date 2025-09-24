@@ -134,6 +134,24 @@ export default function OwnerPage() {
     mutationFn: ({ hotelId, data }: { hotelId: string; data: any }) =>
       apiUpdateHotel(hotelId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ownerHotels"] }),
+    onError: (error: any) => {
+      console.error("Update hotel mutation failed:", error);
+      let errorMessage = "Ошибка обновления отеля";
+
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.response?.status === 403) {
+        errorMessage = "Недостаточно прав для обновления отеля";
+      } else if (error?.response?.status === 404) {
+        errorMessage = "Отель не найден";
+      } else if (error?.response?.status === 400) {
+        errorMessage = "Некорректные данные для обновления";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      alert(`Ошибка: ${errorMessage}`);
+    },
   });
 
   const handleApproveApplication = (id: string) => {
@@ -150,10 +168,14 @@ export default function OwnerPage() {
 
   const handleEditHotel = async (hotel: any) => {
     try {
+      console.log("Editing hotel:", hotel);
       const full = await getHotelById(String(hotel.id));
+      console.log("Full hotel data:", full);
       setSelectedHotel(full);
       setIsEditDialogOpen(true);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load full hotel data:", error);
+      console.log("Using basic hotel data:", hotel);
       setSelectedHotel(hotel);
       setIsEditDialogOpen(true);
     }
@@ -161,14 +183,42 @@ export default function OwnerPage() {
 
   const handleSaveHotel = async (updatedHotel: any) => {
     try {
+      console.log("Saving hotel:", updatedHotel);
+
       const hotelId = String(
-        updatedHotel.id || updatedHotel._id || selectedHotel?.id
+        updatedHotel.id ||
+          updatedHotel._id ||
+          selectedHotel?.id ||
+          selectedHotel?._id
       );
+
+      console.log("Hotel ID:", hotelId);
+      console.log("Selected hotel:", selectedHotel);
+
+      if (!hotelId || hotelId === "undefined" || hotelId === "null") {
+        throw new Error("Не удалось определить ID отеля для обновления");
+      }
+
       await updateHotelMut.mutateAsync({ hotelId, data: updatedHotel });
       setIsEditDialogOpen(false);
       setSelectedHotel(null);
-    } catch (e) {
-      alert("Update failed");
+    } catch (e: any) {
+      console.error("Hotel update failed:", e);
+      let errorMessage = "Неизвестная ошибка";
+
+      if (e?.response?.data?.error) {
+        errorMessage = e.response.data.error;
+      } else if (e?.response?.status === 403) {
+        errorMessage = "Недостаточно прав для обновления отеля";
+      } else if (e?.response?.status === 404) {
+        errorMessage = "Отель не найден";
+      } else if (e?.response?.status === 400) {
+        errorMessage = "Некорректные данные для обновления";
+      } else if (e?.message) {
+        errorMessage = e.message;
+      }
+
+      alert(`Ошибка обновления отеля: ${errorMessage}`);
     }
   };
 
