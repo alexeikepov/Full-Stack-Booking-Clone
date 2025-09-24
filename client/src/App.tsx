@@ -13,6 +13,7 @@ export default function App() {
     pathname === "/partner-register" ||
     pathname === "/owner" ||
     pathname === "/owner/sign-in" ||
+    pathname === "/adminhotel" ||
     pathname === "/admin-hotel" ||
     pathname === "/admin-hotel/sign-in";
 

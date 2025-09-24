@@ -132,13 +132,17 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
   });
 
   const [replyText, setReplyText] = useState<Record<string, string>>({});
-  const [editingResponseId, setEditingResponseId] = useState<string | null>(null);
+  const [editingResponseId, setEditingResponseId] = useState<string | null>(
+    null
+  );
 
   const replyMutation = useMutation({
     mutationFn: ({ reviewId, text }: { reviewId: string; text: string }) =>
       respondToReview(reviewId, text),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["owner-hotel-reviews", hotelId] });
+      queryClient.invalidateQueries({
+        queryKey: ["owner-hotel-reviews", hotelId],
+      });
     },
   });
 
@@ -152,7 +156,9 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
         const createdAt = rv.createdAt ? new Date(rv.createdAt) : null;
         const stayDate = rv.stayDate ? new Date(rv.stayDate) : null;
         const categories = rv.categoryRatings || {};
-        const categoryEntries = Object.entries(categories).filter(([, v]) => typeof v === "number");
+        const categoryEntries = Object.entries(categories).filter(
+          ([, v]) => typeof v === "number"
+        );
 
         return (
           <Card key={String(rv._id || rv.id)}>
@@ -172,8 +178,12 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
                   </span>
                 </div>
                 <div className="text-xs text-gray-500 flex gap-3">
-                  {createdAt && <span>Posted {createdAt.toLocaleDateString()}</span>}
-                  {stayDate && <span>Stayed {stayDate.toLocaleDateString()}</span>}
+                  {createdAt && (
+                    <span>Posted {createdAt.toLocaleDateString()}</span>
+                  )}
+                  {stayDate && (
+                    <span>Stayed {stayDate.toLocaleDateString()}</span>
+                  )}
                   {rv.roomType && <span>Room: {rv.roomType}</span>}
                   {rv.travelType && <span>Type: {rv.travelType}</span>}
                 </div>
@@ -185,13 +195,17 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
                   {rv.comment && (
                     <div className="rounded-lg border p-3">
                       <div className="text-sm font-medium mb-1">Positive</div>
-                      <div className="text-sm text-gray-800 whitespace-pre-wrap">{rv.comment}</div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">
+                        {rv.comment}
+                      </div>
                     </div>
                   )}
                   {rv.negative && (
                     <div className="rounded-lg border p-3">
                       <div className="text-sm font-medium mb-1">Negative</div>
-                      <div className="text-sm text-gray-800 whitespace-pre-wrap">{rv.negative}</div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">
+                        {rv.negative}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -200,12 +214,21 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
               {/* Categories */}
               {categoryEntries.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-2">Category ratings</div>
+                  <div className="text-sm font-medium mb-2">
+                    Category ratings
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                     {categoryEntries.map(([key, val]) => (
-                      <div key={key} className="bg-gray-50 rounded p-2 text-center">
-                        <div className="text-xs text-gray-500 capitalize">{key}</div>
-                        <div className="text-sm font-semibold">{Number(val as number).toFixed(1)}</div>
+                      <div
+                        key={key}
+                        className="bg-gray-50 rounded p-2 text-center"
+                      >
+                        <div className="text-xs text-gray-500 capitalize">
+                          {key}
+                        </div>
+                        <div className="text-sm font-semibold">
+                          {Number(val as number).toFixed(1)}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -213,71 +236,100 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
               )}
 
               {/* Response */}
-            {rv.hotelResponse ? (
-              <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="font-medium">Hotel response</div>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => {
-                      setEditingResponseId(String(rv._id || rv.id));
-                      setReplyText((m) => ({ ...m, [String(rv._id || rv.id)]: rv.hotelResponse?.text || "" }));
-                    }}
-                  >
-                    Edit
-                  </Button>
-                </div>
-                {editingResponseId === String(rv._id || rv.id) ? (
-                  <div className="flex items-center gap-2 mt-1">
-                    <input
-                      className="flex-1 rounded border px-2 py-1 text-sm"
-                      placeholder="Edit response"
-                      value={replyText[String(rv._id || rv.id)] || ""}
-                      onChange={(e) =>
-                        setReplyText((m) => ({ ...m, [String(rv._id || rv.id)]: e.target.value }))
-                      }
-                    />
+              {rv.hotelResponse ? (
+                <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="font-medium">Hotel response</div>
                     <Button
                       size="sm"
-                      onClick={() =>
-                        replyMutation.mutate({
-                          reviewId: String(rv._id || rv.id),
-                          text: replyText[String(rv._id || rv.id)] || "",
-                        }, {
-                          onSuccess: () => setEditingResponseId(null),
-                        })
-                      }
-                      disabled={!replyText[String(rv._id || rv.id)] || replyMutation.isPending}
+                      variant="secondary"
+                      onClick={() => {
+                        setEditingResponseId(String(rv._id || rv.id));
+                        setReplyText((m) => ({
+                          ...m,
+                          [String(rv._id || rv.id)]:
+                            rv.hotelResponse?.text || "",
+                        }));
+                      }}
                     >
-                      Save
+                      Edit
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingResponseId(null)}>Cancel</Button>
                   </div>
-                ) : (
-                  <>
-                    <div className="whitespace-pre-wrap">{rv.hotelResponse.text}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {rv.hotelResponse.respondedAt
-                        ? new Date(rv.hotelResponse.respondedAt).toLocaleString()
-                        : null}
+                  {editingResponseId === String(rv._id || rv.id) ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <input
+                        className="flex-1 rounded border px-2 py-1 text-sm"
+                        placeholder="Edit response"
+                        value={replyText[String(rv._id || rv.id)] || ""}
+                        onChange={(e) =>
+                          setReplyText((m) => ({
+                            ...m,
+                            [String(rv._id || rv.id)]: e.target.value,
+                          }))
+                        }
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          replyMutation.mutate(
+                            {
+                              reviewId: String(rv._id || rv.id),
+                              text: replyText[String(rv._id || rv.id)] || "",
+                            },
+                            {
+                              onSuccess: () => setEditingResponseId(null),
+                            }
+                          )
+                        }
+                        disabled={
+                          !replyText[String(rv._id || rv.id)] ||
+                          replyMutation.isPending
+                        }
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingResponseId(null)}
+                      >
+                        Cancel
+                      </Button>
                     </div>
-                  </>
-                )}
-              </div>
-            ) : (
+                  ) : (
+                    <>
+                      <div className="whitespace-pre-wrap">
+                        {rv.hotelResponse.text}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {rv.hotelResponse.respondedAt
+                          ? new Date(
+                              rv.hotelResponse.respondedAt
+                            ).toLocaleString()
+                          : null}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
                 <div className="flex items-center gap-2">
                   <input
                     className="flex-1 rounded border px-2 py-1 text-sm"
                     placeholder="Write a response to this review"
                     value={replyText[String(rv._id || rv.id)] || ""}
                     onChange={(e) =>
-                      setReplyText((m) => ({ ...m, [String(rv._id || rv.id)]: e.target.value }))
+                      setReplyText((m) => ({
+                        ...m,
+                        [String(rv._id || rv.id)]: e.target.value,
+                      }))
                     }
                   />
                   <Button
                     size="sm"
-                    disabled={!replyText[String(rv._id || rv.id)] || replyMutation.isPending}
+                    disabled={
+                      !replyText[String(rv._id || rv.id)] ||
+                      replyMutation.isPending
+                    }
                     onClick={() =>
                       replyMutation.mutate({
                         reviewId: String(rv._id || rv.id),
@@ -285,7 +337,7 @@ function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
                       })
                     }
                   >
-                  Reply
+                    Reply
                   </Button>
                 </div>
               )}
@@ -315,7 +367,10 @@ function HotelKpis({ hotelId }: { hotelId: string }) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="bg-gray-50 p-3 rounded-lg h-[66px] animate-pulse" />
+          <div
+            key={i}
+            className="bg-gray-50 p-3 rounded-lg h-[66px] animate-pulse"
+          />
         ))}
       </div>
     );
@@ -352,7 +407,13 @@ function HotelKpis({ hotelId }: { hotelId: string }) {
   );
 }
 
-function HotelKpisMini({ hotelId, formatCurrency }: { hotelId: string; formatCurrency: (n: number) => string }) {
+function HotelKpisMini({
+  hotelId,
+  formatCurrency,
+}: {
+  hotelId: string;
+  formatCurrency: (n: number) => string;
+}) {
   const { data, isLoading } = useQuery({
     queryKey: ["owner-analytics-mini", hotelId],
     queryFn: () => getOwnerAnalytics({ hotelId }),
@@ -365,15 +426,21 @@ function HotelKpisMini({ hotelId, formatCurrency }: { hotelId: string; formatCur
     <>
       <div className="bg-gray-50 p-2 rounded-md">
         <div className="text-[11px] text-gray-500">Bookings</div>
-        <div className="text-base font-semibold">{isLoading ? "…" : totalBookings}</div>
+        <div className="text-base font-semibold">
+          {isLoading ? "…" : totalBookings}
+        </div>
       </div>
       <div className="bg-gray-50 p-2 rounded-md">
         <div className="text-[11px] text-gray-500">Revenue</div>
-        <div className="text-base font-semibold">{isLoading ? "…" : formatCurrency(totalRevenue)}</div>
+        <div className="text-base font-semibold">
+          {isLoading ? "…" : formatCurrency(totalRevenue)}
+        </div>
       </div>
       <div className="bg-gray-50 p-2 rounded-md">
         <div className="text-[11px] text-gray-500">Occupancy</div>
-        <div className="text-base font-semibold">{isLoading ? "…" : `${averageOccupancy}%`}</div>
+        <div className="text-base font-semibold">
+          {isLoading ? "…" : `${averageOccupancy}%`}
+        </div>
       </div>
     </>
   );
@@ -402,11 +469,14 @@ export default function AdminHotelPage() {
     retry: false,
   });
 
-  const { data: analytics = mockAnalytics } = useQuery({
+  const { data: analytics } = useQuery({
     queryKey: ["owner-analytics", selectedHotel?.id],
-    queryFn: () => getOwnerAnalytics(selectedHotel?.id ? { hotelId: selectedHotel.id } : undefined),
+    queryFn: () =>
+      getOwnerAnalytics(
+        selectedHotel?.id ? { hotelId: selectedHotel.id } : undefined
+      ),
     retry: false,
-    enabled: true,
+    enabled: !!selectedHotel?.id,
   });
 
   // Reservations list for selected hotel
@@ -489,10 +559,18 @@ export default function AdminHotelPage() {
     };
   }, [setShowTabs]);
 
-  // Preselect first hotel when list loads (skip while adding/new dialog open)
+  // Do not auto-select a hotel; require explicit user selection
   useEffect(() => {
-    if (!isEditDialogOpen && !isAdding && !selectedHotel && Array.isArray(hotels) && hotels.length > 0) {
-      setSelectedHotel(hotels[0]);
+    if (
+      !isEditDialogOpen &&
+      !isAdding &&
+      selectedHotel &&
+      Array.isArray(hotels)
+    ) {
+      const stillExists = hotels.some(
+        (h: any) => String(h.id) === String(selectedHotel.id)
+      );
+      if (!stillExists) setSelectedHotel(null);
     }
   }, [hotels, selectedHotel, isEditDialogOpen, isAdding]);
 
@@ -513,7 +591,9 @@ export default function AdminHotelPage() {
   };
 
   const handleToggleHotelStatus = (id: any) => {
-    const hotel = (hotels as any[]).find((h: any) => String(h.id) === String(id));
+    const hotel = (hotels as any[]).find(
+      (h: any) => String(h.id) === String(id)
+    );
     if (!hotel) return;
     const currentlyVisible = hotel.isVisible !== false;
     const nextVisible = !currentlyVisible;
@@ -523,7 +603,14 @@ export default function AdminHotelPage() {
       if (!Array.isArray(prev)) return prev;
       return prev.map((h: any) =>
         String(h.id) === String(id)
-          ? { ...h, isVisible: nextVisible, status: nextVisible && h.approvalStatus === "APPROVED" ? "active" : "inactive" }
+          ? {
+              ...h,
+              isVisible: nextVisible,
+              status:
+                nextVisible && h.approvalStatus === "APPROVED"
+                  ? "active"
+                  : "inactive",
+            }
           : h
       );
     });
@@ -546,7 +633,9 @@ export default function AdminHotelPage() {
         const photos = Array.isArray(r.photos)
           ? r.photos
           : Array.isArray(r.media)
-          ? r.media.map((m: any) => (typeof m === "string" ? m : m?.url)).filter((x: any) => typeof x === "string" && x)
+          ? r.media
+              .map((m: any) => (typeof m === "string" ? m : m?.url))
+              .filter((x: any) => typeof x === "string" && x)
           : [];
         return {
           _id: r._id,
@@ -563,7 +652,10 @@ export default function AdminHotelPage() {
           features: Array.isArray(r.features)
             ? r.features
             : typeof r.features === "string"
-            ? r.features.split(",").map((s: string) => s.trim()).filter(Boolean)
+            ? r.features
+                .split(",")
+                .map((s: string) => s.trim())
+                .filter(Boolean)
             : [],
           photos,
           media: photos,
@@ -580,7 +672,8 @@ export default function AdminHotelPage() {
 
     const deepClean = (obj: any): any => {
       if (obj == null) return undefined as any;
-      if (Array.isArray(obj)) return obj.map(deepClean).filter((v) => v !== undefined);
+      if (Array.isArray(obj))
+        return obj.map(deepClean).filter((v) => v !== undefined);
       if (typeof obj === "object") {
         const out: any = {};
         Object.entries(obj).forEach(([k, v]) => {
@@ -599,12 +692,20 @@ export default function AdminHotelPage() {
     };
 
     const loc = updatedHotel.location || selectedHotel?.location;
-    const validLocation = loc && typeof loc.lat === "number" && typeof loc.lng === "number" && !Number.isNaN(loc.lat) && !Number.isNaN(loc.lng);
+    const validLocation =
+      loc &&
+      typeof loc.lat === "number" &&
+      typeof loc.lng === "number" &&
+      !Number.isNaN(loc.lat) &&
+      !Number.isNaN(loc.lng);
 
     const baseFacilities = {
       ...(selectedHotel?.facilities || {}),
       ...((updatedHotel.facilities as any) || {}),
-      languagesSpoken: updatedHotel.languagesSpoken || (selectedHotel as any)?.facilities?.languagesSpoken || [],
+      languagesSpoken:
+        updatedHotel.languagesSpoken ||
+        (selectedHotel as any)?.facilities?.languagesSpoken ||
+        [],
     };
 
     // Merge and sanitize houseRules to match server schema and avoid empty required strings
@@ -616,18 +717,25 @@ export default function AdminHotelPage() {
       ...(selectedHotel?.houseRules?.checkIn || {}),
       ...((updatedHotel.houseRules?.checkIn as any) || {}),
     };
-    if (!mergedHouseRules.checkIn.time || String(mergedHouseRules.checkIn.time).trim() === "") {
+    if (
+      !mergedHouseRules.checkIn.time ||
+      String(mergedHouseRules.checkIn.time).trim() === ""
+    ) {
       mergedHouseRules.checkIn.time = "15:00";
     }
     mergedHouseRules.checkOut = {
       ...(selectedHotel?.houseRules?.checkOut || {}),
       ...((updatedHotel.houseRules?.checkOut as any) || {}),
     };
-    if (!mergedHouseRules.checkOut.time || String(mergedHouseRules.checkOut.time).trim() === "") {
+    if (
+      !mergedHouseRules.checkOut.time ||
+      String(mergedHouseRules.checkOut.time).trim() === ""
+    ) {
       mergedHouseRules.checkOut.time = "11:00";
     }
     if (mergedHouseRules.ageRestriction) {
-      if (mergedHouseRules.ageRestriction.minimumAge === "") mergedHouseRules.ageRestriction.minimumAge = null;
+      if (mergedHouseRules.ageRestriction.minimumAge === "")
+        mergedHouseRules.ageRestriction.minimumAge = null;
     }
 
     const base: any = {
@@ -639,13 +747,25 @@ export default function AdminHotelPage() {
       shortDescription: updatedHotel.shortDescription,
       description: updatedHotel.description,
       facilities: deepClean(baseFacilities),
-      propertyHighlights: deepClean(updatedHotel.propertyHighlights || selectedHotel?.propertyHighlights),
+      propertyHighlights: deepClean(
+        updatedHotel.propertyHighlights || selectedHotel?.propertyHighlights
+      ),
       houseRules: deepClean(mergedHouseRules),
-      surroundings: deepClean(updatedHotel.surroundings || selectedHotel?.surroundings),
+      surroundings: deepClean(
+        updatedHotel.surroundings || selectedHotel?.surroundings
+      ),
       overview: deepClean(updatedHotel.overview || selectedHotel?.overview),
-      mostPopularFacilities: Array.isArray(updatedHotel.mostPopularFacilities) ? updatedHotel.mostPopularFacilities : (selectedHotel?.mostPopularFacilities || []),
-      categories: Array.isArray(updatedHotel.categories) ? updatedHotel.categories : (selectedHotel?.categories || []),
-      travellersQuestions: deepClean(updatedHotel.travellersQuestions || selectedHotel?.travellersQuestions || []),
+      mostPopularFacilities: Array.isArray(updatedHotel.mostPopularFacilities)
+        ? updatedHotel.mostPopularFacilities
+        : selectedHotel?.mostPopularFacilities || [],
+      categories: Array.isArray(updatedHotel.categories)
+        ? updatedHotel.categories
+        : selectedHotel?.categories || [],
+      travellersQuestions: deepClean(
+        updatedHotel.travellersQuestions ||
+          selectedHotel?.travellersQuestions ||
+          []
+      ),
       media: Array.isArray(updatedHotel.media)
         ? updatedHotel.media
         : Array.isArray(updatedHotel.images)
@@ -677,7 +797,9 @@ export default function AdminHotelPage() {
   };
 
   const filteredHotels = (hotels as any[]).filter((hotel: any) => {
-    const hay = `${hotel.name || ""} ${hotel.city || ""} ${hotel.address || ""}`.toLowerCase();
+    const hay = `${hotel.name || ""} ${hotel.city || ""} ${
+      hotel.address || ""
+    }`.toLowerCase();
     return hay.includes(searchTerm.toLowerCase());
   });
 
@@ -849,11 +971,18 @@ export default function AdminHotelPage() {
                                   </div>
 
                                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                                      <span>
-                                      Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
-                                      </span>
+                                    <span>
+                                      Created:{" "}
+                                      {hotel.createdAt
+                                        ? new Date(
+                                            hotel.createdAt
+                                          ).toLocaleString()
+                                        : "—"}
+                                    </span>
                                     {hotel.lastBooking && (
-                                      <span>Last booking: {hotel.lastBooking}</span>
+                                      <span>
+                                        Last booking: {hotel.lastBooking}
+                                      </span>
                                     )}
                                   </div>
 
@@ -879,7 +1008,9 @@ export default function AdminHotelPage() {
                                       size="sm"
                                       variant="outline"
                                       onClick={() =>
-                                        handleToggleHotelStatus(String(hotel.id))
+                                        handleToggleHotelStatus(
+                                          String(hotel.id)
+                                        )
                                       }
                                     >
                                       <Eye className="h-4 w-4 mr-1" />
@@ -898,7 +1029,9 @@ export default function AdminHotelPage() {
                                     <Button
                                       size="sm"
                                       variant="destructive"
-                                      onClick={() => handleDeleteHotel(String(hotel.id))}
+                                      onClick={() =>
+                                        handleDeleteHotel(String(hotel.id))
+                                      }
                                     >
                                       <Trash2 className="h-4 w-4 mr-1" />
                                       Delete
@@ -933,32 +1066,52 @@ export default function AdminHotelPage() {
                                 <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
                                   <div className="flex items-center gap-1">
                                     <MapPin className="h-4 w-4" />
-                                    <span className="truncate max-w-[360px]">{hotel.address || hotel.city}</span>
+                                    <span className="truncate max-w-[360px]">
+                                      {hotel.address || hotel.city}
+                                    </span>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Star className="h-4 w-4 text-yellow-500" />
-                                    <span className="font-medium">{hotel.averageRating ?? 0}</span>
-                                    <span className="text-gray-500">({hotel.reviewsCount} reviews)</span>
+                                    <span className="font-medium">
+                                      {hotel.averageRating ?? 0}
+                                    </span>
+                                    <span className="text-gray-500">
+                                      ({hotel.reviewsCount} reviews)
+                                    </span>
                                   </div>
                                 </div>
 
                                 {/* KPIs */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                   <div className="bg-gray-50 p-2 rounded-md">
-                                    <div className="text-[11px] text-gray-500">Rooms</div>
-                                    <div className="text-base font-semibold">{hotel.rooms}</div>
+                                    <div className="text-[11px] text-gray-500">
+                                      Rooms
                                     </div>
+                                    <div className="text-base font-semibold">
+                                      {hotel.rooms}
+                                    </div>
+                                  </div>
                                   {/* Live analytics per hotel */}
-                                  <HotelKpisMini hotelId={String(hotel.id)} formatCurrency={formatCurrency} />
+                                  <HotelKpisMini
+                                    hotelId={String(hotel.id)}
+                                    formatCurrency={formatCurrency}
+                                  />
                                 </div>
 
                                 {/* Meta */}
                                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                                    <span>
-                                    Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
-                                    </span>
+                                  <span>
+                                    Created:{" "}
+                                    {hotel.createdAt
+                                      ? new Date(
+                                          hotel.createdAt
+                                        ).toLocaleString()
+                                      : "—"}
+                                  </span>
                                   {hotel.lastBooking && (
-                                    <span>Last booking: {hotel.lastBooking}</span>
+                                    <span>
+                                      Last booking: {hotel.lastBooking}
+                                    </span>
                                   )}
                                 </div>
 
@@ -1034,7 +1187,8 @@ export default function AdminHotelPage() {
                     value={selectedHotel?.id ?? ""}
                     onChange={(e) => {
                       const id = e.target.value;
-                      const h = hotels.find((x: any) => String(x.id) === id) || null;
+                      const h =
+                        hotels.find((x: any) => String(x.id) === id) || null;
                       setSelectedHotel(h);
                     }}
                   >
@@ -1047,107 +1201,123 @@ export default function AdminHotelPage() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">
-                          Total Revenue
-                        </p>
-                        <p className="text-2xl font-bold">
-                          {formatCurrency(analytics.totalRevenue)}
-                        </p>
+              {!!selectedHotel?.id && !!analytics ? (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">
+                            Total Revenue
+                          </p>
+                          <p className="text-2xl font-bold">
+                            {formatCurrency(analytics.totalRevenue)}
+                          </p>
+                        </div>
+                        <DollarSign className="h-8 w-8 text-green-500" />
                       </div>
-                      <DollarSign className="h-8 w-8 text-green-500" />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">
-                          Total Bookings
-                        </p>
-                        <p className="text-2xl font-bold">
-                          {analytics.totalBookings}
-                        </p>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">
+                            Total Bookings
+                          </p>
+                          <p className="text-2xl font-bold">
+                            {analytics.totalBookings}
+                          </p>
+                        </div>
+                        <Calendar className="h-8 w-8 text-blue-500" />
                       </div>
-                      <Calendar className="h-8 w-8 text-blue-500" />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">
-                          Average Occupancy
-                        </p>
-                        <p className="text-2xl font-bold">
-                          {analytics.averageOccupancy}%
-                        </p>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">
+                            Average Occupancy
+                          </p>
+                          <p className="text-2xl font-bold">
+                            {analytics.averageOccupancy}%
+                          </p>
+                        </div>
+                        <TrendingUp className="h-8 w-8 text-purple-500" />
                       </div>
-                      <TrendingUp className="h-8 w-8 text-purple-500" />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">
-                          Reviews
-                        </p>
-                        <p className="text-2xl font-bold">
-                          {analytics.totalReviews}
-                        </p>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">
+                            Reviews
+                          </p>
+                          <p className="text-2xl font-bold">
+                            {analytics.totalReviews}
+                          </p>
+                        </div>
+                        <Star className="h-8 w-8 text-yellow-500" />
                       </div>
-                      <Star className="h-8 w-8 text-yellow-500" />
-                    </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="p-6 text-sm text-gray-600">
+                    Select a hotel to view analytics.
                   </CardContent>
                 </Card>
-              </div>
+              )}
 
               <Card>
                 <CardHeader>
                   <CardTitle>Top Performing Hotels by Revenue</CardTitle>
-                  <CardDescription>Ranking of your hotels by performance</CardDescription>
+                  <CardDescription>
+                    Ranking of your hotels by performance
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {(analytics?.topPerformingHotels ?? []).map(
-                      (hotel: any, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
-                              {index + 1}
+                {selectedHotel?.id && analytics ? (
+                  <CardContent>
+                    <div className="space-y-4">
+                      {(analytics?.topPerformingHotels ?? []).map(
+                        (hotel: any, index: number) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold">{hotel.name}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {hotel.bookings} bookings
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h4 className="font-semibold">{hotel.name}</h4>
-                              <p className="text-sm text-gray-600">
-                                {hotel.bookings} bookings
+                            <div className="text-right">
+                              <p className="font-semibold">
+                                {formatCurrency(hotel.revenue)}
                               </p>
+                              <p className="text-sm text-gray-600">revenue</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold">
-                              {formatCurrency(hotel.revenue)}
-                            </p>
-                            <p className="text-sm text-gray-600">revenue</p>
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </CardContent>
+                        )
+                      )}
+                    </div>
+                  </CardContent>
+                ) : (
+                  <CardContent className="p-6 text-sm text-gray-600">
+                    No analytics available.
+                  </CardContent>
+                )}
               </Card>
             </div>
           )}
@@ -1157,7 +1327,9 @@ export default function AdminHotelPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Reservations</CardTitle>
-                  <CardDescription>View and update reservation status</CardDescription>
+                  <CardDescription>
+                    View and update reservation status
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -1166,7 +1338,8 @@ export default function AdminHotelPage() {
                       value={selectedHotel?.id ?? ""}
                       onChange={(e) => {
                         const id = e.target.value;
-                        const h = hotels.find((x: any) => String(x.id) === id) || null;
+                        const h =
+                          hotels.find((x: any) => String(x.id) === id) || null;
                         setSelectedHotel(h);
                       }}
                     >
@@ -1190,7 +1363,9 @@ export default function AdminHotelPage() {
                     </select>
                   </div>
                   {!selectedHotel?.id ? (
-                    <div className="text-sm text-gray-600">Select a hotel to view its reservations.</div>
+                    <div className="text-sm text-gray-600">
+                      Select a hotel to view its reservations.
+                    </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="min-w-full text-sm">
@@ -1207,43 +1382,84 @@ export default function AdminHotelPage() {
                         </thead>
                         <tbody>
                           {(reservations as any[]).map((r: any) => (
-                            <tr key={String(r._id || r.id)} className="border-b">
-                              <td className="py-2 pr-3">{r.guestInfo?.firstName} {r.guestInfo?.lastName}</td>
-                              <td className="py-2 pr-3">{new Date(r.checkIn).toLocaleDateString()} – {new Date(r.checkOut).toLocaleDateString()}</td>
+                            <tr
+                              key={String(r._id || r.id)}
+                              className="border-b"
+                            >
+                              <td className="py-2 pr-3">
+                                {r.guestInfo?.firstName} {r.guestInfo?.lastName}
+                              </td>
+                              <td className="py-2 pr-3">
+                                {new Date(r.checkIn).toLocaleDateString()} –{" "}
+                                {new Date(r.checkOut).toLocaleDateString()}
+                              </td>
                               <td className="py-2 pr-3">{r.quantity}</td>
-                              <td className="py-2 pr-3">{r.guests?.total ?? ((r.guests?.adults || 0) + (r.guests?.children || 0))}</td>
-                              <td className="py-2 pr-3">₪{(r.totalPrice || 0).toLocaleString()}</td>
+                              <td className="py-2 pr-3">
+                                {r.guests?.total ??
+                                  (r.guests?.adults || 0) +
+                                    (r.guests?.children || 0)}
+                              </td>
+                              <td className="py-2 pr-3">
+                                ₪{(r.totalPrice || 0).toLocaleString()}
+                              </td>
                               <td className="py-2 pr-3">{r.status}</td>
                               <td className="py-2 pr-3">
                                 <div className="flex gap-2">
-                      <Button
+                                  <Button
                                     size="sm"
                                     variant="secondary"
-                                    onClick={() => updateReservationStatus(String(r._id || r.id), "CONFIRMED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
+                                    onClick={() =>
+                                      updateReservationStatus(
+                                        String(r._id || r.id),
+                                        "CONFIRMED"
+                                      ).then(() =>
+                                        queryClient.invalidateQueries({
+                                          queryKey: ["owner-reservations"],
+                                        })
+                                      )
+                                    }
                                   >
                                     Confirm
                                   </Button>
                                   <Button
                                     size="sm"
                                     className="bg-green-600 hover:bg-green-700 text-white"
-                                    onClick={() => updateReservationStatus(String(r._id || r.id), "COMPLETED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
+                                    onClick={() =>
+                                      updateReservationStatus(
+                                        String(r._id || r.id),
+                                        "COMPLETED"
+                                      ).then(() =>
+                                        queryClient.invalidateQueries({
+                                          queryKey: ["owner-reservations"],
+                                        })
+                                      )
+                                    }
                                   >
                                     Complete
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => updateReservationStatus(String(r._id || r.id), "CANCELLED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
+                                    onClick={() =>
+                                      updateReservationStatus(
+                                        String(r._id || r.id),
+                                        "CANCELLED"
+                                      ).then(() =>
+                                        queryClient.invalidateQueries({
+                                          queryKey: ["owner-reservations"],
+                                        })
+                                      )
+                                    }
                                   >
                                     Cancel
-                      </Button>
-                    </div>
+                                  </Button>
+                                </div>
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
-                  </div>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -1264,7 +1480,8 @@ export default function AdminHotelPage() {
                       value={selectedHotel?.id ?? ""}
                       onChange={(e) => {
                         const id = e.target.value;
-                        const h = hotels.find((x: any) => String(x.id) === id) || null;
+                        const h =
+                          hotels.find((x: any) => String(x.id) === id) || null;
                         setSelectedHotel(h);
                       }}
                     >
@@ -1277,7 +1494,9 @@ export default function AdminHotelPage() {
                     </select>
                   </div>
                   {!selectedHotel?.id ? (
-                    <div className="text-sm text-gray-600">Select a hotel to view its reviews.</div>
+                    <div className="text-sm text-gray-600">
+                      Select a hotel to view its reviews.
+                    </div>
                   ) : (
                     <AdminHotelReviewsList hotelId={String(selectedHotel.id)} />
                   )}
