@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import mongoose, { Types } from "mongoose";
 import { z } from "zod";
 import { ReservationModel } from "../models/Reservation";
@@ -7,22 +7,19 @@ import { AuthedRequest } from "../middlewares/auth";
 
 const createReservationSchema = z.object({
   hotelId: z.string().min(1),
-  roomType: z.string().min(1), // "STANDARD", "SUPERIOR", "DELUXE", etc.
-  roomName: z.string().min(1), // "STANDARD CITY VIEW", "FAMILY SUITE", etc.
+  roomType: z.string().min(1),
+  roomName: z.string().min(1),
   roomId: z.string().min(1),
   quantity: z.number().int().positive(),
 
-  // Guest details
   guests: z.object({
     adults: z.number().int().positive(),
     children: z.number().int().min(0).default(0),
   }),
 
-  // Dates
   checkIn: z.union([z.string(), z.date()]),
   checkOut: z.union([z.string(), z.date()]),
 
-  // Guest information
   guestInfo: z.object({
     firstName: z.string().min(1),
     lastName: z.string().min(1),
@@ -35,7 +32,6 @@ const createReservationSchema = z.object({
     departureTime: z.string().optional(),
   }),
 
-  // Children details
   children: z
     .array(
       z.object({
@@ -46,7 +42,6 @@ const createReservationSchema = z.object({
     )
     .optional(),
 
-  // Special requests
   specialRequests: z
     .array(
       z.object({
@@ -57,7 +52,6 @@ const createReservationSchema = z.object({
     )
     .optional(),
 
-  // Payment information
   payment: z
     .object({
       method: z
@@ -80,7 +74,6 @@ const createReservationSchema = z.object({
     })
     .optional(),
 
-  // Policies
   policies: z
     .object({
       freeCancellation: z.boolean().default(true),
@@ -137,7 +130,6 @@ export async function createReservation(
       return res.status(400).json({ error: "Room not found in hotel" });
     }
 
-    // Check availability
     const hotelObjectId = new Types.ObjectId(dto.hotelId);
     const overlap = await ReservationModel.aggregate<{ qty: number }>([
       {
@@ -155,10 +147,7 @@ export async function createReservation(
 
     const alreadyBooked = overlap[0]?.qty ?? 0;
     const totalRooms =
-      roomInfo.totalRooms ??
-      roomInfo.availableRooms ??
-      roomInfo.totalUnits ??
-      0;
+      roomInfo.totalRooms ?? roomInfo.availableRooms ?? roomInfo.totalUnits ?? 0;
     const availableNow = Math.max(0, totalRooms - alreadyBooked);
 
     if (dto.quantity > availableNow) {
@@ -169,18 +158,16 @@ export async function createReservation(
       });
     }
 
-    // Calculate pricing
     const nights = Math.ceil(
       (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
     );
     const basePrice = roomInfo.pricePerNight * nights * dto.quantity;
 
-    // Calculate children costs
     let childrenCost = 0;
     if (dto.children) {
       childrenCost =
         dto.children.reduce((total, child) => {
-          return total + (child.needsCot ? 70 : 0); // ₪70 per cot per night
+          return total + (child.needsCot ? 70 : 0);
         }, 0) * nights;
     }
 
@@ -245,7 +232,14 @@ export async function listReservations(
     const wantsAll =
       (req.query.all === "1" || req.query.all === "true") &&
       isAdmin(req.user?.role);
-    const filter = wantsAll ? {} : { user: req.user!.id };
+    const q = req.query as any;
+    const filter: any = wantsAll ? {} : { user: req.user!.id };
+    if (q.status) filter.status = q.status;
+    if (q.hotelId && isAdmin(req.user?.role)) {
+      try {
+        filter.hotel = new mongoose.Types.ObjectId(String(q.hotelId));
+      } catch {}
+    }
 
     const list = await ReservationModel.find(filter)
       .sort({ createdAt: -1 })
@@ -449,7 +443,6 @@ export async function updateReservation(
       return res.status(404).json({ error: "Reservation not found" });
     }
 
-    // Check permissions
     if (
       !isAdmin(req.user?.role) &&
       String(reservation.user) !== String(req.user!.id)
@@ -457,10 +450,8 @@ export async function updateReservation(
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    // Update fields
     Object.assign(reservation, dto);
 
-    // Handle date updates
     if (dto.checkIn) {
       reservation.checkIn = new Date(dto.checkIn as any);
     }
@@ -468,16 +459,13 @@ export async function updateReservation(
       reservation.checkOut = new Date(dto.checkOut as any);
     }
 
-    // Recalculate pricing if dates or quantity changed
     if (dto.checkIn || dto.checkOut || dto.quantity) {
       const nights = Math.ceil(
         (reservation.checkOut.getTime() - reservation.checkIn.getTime()) /
           (1000 * 60 * 60 * 24)
       );
-      const basePrice =
-        reservation.pricePerNight * nights * reservation.quantity;
+      const basePrice = reservation.pricePerNight * nights * reservation.quantity;
 
-      // Recalculate children costs
       let childrenCost = 0;
       if (reservation.children) {
         childrenCost =
@@ -615,7 +603,6 @@ export async function addSpecialRequest(
       return res.status(404).json({ error: "Reservation not found" });
     }
 
-    // Check permissions
     if (
       !isAdmin(req.user?.role) &&
       String(reservation.user) !== String(req.user!.id)
@@ -705,3 +692,5 @@ export async function deleteReservation(
     next(err);
   }
 }
+
+

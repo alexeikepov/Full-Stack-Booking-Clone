@@ -74,9 +74,18 @@ const meals = (h: Hotel) => {
   const fromField = new Set<string>(
     toStringArray((h as any).meals).map((s) => s.toLowerCase())
   );
-  const c = catsSet(h);
-  if (c.has("breakfast included")) fromField.add("breakfast included");
-  if (c.has("all-inclusive")) fromField.add("all-inclusive");
+  // derive meals from categories; categories may be pipe-separated strings
+  const rawCats = toStringArray((h as any).categories);
+  for (const raw of rawCats) {
+    const parts = String(raw)
+      .split("|")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    for (const p of parts) {
+      if (p === "breakfast included") fromField.add("breakfast included");
+      if (p === "all-inclusive" || p === "all inclusive") fromField.add("all-inclusive");
+    }
+  }
   return fromField;
 };
 
@@ -145,11 +154,13 @@ function categoriesFacet(hotels: Hotel[]): FacetGroup {
 
 function selectedCategoryTokens(selected: FiltersState["selected"]): string[] {
   const tokens: string[] = [];
-  for (const [, set] of Object.entries(selected)) {
-    if (!set) continue;
-    for (const id of Array.from(set)) {
-      if (id.startsWith("cat_")) tokens.push(id.slice(4).toLowerCase());
-    }
+  const set = selected["categories"];
+  if (!set) return tokens;
+  for (const raw of Array.from(set)) {
+    const id = String(raw);
+    const token = id.startsWith("cat_") ? id.slice(4) : id;
+    const t = token.trim().toLowerCase();
+    if (t) tokens.push(t);
   }
   return tokens;
 }
@@ -294,31 +305,38 @@ export default function SearchPage() {
           return false;
       }
 
-      if (
-        anyIn("review", (id) => {
-          const r = ratingOf(h);
-          if (id === "rv_9") return r >= 9;
-          if (id === "rv_8") return r >= 8;
-          if (id === "rv_7") return r >= 7;
-          if (id === "rv_6") return r >= 6;
-          return false;
-        }) &&
-        !(
-          (sel.review?.has("rv_9") && ratingOf(h) >= 9) ||
-          (sel.review?.has("rv_8") && ratingOf(h) >= 8) ||
-          (sel.review?.has("rv_7") && ratingOf(h) >= 7) ||
-          (sel.review?.has("rv_6") && ratingOf(h) >= 6)
-        )
-      )
-        return false;
+      if (sel.review && sel.review.size > 0) {
+        let minRequired = 0;
+        for (const raw of Array.from(sel.review)) {
+          const v = String(raw).toLowerCase();
+          if (v.includes("9")) minRequired = Math.max(minRequired, 9);
+          else if (v.includes("8")) minRequired = Math.max(minRequired, 8);
+          else if (v.includes("7")) minRequired = Math.max(minRequired, 7);
+          else if (v.includes("6")) minRequired = Math.max(minRequired, 6);
+          if (v.includes("superb")) minRequired = Math.max(minRequired, 9);
+          if (v.includes("very good")) minRequired = Math.max(minRequired, 8);
+          if (v === "good" || v.includes("good:")) minRequired = Math.max(minRequired, 7);
+          if (v.includes("pleasant")) minRequired = Math.max(minRequired, 6);
+        }
+        if (minRequired > 0 && ratingOf(h) < minRequired) return false;
+      }
 
       if (sel.stars && sel.stars.size > 0) {
-        if (
-          ![...sel.stars].some(
-            (id) => Number(id.replace("stars_", "")) === starsOf(h)
-          )
-        )
+        const hotelStarsRaw = starsOf(h);
+        const hotelStarsFloored = Math.floor(hotelStarsRaw);
+        const match = [...sel.stars].some((id) => {
+          const token = String(id).toLowerCase();
+          const val = Number(token.replace("stars_", ""));
+          if (Number.isFinite(val)) {
+            return hotelStarsFloored === val;
+          }
+          if (token.includes("plus")) {
+            const base = Number(token.replace(/[^0-9]/g, ""));
+            return Number.isFinite(base) && hotelStarsFloored >= base;
+          }
           return false;
+        });
+        if (!match) return false;
       }
 
       if (sel.ptype && sel.ptype.size > 0) {
@@ -379,28 +397,25 @@ export default function SearchPage() {
 
       if (catTokens.length > 0) {
         const cset = catsSet(h);
-        const hasAll = catTokens.every((t) => cset.has(t));
+        const catsArr = Array.from(cset);
+        const hasAll = catTokens.every((t) =>
+          catsArr.some((c) => c.includes(t))
+        );
         if (!hasAll) return false;
       }
 
-      if (
-        sel.popular?.has("popular_breakfast") &&
-        !meals(h).has("breakfast included")
-      )
-        return false;
-      if (sel.popular?.has("popular_parking") && !amens(h).includes("parking"))
-        return false;
-      if (sel.popular?.has("popular_hotels") && !typeOf(h).includes("hotel"))
-        return false;
-      if (
-        sel.popular?.has("popular_apartments") &&
-        !typeOf(h).includes("apartment")
-      )
-        return false;
-      if (sel.popular?.has("popular_review8") && ratingOf(h) < 8) return false;
-      if (sel.popular?.has("popular_hostels") && !typeOf(h).includes("hostel"))
-        return false;
-      if (sel.popular?.has("popular_review9") && ratingOf(h) < 9) return false;
+      if (sel.popular && sel.popular.size > 0) {
+        for (const raw of Array.from(sel.popular)) {
+          const v = String(raw).toLowerCase();
+          if (v.includes("breakfast") && !meals(h).has("breakfast included")) return false;
+          if (v.includes("parking") && !amens(h).includes("parking")) return false;
+          if (v.includes("hotels") && !typeOf(h).includes("hotel")) return false;
+          if (v.includes("apartments") && !typeOf(h).includes("apartment")) return false;
+          if (v.includes("hostels") && !typeOf(h).includes("hostel")) return false;
+          if (v.includes("9+") || v.includes("superb")) { if (ratingOf(h) < 9) return false; }
+          if (v.includes("8+") || v.includes("very good")) { if (ratingOf(h) < 8) return false; }
+        }
+      }
 
       return true;
     });

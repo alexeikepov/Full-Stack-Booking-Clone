@@ -4,6 +4,7 @@ import axios from "axios";
 export type CreateReviewData = {
   rating: number;
   comment: string;
+  negative?: string;
   guestName: string;
   guestCountry: string;
   categoryRatings?: {
@@ -148,41 +149,28 @@ export async function searchHotels(params: SearchHotelsParams) {
 
 // Admin Hotel management API functions
 export async function getOwnerHotels() {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.get("/api/admin-hotel/hotels", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.get("/api/admin-hotel/hotels");
   return res.data;
 }
 
 export async function createHotel(hotelData: any) {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.post("/api/admin-hotel/hotels", hotelData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.post("/api/admin-hotel/hotels", hotelData);
   return res.data;
 }
 
 export async function updateHotel(hotelId: string, hotelData: any) {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.put(`/api/admin-hotel/hotels/${hotelId}`, hotelData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.put(`/api/admin-hotel/hotels/${hotelId}`, hotelData);
   return res.data;
 }
 
 export async function deleteHotel(hotelId: string) {
-  const token = localStorage.getItem("admin_hotel_token");
-  const res = await api.delete(`/api/admin-hotel/hotels/${hotelId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await api.delete(`/api/admin-hotel/hotels/${hotelId}`);
   return res.data;
 }
 
-export async function getOwnerAnalytics() {
-  const token = localStorage.getItem("admin_hotel_token");
+export async function getOwnerAnalytics(params?: { hotelId?: string }) {
   const res = await api.get("/api/admin-hotel/analytics", {
-    headers: { Authorization: `Bearer ${token}` },
+    params,
   });
   return res.data;
 }
@@ -203,11 +191,118 @@ export async function getHotelReviews(
   return res.data;
 }
 
+// My reviews (timeline)
+export async function getMyReviews(params?: { page?: number; limit?: number }) {
+  try {
+    const res = await api.get("/api/me/reviews", { params });
+    return res.data as {
+      items: Array<{
+        _id: string;
+        hotel: { _id: string; name: string; city: string; averageRating?: number; reviewsCount?: number; media?: any[] };
+        rating: number;
+        comment?: string;
+        createdAt: string;
+        stayDate?: string;
+      }>;
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      // Fallback for older API paths
+      try {
+        const altHotelsMe = await api.get("/api/hotels/me/reviews", { params });
+        return altHotelsMe.data;
+      } catch {}
+      try {
+        const alt = await api.get("/api/reviews/my", { params });
+        return alt.data;
+      } catch {}
+      try {
+        const alt2 = await api.get("/api/reviews", { params: { ...params, me: 1 } });
+        return alt2.data;
+      } catch {}
+    }
+    throw err;
+  }
+}
+
+export async function getMe() {
+  const res = await api.get("/api/me");
+  return res.data as {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    role?: string;
+    ownerApplicationStatus?: "none" | "pending" | "approved" | "rejected";
+    genius?: { level: number; completedLast24Months: number; nextThreshold: number | null; remaining: number };
+  };
+}
+
+// ----- Search History -----
+export type LastSearch = {
+  city?: string;
+  from?: string; // ISO string
+  to?: string;   // ISO string
+  adults?: number;
+  children?: number;
+  rooms?: number;
+  createdAt?: string;
+};
+
+export async function getMyLastSearch(): Promise<LastSearch | null> {
+  try {
+    const res = await api.get("/api/me/last-search");
+    return res.data as LastSearch;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    throw err;
+  }
+}
+
+export async function saveMyLastSearch(filters: {
+  city?: string;
+  from?: string | Date;
+  to?: string | Date;
+  adults?: number;
+  children?: number;
+  rooms?: number;
+}): Promise<void> {
+  await api.post("/api/me/last-search", filters);
+}
+
+// ----- Auth (Partner) -----
+export type AuthResponse = {
+  user: { id: string; name: string; email: string; phone?: string; role?: string };
+  token: string;
+};
+
+export async function registerUser(params: { name: string; email: string; phone: string; password: string }): Promise<AuthResponse> {
+  const res = await api.post("/api/users/register", params);
+  return res.data as AuthResponse;
+}
+
+export async function loginUser(params: { email: string; password: string }): Promise<AuthResponse> {
+  const res = await api.post("/api/users/login", params);
+  return res.data as AuthResponse;
+}
+
 export async function createReview(
   hotelId: string,
   reviewData: CreateReviewData
 ) {
   const res = await api.post(`/api/hotels/${hotelId}/reviews`, reviewData);
+  return res.data;
+}
+
+export async function updateMyReviewForHotel(
+  hotelId: string,
+  reviewData: UpdateReviewData
+) {
+  const res = await api.patch(`/api/hotels/${hotelId}/reviews/me`, reviewData);
   return res.data;
 }
 
@@ -317,6 +412,17 @@ export async function updateReservationStatus(
   const res = await api.patch(`/api/reservations/${reservationId}/status`, {
     status,
   });
+  return res.data;
+}
+
+// -------- Reviews (Admin) ---------
+// Note: use the existing getHotelReviews defined above (/api/hotels/:id/reviews)
+
+export async function respondToReview(reviewId: string, text: string) {
+  const res = await api.post(
+    `/api/reviews/${reviewId}/response`,
+    { text }
+  );
   return res.data;
 }
 
@@ -466,4 +572,35 @@ export async function checkHotelInWishlist(hotelId: string): Promise<{
 export async function getPublicWishlist(wishlistId: string): Promise<Wishlist> {
   const res = await api.get(`/api/wishlists/public/${wishlistId}`);
   return res.data;
+}
+
+export async function getHotelById(hotelId: string) {
+  const res = await api.get(`/api/hotels/${hotelId}`);
+  return res.data;
+}
+
+export async function setHotelVisibility(hotelId: string, isVisible: boolean) {
+  const res = await api.patch(`/api/admin-hotel/hotels/${hotelId}/visibility`, { isVisible });
+  return res.data as { id: string; isVisible: boolean };
+}
+
+// ----- Platform owner: admin applications -----
+export async function getAdminApplications(params?: { status?: "pending" | "approved" | "rejected" }) {
+  const res = await api.get("/api/users/admin-applications", { params });
+  return res.data as { items: Array<{ _id: string; name: string; email: string; phone: string; ownerApplicationStatus: string; role: string; requestedOwner: boolean; createdAt: string }> };
+}
+
+export async function approveAdminApplication(userId: string) {
+  const res = await api.patch(`/api/users/${userId}/admin-approve`, { action: "approve" });
+  return res.data as { id: string; role: string; ownerApplicationStatus: string };
+}
+
+export async function rejectAdminApplication(userId: string) {
+  const res = await api.patch(`/api/users/${userId}/admin-approve`, { action: "reject" });
+  return res.data as { id: string; role: string; ownerApplicationStatus: string };
+}
+
+export async function requestAdminRole() {
+  const res = await api.post("/api/users/request-admin");
+  return res.data as { ok: true; ownerApplicationStatus: string };
 }

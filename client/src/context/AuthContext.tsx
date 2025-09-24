@@ -1,9 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
+import { getMe } from "@/lib/api";
 type User = {
   id: string;
   name: string;
   email: string;
+  genius?: {
+    level: number;
+    completedLast24Months: number;
+    nextThreshold: number | null;
+    remaining: number;
+  };
 };
 
 type AuthContextType = {
@@ -24,7 +31,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (stored) {
       setUser(JSON.parse(stored));
     }
-    setIsLoading(false);
+    (async () => {
+      try {
+        const me = await getMe();
+        const next = { id: me.id, name: me.name, email: me.email, genius: me.genius } as User;
+        setUser(next);
+        localStorage.setItem("user", JSON.stringify(next));
+      } catch {
+        // ignore if unauthorized
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   }, []);
 
   const signIn = (newUser: User) => {

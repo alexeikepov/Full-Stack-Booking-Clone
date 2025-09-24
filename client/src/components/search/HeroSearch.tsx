@@ -8,6 +8,7 @@ import { GuestsPopover } from "./GuestsPopover";
 import type { PickerValue } from "./types";
 import type { DateRange } from "react-day-picker";
 import { useSearchStore } from "@/stores/search";
+import { getMyLastSearch, saveMyLastSearch } from "@/lib/api";
 
 export default function HeroSearch() {
   const [params, setParams] = useSearchParams();
@@ -27,6 +28,36 @@ export default function HeroSearch() {
     setSearchParams,
   } = useSearchStore();
 
+  // Load last search from backend (fallback to local persisted store)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const last = await getMyLastSearch();
+        if (mounted && last) {
+          if (last.city) setCity(last.city);
+          if (last.adults != null) setAdults(last.adults);
+          if (last.children != null) setChildren(last.children);
+          if (last.rooms != null) setRooms(last.rooms);
+          if (last.from || last.to) {
+            setPicker({
+              mode: "calendar",
+              range: {
+                from: last.from ? new Date(last.from) : undefined,
+                to: last.to ? new Date(last.to) : undefined,
+              },
+            });
+          }
+        }
+      } catch {
+        // silently ignore; Zustand persist will already hydrate defaults
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [setCity, setAdults, setChildren, setRooms, setPicker]);
+
   useEffect(() => {
     setSearchParams(params);
   }, [params, setSearchParams]);
@@ -38,6 +69,21 @@ export default function HeroSearch() {
       children: String(children),
       rooms: String(rooms),
     };
+
+    // Save to backend history (fire and forget)
+    (async () => {
+      try {
+        const r: DateRange | undefined = picker.mode === "calendar" ? picker.range : undefined;
+        await saveMyLastSearch({
+          city,
+          adults,
+          children,
+          rooms,
+          from: r?.from ? r.from.toISOString() : undefined,
+          to: r?.to ? r.to.toISOString() : undefined,
+        });
+      } catch {}
+    })();
 
     if (picker.mode === "calendar") {
       const r: DateRange | undefined = picker.range;

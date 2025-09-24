@@ -1,6 +1,7 @@
 // src/pages/AdminSignInPage.tsx
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getMe, loginUser } from "@/lib/api";
 
 type Step = "username" | "password";
 
@@ -54,15 +55,28 @@ export default function AdminSignInPage() {
 
   const [showBanner, setShowBanner] = useState(false);
 
-  const onNext = () => {
+  const onNext = async () => {
     if (step === "username") {
       if (!username.trim()) return;
       setStep("password");
       return;
     }
-    // step === "password"
     if (!password.trim()) return;
-    navigate("/AdminHotel");
+    try {
+      const auth = await loginUser({ email: username, password });
+      localStorage.setItem("auth_token", auth.token);
+      localStorage.setItem("user", JSON.stringify(auth.user));
+      const me = await getMe();
+      if (me.role === "HOTEL_ADMIN") {
+        navigate("/AdminHotel");
+      } else if (me.ownerApplicationStatus === "pending") {
+        navigate("/owner/waiting-approval");
+      } else {
+        navigate("/partner-register");
+      }
+    } catch (e) {
+      alert("Sign in failed");
+    }
   };
 
   const isNextDisabled =
@@ -113,12 +127,12 @@ export default function AdminSignInPage() {
 
           {step === "username" && (
             <>
-              <label className="label">Username</label>
+              <label className="label">Username or email</label>
               <input
                 className="input"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Also known as 'Login name' and 'Login ID'"
+                placeholder="Enter your username or email"
               />
             </>
           )}

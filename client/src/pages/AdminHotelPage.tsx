@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import {
   Card,
   CardContent,
@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import EditHotelDialog from "@/components/EditHotelDialog";
-import AddHotelDialog from "@/components/AddHotelDialog";
+// import AddHotelDialog from "@/components/AddHotelDialog"; // removed, using EditHotelDialog for full add
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import AdminHeader from "@/components/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +37,11 @@ import {
   updateHotel,
   deleteHotel,
   getOwnerAnalytics,
+  getReservations,
+  updateReservationStatus,
+  getHotelReviews,
+  respondToReview,
+  setHotelVisibility,
 } from "@/lib/api";
 
 // Mock data for hotel owner's hotels
@@ -118,12 +123,270 @@ const mockAnalytics = {
   ],
 };
 
+function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
+  const queryClient = useQueryClient();
+  const { data: reviews = [], isLoading } = useQuery({
+    queryKey: ["owner-hotel-reviews", hotelId],
+    queryFn: () => getHotelReviews(hotelId, { limit: 100 }),
+    retry: false,
+  });
+
+  const [replyText, setReplyText] = useState<Record<string, string>>({});
+  const [editingResponseId, setEditingResponseId] = useState<string | null>(null);
+
+  const replyMutation = useMutation({
+    mutationFn: ({ reviewId, text }: { reviewId: string; text: string }) =>
+      respondToReview(reviewId, text),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["owner-hotel-reviews", hotelId] });
+    },
+  });
+
+  if (isLoading) {
+    return <div className="text-sm text-gray-600">Loading reviews...</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {(reviews as any[]).map((rv: any) => {
+        const createdAt = rv.createdAt ? new Date(rv.createdAt) : null;
+        const stayDate = rv.stayDate ? new Date(rv.stayDate) : null;
+        const categories = rv.categoryRatings || {};
+        const categoryEntries = Object.entries(categories).filter(([, v]) => typeof v === "number");
+
+        return (
+          <Card key={String(rv._id || rv.id)}>
+            <CardContent className="p-5 space-y-4">
+              {/* Header */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-md bg-blue-600 text-white flex items-center justify-center font-semibold">
+                      {Number(rv.rating)?.toFixed?.(1) ?? rv.rating}
+                    </div>
+                    <Badge variant="secondary">Rating</Badge>
+                  </div>
+                  <span className="font-medium">
+                    {rv.guestName || rv.user?.name || "Guest"}
+                    {rv.guestCountry ? ` • ${rv.guestCountry}` : ""}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-500 flex gap-3">
+                  {createdAt && <span>Posted {createdAt.toLocaleDateString()}</span>}
+                  {stayDate && <span>Stayed {stayDate.toLocaleDateString()}</span>}
+                  {rv.roomType && <span>Room: {rv.roomType}</span>}
+                  {rv.travelType && <span>Type: {rv.travelType}</span>}
+                </div>
+              </div>
+
+              {/* Content */}
+              {(rv.comment || rv.negative) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {rv.comment && (
+                    <div className="rounded-lg border p-3">
+                      <div className="text-sm font-medium mb-1">Positive</div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">{rv.comment}</div>
+                    </div>
+                  )}
+                  {rv.negative && (
+                    <div className="rounded-lg border p-3">
+                      <div className="text-sm font-medium mb-1">Negative</div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">{rv.negative}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Categories */}
+              {categoryEntries.length > 0 && (
+                <div>
+                  <div className="text-sm font-medium mb-2">Category ratings</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+                    {categoryEntries.map(([key, val]) => (
+                      <div key={key} className="bg-gray-50 rounded p-2 text-center">
+                        <div className="text-xs text-gray-500 capitalize">{key}</div>
+                        <div className="text-sm font-semibold">{Number(val as number).toFixed(1)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Response */}
+            {rv.hotelResponse ? (
+              <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-medium">Hotel response</div>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      setEditingResponseId(String(rv._id || rv.id));
+                      setReplyText((m) => ({ ...m, [String(rv._id || rv.id)]: rv.hotelResponse?.text || "" }));
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </div>
+                {editingResponseId === String(rv._id || rv.id) ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      className="flex-1 rounded border px-2 py-1 text-sm"
+                      placeholder="Edit response"
+                      value={replyText[String(rv._id || rv.id)] || ""}
+                      onChange={(e) =>
+                        setReplyText((m) => ({ ...m, [String(rv._id || rv.id)]: e.target.value }))
+                      }
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        replyMutation.mutate({
+                          reviewId: String(rv._id || rv.id),
+                          text: replyText[String(rv._id || rv.id)] || "",
+                        }, {
+                          onSuccess: () => setEditingResponseId(null),
+                        })
+                      }
+                      disabled={!replyText[String(rv._id || rv.id)] || replyMutation.isPending}
+                    >
+                      Save
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingResponseId(null)}>Cancel</Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="whitespace-pre-wrap">{rv.hotelResponse.text}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {rv.hotelResponse.respondedAt
+                        ? new Date(rv.hotelResponse.respondedAt).toLocaleString()
+                        : null}
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+                <div className="flex items-center gap-2">
+                  <input
+                    className="flex-1 rounded border px-2 py-1 text-sm"
+                    placeholder="Write a response to this review"
+                    value={replyText[String(rv._id || rv.id)] || ""}
+                    onChange={(e) =>
+                      setReplyText((m) => ({ ...m, [String(rv._id || rv.id)]: e.target.value }))
+                    }
+                  />
+                  <Button
+                    size="sm"
+                    disabled={!replyText[String(rv._id || rv.id)] || replyMutation.isPending}
+                    onClick={() =>
+                      replyMutation.mutate({
+                        reviewId: String(rv._id || rv.id),
+                        text: replyText[String(rv._id || rv.id)],
+                      })
+                    }
+                  >
+                  Reply
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+function HotelKpis({ hotelId }: { hotelId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["owner-analytics", hotelId],
+    queryFn: () => getOwnerAnalytics({ hotelId }),
+    staleTime: 60_000,
+  });
+
+  const currency = (amount: number) =>
+    new Intl.NumberFormat("he-IL", {
+      style: "currency",
+      currency: "ILS",
+      minimumFractionDigits: 0,
+    }).format(Number.isFinite(amount) ? amount : 0);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="bg-gray-50 p-3 rounded-lg h-[66px] animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  const totalBookings = Number(data?.totalBookings || 0);
+  const totalRevenue = Number(data?.totalRevenue || 0);
+  const averageOccupancy = Number(data?.averageOccupancy || 0);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Calendar className="h-4 w-4" />
+          Bookings
+        </div>
+        <div className="text-lg font-semibold">{totalBookings}</div>
+      </div>
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <DollarSign className="h-4 w-4" />
+          Revenue
+        </div>
+        <div className="text-lg font-semibold">{currency(totalRevenue)}</div>
+      </div>
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <TrendingUp className="h-4 w-4" />
+          Occupancy
+        </div>
+        <div className="text-lg font-semibold">{averageOccupancy}%</div>
+      </div>
+    </div>
+  );
+}
+
+function HotelKpisMini({ hotelId, formatCurrency }: { hotelId: string; formatCurrency: (n: number) => string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["owner-analytics-mini", hotelId],
+    queryFn: () => getOwnerAnalytics({ hotelId }),
+    staleTime: 60_000,
+  });
+  const totalBookings = Number(data?.totalBookings || 0);
+  const totalRevenue = Number(data?.totalRevenue || 0);
+  const averageOccupancy = Number(data?.averageOccupancy || 0);
+  return (
+    <>
+      <div className="bg-gray-50 p-2 rounded-md">
+        <div className="text-[11px] text-gray-500">Bookings</div>
+        <div className="text-base font-semibold">{isLoading ? "…" : totalBookings}</div>
+      </div>
+      <div className="bg-gray-50 p-2 rounded-md">
+        <div className="text-[11px] text-gray-500">Revenue</div>
+        <div className="text-base font-semibold">{isLoading ? "…" : formatCurrency(totalRevenue)}</div>
+      </div>
+      <div className="bg-gray-50 p-2 rounded-md">
+        <div className="text-[11px] text-gray-500">Occupancy</div>
+        <div className="text-base font-semibold">{isLoading ? "…" : `${averageOccupancy}%`}</div>
+      </div>
+    </>
+  );
+}
+
 export default function AdminHotelPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("hotels");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [selectedHotel, setSelectedHotel] = useState<any>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [reservationStatus, setReservationStatus] = useState<string>("");
   const { setShowTabs } = useNavigationTabsStore();
   const queryClient = useQueryClient();
 
@@ -140,9 +403,23 @@ export default function AdminHotelPage() {
   });
 
   const { data: analytics = mockAnalytics } = useQuery({
-    queryKey: ["owner-analytics"],
-    queryFn: getOwnerAnalytics,
-    // Fallback to mock data if API fails
+    queryKey: ["owner-analytics", selectedHotel?.id],
+    queryFn: () => getOwnerAnalytics(selectedHotel?.id ? { hotelId: selectedHotel.id } : undefined),
+    retry: false,
+    enabled: true,
+  });
+
+  // Reservations list for selected hotel
+  const { data: reservations = [] } = useQuery({
+    queryKey: ["owner-reservations", selectedHotel?.id, reservationStatus],
+    queryFn: () =>
+      getReservations({
+        hotelId: selectedHotel?.id,
+        status: reservationStatus || undefined,
+        limit: 200,
+        page: 1,
+      }),
+    enabled: !!selectedHotel?.id,
     retry: false,
   });
 
@@ -152,15 +429,45 @@ export default function AdminHotelPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       queryClient.invalidateQueries({ queryKey: ["owner-analytics"] });
+      setIsEditDialogOpen(false);
+      setIsAddDialogOpen(false);
+      setSelectedHotel(null);
+    },
+    onError: (err: any) => {
+      console.error("Create hotel failed", err?.response?.data || err);
+      alert("Failed to create hotel. Please check required fields.");
     },
   });
 
   const updateHotelMutation = useMutation({
     mutationFn: ({ hotelId, hotelData }: { hotelId: string; hotelData: any }) =>
       updateHotel(hotelId, hotelData),
-    onSuccess: () => {
+    onSuccess: (updated: any, vars) => {
+      // Optimistically update cache
+      queryClient.setQueryData(["owner-hotels"], (prev: any) => {
+        if (!Array.isArray(prev)) return prev;
+        return prev.map((h: any) =>
+          String(h.id) === String(vars.hotelId)
+            ? {
+                ...h,
+                name: updated?.name ?? vars.hotelData?.name ?? h.name,
+                city: updated?.city ?? h.city,
+                address: updated?.address ?? h.address,
+                status: updated?.status ?? vars.hotelData?.status ?? h.status,
+              }
+            : h
+        );
+      });
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       queryClient.invalidateQueries({ queryKey: ["owner-analytics"] });
+      setIsEditDialogOpen(false);
+      setIsAddDialogOpen(false);
+      setSelectedHotel(null);
+    },
+    onError: (err: any) => {
+      console.error("Update hotel failed", err?.response?.data || err);
+      alert("Failed to save changes. Please review fields and try again.");
+      queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
     },
   });
 
@@ -182,9 +489,18 @@ export default function AdminHotelPage() {
     };
   }, [setShowTabs]);
 
+  // Preselect first hotel when list loads (skip while adding/new dialog open)
+  useEffect(() => {
+    if (!isEditDialogOpen && !isAdding && !selectedHotel && Array.isArray(hotels) && hotels.length > 0) {
+      setSelectedHotel(hotels[0]);
+    }
+  }, [hotels, selectedHotel, isEditDialogOpen, isAdding]);
+
   const handleAddHotel = () => {
+    setIsAdding(true);
     setSelectedHotel(null);
-    setIsAddDialogOpen(true);
+    setIsEditDialogOpen(true);
+    setIsAddDialogOpen(false);
   };
 
   const handleEditHotel = (hotel: any) => {
@@ -192,48 +508,178 @@ export default function AdminHotelPage() {
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteHotel = (id: number) => {
-    deleteHotelMutation.mutate(id.toString());
+  const handleDeleteHotel = (id: string) => {
+    deleteHotelMutation.mutate(id);
   };
 
-  const handleToggleHotelStatus = (id: number) => {
-    const hotel = hotels.find((h: any) => h.id === id);
-    if (hotel) {
-      const newStatus = hotel.status === "active" ? "inactive" : "active";
-      updateHotelMutation.mutate({
-        hotelId: id.toString(),
-        hotelData: { ...hotel, status: newStatus },
+  const handleToggleHotelStatus = (id: any) => {
+    const hotel = (hotels as any[]).find((h: any) => String(h.id) === String(id));
+    if (!hotel) return;
+    const currentlyVisible = hotel.isVisible !== false;
+    const nextVisible = !currentlyVisible;
+
+    // Optimistic update
+    queryClient.setQueryData(["owner-hotels"], (prev: any) => {
+      if (!Array.isArray(prev)) return prev;
+      return prev.map((h: any) =>
+        String(h.id) === String(id)
+          ? { ...h, isVisible: nextVisible, status: nextVisible && h.approvalStatus === "APPROVED" ? "active" : "inactive" }
+          : h
+      );
+    });
+
+    setHotelVisibility(String(id), nextVisible)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
+      })
+      .catch(() => {
+        alert("Failed to change visibility.");
+        queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       });
-    }
   };
 
   const handleSaveHotel = (updatedHotel: any) => {
-    if (updatedHotel.id) {
-      // Edit existing hotel
+    const id = updatedHotel?.id; // only trust explicit id from dialog
+    const sanitizeRooms = (rooms: any[]) =>
+      (rooms || []).map((r) => {
+        const pricePerNight = Number(r.pricePerNight ?? 0);
+        const photos = Array.isArray(r.photos)
+          ? r.photos
+          : Array.isArray(r.media)
+          ? r.media.map((m: any) => (typeof m === "string" ? m : m?.url)).filter((x: any) => typeof x === "string" && x)
+          : [];
+        return {
+          _id: r._id,
+          name: r.name || "",
+          roomType: r.roomType || r.type || "STANDARD",
+          capacity: Number(r.capacity ?? r.maxAdults ?? 1),
+          maxAdults: Number(r.maxAdults ?? 0),
+          maxChildren: Number(r.maxChildren ?? 0),
+          pricePerNight,
+          totalRooms: Number(r.totalRooms ?? r.totalUnits ?? 1),
+          sizeSqm: Number(r.sizeSqm ?? 0),
+          bedrooms: Number(r.bedrooms ?? 0),
+          bathrooms: Number(r.bathrooms ?? 1),
+          features: Array.isArray(r.features)
+            ? r.features
+            : typeof r.features === "string"
+            ? r.features.split(",").map((s: string) => s.trim()).filter(Boolean)
+            : [],
+          photos,
+          media: photos,
+          pricing: {
+            basePrice: pricePerNight,
+            currency: "₪",
+            includesBreakfast: Boolean(r?.pricing?.includesBreakfast ?? false),
+            freeCancellation: Boolean(r?.pricing?.freeCancellation ?? true),
+            noPrepayment: Boolean(r?.pricing?.noPrepayment ?? true),
+            priceMatch: Boolean(r?.pricing?.priceMatch ?? true),
+          },
+        };
+      });
+
+    const deepClean = (obj: any): any => {
+      if (obj == null) return undefined as any;
+      if (Array.isArray(obj)) return obj.map(deepClean).filter((v) => v !== undefined);
+      if (typeof obj === "object") {
+        const out: any = {};
+        Object.entries(obj).forEach(([k, v]) => {
+          const cleaned = deepClean(v as any);
+          if (
+            cleaned !== undefined &&
+            !(typeof cleaned === "string" && cleaned.trim() === "") &&
+            !(Array.isArray(cleaned) && cleaned.length === 0)
+          ) {
+            out[k] = cleaned;
+          }
+        });
+        return out;
+      }
+      return obj;
+    };
+
+    const loc = updatedHotel.location || selectedHotel?.location;
+    const validLocation = loc && typeof loc.lat === "number" && typeof loc.lng === "number" && !Number.isNaN(loc.lat) && !Number.isNaN(loc.lng);
+
+    const baseFacilities = {
+      ...(selectedHotel?.facilities || {}),
+      ...((updatedHotel.facilities as any) || {}),
+      languagesSpoken: updatedHotel.languagesSpoken || (selectedHotel as any)?.facilities?.languagesSpoken || [],
+    };
+
+    // Merge and sanitize houseRules to match server schema and avoid empty required strings
+    const mergedHouseRules = {
+      ...(selectedHotel?.houseRules || {}),
+      ...((updatedHotel.houseRules as any) || {}),
+    } as any;
+    mergedHouseRules.checkIn = {
+      ...(selectedHotel?.houseRules?.checkIn || {}),
+      ...((updatedHotel.houseRules?.checkIn as any) || {}),
+    };
+    if (!mergedHouseRules.checkIn.time || String(mergedHouseRules.checkIn.time).trim() === "") {
+      mergedHouseRules.checkIn.time = "15:00";
+    }
+    mergedHouseRules.checkOut = {
+      ...(selectedHotel?.houseRules?.checkOut || {}),
+      ...((updatedHotel.houseRules?.checkOut as any) || {}),
+    };
+    if (!mergedHouseRules.checkOut.time || String(mergedHouseRules.checkOut.time).trim() === "") {
+      mergedHouseRules.checkOut.time = "11:00";
+    }
+    if (mergedHouseRules.ageRestriction) {
+      if (mergedHouseRules.ageRestriction.minimumAge === "") mergedHouseRules.ageRestriction.minimumAge = null;
+    }
+
+    const base: any = {
+      name: updatedHotel.name,
+      address: updatedHotel.address,
+      city: updatedHotel.city,
+      country: updatedHotel.country,
+      stars: Number(updatedHotel.stars ?? 0),
+      shortDescription: updatedHotel.shortDescription,
+      description: updatedHotel.description,
+      facilities: deepClean(baseFacilities),
+      propertyHighlights: deepClean(updatedHotel.propertyHighlights || selectedHotel?.propertyHighlights),
+      houseRules: deepClean(mergedHouseRules),
+      surroundings: deepClean(updatedHotel.surroundings || selectedHotel?.surroundings),
+      overview: deepClean(updatedHotel.overview || selectedHotel?.overview),
+      mostPopularFacilities: Array.isArray(updatedHotel.mostPopularFacilities) ? updatedHotel.mostPopularFacilities : (selectedHotel?.mostPopularFacilities || []),
+      categories: Array.isArray(updatedHotel.categories) ? updatedHotel.categories : (selectedHotel?.categories || []),
+      travellersQuestions: deepClean(updatedHotel.travellersQuestions || selectedHotel?.travellersQuestions || []),
+      media: Array.isArray(updatedHotel.media)
+        ? updatedHotel.media
+        : Array.isArray(updatedHotel.images)
+        ? updatedHotel.images
+        : [],
+      status: updatedHotel.status || selectedHotel?.status,
+    };
+
+    if (validLocation) base.location = loc;
+
+    const mappedRooms = sanitizeRooms(updatedHotel.rooms || []);
+    if (mappedRooms.length > 0) base.rooms = mappedRooms;
+
+    if (id) {
       updateHotelMutation.mutate({
-        hotelId: updatedHotel.id.toString(),
-        hotelData: updatedHotel,
+        hotelId: String(id),
+        hotelData: base,
       });
     } else {
-      // Add new hotel
-      createHotelMutation.mutate(updatedHotel);
+      createHotelMutation.mutate(base);
     }
-    setIsEditDialogOpen(false);
-    setIsAddDialogOpen(false);
-    setSelectedHotel(null);
   };
 
   const handleCloseDialog = () => {
     setIsEditDialogOpen(false);
     setIsAddDialogOpen(false);
     setSelectedHotel(null);
+    setIsAdding(false);
   };
 
-  const filteredHotels = hotels.filter(
-    (hotel: any) =>
-      hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      hotel.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredHotels = (hotels as any[]).filter((hotel: any) => {
+    const hay = `${hotel.name || ""} ${hotel.city || ""} ${hotel.address || ""}`.toLowerCase();
+    return hay.includes(searchTerm.toLowerCase());
+  });
 
   const getStatusBadge = (status: string) => {
     const colors = {
@@ -273,7 +719,7 @@ export default function AdminHotelPage() {
         </div>
 
         <Tabs className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger
               value="hotels"
               className={`flex items-center gap-2 ${
@@ -295,14 +741,24 @@ export default function AdminHotelPage() {
               Analytics
             </TabsTrigger>
             <TabsTrigger
-              value="add-hotel"
+              value="reservations"
               className={`flex items-center gap-2 ${
-                activeTab === "add-hotel" ? "bg-white shadow-sm" : ""
+                activeTab === "reservations" ? "bg-white shadow-sm" : ""
               }`}
-              onClick={() => setActiveTab("add-hotel")}
+              onClick={() => setActiveTab("reservations")}
             >
-              <Plus className="h-4 w-4" />
-              Add Hotel
+              <Calendar className="h-4 w-4" />
+              Reservations
+            </TabsTrigger>
+            <TabsTrigger
+              value="reviews"
+              className={`flex items-center gap-2 ${
+                activeTab === "reviews" ? "bg-white shadow-sm" : ""
+              }`}
+              onClick={() => setActiveTab("reviews")}
+            >
+              <Star className="h-4 w-4" />
+              Reviews
             </TabsTrigger>
           </TabsList>
 
@@ -387,41 +843,17 @@ export default function AdminHotelPage() {
                                         {hotel.rooms}
                                       </div>
                                     </div>
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Calendar className="h-4 w-4" />
-                                        Bookings
-                                      </div>
-                                      <div className="text-lg font-semibold">
-                                        {hotel.totalBookings}
-                                      </div>
-                                    </div>
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <DollarSign className="h-4 w-4" />
-                                        Revenue
-                                      </div>
-                                      <div className="text-lg font-semibold">
-                                        {formatCurrency(hotel.revenue)}
-                                      </div>
-                                    </div>
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <TrendingUp className="h-4 w-4" />
-                                        Occupancy
-                                      </div>
-                                      <div className="text-lg font-semibold">
-                                        {hotel.occupancy}%
-                                      </div>
-                                    </div>
+                                    <Fragment>
+                                      <HotelKpis hotelId={String(hotel.id)} />
+                                    </Fragment>
                                   </div>
 
                                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                                    <span>Created: {hotel.createdAt}</span>
-                                    {hotel.lastBooking && (
                                       <span>
-                                        Last booking: {hotel.lastBooking}
+                                      Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
                                       </span>
+                                    {hotel.lastBooking && (
+                                      <span>Last booking: {hotel.lastBooking}</span>
                                     )}
                                   </div>
 
@@ -447,7 +879,7 @@ export default function AdminHotelPage() {
                                       size="sm"
                                       variant="outline"
                                       onClick={() =>
-                                        handleToggleHotelStatus(hotel.id)
+                                        handleToggleHotelStatus(String(hotel.id))
                                       }
                                     >
                                       <Eye className="h-4 w-4 mr-1" />
@@ -466,9 +898,7 @@ export default function AdminHotelPage() {
                                     <Button
                                       size="sm"
                                       variant="destructive"
-                                      onClick={() =>
-                                        handleDeleteHotel(hotel.id)
-                                      }
+                                      onClick={() => handleDeleteHotel(String(hotel.id))}
                                     >
                                       <Trash2 className="h-4 w-4 mr-1" />
                                       Delete
@@ -491,6 +921,7 @@ export default function AdminHotelPage() {
                           <CardContent className="pt-6">
                             <div className="flex justify-between items-start">
                               <div className="space-y-3 flex-1">
+                                {/* Header */}
                                 <div className="flex items-center gap-3">
                                   <h3 className="text-xl font-semibold">
                                     {hotel.name}
@@ -498,67 +929,40 @@ export default function AdminHotelPage() {
                                   {getStatusBadge(hotel.status)}
                                 </div>
 
-                                <div className="flex items-center gap-4 text-gray-600">
+                                {/* Subheader: location & rating */}
+                                <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
                                   <div className="flex items-center gap-1">
                                     <MapPin className="h-4 w-4" />
-                                    {hotel.address}
+                                    <span className="truncate max-w-[360px]">{hotel.address || hotel.city}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Star className="h-4 w-4 text-yellow-500" />
-                                    {hotel.averageRating} ({hotel.reviewsCount}{" "}
-                                    reviews)
+                                    <span className="font-medium">{hotel.averageRating ?? 0}</span>
+                                    <span className="text-gray-500">({hotel.reviewsCount} reviews)</span>
                                   </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <Building2 className="h-4 w-4" />
-                                      Rooms
+                                {/* KPIs */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                  <div className="bg-gray-50 p-2 rounded-md">
+                                    <div className="text-[11px] text-gray-500">Rooms</div>
+                                    <div className="text-base font-semibold">{hotel.rooms}</div>
                                     </div>
-                                    <div className="text-lg font-semibold">
-                                      {hotel.rooms}
-                                    </div>
-                                  </div>
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <Calendar className="h-4 w-4" />
-                                      Bookings
-                                    </div>
-                                    <div className="text-lg font-semibold">
-                                      {hotel.totalBookings}
-                                    </div>
-                                  </div>
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <DollarSign className="h-4 w-4" />
-                                      Revenue
-                                    </div>
-                                    <div className="text-lg font-semibold">
-                                      {formatCurrency(hotel.revenue)}
-                                    </div>
-                                  </div>
-                                  <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <TrendingUp className="h-4 w-4" />
-                                      Occupancy
-                                    </div>
-                                    <div className="text-lg font-semibold">
-                                      {hotel.occupancy}%
-                                    </div>
-                                  </div>
+                                  {/* Live analytics per hotel */}
+                                  <HotelKpisMini hotelId={String(hotel.id)} formatCurrency={formatCurrency} />
                                 </div>
 
-                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                  <span>Created: {hotel.createdAt}</span>
-                                  {hotel.lastBooking && (
+                                {/* Meta */}
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                                     <span>
-                                      Последнее бронирование:{" "}
-                                      {hotel.lastBooking}
+                                    Created: {hotel.createdAt ? new Date(hotel.createdAt).toLocaleString() : "—"}
                                     </span>
+                                  {hotel.lastBooking && (
+                                    <span>Last booking: {hotel.lastBooking}</span>
                                   )}
                                 </div>
 
+                                {/* Contact */}
                                 <div className="flex items-center gap-4 text-sm">
                                   {hotel.contactInfo?.phone && (
                                     <div className="flex items-center gap-1">
@@ -581,7 +985,7 @@ export default function AdminHotelPage() {
                                     size="sm"
                                     variant="outline"
                                     onClick={() =>
-                                      handleToggleHotelStatus(hotel.id)
+                                      handleToggleHotelStatus(String(hotel.id))
                                     }
                                     disabled={updateHotelMutation.isPending}
                                   >
@@ -596,7 +1000,7 @@ export default function AdminHotelPage() {
                                     onClick={() => handleEditHotel(hotel)}
                                   >
                                     <Edit className="h-4 w-4 mr-1" />
-                                    Редактировать
+                                    Edit
                                   </Button>
                                   <Button
                                     size="sm"
@@ -605,7 +1009,7 @@ export default function AdminHotelPage() {
                                     disabled={deleteHotelMutation.isPending}
                                   >
                                     <Trash2 className="h-4 w-4 mr-1" />
-                                    Удалить
+                                    Delete
                                   </Button>
                                 </div>
                               </div>
@@ -622,6 +1026,27 @@ export default function AdminHotelPage() {
 
           {activeTab === "analytics" && (
             <div className="space-y-6">
+              <div className="flex items-center justify-end">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Hotel:</span>
+                  <select
+                    className="rounded border px-2 py-1 text-sm"
+                    value={selectedHotel?.id ?? ""}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const h = hotels.find((x: any) => String(x.id) === id) || null;
+                      setSelectedHotel(h);
+                    }}
+                  >
+                    <option value="">All hotels</option>
+                    {hotels.map((h: any) => (
+                      <option key={h.id} value={h.id}>
+                        {h.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <Card>
                   <CardContent className="p-6">
@@ -691,13 +1116,11 @@ export default function AdminHotelPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Top Performing Hotels by Revenue</CardTitle>
-                  <CardDescription>
-                    Ranking of your hotels by performance
-                  </CardDescription>
+                  <CardDescription>Ranking of your hotels by performance</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {analytics.topPerformingHotels.map(
+                    {(analytics?.topPerformingHotels ?? []).map(
                       (hotel: any, index: number) => (
                         <div
                           key={index}
@@ -729,53 +1152,152 @@ export default function AdminHotelPage() {
             </div>
           )}
 
-          {activeTab === "add-hotel" && (
-            <div className="space-y-6">
+          {activeTab === "reservations" && (
+            <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Add New Hotel</CardTitle>
-                  <CardDescription>
-                    Fill in the information about the new hotel to add it to the
-                    platform
-                  </CardDescription>
+                  <CardTitle>Reservations</CardTitle>
+                  <CardDescription>View and update reservation status</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    <div className="text-center py-12">
-                      <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Add New Hotel
-                      </h3>
-                      <p className="text-gray-600 mb-6">
-                        Click the button below to open the form for adding a new
-                        hotel
-                      </p>
+                  <div className="flex flex-wrap items-center gap-3 mb-4">
+                    <select
+                      className="rounded border px-2 py-1 text-sm"
+                      value={selectedHotel?.id ?? ""}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        const h = hotels.find((x: any) => String(x.id) === id) || null;
+                        setSelectedHotel(h);
+                      }}
+                    >
+                      <option value="">Select a hotel</option>
+                      {hotels.map((h: any) => (
+                        <option key={h.id} value={h.id}>
+                          {h.name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className="rounded border px-2 py-1 text-sm"
+                      value={reservationStatus}
+                      onChange={(e) => setReservationStatus(e.target.value)}
+                    >
+                      <option value="">All statuses</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="CONFIRMED">Confirmed</option>
+                      <option value="CANCELLED">Cancelled</option>
+                      <option value="COMPLETED">Completed</option>
+                    </select>
+                  </div>
+                  {!selectedHotel?.id ? (
+                    <div className="text-sm text-gray-600">Select a hotel to view its reservations.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full text-sm">
+                        <thead>
+                          <tr className="text-left border-b">
+                            <th className="py-2 pr-3">Guest</th>
+                            <th className="py-2 pr-3">Dates</th>
+                            <th className="py-2 pr-3">Rooms</th>
+                            <th className="py-2 pr-3">Guests</th>
+                            <th className="py-2 pr-3">Total</th>
+                            <th className="py-2 pr-3">Status</th>
+                            <th className="py-2 pr-3">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(reservations as any[]).map((r: any) => (
+                            <tr key={String(r._id || r.id)} className="border-b">
+                              <td className="py-2 pr-3">{r.guestInfo?.firstName} {r.guestInfo?.lastName}</td>
+                              <td className="py-2 pr-3">{new Date(r.checkIn).toLocaleDateString()} – {new Date(r.checkOut).toLocaleDateString()}</td>
+                              <td className="py-2 pr-3">{r.quantity}</td>
+                              <td className="py-2 pr-3">{r.guests?.total ?? ((r.guests?.adults || 0) + (r.guests?.children || 0))}</td>
+                              <td className="py-2 pr-3">₪{(r.totalPrice || 0).toLocaleString()}</td>
+                              <td className="py-2 pr-3">{r.status}</td>
+                              <td className="py-2 pr-3">
+                                <div className="flex gap-2">
                       <Button
-                        onClick={handleAddHotel}
-                        size="lg"
-                        className="flex items-center gap-2"
-                      >
-                        <Plus className="h-5 w-5" />
-                        Add Hotel
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => updateReservationStatus(String(r._id || r.id), "CONFIRMED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
+                                  >
+                                    Confirm
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                    onClick={() => updateReservationStatus(String(r._id || r.id), "COMPLETED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
+                                  >
+                                    Complete
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => updateReservationStatus(String(r._id || r.id), "CANCELLED").then(() => queryClient.invalidateQueries({ queryKey: ["owner-reservations"] }))}
+                                  >
+                                    Cancel
                       </Button>
                     </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                   </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
           )}
+
+          {activeTab === "reviews" && (
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reviews</CardTitle>
+                  <CardDescription>View and reply to reviews</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3 mb-4">
+                    <select
+                      className="rounded border px-2 py-1 text-sm"
+                      value={selectedHotel?.id ?? ""}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        const h = hotels.find((x: any) => String(x.id) === id) || null;
+                        setSelectedHotel(h);
+                      }}
+                    >
+                      <option value="">Select a hotel</option>
+                      {hotels.map((h: any) => (
+                        <option key={h.id} value={h.id}>
+                          {h.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {!selectedHotel?.id ? (
+                    <div className="text-sm text-gray-600">Select a hotel to view its reviews.</div>
+                  ) : (
+                    <AdminHotelReviewsList hotelId={String(selectedHotel.id)} />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Removed separate AddHotelDialog; full add uses EditHotelDialog */}
+          {/* <AddHotelDialog
+            isOpen={isAddDialogOpen}
+            onClose={handleCloseDialog}
+            onSave={handleSaveHotel}
+          /> */}
         </Tabs>
 
         <EditHotelDialog
           isOpen={isEditDialogOpen}
           onClose={handleCloseDialog}
           hotel={selectedHotel}
-          onSave={handleSaveHotel}
-        />
-
-        <AddHotelDialog
-          isOpen={isAddDialogOpen}
-          onClose={handleCloseDialog}
           onSave={handleSaveHotel}
         />
       </div>
