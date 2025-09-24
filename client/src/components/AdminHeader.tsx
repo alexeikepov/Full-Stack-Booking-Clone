@@ -1,7 +1,11 @@
 import LanguageSelector from "@/components/LanguageSelector";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import ProfileMenu from "./ProfileMenu";
 
 export default function AdminHeader() {
+  const { user, isLoading, signOut } = useAuth();
+
   return (
     <>
       <style>{`
@@ -77,10 +81,20 @@ export default function AdminHeader() {
             </a>
             <nav className="header-nav">
               <LanguageSelector variant="header" />
-              <span>Already a partner?</span>
-             <Link to="/admin-hotel/sign-in" className="header-btn">
-              Sign in
-            </Link>
+
+              {!isLoading && !user && (
+                <>
+                  <span>Already a partner?</span>
+                  <Link to="/admin-hotel/sign-in" className="header-btn">
+                    Sign in
+                  </Link>
+                </>
+              )}
+
+              {!isLoading && user && (
+                <ProfileMenu user={user} onSignOut={signOut} />
+              )}
+
               <a href="#" className="header-btn">
                 Help
               </a>

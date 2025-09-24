@@ -14,7 +14,12 @@ import {
 type User = {
   name?: string | null;
   email?: string | null;
-  geniusLevel?: number | null;
+  genius?: {
+    level: number;
+    completedLast24Months: number;
+    nextThreshold: number | null;
+    remaining: number;
+  };
   rewardsCount?: number | null;
   creditsCount?: number | null;
 };
@@ -50,7 +55,7 @@ export default function ProfileMenu({
     );
   }, [user?.name]);
 
-  const geniusLabel = `Genius Level ${user?.geniusLevel ?? 3}`;
+  const geniusLabel = `Genius Level ${user?.genius?.level ?? 1}`;
 
   return (
     <div ref={ref} className="relative">

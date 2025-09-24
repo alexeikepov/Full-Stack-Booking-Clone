@@ -46,15 +46,6 @@ export default function HotelOverview({ hotel }: HotelOverviewProps) {
                 </p>
               </div>
             )}
-
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-6 text-gray-900">
-                Most popular facilities
-              </h2>
-              <button className="bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 hover:bg-gray-50 transition-colors">
-                Food | Popular
-              </button>
-            </div>
           </div>
 
           {/* Sidebar */}
