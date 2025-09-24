@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelById } from "@/lib/api";
+import { Utensils, User, Mountain, Star, Bus, Plane } from "lucide-react";
 
 interface HotelSurroundingsProps {
   hotelId?: string;
@@ -64,19 +65,7 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
             {/* What's nearby */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+                <User className="w-5 h-5 text-gray-600" />
                 <h3 className="text-sm font-bold text-gray-900">
                   What's nearby
                 </h3>
@@ -104,19 +93,7 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
             {/* Top attractions */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
+                <Star className="w-5 h-5 text-gray-600" />
                 <h3 className="text-sm font-bold text-gray-900">
                   Top attractions
                 </h3>
@@ -147,19 +124,7 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
             {/* Restaurants & cafes */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
-                  />
-                </svg>
+                <Utensils className="w-5 h-5 text-gray-600" />
                 <h3 className="text-sm font-bold text-gray-900">
                   Restaurants & cafes
                 </h3>
@@ -172,9 +137,19 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                       onClick={() => handleLocationClick(location.name)}
                       className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
                     >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
-                        {location.name}
-                      </span>
+                      <div className="flex items-center">
+                        {location.type && (
+                          <>
+                            <span className="text-gray-500 text-xs">
+                              {location.type}
+                            </span>
+                            <span className="text-gray-400 mx-1">•</span>
+                          </>
+                        )}
+                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                          {location.name}
+                        </span>
+                      </div>
                       <span className="text-gray-600 text-xs">
                         {location.distance}
                       </span>
@@ -187,19 +162,7 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
             {/* Natural beauty */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                  />
-                </svg>
+                <Mountain className="w-5 h-5 text-gray-600" />
                 <h3 className="text-sm font-bold text-gray-900">
                   Natural beauty
                 </h3>
@@ -212,10 +175,20 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                       onClick={() => handleLocationClick(location.name)}
                       className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
                     >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors">
-                        {location.name}
-                      </span>
-                      <span className="text-gray-600 text-sm">
+                      <div className="flex items-center">
+                        {location.type && (
+                          <>
+                            <span className="text-gray-500 text-xs">
+                              {location.type}
+                            </span>
+                            <span className="text-gray-400 mx-1">•</span>
+                          </>
+                        )}
+                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                          {location.name}
+                        </span>
+                      </div>
+                      <span className="text-gray-600 text-xs">
                         {location.distance}
                       </span>
                     </button>
@@ -230,19 +203,7 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
             {/* Public transport */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                  />
-                </svg>
+                <Bus className="w-5 h-5 text-gray-600" />
                 <h3 className="text-sm font-bold text-gray-900">
                   Public transport
                 </h3>
@@ -255,9 +216,19 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                       onClick={() => handleLocationClick(location.name)}
                       className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
                     >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
-                        {location.name}
-                      </span>
+                      <div className="flex items-center">
+                        {location.type && (
+                          <>
+                            <span className="text-gray-500 text-xs">
+                              {location.type}
+                            </span>
+                            <span className="text-gray-400 mx-1">•</span>
+                          </>
+                        )}
+                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                          {location.name}
+                        </span>
+                      </div>
                       <span className="text-gray-600 text-xs">
                         {location.distance}
                       </span>
@@ -270,19 +241,7 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
             {/* Closest airports */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
+                <Plane className="w-5 h-5 text-gray-600" />
                 <h3 className="text-sm font-bold text-gray-900">
                   Closest airports
                 </h3>

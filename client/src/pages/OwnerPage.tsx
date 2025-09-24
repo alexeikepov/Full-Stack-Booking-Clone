@@ -26,7 +26,19 @@ import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import { useEffect } from "react";
 import AdminHeader from "@/components/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, approveAdminApplication, getAdminApplications, rejectAdminApplication, getOwnerHotels, getAllHotelsForOwner, setHotelVisibility, deleteHotel as apiDeleteHotel, getHotelById, updateHotel as apiUpdateHotel, getMe } from "@/lib/api";
+import {
+  api,
+  approveAdminApplication,
+  getAdminApplications,
+  rejectAdminApplication,
+  getOwnerHotels,
+  getAllHotelsForOwner,
+  setHotelVisibility,
+  deleteHotel as apiDeleteHotel,
+  getHotelById,
+  updateHotel as apiUpdateHotel,
+  getMe,
+} from "@/lib/api";
 
 export default function OwnerPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,10 +82,20 @@ export default function OwnerPage() {
     queryKey: ["ownerHotels"],
     queryFn: async () => {
       // Prefer the public catalog endpoints first to list ALL hotels
-      try { const r = await api.get("/api/hotels", { params: { all: 1, limit: 10000 } }); return r.data; } catch {}
-      try { const r = await api.get("/api/hotels", { params: { limit: 10000 } }); return r.data; } catch {}
+      try {
+        const r = await api.get("/api/hotels", {
+          params: { all: 1, limit: 10000 },
+        });
+        return r.data;
+      } catch {}
+      try {
+        const r = await api.get("/api/hotels", { params: { limit: 10000 } });
+        return r.data;
+      } catch {}
       // Then try owner-specific aggregated endpoints
-      try { return await getAllHotelsForOwner(); } catch {}
+      try {
+        return await getAllHotelsForOwner();
+      } catch {}
       // Final fallback: only the hotels current user manages
       return await getOwnerHotels();
     },
@@ -109,7 +131,8 @@ export default function OwnerPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ownerHotels"] }),
   });
   const updateHotelMut = useMutation({
-    mutationFn: ({ hotelId, data }: { hotelId: string; data: any }) => apiUpdateHotel(hotelId, data),
+    mutationFn: ({ hotelId, data }: { hotelId: string; data: any }) =>
+      apiUpdateHotel(hotelId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ownerHotels"] }),
   });
 
@@ -138,7 +161,9 @@ export default function OwnerPage() {
 
   const handleSaveHotel = async (updatedHotel: any) => {
     try {
-      const hotelId = String(updatedHotel.id || updatedHotel._id || selectedHotel?.id);
+      const hotelId = String(
+        updatedHotel.id || updatedHotel._id || selectedHotel?.id
+      );
       await updateHotelMut.mutateAsync({ hotelId, data: updatedHotel });
       setIsEditDialogOpen(false);
       setSelectedHotel(null);
@@ -223,7 +248,8 @@ export default function OwnerPage() {
                 <CardHeader>
                   <CardTitle>Hotel Admin Applications</CardTitle>
                   <CardDescription>
-                    Review and approve applications from users requesting hotel admin role
+                    Review and approve applications from users requesting hotel
+                    admin role
                   </CardDescription>
                   <div className="flex items-center gap-4 mt-4">
                     <div className="relative flex-1">
@@ -258,7 +284,8 @@ export default function OwnerPage() {
                                   <strong>Phone:</strong> {application.phone}
                                 </p>
                                 <p>
-                                  <strong>Submitted:</strong> {application.submittedAt}
+                                  <strong>Submitted:</strong>{" "}
+                                  {application.submittedAt}
                                 </p>
                               </div>
                             </div>
@@ -268,7 +295,9 @@ export default function OwnerPage() {
                                 <div className="flex space-x-2">
                                   <Button
                                     size="sm"
-                                    onClick={() => handleApproveApplication(application.id)}
+                                    onClick={() =>
+                                      handleApproveApplication(application.id)
+                                    }
                                     className="bg-green-600 hover:bg-green-700"
                                   >
                                     <CheckCircle className="h-4 w-4 mr-1" />
@@ -277,7 +306,9 @@ export default function OwnerPage() {
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => handleRejectApplication(application.id)}
+                                    onClick={() =>
+                                      handleRejectApplication(application.id)
+                                    }
                                   >
                                     <XCircle className="h-4 w-4 mr-1" />
                                     Reject
@@ -341,7 +372,10 @@ export default function OwnerPage() {
                                 <select
                                   value={hotel.approvalStatus}
                                   onChange={(e) =>
-                                    updateHotelMut.mutate({ hotelId: hotel.id, data: { approvalStatus: e.target.value } })
+                                    updateHotelMut.mutate({
+                                      hotelId: hotel.id,
+                                      data: { approvalStatus: e.target.value },
+                                    })
                                   }
                                   className="h-9 rounded border px-2 text-sm"
                                 >
