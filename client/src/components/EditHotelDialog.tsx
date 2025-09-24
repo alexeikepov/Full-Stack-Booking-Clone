@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Loader } from "@googlemaps/js-api-loader";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,7 @@ export default function EditHotelDialog({
 }: EditHotelDialogProps) {
   const [activeTab, setActiveTab] = useState("general");
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const addressInputRef = useRef<HTMLInputElement | null>(null);
   const [formData, setFormData] = useState<any>({
     name: "",
     address: "",
@@ -274,6 +276,72 @@ export default function EditHotelDialog({
     };
     load();
   }, [hotel]);
+
+  // Google Places Autocomplete on address input
+  useEffect(() => {
+    if (!isOpen) return;
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+    if (!apiKey) return;
+
+    let autocomplete: google.maps.places.Autocomplete | null = null;
+    // Ensure Google suggestions overlay appears above the dialog
+    const styleId = "gmaps-pac-zindex";
+    if (!document.getElementById(styleId)) {
+      const s = document.createElement("style");
+      s.id = styleId;
+      s.innerHTML = `.pac-container{z-index:999999!important}`;
+      document.head.appendChild(s);
+    }
+
+    const init = async () => {
+      try {
+        const loader = new Loader({ apiKey, version: "weekly", libraries: ["places"] });
+        await loader.load();
+        if (!addressInputRef.current) return;
+        autocomplete = new google.maps.places.Autocomplete(addressInputRef.current as HTMLInputElement, {
+          fields: ["geometry", "address_components", "formatted_address"],
+          types: ["geocode"],
+        });
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete!.getPlace();
+          if (!place) return;
+          const components = place.address_components || [];
+          const getPart = (type: string) => {
+            const comp = components.find((c) => (c.types || []).includes(type));
+            return comp?.long_name || "";
+          };
+          const city = getPart("locality") || getPart("administrative_area_level_2") || getPart("administrative_area_level_1");
+          const country = getPart("country");
+          const address = place.formatted_address || addressInputRef.current!.value || "";
+          const lat = place.geometry?.location?.lat();
+          const lng = place.geometry?.location?.lng();
+
+          // Update the input display immediately
+          if (addressInputRef.current) addressInputRef.current.value = address;
+
+          setFormData((prev: any) => ({
+            ...prev,
+            address,
+            city: city || prev.city,
+            country: country || prev.country,
+            location: {
+              lat: typeof lat === "number" ? lat : (lat ? lat : prev.location?.lat || 0),
+              lng: typeof lng === "number" ? lng : (lng ? lng : prev.location?.lng || 0),
+            },
+          }));
+        });
+      } catch {
+        // ignore loader errors
+      }
+    };
+
+    init();
+
+    return () => {
+      // Autocomplete cleans up on GC; no explicit dispose in JS API
+      autocomplete = null;
+    };
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -537,6 +605,7 @@ export default function EditHotelDialog({
                       <div className="text-xs text-gray-500">
                         Street and number (you may include ZIP).
                       </div>
+
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="city">City</Label>
