@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getHotelById } from "@/lib/api";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SurroundingsSection from "@/components/ui/SurroundingsSection";
+import FacilitiesManager from "@/components/ui/FacilitiesManager";
 
 interface Hotel {
   id: string | number;
@@ -57,7 +58,25 @@ export default function EditHotelDialog({
     shortDescription: "",
     description: "",
     location: { lat: 0, lng: 0 },
-    facilities: { general: [] as string[] },
+    facilities: {
+      general: [] as string[],
+      greatForStay: [] as any[],
+      bathroom: [] as any[],
+      bedroom: [] as any[],
+      view: [] as any[],
+      outdoors: [] as any[],
+      kitchen: [] as any[],
+      roomAmenities: [] as any[],
+      livingArea: [] as any[],
+      mediaTechnology: [] as any[],
+      foodDrink: [] as any[],
+      internet: "",
+      parking: "",
+      receptionServices: [] as any[],
+      safetySecurity: [] as any[],
+      generalFacilities: [] as any[],
+      languagesSpoken: [] as any[],
+    },
     rooms: [] as any[],
     status: "active",
     media: [] as string[],
@@ -124,7 +143,25 @@ export default function EditHotelDialog({
     shortDescription: "",
     description: "",
     location: { lat: 0, lng: 0 },
-    facilities: { general: [] as string[] },
+    facilities: {
+      general: [] as string[],
+      greatForStay: [] as any[],
+      bathroom: [] as any[],
+      bedroom: [] as any[],
+      view: [] as any[],
+      outdoors: [] as any[],
+      kitchen: [] as any[],
+      roomAmenities: [] as any[],
+      livingArea: [] as any[],
+      mediaTechnology: [] as any[],
+      foodDrink: [] as any[],
+      internet: "",
+      parking: "",
+      receptionServices: [] as any[],
+      safetySecurity: [] as any[],
+      generalFacilities: [] as any[],
+      languagesSpoken: [] as any[],
+    },
     rooms: [] as any[],
     status: "active",
     media: [] as string[],
@@ -196,6 +233,42 @@ export default function EditHotelDialog({
               .map((m: any) => (typeof m === "string" ? m : m?.url))
               .filter((x: any) => typeof x === "string" && x.length > 0)
           : [];
+
+        // Convert server format to UI format
+        const convertServerToUIFormat = (facilities: any) => {
+          const converted: any = {};
+
+          Object.keys(facilities || {}).forEach((key) => {
+            const value = facilities[key];
+
+            if (Array.isArray(value)) {
+              // Convert array of strings to array of objects
+              converted[key] = value.map((item: any) => {
+                if (typeof item === "string") {
+                  // Parse string format: "Free WiFi (Additional charge)" or just "Free WiFi"
+                  const match = item.match(/^(.+?)(?:\s*\((.+)\))?$/);
+                  if (match) {
+                    return {
+                      name: match[1].trim(),
+                      available: true,
+                      note: match[2] ? match[2].trim() : "",
+                    };
+                  }
+                  return {
+                    name: item.trim(),
+                    available: true,
+                    note: "",
+                  };
+                }
+                return item; // Already an object
+              });
+            } else if (typeof value === "string") {
+              converted[key] = value;
+            }
+          });
+
+          return converted;
+        };
         const normalizedRooms = Array.isArray(full.rooms)
           ? full.rooms.map((r: any) => {
               const photos: string[] = Array.isArray(r?.photos || r?.media)
@@ -218,7 +291,26 @@ export default function EditHotelDialog({
           shortDescription: full.shortDescription || "",
           description: full.description || "",
           location: full.location || { lat: 0, lng: 0 },
-          facilities: full.facilities || { general: [] },
+          facilities: {
+            general: [],
+            greatForStay: [],
+            bathroom: [],
+            bedroom: [],
+            view: [],
+            outdoors: [],
+            kitchen: [],
+            roomAmenities: [],
+            livingArea: [],
+            mediaTechnology: [],
+            foodDrink: [],
+            internet: "",
+            parking: "",
+            receptionServices: [],
+            safetySecurity: [],
+            generalFacilities: [],
+            languagesSpoken: [],
+            ...convertServerToUIFormat(full.facilities),
+          },
           rooms: normalizedRooms,
           status: full.status || "active",
           media: normalizedMedia,
@@ -280,7 +372,9 @@ export default function EditHotelDialog({
   // Google Places Autocomplete on address input
   useEffect(() => {
     if (!isOpen) return;
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as
+      | string
+      | undefined;
     if (!apiKey) return;
 
     let autocomplete: google.maps.places.Autocomplete | null = null;
@@ -295,13 +389,20 @@ export default function EditHotelDialog({
 
     const init = async () => {
       try {
-        const loader = new Loader({ apiKey, version: "weekly", libraries: ["places"] });
+        const loader = new Loader({
+          apiKey,
+          version: "weekly",
+          libraries: ["places"],
+        });
         await loader.load();
         if (!addressInputRef.current) return;
-        autocomplete = new google.maps.places.Autocomplete(addressInputRef.current as HTMLInputElement, {
-          fields: ["geometry", "address_components", "formatted_address"],
-          types: ["geocode"],
-        });
+        autocomplete = new google.maps.places.Autocomplete(
+          addressInputRef.current as HTMLInputElement,
+          {
+            fields: ["geometry", "address_components", "formatted_address"],
+            types: ["geocode"],
+          }
+        );
         autocomplete.addListener("place_changed", () => {
           const place = autocomplete!.getPlace();
           if (!place) return;
@@ -310,9 +411,13 @@ export default function EditHotelDialog({
             const comp = components.find((c) => (c.types || []).includes(type));
             return comp?.long_name || "";
           };
-          const city = getPart("locality") || getPart("administrative_area_level_2") || getPart("administrative_area_level_1");
+          const city =
+            getPart("locality") ||
+            getPart("administrative_area_level_2") ||
+            getPart("administrative_area_level_1");
           const country = getPart("country");
-          const address = place.formatted_address || addressInputRef.current!.value || "";
+          const address =
+            place.formatted_address || addressInputRef.current!.value || "";
           const lat = place.geometry?.location?.lat();
           const lng = place.geometry?.location?.lng();
 
@@ -325,8 +430,18 @@ export default function EditHotelDialog({
             city: city || prev.city,
             country: country || prev.country,
             location: {
-              lat: typeof lat === "number" ? lat : (lat ? lat : prev.location?.lat || 0),
-              lng: typeof lng === "number" ? lng : (lng ? lng : prev.location?.lng || 0),
+              lat:
+                typeof lat === "number"
+                  ? lat
+                  : lat
+                  ? lat
+                  : prev.location?.lat || 0,
+              lng:
+                typeof lng === "number"
+                  ? lng
+                  : lng
+                  ? lng
+                  : prev.location?.lng || 0,
             },
           }));
         });
@@ -454,8 +569,6 @@ export default function EditHotelDialog({
       media: (prev.media || []).filter((_: string, i: number) => i !== index),
     }));
   };
-
-  const generalFacilitiesCsv = (formData.facilities?.general || []).join(", ");
 
   const onTabChange = (v: string) => {
     setActiveTab(v);
@@ -605,7 +718,6 @@ export default function EditHotelDialog({
                       <div className="text-xs text-gray-500">
                         Street and number (you may include ZIP).
                       </div>
-
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="city">City</Label>
@@ -728,31 +840,15 @@ export default function EditHotelDialog({
 
               {(showAll || activeTab === "facilities") && (
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="generalFacilities">
-                      Facilities (comma separated)
-                    </Label>
-                    <Input
-                      id="generalFacilities"
-                      value={generalFacilitiesCsv}
-                      onChange={(e) =>
-                        setFormData((prev: any) => ({
-                          ...prev,
-                          facilities: {
-                            ...(prev.facilities || {}),
-                            general: e.target.value
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter(Boolean),
-                          },
-                        }))
-                      }
-                    />
-                    <div className="text-xs text-gray-500">
-                      Separate items with commas (e.g., Free WiFi, Terrace,
-                      Family rooms).
-                    </div>
-                  </div>
+                  <FacilitiesManager
+                    facilities={formData.facilities}
+                    onUpdate={(facilities) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        facilities,
+                      }))
+                    }
+                  />
                 </div>
               )}
 
