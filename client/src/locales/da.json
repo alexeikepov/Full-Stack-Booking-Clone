@@ -1,0 +1,107 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registrér din ejendom",
+  "register": "Registrér",
+  "signIn": "Log ind",
+  "geniusLevel": "Genius‑niveau {{level}}",
+  "tabs": {
+    "stays": "Overnatningssteder",
+    "flights": "Fly",
+    "cars": "Biludlejning",
+    "attractions": "Seværdigheder",
+    "taxis": "Lufthavnstaxaer",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": { "title": "Find dit næste ophold", "subtitle": "Søg lave priser på hoteller, lejligheder og mere..." },
+    "offers": { "title": "Tilbud", "subtitle": "Kampagner, rabatter og specialtilbud til dig" },
+    "card1": { "kicker": "Ferieboliger", "title": "Drøm i en feriebolig", "subtitle": "Vælg blandt huse, villaer, hytter og mere", "cta": "Book" },
+    "card2": { "title": "Hurtig getaway, gode tider", "subtitle": "Spar op til 20% med Getaway Deal", "cta": "Spar på overnatning" },
+    "trending": { "title": "Populære destinationer", "subtitle": "De mest populære valg for rejsende fra Israel" },
+    "propertyTypes": {
+      "title": "Gennemse efter type",
+      "items": {
+        "hotels": "Hoteller",
+        "apartments": "Lejligheder",
+        "resorts": "Resorts",
+        "villas": "Villaer",
+        "cabins": "Hytter",
+        "cottages": "Sommerhuse",
+        "glamping": "Glamping",
+        "serviced-apartments": "Lejlighedshoteller",
+        "holiday-homes": "Ferieboliger",
+        "guest-houses": "Gæstehuse",
+        "hostels": "Vandrerhjem",
+        "motels": "Moteller"
+      }
+    },
+    "tripPlanner": {
+      "title": "Nem og hurtig rejseplanlægger",
+      "subtitle": "Vælg stemning og opdag de bedste destinationer i Israel",
+      "categories": {
+        "festivals": "Festivaler",
+        "artMusic": "Kunst og musik",
+        "beachRelaxation": "Strand og afslapning",
+        "gastronomyWine": "Gastronomi og vin",
+        "shoppingMarkets": "Shopping og markeder",
+        "culturalExploration": "Kulturel udforskning"
+      },
+      "kmAway": "{{km}} km væk"
+    },
+    "banner": { "titleLine1": "Vil du føle dig hjemme", "titleLine2": "på dit næste eventyr?", "cta": "Opdag ferieboliger" },
+    "popular": {
+      "title": "Populært blandt rejsende fra Israel",
+      "tabs": { "domestic": "Nationale byer", "international": "Internationale byer", "regions": "Regioner", "countries": "Lande", "places": "Overnatningssteder" },
+      "showMore": "+ Vis mere",
+      "showLess": "− Vis mindre"
+    },
+    "travelMore": {
+      "title": "Rejs mere, betal mindre",
+      "boxTitle": "Log ind og spar",
+      "boxSubtitle": "Spar 10% eller mere på deltagende steder – kig efter det blå Genius‑mærke",
+      "features": {
+        "freeCancellation": { "title": "Book nu, betal på stedet", "subtitle": "Gratis afbestilling for de fleste værelser", "imgAlt": "Tjekliste‑illustration" },
+        "worldwide": { "title": "+2 millioner steder i hele verden", "subtitle": "Hoteller, gæstehuse, lejligheder og mere...", "imgAlt": "Globus‑illustration" },
+        "support247": { "title": "Pålidelig kundeservice døgnet rundt", "subtitle": "Vi er altid klar til at hjælpe", "imgAlt": "Kundeservice‑illustration" }
+      }
+    }
+  },
+  "search": {
+    "where": "Hvor skal du hen?",
+    "cta": "Søg",
+    "breadcrumb": { "home": "Hjem", "country": "Israel", "city": "By", "results": "Søgeresultater" },
+    "count": { "propertiesFound": "steder fundet" },
+    "view": { "list": "Liste", "grid": "Gitter" },
+    "notice": { "conflict": "Tjek venligst dit lands rejsevejledninger, før du beslutter at overnatte i dette område, som kan anses for at være påvirket af konflikt." },
+    "error": { "title": "Fejl ved indlæsning af hoteller", "description": "Kunne ikke indlæse hoteldata. Prøv igen.", "retry": "Prøv igen" },
+    "sort": {
+      "by": "Sorter efter:",
+      "labels": {
+        "top_picks": "Bedst for solorejsende",
+        "price_low": "Pris (lav til høj)",
+        "price_high": "Pris (høj til lav)",
+        "rating_high": "Bedømmelse (faldende)",
+        "rating_low": "Bedømmelse (stigende)",
+        "distance_low": "Afstand til centrum",
+        "reviews_high": "Bedst bedømte"
+      }
+    },
+    "filters": {
+      "budget": "Dit budget (per nat)",
+      "categories": "Kategorier",
+      "review": "Anmeldelseskarakter",
+      "meals": "Måltider",
+      "stars": "Stjernekategori",
+      "ptype": "Overnatningstype",
+      "facilities": "Populære filtre",
+      "payment": "Betalingsmuligheder",
+      "distance": "Afstand fra centrum",
+      "neighborhood": "Kvarterer",
+      "brands": "Brands",
+      "showAll": "Vis alle",
+      "showLess": "Vis færre"
+    }
+  }
+}
+
+

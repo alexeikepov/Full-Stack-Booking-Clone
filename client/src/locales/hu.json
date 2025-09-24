@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Regisztráld szálláshelyedet",
+  "register": "Regisztráció",
+  "signIn": "Bejelentkezés",
+  "geniusLevel": "Genius szint {{level}}",
+  "tabs": {
+    "stays": "Szálláshelyek",
+    "flights": "Repülőjegyek",
+    "cars": "Autóbérlés",
+    "attractions": "Látnivalók",
+    "taxis": "Repülőtéri taxik",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Találd meg a következő szálláshelyedet",
+      "subtitle": "Keress alacsony árakat szállodákban, apartmanokban és máshol..."
+    },
+    "offers": {
+      "title": "Ajánlatok",
+      "subtitle": "Promóciók, kedvezmények és különleges ajánlatok számodra"
+    },
+    "card1": {
+      "kicker": "Üdülőházak",
+      "title": "Álmodj egy üdülőházban",
+      "subtitle": "Válassz házak, villák, nyaralók és egyebek közül",
+      "cta": "Foglalás"
+    },
+    "card2": {
+      "title": "Gyors szökés, jó pillanatok",
+      "subtitle": "Spórolj akár 20%-ot a Getaway Deal-lel",
+      "cta": "Spórolás a szálláson"
+    },
+    "trending": {
+      "title": "Népszerű úticélok",
+      "subtitle": "A legnépszerűbb választások Izraelből érkező utazók számára"
+    },
+    "propertyTypes": {
+      "title": "Böngészd szálláshely típus szerint",
+      "items": {
+        "hotels": "Szállodák",
+        "apartments": "Apartmanok",
+        "resorts": "Üdülőközpontok",
+        "villas": "Villák",
+        "cabins": "Kunyhók",
+        "cottages": "Nyaralók",
+        "glamping": "Glamping",
+        "serviced-apartments": "Apartman szállodák",
+        "holiday-homes": "Üdülőházak",
+        "guest-houses": "Panziók",
+        "hostels": "Hostelek",
+        "motels": "Motelok"
+      }
+    },
+    "tripPlanner": {
+      "title": "Egyszerű és gyors utazástervező",
+      "subtitle": "Válassz hangulatot és fedezd fel Izrael legjobb úticéljait",
+      "categories": {
+        "festivals": "Fesztiválok",
+        "artMusic": "Művészet és zene",
+        "beachRelaxation": "Strand és pihenés",
+        "gastronomyWine": "Gasztronómia és bor",
+        "shoppingMarkets": "Vásárlás és piacok",
+        "culturalExploration": "Kulturális felfedezés"
+      },
+      "kmAway": "{{km}} km-re"
+    },
+    "banner": {
+      "titleLine1": "Szeretnél otthon érezni magad",
+      "titleLine2": "a következő kalandod során?",
+      "cta": "Fedezd fel az üdülőházakat"
+    },
+    "popular": {
+      "title": "Népszerű Izraelből érkező utazók körében",
+      "tabs": {
+        "domestic": "Hazai városok",
+        "international": "Nemzetközi városok",
+        "regions": "Régiók",
+        "countries": "Országok",
+        "places": "Szálláshelyek"
+      },
+      "showMore": "+ Mutass többet",
+      "showLess": "− Mutass kevesebbet"
+    },
+    "travelMore": {
+      "title": "Utazz többet, fizess kevesebbet",
+      "boxTitle": "Jelentkezz be és spórolj",
+      "boxSubtitle": "Spórolj 10%-ot vagy többet a részt vevő szálláshelyeken — keress a kék Genius címkét",
+      "features": {
+        "freeCancellation": {
+          "title": "Foglalj most, fizess a szálláshelyen",
+          "subtitle": "Ingyenes lemondás a legtöbb szobánál",
+          "imgAlt": "Ellenőrzőlista illusztráció"
+        },
+        "worldwide": {
+          "title": "+2 millió szálláshely világszerte",
+          "subtitle": "Szállodák, panziók, apartmanok és egyebek...",
+          "imgAlt": "Globusz illusztráció"
+        },
+        "support247": {
+          "title": "Megbízható ügyfélszolgálat 24/7",
+          "subtitle": "Mindig itt vagyunk, hogy segítsünk",
+          "imgAlt": "Ügyfélszolgálat illusztráció"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Hová mész?",
+    "cta": "Keresés",
+    "breadcrumb": {
+      "home": "Főoldal",
+      "country": "Izrael",
+      "city": "Város",
+      "results": "Keresési eredmények"
+    },
+    "count": { "propertiesFound": "szálláshely találva" },
+    "view": { "list": "Lista", "grid": "Rács" },
+    "notice": { "conflict": "Kérjük, ellenőrizd a kormányod utazási figyelmeztetéseit, mielőtt úgy döntesz, hogy ezen a területen szállsz meg, amely konfliktus által érintettnek tekinthető." },
+    "error": { "title": "Hiba a szállodák betöltésekor", "description": "Nem sikerült betölteni a szálloda adatokat. Próbáld újra.", "retry": "Újra próbálkozás" },
+    "sort": {
+      "by": "Rendezés:",
+      "labels": {
+        "top_picks": "Legjobb egyedül utazóknak",
+        "price_low": "Ár (alacsonytól magasig)",
+        "price_high": "Ár (magastól alacsonyig)",
+        "rating_high": "Értékelés (csökkenő)",
+        "rating_low": "Értékelés (növekvő)",
+        "distance_low": "Távolság a központtól",
+        "reviews_high": "Legjobbra értékelt"
+      }
+    },
+    "filters": {
+      "budget": "A te költségvetésed (éjszakánként)",
+      "categories": "Kategóriák",
+      "review": "Értékelési pontszám",
+      "meals": "Étkezések",
+      "stars": "Csillag kategória",
+      "ptype": "Szálláshely típus",
+      "facilities": "Népszerű szűrők",
+      "payment": "Fizetési lehetőségek",
+      "distance": "Távolság a központtól",
+      "neighborhood": "Kerületek",
+      "brands": "Márkák",
+      "showAll": "Összes mutatása",
+      "showLess": "Kevesebb mutatása"
+    }
+  }
+}

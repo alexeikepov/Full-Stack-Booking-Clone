@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "注册您的住宿",
+  "register": "注册",
+  "signIn": "登录",
+  "geniusLevel": "Genius等级{{level}}",
+  "tabs": {
+    "stays": "住宿",
+    "flights": "航班",
+    "cars": "租车",
+    "attractions": "景点",
+    "taxis": "机场出租车",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "寻找您的下一个住宿",
+      "subtitle": "搜索酒店、公寓等的低价..."
+    },
+    "offers": {
+      "title": "优惠",
+      "subtitle": "为您提供的促销、折扣和特别优惠"
+    },
+    "card1": {
+      "kicker": "度假屋",
+      "title": "在度假屋中梦想成真",
+      "subtitle": "从房屋、别墅、小屋等中选择",
+      "cta": "预订"
+    },
+    "card2": {
+      "title": "快速度假，美好时光",
+      "subtitle": "通过Getaway Deal节省高达20%",
+      "cta": "节省住宿费用"
+    },
+    "trending": {
+      "title": "热门目的地",
+      "subtitle": "以色列旅行者最受欢迎的选择"
+    },
+    "propertyTypes": {
+      "title": "按住宿类型浏览",
+      "items": {
+        "hotels": "酒店",
+        "apartments": "公寓",
+        "resorts": "度假村",
+        "villas": "别墅",
+        "cabins": "小屋",
+        "cottages": "农舍",
+        "glamping": "豪华露营",
+        "serviced-apartments": "服务式公寓",
+        "holiday-homes": "度假屋",
+        "guest-houses": "招待所",
+        "hostels": "青年旅社",
+        "motels": "汽车旅馆"
+      }
+    },
+    "tripPlanner": {
+      "title": "简单快速的旅行规划器",
+      "subtitle": "选择氛围，发现以色列的最佳目的地",
+      "categories": {
+        "festivals": "节日",
+        "artMusic": "艺术与音乐",
+        "beachRelaxation": "海滩放松",
+        "gastronomyWine": "美食与美酒",
+        "shoppingMarkets": "购物与市场",
+        "culturalExploration": "文化探索"
+      },
+      "kmAway": "距离{{km}}公里"
+    },
+    "banner": {
+      "titleLine1": "想在您的下一次冒险中",
+      "titleLine2": "感受家的温暖吗？",
+      "cta": "发现度假屋"
+    },
+    "popular": {
+      "title": "以色列旅行者中受欢迎",
+      "tabs": {
+        "domestic": "国内城市",
+        "international": "国际城市",
+        "regions": "地区",
+        "countries": "国家",
+        "places": "住宿"
+      },
+      "showMore": "+ 显示更多",
+      "showLess": "− 显示更少"
+    },
+    "travelMore": {
+      "title": "更多旅行，更少花费",
+      "boxTitle": "登录并节省",
+      "boxSubtitle": "在参与酒店节省10%或更多 — 寻找蓝色Genius标签",
+      "features": {
+        "freeCancellation": {
+          "title": "立即预订，到店付款",
+          "subtitle": "大多数客房免费取消",
+          "imgAlt": "清单插图"
+        },
+        "worldwide": {
+          "title": "全球超过200万家住宿",
+          "subtitle": "酒店、招待所、公寓等等...",
+          "imgAlt": "地球插图"
+        },
+        "support247": {
+          "title": "可靠的24/7客户服务",
+          "subtitle": "我们随时为您提供帮助",
+          "imgAlt": "客户服务插图"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "您要去哪里？",
+    "cta": "搜索",
+    "breadcrumb": {
+      "home": "首页",
+      "country": "以色列",
+      "city": "城市",
+      "results": "搜索结果"
+    },
+    "count": { "propertiesFound": "个住宿找到" },
+    "view": { "list": "列表", "grid": "网格" },
+    "notice": { "conflict": "在决定在此地区住宿之前，请查看您政府发布的旅行警告，该地区可能被视为受冲突影响。" },
+    "error": { "title": "酒店加载错误", "description": "无法加载酒店数据。请重试。", "retry": "重试" },
+    "sort": {
+      "by": "排序方式:",
+      "labels": {
+        "top_picks": "独自旅行者最佳选择",
+        "price_low": "价格（从低到高）",
+        "price_high": "价格（从高到低）",
+        "rating_high": "评分（降序）",
+        "rating_low": "评分（升序）",
+        "distance_low": "距离市中心",
+        "reviews_high": "最高评分"
+      }
+    },
+    "filters": {
+      "budget": "您的预算（每晚）",
+      "categories": "类别",
+      "review": "评论评分",
+      "meals": "餐食",
+      "stars": "星级分类",
+      "ptype": "住宿类型",
+      "facilities": "热门筛选",
+      "payment": "付款选项",
+      "distance": "距离市中心",
+      "neighborhood": "街区",
+      "brands": "品牌",
+      "showAll": "显示全部",
+      "showLess": "显示更少"
+    }
+  }
+}

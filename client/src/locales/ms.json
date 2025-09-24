@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Daftarkan penginapan anda",
+  "register": "Daftar",
+  "signIn": "Log masuk",
+  "geniusLevel": "Tahap Genius {{level}}",
+  "tabs": {
+    "stays": "Penginapan",
+    "flights": "Penerbangan",
+    "cars": "Sewa kereta",
+    "attractions": "Tarikan",
+    "taxis": "Teksi lapangan terbang",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Cari penginapan seterusnya",
+      "subtitle": "Cari harga murah di hotel, apartmen dan lain-lain..."
+    },
+    "offers": {
+      "title": "Tawaran",
+      "subtitle": "Promosi, diskaun dan tawaran khas untuk anda"
+    },
+    "card1": {
+      "kicker": "Rumah percutian",
+      "title": "Impikan di rumah percutian",
+      "subtitle": "Pilih dari rumah, villa, chalet dan lain-lain",
+      "cta": "Tempah"
+    },
+    "card2": {
+      "title": "Percutian pantas, masa yang baik",
+      "subtitle": "Jimat sehingga 20% dengan Getaway Deal",
+      "cta": "Jimat penginapan"
+    },
+    "trending": {
+      "title": "Destinasi popular",
+      "subtitle": "Pilihan paling popular untuk pelancong dari Israel"
+    },
+    "propertyTypes": {
+      "title": "Jelajah mengikut jenis penginapan",
+      "items": {
+        "hotels": "Hotel",
+        "apartments": "Apartmen",
+        "resorts": "Resort",
+        "villas": "Villa",
+        "cabins": "Kabin",
+        "cottages": "Cottage",
+        "glamping": "Glamping",
+        "serviced-apartments": "Apartmen berkhidmat",
+        "holiday-homes": "Rumah percutian",
+        "guest-houses": "Rumah tetamu",
+        "hostels": "Hostel",
+        "motels": "Motel"
+      }
+    },
+    "tripPlanner": {
+      "title": "Perancang perjalanan mudah dan pantas",
+      "subtitle": "Pilih mood dan temui destinasi terbaik di Israel",
+      "categories": {
+        "festivals": "Festival",
+        "artMusic": "Seni & muzik",
+        "beachRelaxation": "Pantai & relaksasi",
+        "gastronomyWine": "Gastronomi & wain",
+        "shoppingMarkets": "Membeli-belah & pasar",
+        "culturalExploration": "Penerokaan budaya"
+      },
+      "kmAway": "{{km}} km jauh"
+    },
+    "banner": {
+      "titleLine1": "Ingin berasa seperti di rumah",
+      "titleLine2": "dalam pengembaraan seterusnya?",
+      "cta": "Temui rumah percutian"
+    },
+    "popular": {
+      "title": "Popular dalam kalangan pelancong dari Israel",
+      "tabs": {
+        "domestic": "Bandar domestik",
+        "international": "Bandar antarabangsa",
+        "regions": "Wilayah",
+        "countries": "Negara",
+        "places": "Penginapan"
+      },
+      "showMore": "+ Tunjukkan lebih banyak",
+      "showLess": "− Tunjukkan kurang"
+    },
+    "travelMore": {
+      "title": "Melancong lebih banyak, bayar kurang",
+      "boxTitle": "Log masuk dan jimat",
+      "boxSubtitle": "Jimat 10% atau lebih di hartanah yang menyertai — cari label Genius biru",
+      "features": {
+        "freeCancellation": {
+          "title": "Tempah sekarang, bayar di hartanah",
+          "subtitle": "Pembatalan percuma untuk kebanyakan bilik",
+          "imgAlt": "Ilustrasi senarai semak"
+        },
+        "worldwide": {
+          "title": "+2 juta hartanah di seluruh dunia",
+          "subtitle": "Hotel, rumah tetamu, apartmen dan lain-lain...",
+          "imgAlt": "Ilustrasi glob"
+        },
+        "support247": {
+          "title": "Perkhidmatan pelanggan yang boleh dipercayai 24/7",
+          "subtitle": "Kami sentiasa di sini untuk membantu",
+          "imgAlt": "Ilustrasi perkhidmatan pelanggan"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Ke mana anda pergi?",
+    "cta": "Cari",
+    "breadcrumb": {
+      "home": "Laman utama",
+      "country": "Israel",
+      "city": "Bandar",
+      "results": "Hasil carian"
+    },
+    "count": { "propertiesFound": "hartanah ditemui" },
+    "view": { "list": "Senarai", "grid": "Grid" },
+    "notice": { "conflict": "Sila semak amaran perjalanan kerajaan anda sebelum memutuskan untuk menginap di kawasan ini, yang mungkin dianggap terjejas oleh konflik." },
+    "error": { "title": "Ralat memuatkan hotel", "description": "Gagal memuatkan data hotel. Sila cuba lagi.", "retry": "Cuba lagi" },
+    "sort": {
+      "by": "Isih mengikut:",
+      "labels": {
+        "top_picks": "Terbaik untuk pelancong solo",
+        "price_low": "Harga (rendah ke tinggi)",
+        "price_high": "Harga (tinggi ke rendah)",
+        "rating_high": "Penilaian hartanah (menurun)",
+        "rating_low": "Penilaian hartanah (meningkat)",
+        "distance_low": "Jarak dari pusat",
+        "reviews_high": "Penilaian tertinggi"
+      }
+    },
+    "filters": {
+      "budget": "Belanjawan anda (sehari)",
+      "categories": "Kategori",
+      "review": "Skor ulasan",
+      "meals": "Makanan",
+      "stars": "Kategori bintang",
+      "ptype": "Jenis penginapan",
+      "facilities": "Penapis popular",
+      "payment": "Pilihan pembayaran",
+      "distance": "Jarak dari pusat",
+      "neighborhood": "Kejiranan",
+      "brands": "Jenama",
+      "showAll": "Tunjukkan semua",
+      "showLess": "Tunjukkan kurang"
+    }
+  }
+}

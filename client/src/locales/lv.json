@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Reģistrējiet savu nakšņošanas vietu",
+  "register": "Reģistrēties",
+  "signIn": "Pieteikties",
+  "geniusLevel": "Genius līmenis {{level}}",
+  "tabs": {
+    "stays": "Nakšņošana",
+    "flights": "Lidojumi",
+    "cars": "Automašīnu noma",
+    "attractions": "Atrakcijas",
+    "taxis": "Lidostas taksometrs",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Atrodiet savu nākamo nakšņošanas vietu",
+      "subtitle": "Meklējiet zemu cenu viesnīcās, dzīvokļos un citur..."
+    },
+    "offers": {
+      "title": "Piedāvājumi",
+      "subtitle": "Akcijas, atlaides un īpaši piedāvājumi jums"
+    },
+    "card1": {
+      "kicker": "Atpūtas mājas",
+      "title": "Sapņojiet atpūtas mājā",
+      "subtitle": "Izvēlieties no mājām, villām, šalēm un citām",
+      "cta": "Rezervēt"
+    },
+    "card2": {
+      "title": "Ātrs aizbraukums, labi brīži",
+      "subtitle": "Ietaupiet līdz 20% ar Getaway Deal",
+      "cta": "Ietaupīt uz nakšņošanu"
+    },
+    "trending": {
+      "title": "Populāri galamērķi",
+      "subtitle": "Populārākās izvēles ceļotājiem no Izraēlas"
+    },
+    "propertyTypes": {
+      "title": "Pārlūkojiet pēc nakšņošanas veida",
+      "items": {
+        "hotels": "Viesnīcas",
+        "apartments": "Dzīvokļi",
+        "resorts": "Kūrorti",
+        "villas": "Villas",
+        "cabins": "Būdas",
+        "cottages": "Mājiņas",
+        "glamping": "Glamping",
+        "serviced-apartments": "Servisa dzīvokļi",
+        "holiday-homes": "Atpūtas mājas",
+        "guest-houses": "Viesu mājas",
+        "hostels": "Hosteli",
+        "motels": "Moteli"
+      }
+    },
+    "tripPlanner": {
+      "title": "Vienkāršs un ātrs ceļojumu plānotājs",
+      "subtitle": "Izvēlieties noskaņu un atklājiet labākos galamērķus Izraēlā",
+      "categories": {
+        "festivals": "Festivāli",
+        "artMusic": "Māksla un mūzika",
+        "beachRelaxation": "Pludmale un atpūta",
+        "gastronomyWine": "Gastronomija un vīns",
+        "shoppingMarkets": "Pirkšana un tirgi",
+        "culturalExploration": "Kultūras izpēte"
+      },
+      "kmAway": "{{km}} km attālumā"
+    },
+    "banner": {
+      "titleLine1": "Vēlaties justies kā mājās",
+      "titleLine2": "savā nākamajā piedzīvojumā?",
+      "cta": "Atklājiet atpūtas mājas"
+    },
+    "popular": {
+      "title": "Populārs starp ceļotājiem no Izraēlas",
+      "tabs": {
+        "domestic": "Iekšzemes pilsētas",
+        "international": "Starptautiskas pilsētas",
+        "regions": "Reģioni",
+        "countries": "Valstis",
+        "places": "Nakšņošana"
+      },
+      "showMore": "+ Rādīt vairāk",
+      "showLess": "− Rādīt mazāk"
+    },
+    "travelMore": {
+      "title": "Ceļojiet vairāk, maksājiet mazāk",
+      "boxTitle": "Pieteikties un ietaupīt",
+      "boxSubtitle": "Ietaupiet 10% vai vairāk dalībnieku nakšņošanas vietās — meklējiet zilo Genius marķējumu",
+      "features": {
+        "freeCancellation": {
+          "title": "Rezervējiet tagad, maksājiet uz vietas",
+          "subtitle": "Bezmaksas atcelšana lielākajai daļai istabu",
+          "imgAlt": "Kontroles saraksta ilustrācija"
+        },
+        "worldwide": {
+          "title": "+2 miljoni nakšņošanas vietu visā pasaulē",
+          "subtitle": "Viesnīcas, viesu mājas, dzīvokļi un daudz kas cits...",
+          "imgAlt": "Globusa ilustrācija"
+        },
+        "support247": {
+          "title": "Uzticams klientu atbalsts 24/7",
+          "subtitle": "Mēs vienmēr esam šeit, lai palīdzētu",
+          "imgAlt": "Klientu atbalsta ilustrācija"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Kur jūs dodaties?",
+    "cta": "Meklēt",
+    "breadcrumb": {
+      "home": "Sākums",
+      "country": "Izraēla",
+      "city": "Pilsēta",
+      "results": "Meklēšanas rezultāti"
+    },
+    "count": { "propertiesFound": "nakšņošanas vietas atrastas" },
+    "view": { "list": "Saraksts", "grid": "Režģis" },
+    "notice": { "conflict": "Lūdzu, pārbaudiet jūsu valdības ceļojumu brīdinājumus pirms izlemšanas palikt šajā apgabalā, kas var tikt uzskatīts par konflikta ietekmētu." },
+    "error": { "title": "Kļūda ielādējot viesnīcas", "description": "Neizdevās ielādēt viesnīcu datus. Lūdzu, mēģiniet vēlreiz.", "retry": "Mēģināt vēlreiz" },
+    "sort": {
+      "by": "Kārtot pēc:",
+      "labels": {
+        "top_picks": "Labākais vienatnē ceļotājiem",
+        "price_low": "Cena (no zemākās uz augstāko)",
+        "price_high": "Cena (no augstākās uz zemāko)",
+        "rating_high": "Nakšņošanas vietas vērtējums (dilstošs)",
+        "rating_low": "Nakšņošanas vietas vērtējums (augošs)",
+        "distance_low": "Attālums no centra",
+        "reviews_high": "Augstāk vērtēts"
+      }
+    },
+    "filters": {
+      "budget": "Jūsu budžets (par nakti)",
+      "categories": "Kategorijas",
+      "review": "Atsauksmju vērtējums",
+      "meals": "Ēdieni",
+      "stars": "Zvaigžņu kategorija",
+      "ptype": "Nakšņošanas veids",
+      "facilities": "Populāri filtri",
+      "payment": "Maksājuma iespējas",
+      "distance": "Attālums no centra",
+      "neighborhood": "Apkaimes",
+      "brands": "Zīmoli",
+      "showAll": "Rādīt visu",
+      "showLess": "Rādīt mazāk"
+    }
+  }
+}

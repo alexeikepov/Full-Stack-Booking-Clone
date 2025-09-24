@@ -1,0 +1,107 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registrera ditt boende",
+  "register": "Registrera dig",
+  "signIn": "Logga in",
+  "geniusLevel": "Genius‑nivå {{level}}",
+  "tabs": {
+    "stays": "Boenden",
+    "flights": "Flyg",
+    "cars": "Hyrbil",
+    "attractions": "Sevärdheter",
+    "taxis": "Flygplatstaxi",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": { "title": "Hitta ditt nästa boende", "subtitle": "Sök låga priser på hotell, lägenheter och mer..." },
+    "offers": { "title": "Erbjudanden", "subtitle": "Kampanjer, rabatter och specialerbjudanden för dig" },
+    "card1": { "kicker": "Semesterbostäder", "title": "Dröm i en semesterbostad", "subtitle": "Välj bland hus, villor, stugor och mer", "cta": "Boka" },
+    "card2": { "title": "Snabb weekend, goda tider", "subtitle": "Spara upp till 20% med Getaway Deal", "cta": "Spara på boende" },
+    "trending": { "title": "Populära destinationer", "subtitle": "De mest populära valen för resenärer från Israel" },
+    "propertyTypes": {
+      "title": "Utforska efter boendetyp",
+      "items": {
+        "hotels": "Hotell",
+        "apartments": "Lägenheter",
+        "resorts": "Resorter",
+        "villas": "Villor",
+        "cabins": "Stugor",
+        "cottages": "Stugor",
+        "glamping": "Glamping",
+        "serviced-apartments": "Lägenhetshotell",
+        "holiday-homes": "Semesterbostäder",
+        "guest-houses": "Pensionat",
+        "hostels": "Vandrarhem",
+        "motels": "Motell"
+      }
+    },
+    "tripPlanner": {
+      "title": "Enkel och snabb reseplanerare",
+      "subtitle": "Välj stämning och upptäck toppdestinationer i Israel",
+      "categories": {
+        "festivals": "Festivaler",
+        "artMusic": "Konst och musik",
+        "beachRelaxation": "Strand och avkoppling",
+        "gastronomyWine": "Gastronomi och vin",
+        "shoppingMarkets": "Shopping och marknader",
+        "culturalExploration": "Kulturell utforskning"
+      },
+      "kmAway": "{{km}} km bort"
+    },
+    "banner": { "titleLine1": "Vill du känna dig som hemma", "titleLine2": "på nästa äventyr?", "cta": "Upptäck semesterbostäder" },
+    "popular": {
+      "title": "Populärt bland resenärer från Israel",
+      "tabs": { "domestic": "Nationella städer", "international": "Internationella städer", "regions": "Regioner", "countries": "Länder", "places": "Boenden" },
+      "showMore": "+ Visa mer",
+      "showLess": "− Visa mindre"
+    },
+    "travelMore": {
+      "title": "Res mer – betala mindre",
+      "boxTitle": "Logga in och spara",
+      "boxSubtitle": "Spara 10% eller mer på deltagande boenden – leta efter den blå Genius‑etiketten",
+      "features": {
+        "freeCancellation": { "title": "Boka nu, betala på plats", "subtitle": "Gratis avbokning för de flesta rum", "imgAlt": "Checklista‑illustration" },
+        "worldwide": { "title": "+2 miljoner boenden världen över", "subtitle": "Hotell, pensionat, lägenheter och mer...", "imgAlt": "Jordglob‑illustration" },
+        "support247": { "title": "Pålitlig kundservice dygnet runt", "subtitle": "Vi finns här för att hjälpa till", "imgAlt": "Kundservice‑illustration" }
+      }
+    }
+  },
+  "search": {
+    "where": "Vart är du på väg?",
+    "cta": "Sök",
+    "breadcrumb": { "home": "Hem", "country": "Israel", "city": "Stad", "results": "Sökresultat" },
+    "count": { "propertiesFound": "boenden hittade" },
+    "view": { "list": "Lista", "grid": "Rutnät" },
+    "notice": { "conflict": "Kontrollera ditt lands resevarningar innan du bestämmer dig för att bo i detta område, som kan anses påverkat av konflikt." },
+    "error": { "title": "Fel vid inläsning av hotell", "description": "Det gick inte att läsa in hotelluppgifter. Försök igen.", "retry": "Försök igen" },
+    "sort": {
+      "by": "Sortera efter:",
+      "labels": {
+        "top_picks": "Bäst för ensamresenärer",
+        "price_low": "Pris (lågt till högt)",
+        "price_high": "Pris (högt till lågt)",
+        "rating_high": "Betyg (fallande)",
+        "rating_low": "Betyg (stigande)",
+        "distance_low": "Avstånd till centrum",
+        "reviews_high": "Bäst betygsatta"
+      }
+    },
+    "filters": {
+      "budget": "Din budget (per natt)",
+      "categories": "Kategorier",
+      "review": "Recensionsbetyg",
+      "meals": "Måltider",
+      "stars": "Stjärnklass",
+      "ptype": "Boendetyp",
+      "facilities": "Populära filter",
+      "payment": "Betalningsalternativ",
+      "distance": "Avstånd från centrum",
+      "neighborhood": "Stadsdelar",
+      "brands": "Varumärken",
+      "showAll": "Visa alla",
+      "showLess": "Visa färre"
+    }
+  }
+}
+
+

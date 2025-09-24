@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Đăng ký chỗ nghỉ của bạn",
+  "register": "Đăng ký",
+  "signIn": "Đăng nhập",
+  "geniusLevel": "Cấp độ Genius {{level}}",
+  "tabs": {
+    "stays": "Chỗ nghỉ",
+    "flights": "Chuyến bay",
+    "cars": "Thuê xe",
+    "attractions": "Điểm tham quan",
+    "taxis": "Taxi sân bay",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Tìm chỗ nghỉ tiếp theo của bạn",
+      "subtitle": "Tìm kiếm giá thấp tại khách sạn, căn hộ và nhiều hơn nữa..."
+    },
+    "offers": {
+      "title": "Ưu đãi",
+      "subtitle": "Khuyến mãi, giảm giá và ưu đãi đặc biệt dành cho bạn"
+    },
+    "card1": {
+      "kicker": "Nhà nghỉ dưỡng",
+      "title": "Mơ ước trong nhà nghỉ dưỡng",
+      "subtitle": "Chọn từ nhà, biệt thự, chalet và nhiều hơn nữa",
+      "cta": "Đặt chỗ"
+    },
+    "card2": {
+      "title": "Chuyến đi nhanh, thời gian tốt",
+      "subtitle": "Tiết kiệm đến 20% với Getaway Deal",
+      "cta": "Tiết kiệm chỗ nghỉ"
+    },
+    "trending": {
+      "title": "Điểm đến phổ biến",
+      "subtitle": "Lựa chọn phổ biến nhất cho du khách từ Israel"
+    },
+    "propertyTypes": {
+      "title": "Duyệt theo loại chỗ nghỉ",
+      "items": {
+        "hotels": "Khách sạn",
+        "apartments": "Căn hộ",
+        "resorts": "Khu nghỉ dưỡng",
+        "villas": "Biệt thự",
+        "cabins": "Nhà gỗ",
+        "cottages": "Nhà tranh",
+        "glamping": "Glamping",
+        "serviced-apartments": "Căn hộ dịch vụ",
+        "holiday-homes": "Nhà nghỉ dưỡng",
+        "guest-houses": "Nhà khách",
+        "hostels": "Nhà trọ",
+        "motels": "Motel"
+      }
+    },
+    "tripPlanner": {
+      "title": "Người lập kế hoạch du lịch đơn giản và nhanh chóng",
+      "subtitle": "Chọn tâm trạng và khám phá những điểm đến hàng đầu ở Israel",
+      "categories": {
+        "festivals": "Lễ hội",
+        "artMusic": "Nghệ thuật & Âm nhạc",
+        "beachRelaxation": "Bãi biển & Thư giãn",
+        "gastronomyWine": "Ẩm thực & Rượu vang",
+        "shoppingMarkets": "Mua sắm & Chợ",
+        "culturalExploration": "Khám phá văn hóa"
+      },
+      "kmAway": "cách {{km}} km"
+    },
+    "banner": {
+      "titleLine1": "Muốn cảm thấy như ở nhà",
+      "titleLine2": "trong cuộc phiêu lưu tiếp theo?",
+      "cta": "Khám phá nhà nghỉ dưỡng"
+    },
+    "popular": {
+      "title": "Phổ biến trong số du khách từ Israel",
+      "tabs": {
+        "domestic": "Thành phố trong nước",
+        "international": "Thành phố quốc tế",
+        "regions": "Vùng",
+        "countries": "Quốc gia",
+        "places": "Chỗ nghỉ"
+      },
+      "showMore": "+ Hiển thị thêm",
+      "showLess": "− Hiển thị ít hơn"
+    },
+    "travelMore": {
+      "title": "Du lịch nhiều hơn, trả ít hơn",
+      "boxTitle": "Đăng nhập và tiết kiệm",
+      "boxSubtitle": "Tiết kiệm 10% hoặc nhiều hơn tại các chỗ nghỉ tham gia — tìm nhãn Genius màu xanh",
+      "features": {
+        "freeCancellation": {
+          "title": "Đặt ngay, thanh toán tại chỗ nghỉ",
+          "subtitle": "Hủy miễn phí cho hầu hết các phòng",
+          "imgAlt": "Hình minh họa danh sách kiểm tra"
+        },
+        "worldwide": {
+          "title": "+2 triệu chỗ nghỉ trên toàn thế giới",
+          "subtitle": "Khách sạn, nhà khách, căn hộ và nhiều hơn nữa...",
+          "imgAlt": "Hình minh họa quả địa cầu"
+        },
+        "support247": {
+          "title": "Dịch vụ khách hàng đáng tin cậy 24/7",
+          "subtitle": "Chúng tôi luôn ở đây để giúp đỡ",
+          "imgAlt": "Hình minh họa dịch vụ khách hàng"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Bạn sẽ đi đâu?",
+    "cta": "Tìm kiếm",
+    "breadcrumb": {
+      "home": "Trang chủ",
+      "country": "Israel",
+      "city": "Thành phố",
+      "results": "Kết quả tìm kiếm"
+    },
+    "count": { "propertiesFound": "chỗ nghỉ được tìm thấy" },
+    "view": { "list": "Danh sách", "grid": "Lưới" },
+    "notice": { "conflict": "Vui lòng kiểm tra cảnh báo du lịch của chính phủ trước khi quyết định lưu trú tại khu vực này, có thể được coi là bị ảnh hưởng bởi xung đột." },
+    "error": { "title": "Lỗi tải khách sạn", "description": "Không thể tải dữ liệu khách sạn. Vui lòng thử lại.", "retry": "Thử lại" },
+    "sort": {
+      "by": "Sắp xếp theo:",
+      "labels": {
+        "top_picks": "Tốt nhất cho du khách solo",
+        "price_low": "Giá (thấp đến cao)",
+        "price_high": "Giá (cao đến thấp)",
+        "rating_high": "Đánh giá chỗ nghỉ (giảm dần)",
+        "rating_low": "Đánh giá chỗ nghỉ (tăng dần)",
+        "distance_low": "Khoảng cách từ trung tâm",
+        "reviews_high": "Được đánh giá cao nhất"
+      }
+    },
+    "filters": {
+      "budget": "Ngân sách của bạn (mỗi đêm)",
+      "categories": "Danh mục",
+      "review": "Điểm đánh giá",
+      "meals": "Bữa ăn",
+      "stars": "Phân loại sao",
+      "ptype": "Loại chỗ nghỉ",
+      "facilities": "Bộ lọc phổ biến",
+      "payment": "Tùy chọn thanh toán",
+      "distance": "Khoảng cách từ trung tâm",
+      "neighborhood": "Khu vực lân cận",
+      "brands": "Thương hiệu",
+      "showAll": "Hiển thị tất cả",
+      "showLess": "Hiển thị ít hơn"
+    }
+  }
+}

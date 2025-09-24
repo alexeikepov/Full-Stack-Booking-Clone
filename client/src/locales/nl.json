@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registreer je accommodatie",
+  "register": "Registreren",
+  "signIn": "Inloggen",
+  "geniusLevel": "Genius niveau {{level}}",
+  "tabs": {
+    "stays": "Accommodaties",
+    "flights": "Vluchten",
+    "cars": "Autohuur",
+    "attractions": "Attracties",
+    "taxis": "Luchthaventaxi's",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Vind je volgende accommodatie",
+      "subtitle": "Zoek naar lage prijzen voor hotels, appartementen en meer..."
+    },
+    "offers": {
+      "title": "Aanbiedingen",
+      "subtitle": "Promoties, kortingen en speciale aanbiedingen voor jou"
+    },
+    "card1": {
+      "kicker": "Vakantiehuizen",
+      "title": "Droom in een vakantiehuis",
+      "subtitle": "Kies uit huizen, villa's, chalets en meer",
+      "cta": "Reserveer"
+    },
+    "card2": {
+      "title": "Snelle uitstap, goede tijden",
+      "subtitle": "Bespaar tot 20% met Getaway Deal",
+      "cta": "Bespaar op accommodatie"
+    },
+    "trending": {
+      "title": "Populaire bestemmingen",
+      "subtitle": "De populairste keuzes voor reizigers uit Israël"
+    },
+    "propertyTypes": {
+      "title": "Verken per accommodatietype",
+      "items": {
+        "hotels": "Hotels",
+        "apartments": "Appartementen",
+        "resorts": "Resorts",
+        "villas": "Villa's",
+        "cabins": "Hutten",
+        "cottages": "Cottages",
+        "glamping": "Glamping",
+        "serviced-apartments": "Serviceappartementen",
+        "holiday-homes": "Vakantiehuizen",
+        "guest-houses": "Pensions",
+        "hostels": "Hostels",
+        "motels": "Motels"
+      }
+    },
+    "tripPlanner": {
+      "title": "Eenvoudige en snelle reisplanner",
+      "subtitle": "Kies de sfeer en ontdek de beste bestemmingen in Israël",
+      "categories": {
+        "festivals": "Festivals",
+        "artMusic": "Kunst & muziek",
+        "beachRelaxation": "Strandontspanning",
+        "gastronomyWine": "Gastronomie & wijn",
+        "shoppingMarkets": "Shopping & markten",
+        "culturalExploration": "Culturele verkenning"
+      },
+      "kmAway": "op {{km}} km"
+    },
+    "banner": {
+      "titleLine1": "Wil je je thuis voelen",
+      "titleLine2": "tijdens je volgende avontuur?",
+      "cta": "Ontdek vakantiehuizen"
+    },
+    "popular": {
+      "title": "Populair bij reizigers uit Israël",
+      "tabs": {
+        "domestic": "Nationale steden",
+        "international": "Internationale steden",
+        "regions": "Regio's",
+        "countries": "Landen",
+        "places": "Accommodaties"
+      },
+      "showMore": "+ Meer tonen",
+      "showLess": "− Minder tonen"
+    },
+    "travelMore": {
+      "title": "Reis meer, betaal minder",
+      "boxTitle": "Log in en bespaar",
+      "boxSubtitle": "Bespaar 10% of meer bij deelnemende accommodaties: zoek naar het blauwe Genius-label",
+      "features": {
+        "freeCancellation": {
+          "title": "Reserveer nu, betaal ter plaatse",
+          "subtitle": "Gratis annulering voor de meeste kamers",
+          "imgAlt": "Checklist illustratie"
+        },
+        "worldwide": {
+          "title": "+2 miljoen accommodaties wereldwijd",
+          "subtitle": "Hotels, pensions, appartementen en meer...",
+          "imgAlt": "Wereldbol illustratie"
+        },
+        "support247": {
+          "title": "Betrouwbare klantenservice 24/7",
+          "subtitle": "We zijn er altijd om te helpen",
+          "imgAlt": "Klantenservice illustratie"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Waar ga je naartoe?",
+    "cta": "Zoeken",
+    "breadcrumb": {
+      "home": "Home",
+      "country": "Israël",
+      "city": "Stad",
+      "results": "Zoekresultaten"
+    },
+    "count": { "propertiesFound": "accommodaties gevonden" },
+    "view": { "list": "Lijst", "grid": "Raster" },
+    "notice": { "conflict": "Controleer de reisadviezen van je overheid voordat je besluit om in dit gebied te verblijven, dat mogelijk wordt beschouwd als getroffen door conflicten." },
+    "error": { "title": "Fout bij laden hotels", "description": "Kon hotelgegevens niet laden. Probeer opnieuw.", "retry": "Opnieuw proberen" },
+    "sort": {
+      "by": "Sorteren op:",
+      "labels": {
+        "top_picks": "Beste keuzes voor solo-reizigers",
+        "price_low": "Prijs (laag naar hoog)",
+        "price_high": "Prijs (hoog naar laag)",
+        "rating_high": "Beoordeling accommodatie (aflopend)",
+        "rating_low": "Beoordeling accommodatie (oplopend)",
+        "distance_low": "Afstand tot centrum",
+        "reviews_high": "Beste beoordeeld"
+      }
+    },
+    "filters": {
+      "budget": "Je budget (per nacht)",
+      "categories": "Categorieën",
+      "review": "Beoordelingsscore",
+      "meals": "Maaltijden",
+      "stars": "Sterrenclassificatie",
+      "ptype": "Accommodatietype",
+      "facilities": "Populaire filters",
+      "payment": "Betalingsopties",
+      "distance": "Afstand tot centrum",
+      "neighborhood": "Wijken",
+      "brands": "Merken",
+      "showAll": "Alles tonen",
+      "showLess": "Minder tonen"
+    }
+  }
+}

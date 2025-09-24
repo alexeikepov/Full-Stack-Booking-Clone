@@ -133,7 +133,55 @@
   },
   "search": {
     "where": "Where are you going?",
-    "cta": "Search"
+    "cta": "Search",
+    "breadcrumb": {
+      "home": "Home",
+      "country": "Israel",
+      "city": "City",
+      "results": "Search results"
+    },
+    "count": {
+      "propertiesFound": "properties found"
+    },
+    "view": {
+      "list": "List",
+      "grid": "Grid"
+    },
+    "notice": {
+      "conflict": "Please review any travel advisories provided by your government to make an informed decision about your stay in this area, which may be considered conflict-affected."
+    },
+    "error": {
+      "title": "Error loading hotels",
+      "description": "Failed to load hotel data. Please try again.",
+      "retry": "Retry"
+    },
+    "sort": {
+      "by": "Sort by:",
+      "labels": {
+        "top_picks": "Top picks for solo travellers",
+        "price_low": "Price (lowest first)",
+        "price_high": "Price (highest first)",
+        "rating_high": "Property rating (high to low)",
+        "rating_low": "Property rating (low to high)",
+        "distance_low": "Distance from city centre",
+        "reviews_high": "Top reviewed"
+      }
+    },
+    "filters": {
+      "budget": "Your budget (per night)",
+      "categories": "Categories",
+      "review": "Review score",
+      "meals": "Meals",
+      "stars": "Property rating",
+      "ptype": "Property type",
+      "facilities": "Popular filters",
+      "payment": "Payment options",
+      "distance": "Distance from centre",
+      "neighborhood": "Neighborhoods",
+      "brands": "Brands",
+      "showAll": "Show all",
+      "showLess": "Show less"
+    }
   }
 }
 

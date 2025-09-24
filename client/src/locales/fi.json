@@ -1,0 +1,107 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Rekisteröi majoituspaikkasi",
+  "register": "Rekisteröidy",
+  "signIn": "Kirjaudu sisään",
+  "geniusLevel": "Genius‑taso {{level}}",
+  "tabs": {
+    "stays": "Majoitukset",
+    "flights": "Lennot",
+    "cars": "Autonvuokraus",
+    "attractions": "Nähtävyydet",
+    "taxis": "Lentokenttätaksit",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": { "title": "Löydä seuraava majoituksesi", "subtitle": "Hae edullisia hintoja hotelleista, huoneistoista ja muusta..." },
+    "offers": { "title": "Tarjoukset", "subtitle": "Kampanjat, alennukset ja erikoistarjoukset sinulle" },
+    "card1": { "kicker": "Lomakodit", "title": "Unelmoi lomakodissa", "subtitle": "Valitse taloista, huviloista, mökeistä ja muista", "cta": "Varaa" },
+    "card2": { "title": "Nopea irtiotto, hyvät hetket", "subtitle": "Säästä jopa 20 % Getaway Deal ‑tarjouksella", "cta": "Säästä majoituksessa" },
+    "trending": { "title": "Suositut kohteet", "subtitle": "Suosituimmat valinnat Israelista matkustaville" },
+    "propertyTypes": {
+      "title": "Selaa majoitustyypin mukaan",
+      "items": {
+        "hotels": "Hotellit",
+        "apartments": "Huoneistot",
+        "resorts": "Lomakeskukset",
+        "villas": "Huvilat",
+        "cabins": "Mökit",
+        "cottages": "Mökit",
+        "glamping": "Glamping",
+        "serviced-apartments": "Huoneistohotellit",
+        "holiday-homes": "Lomakodit",
+        "guest-houses": "Guesthouset",
+        "hostels": "Hostellit",
+        "motels": "Motelit"
+      }
+    },
+    "tripPlanner": {
+      "title": "Helppo ja nopea matkan suunnittelija",
+      "subtitle": "Valitse tunnelma ja löydä parhaat kohteet Israelissa",
+      "categories": {
+        "festivals": "Festivaalit",
+        "artMusic": "Taide ja musiikki",
+        "beachRelaxation": "Ranta ja rentoutuminen",
+        "gastronomyWine": "Gastronomia ja viini",
+        "shoppingMarkets": "Shoppailu ja markkinat",
+        "culturalExploration": "Kulttuurien tutkiminen"
+      },
+      "kmAway": "{{km}} km päässä"
+    },
+    "banner": { "titleLine1": "Haluatko tuntea olosi kotoisaksi", "titleLine2": "seuraavalla seikkailullasi?", "cta": "Tutustu lomakoteihin" },
+    "popular": {
+      "title": "Suosittua Israelista matkustaville",
+      "tabs": { "domestic": "Kotimaan kaupungit", "international": "Kansainväliset kaupungit", "regions": "Alueet", "countries": "Maat", "places": "Majoitukset" },
+      "showMore": "+ Näytä lisää",
+      "showLess": "− Näytä vähemmän"
+    },
+    "travelMore": {
+      "title": "Matkusta enemmän – maksa vähemmän",
+      "boxTitle": "Kirjaudu sisään ja säästä",
+      "boxSubtitle": "Säästä 10 % tai enemmän osallistuvissa majoituspaikoissa – etsi sinistä Genius‑merkintää",
+      "features": {
+        "freeCancellation": { "title": "Varaa nyt, maksa majoituspaikassa", "subtitle": "Ilmainen peruutus useimmissa huoneissa", "imgAlt": "Tarkistuslista‑kuvitus" },
+        "worldwide": { "title": "+2 miljoonaa majoituspaikkaa maailmanlaajuisesti", "subtitle": "Hotellit, guesthouset, huoneistot ja paljon muuta...", "imgAlt": "Maapallo‑kuvitus" },
+        "support247": { "title": "Luotettava asiakaspalvelu 24/7", "subtitle": "Olemme aina valmiina auttamaan", "imgAlt": "Asiakaspalvelu‑kuvitus" }
+      }
+    }
+  },
+  "search": {
+    "where": "Minne olet menossa?",
+    "cta": "Hae",
+    "breadcrumb": { "home": "Etusivu", "country": "Israel", "city": "Kaupunki", "results": "Hakutulokset" },
+    "count": { "propertiesFound": "majoitusta löydetty" },
+    "view": { "list": "Lista", "grid": "Ruudukko" },
+    "notice": { "conflict": "Tarkista hallituksesi matkustustiedotteet ennen kuin päätät majoittua tällä alueella, jota voidaan pitää konfliktin vaikutusalueena." },
+    "error": { "title": "Virhe hotellien latauksessa", "description": "Hotellitietojen lataus epäonnistui. Yritä uudelleen.", "retry": "Yritä uudelleen" },
+    "sort": {
+      "by": "Järjestä:",
+      "labels": {
+        "top_picks": "Parhaat valinnat soolomatkailijoille",
+        "price_low": "Hinta (alimmasta korkeimpaan)",
+        "price_high": "Hinta (korkeimmasta alimpaan)",
+        "rating_high": "Majoituspaikan arvosana (laskeva)",
+        "rating_low": "Majoituspaikan arvosana (nouseva)",
+        "distance_low": "Etäisyys keskustasta",
+        "reviews_high": "Parhaiten arvioitu"
+      }
+    },
+    "filters": {
+      "budget": "Budjettisi (per yö)",
+      "categories": "Kategoriat",
+      "review": "Arvostelujen pistemäärä",
+      "meals": "Ateriat",
+      "stars": "Tähtiluokitus",
+      "ptype": "Majoitustyyppi",
+      "facilities": "Suosittuja suodattimia",
+      "payment": "Maksuvaihtoehdot",
+      "distance": "Etäisyys keskustasta",
+      "neighborhood": "Naapurustot",
+      "brands": "Brändit",
+      "showAll": "Näytä kaikki",
+      "showLess": "Näytä vähemmän"
+    }
+  }
+}
+
+

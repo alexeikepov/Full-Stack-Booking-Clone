@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registreeri oma majutus",
+  "register": "Registreeri",
+  "signIn": "Logi sisse",
+  "geniusLevel": "Genius tase {{level}}",
+  "tabs": {
+    "stays": "Majutus",
+    "flights": "Lennud",
+    "cars": "Autorent",
+    "attractions": "Atraktsioonid",
+    "taxis": "Lennujaama takso",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Leia oma järgmine majutus",
+      "subtitle": "Otsi madalaid hindu hotellides, korterites ja mujal..."
+    },
+    "offers": {
+      "title": "Pakkumised",
+      "subtitle": "Promotsioonid, allahindlused ja eripakkumised teile"
+    },
+    "card1": {
+      "kicker": "Puhkekodid",
+      "title": "Unista puhkekodus",
+      "subtitle": "Vali majadest, villadest, chaletitest ja teistest",
+      "cta": "Broneeri"
+    },
+    "card2": {
+      "title": "Kiire puhkus, head hetked",
+      "subtitle": "Säästa kuni 20% Getaway Dealiga",
+      "cta": "Säästa majutuses"
+    },
+    "trending": {
+      "title": "Populaarsed sihtkohad",
+      "subtitle": "Kõige populaarsemad valikud Iisraeli reisijatele"
+    },
+    "propertyTypes": {
+      "title": "Sirvi majutuse tüübi järgi",
+      "items": {
+        "hotels": "Hotellid",
+        "apartments": "Korterid",
+        "resorts": "Kuurordid",
+        "villas": "Villad",
+        "cabins": "Onnid",
+        "cottages": "Suvekodid",
+        "glamping": "Glamping",
+        "serviced-apartments": "Teenindatavad korterid",
+        "holiday-homes": "Puhkekodid",
+        "guest-houses": "Külalistemajad",
+        "hostels": "Hostelid",
+        "motels": "Motellid"
+      }
+    },
+    "tripPlanner": {
+      "title": "Lihtne ja kiire reisiplaanija",
+      "subtitle": "Vali tuju ja avasta parimad sihtkohad Iisraelis",
+      "categories": {
+        "festivals": "Festivalid",
+        "artMusic": "Kunst ja muusika",
+        "beachRelaxation": "Rann ja puhkus",
+        "gastronomyWine": "Gastronoomia ja vein",
+        "shoppingMarkets": "Ostlemine ja turud",
+        "culturalExploration": "Kultuuriline uurimine"
+      },
+      "kmAway": "{{km}} km kaugusel"
+    },
+    "banner": {
+      "titleLine1": "Tahad tunda end nagu kodus",
+      "titleLine2": "oma järgmises seikluses?",
+      "cta": "Avasta puhkekodid"
+    },
+    "popular": {
+      "title": "Populaarne Iisraeli reisijate seas",
+      "tabs": {
+        "domestic": "Kodumaised linnad",
+        "international": "Rahvusvahelised linnad",
+        "regions": "Piirkonnad",
+        "countries": "Riigid",
+        "places": "Majutus"
+      },
+      "showMore": "+ Näita rohkem",
+      "showLess": "− Näita vähem"
+    },
+    "travelMore": {
+      "title": "Reisi rohkem, maksa vähem",
+      "boxTitle": "Logi sisse ja säästa",
+      "boxSubtitle": "Säästa 10% või rohkem osalevates majutustes — otsi sinist Genius silti",
+      "features": {
+        "freeCancellation": {
+          "title": "Broneeri kohe, maksa kohapeal",
+          "subtitle": "Tasuta tühistamine enamiku tubade puhul",
+          "imgAlt": "Kontrollnimekirja illustratsioon"
+        },
+        "worldwide": {
+          "title": "+2 miljonit majutust üle maailma",
+          "subtitle": "Hotellid, külalistemajad, korterid ja palju muud...",
+          "imgAlt": "Maa illustratsioon"
+        },
+        "support247": {
+          "title": "Usaldusväärne klienditeenindus 24/7",
+          "subtitle": "Oleme alati siin, et aidata",
+          "imgAlt": "Klienditeeninduse illustratsioon"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Kuhu lähed?",
+    "cta": "Otsi",
+    "breadcrumb": {
+      "home": "Kodu",
+      "country": "Iisrael",
+      "city": "Linn",
+      "results": "Otsingu tulemused"
+    },
+    "count": { "propertiesFound": "majutust leitud" },
+    "view": { "list": "Nimekiri", "grid": "Võrk" },
+    "notice": { "conflict": "Palun kontrolli oma valitsuse reisihoiatusi enne otsustamist selles piirkonnas ööbida, mis võib olla konflikti mõjutatud." },
+    "error": { "title": "Hotellide laadimise viga", "description": "Hotellide andmete laadimine ebaõnnestus. Palun proovi uuesti.", "retry": "Proovi uuesti" },
+    "sort": {
+      "by": "Sordi:",
+      "labels": {
+        "top_picks": "Parimad üksikreisijatele",
+        "price_low": "Hind (odavamast kallimani)",
+        "price_high": "Hind (kallimast odavamani)",
+        "rating_high": "Hindamine (kahanev)",
+        "rating_low": "Hindamine (kasvav)",
+        "distance_low": "Kaugus keskusest",
+        "reviews_high": "Kõige hinnatud"
+      }
+    },
+    "filters": {
+      "budget": "Sinu eelarve (öö kohta)",
+      "categories": "Kategooriad",
+      "review": "Arvustuste skoor",
+      "meals": "Toit",
+      "stars": "Tähtede kategooria",
+      "ptype": "Majutuse tüüp",
+      "facilities": "Populaarsed filtrid",
+      "payment": "Makseviisid",
+      "distance": "Kaugus keskusest",
+      "neighborhood": "Linnaosad",
+      "brands": "Brändid",
+      "showAll": "Näita kõiki",
+      "showLess": "Näita vähem"
+    }
+  }
+}

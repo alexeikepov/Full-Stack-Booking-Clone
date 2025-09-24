@@ -7,7 +7,6 @@ import PropertyTypesSection from "@/components/homePage/PropertyTypesSection";
 import TrendingDestinations from "@/components/homePage/TrendingDestinations";
 import TripPlannerCarousel from "@/components/homePage/TripPlannerCarousel";
 import TravelMoreSection from "@/components/homePage/TravelMoreSection";
-import HolidayRentalsBanner from "@/components/homePage/HolidayRentalsBanner";
 import PopularWithTravellers from "@/components/homePage/PopularWithTravellers";
 import Footer from "@/components/Footer";
 import { useNavigationStore } from "@/stores/navigation";
@@ -103,7 +102,7 @@ export default function HomePage() {
       <PropertyTypesSection />
       <TripPlannerCarousel />
       <TravelMoreSection />
-      <HolidayRentalsBanner />
+      
       <PopularWithTravellers />
       <Footer />
     </div>
