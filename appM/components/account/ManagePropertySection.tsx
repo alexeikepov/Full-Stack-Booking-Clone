@@ -10,13 +10,11 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
 import { itemIcons } from "./itemIcons";
-
 interface Style {
   fullContainer: ViewStyle;
   backgroundImage: ViewStyle;
@@ -31,71 +29,72 @@ interface Style {
   listPropertyButton: ViewStyle;
   listPropertyButtonText: TextStyle;
 }
-
-const styles = StyleSheet.create<Style>({
-  fullContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(10, 10, 10, 0.92)",
-  },
-  backgroundImage: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  backButton: { paddingRight: 10 },
-  headerText: { fontSize: 20, fontWeight: "bold", color: "white" },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "white",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
-  listPropertyButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    paddingVertical: 15,
-    alignItems: "center",
-  },
-  listPropertyButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});
-
 export default function ManagePropertySection() {
+  const { colors } = useTheme();
   const [showPropertyModal, setShowPropertyModal] = useState(false);
-  const items = ["List your property"];
 
+  const styles = StyleSheet.create<Style>({
+    fullContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 44, // iOS status bar height
+    },
+    backgroundImage: {
+      flex: 1,
+      width: "100%",
+      height: "100%",
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.card,
+    },
+    backButton: { paddingRight: 10 },
+    headerText: { fontSize: 20, fontWeight: "bold", color: colors.text },
+    contentContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      backgroundColor: colors.card,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: colors.text,
+      textAlign: "center",
+      marginBottom: 10,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: "center",
+      lineHeight: 24,
+    },
+    footer: {
+      padding: 20,
+      backgroundColor: colors.card,
+    },
+    listPropertyButton: {
+      backgroundColor: colors.button,
+      borderRadius: 8,
+      paddingVertical: 15,
+      alignItems: "center",
+    },
+    listPropertyButtonText: {
+      color: "white",
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+  });
+
+  const items = ["List your property"];
   const PropertyModal = (
     <Modal visible={showPropertyModal} animationType="slide" transparent={true}>
       <View style={styles.overlay}>
@@ -104,25 +103,25 @@ export default function ManagePropertySection() {
           style={styles.backgroundImage}
           resizeMode="cover"
         >
-          <SafeAreaView style={{ flex: 1 }}>
+          <View style={{ flex: 1 }}>
             <View style={styles.header}>
               <Pressable
                 onPress={() => setShowPropertyModal(false)}
                 style={styles.backButton}
               >
-                <Ionicons name="chevron-back" size={24} color={"white"} />
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </Pressable>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Ionicons
                   name="home-outline"
                   size={20}
-                  color="white"
+                  color={colors.icon}
                   style={{ marginRight: 4 }}
                 />
                 <Ionicons
                   name="add-circle-outline"
                   size={20}
-                  color="white"
+                  color={colors.icon}
                   style={{ marginRight: 8 }}
                 />
                 <Text style={styles.headerText}>List your property</Text>
@@ -154,12 +153,11 @@ export default function ManagePropertySection() {
                 </Text>
               </Pressable>
             </View>
-          </SafeAreaView>
+          </View>
         </ImageBackground>
       </View>
     </Modal>
   );
-
   return (
     <>
       <AccountSection title="Manage your property">
@@ -170,7 +168,7 @@ export default function ManagePropertySection() {
               <Ionicons
                 name={itemIcons[title] || "home-outline"}
                 size={20}
-                color={Colors.dark.icon}
+                color={colors.icon}
               />
             }
             title={title}

@@ -5,7 +5,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { useAuth } from "@/context/AuthContext";
 
 const schema = z.object({
@@ -83,14 +90,20 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Your password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Your password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {serverError && <p className="text-sm text-red-600">{serverError}</p>}
+            {serverError && (
+              <p className="text-sm text-red-600">{serverError}</p>
+            )}
 
             <Button
               type="submit"

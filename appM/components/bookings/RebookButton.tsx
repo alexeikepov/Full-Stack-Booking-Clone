@@ -1,18 +1,25 @@
+// path: src/components/buttons/RebookButton.tsx
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Colors } from "../../constants/Colors";
-
-interface RebookButtonProps {
-  onPress: () => void;
-}
-
-export default function RebookButton({ onPress }: RebookButtonProps) {
+import { useTheme } from "../../hooks/ThemeContext";
+export default function RebookButton() {
+  const navigation =
+    useNavigation<
+      NativeStackNavigationProp<Record<string, object | undefined>>
+    >();
+  const { colors, theme } = useTheme();
+  const styles = createStyles(colors, theme);
+  const handlePress = () => {
+    navigation.navigate("Search"); // navigate to Search screen
+  };
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={styles.button} onPress={handlePress}>
       <Ionicons
         name="refresh-outline"
         size={20}
-        color={Colors.dark.text}
+        color={colors.text}
         style={{ marginRight: 8 }}
       />
       <Text style={[styles.text, { flexShrink: 1 }]} numberOfLines={1}>
@@ -21,25 +28,29 @@ export default function RebookButton({ onPress }: RebookButtonProps) {
       <Ionicons
         name="arrow-forward-outline"
         size={20}
-        color={Colors.dark.text}
+        color={colors.text}
         style={{ marginLeft: 4 }}
       />
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.dark.cardSecondary,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 12,
-  },
-  text: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-  },
-});
+const createStyles = (colors: Record<string, string>, theme: string) =>
+  StyleSheet.create({
+    button: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor:
+        theme === "light" ? colors.card : colors.cardSecondary || colors.card,
+      paddingVertical: 8,
+      borderRadius: 20,
+      marginTop: 12,
+      borderWidth: theme === "light" ? 1 : 0,
+      borderColor:
+        theme === "light" ? colors.border || "#E5E5E5" : "transparent",
+    },
+    text: {
+      color: colors.text,
+      fontWeight: "bold",
+    },
+  });

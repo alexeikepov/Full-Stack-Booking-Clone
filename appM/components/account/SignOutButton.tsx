@@ -1,15 +1,78 @@
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { Colors } from "../../constants/Colors";
-
+import { useTheme } from "../../hooks/ThemeContext";
 export default function SignOutButton() {
+  const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
+
+  const styles = StyleSheet.create({
+    signOutButton: {
+      paddingVertical: 12,
+      marginTop: 20,
+      marginBottom: 40,
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      alignItems: "center",
+    },
+    signOutText: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: "#ff6a6a",
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 24,
+      alignItems: "center",
+      width: 280,
+    },
+    modalText: {
+      fontSize: 16,
+      color: colors.text,
+      marginBottom: 24,
+      textAlign: "center",
+    },
+    modalActions: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    cancelButton: {
+      flex: 1,
+      paddingVertical: 10,
+      marginRight: 8,
+      backgroundColor: colors.background,
+      borderRadius: 8,
+      alignItems: "center",
+    },
+    confirmButton: {
+      flex: 1,
+      paddingVertical: 10,
+      marginLeft: 8,
+      backgroundColor: "#ff6a6a",
+      borderRadius: 8,
+      alignItems: "center",
+    },
+    cancelText: {
+      color: colors.text,
+      fontWeight: "bold",
+    },
+    confirmText: {
+      color: "white",
+      fontWeight: "bold",
+    },
+  });
 
   const handleSignOut = () => {
     // Add your sign out logic here
     setModalVisible(false);
   };
-
   return (
     <>
       <Pressable
@@ -20,7 +83,6 @@ export default function SignOutButton() {
       </Pressable>
       <Modal
         visible={modalVisible}
-        transparent
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
@@ -46,67 +108,3 @@ export default function SignOutButton() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  signOutButton: {
-    paddingVertical: 12,
-    marginTop: 20,
-    marginBottom: 40,
-    backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  signOutText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#ff6a6a",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    padding: 24,
-    alignItems: "center",
-    width: 280,
-  },
-  modalText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-    marginBottom: 24,
-    textAlign: "center",
-  },
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 10,
-    marginRight: 8,
-    backgroundColor: Colors.dark.background,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  confirmButton: {
-    flex: 1,
-    paddingVertical: 10,
-    marginLeft: 8,
-    backgroundColor: "#ff6a6a",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  cancelText: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-  },
-  confirmText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-});

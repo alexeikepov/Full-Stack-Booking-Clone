@@ -5,7 +5,6 @@ import {
   Modal,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   TextStyle,
   View,
@@ -17,9 +16,9 @@ import {
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
-
 interface Style {
   fullPage: ViewStyle;
   header: ViewStyle;
@@ -29,18 +28,17 @@ interface Style {
   mainText: TextStyle;
   subText: TextStyle;
 }
-
-const styles = StyleSheet.create<Style>({
+const createStyles = (colors: typeof Colors.light): Style => ({
   fullPage: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
   },
   backButton: {
     paddingRight: 10,
@@ -48,7 +46,7 @@ const styles = StyleSheet.create<Style>({
   headerText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
   },
   container: {
     flex: 1,
@@ -59,22 +57,22 @@ const styles = StyleSheet.create<Style>({
   mainText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
     textAlign: "center",
     marginBottom: 10,
   },
   subText: {
     fontSize: 16,
-    color: Colors.dark.textSecondary,
+    color: colors.textSecondary,
     textAlign: "center",
   },
 });
-
 export default function TravelActivitySection(): JSX.Element {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [showModal, setShowModal] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-
   useEffect(() => {
     if (!showModal) return;
     const handler = () => true;
@@ -86,13 +84,10 @@ export default function TravelActivitySection(): JSX.Element {
       if (subscription) subscription.remove();
     };
   }, [showModal]);
-
   const items = [
     {
       title: "Saved lists",
-      icon: (
-        <Ionicons name="heart-outline" size={20} color={Colors.dark.icon} />
-      ),
+      icon: <Ionicons name="heart-outline" size={20} color={colors.icon} />,
     },
     {
       title: "My reviews",
@@ -100,22 +95,17 @@ export default function TravelActivitySection(): JSX.Element {
         <Ionicons
           name="chatbubble-ellipses-outline"
           size={20}
-          color={Colors.dark.icon}
+          color={colors.icon}
         />
       ),
     },
     {
       title: "My questions to properties",
       icon: (
-        <Ionicons
-          name="document-text-outline"
-          size={20}
-          color={Colors.dark.icon}
-        />
+        <Ionicons name="document-text-outline" size={20} color={colors.icon} />
       ),
     },
   ];
-
   const getModalContent = () => {
     switch (showModal) {
       case "My reviews":
@@ -124,7 +114,7 @@ export default function TravelActivitySection(): JSX.Element {
             <Ionicons
               name="person-outline"
               size={60}
-              color={Colors.dark.textSecondary}
+              color={colors.textSecondary}
               style={{ marginBottom: 20 }}
             />
             <Text style={styles.mainText}>You do not have any reviews</Text>
@@ -148,7 +138,6 @@ export default function TravelActivitySection(): JSX.Element {
         return null;
     }
   };
-
   const getModalHeaderTitle = () => {
     switch (showModal) {
       case "My reviews":
@@ -159,7 +148,6 @@ export default function TravelActivitySection(): JSX.Element {
         return "";
     }
   };
-
   const handleItemPress = (title: string) => {
     if (title === "Saved lists") {
       navigation.navigate("Saved" as never);
@@ -167,7 +155,6 @@ export default function TravelActivitySection(): JSX.Element {
       setShowModal(title);
     }
   };
-
   const ModalComponent = (
     <Modal
       visible={!!showModal}
@@ -183,7 +170,7 @@ export default function TravelActivitySection(): JSX.Element {
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
           <Text style={styles.headerText}>{getModalHeaderTitle()}</Text>
         </View>
@@ -191,7 +178,6 @@ export default function TravelActivitySection(): JSX.Element {
       </SafeAreaView>
     </Modal>
   );
-
   return (
     <AccountSection title="Travel activity">
       {items.map((item) => (

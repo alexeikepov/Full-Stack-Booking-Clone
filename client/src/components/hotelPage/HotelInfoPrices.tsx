@@ -62,7 +62,7 @@ export default function HotelInfoPrices({
   // Update rooms if it's less than the required amount (but allow more)
   if (searchRooms < requiredRooms) {
     console.log(
-      `Auto-updating rooms: ${searchRooms} -> ${requiredRooms} (${totalGuests} guests)`
+      `Auto-updating rooms: ${searchRooms} -> ${requiredRooms} (${totalGuests} guests)`,
     );
     setRooms(requiredRooms);
   }
@@ -97,7 +97,7 @@ export default function HotelInfoPrices({
       window.history.replaceState(
         {},
         "",
-        `${window.location.pathname}?${next.toString()}`
+        `${window.location.pathname}?${next.toString()}`,
       );
 
       // Прокручиваем к секции с ценами
@@ -307,7 +307,7 @@ export default function HotelInfoPrices({
                               <span key={i} className="inline-block mr-1">
                                 <MdPerson className="text-gray-600" size={22} />
                               </span>
-                            )
+                            ),
                           )}
                         </div>
                       </div>
@@ -359,7 +359,7 @@ export default function HotelInfoPrices({
                       {/* High-speed internet */}
                       {(room.amenities.some((a) => /wifi|internet/i.test(a)) ||
                         room.facilities.some((a) =>
-                          /wifi|internet/i.test(a)
+                          /wifi|internet/i.test(a),
                         )) && (
                         <div className="flex items-center gap-2 text-green-600">
                           <span>✓</span>
@@ -368,7 +368,7 @@ export default function HotelInfoPrices({
                       )}
 
                       {room.categories.some((c) =>
-                        /free cancellation/i.test(c)
+                        /free cancellation/i.test(c),
                       ) && (
                         <div className="flex items-center gap-2 text-green-600">
                           <span>✓</span>
@@ -378,7 +378,7 @@ export default function HotelInfoPrices({
 
                       {/* No prepayment */}
                       {room.categories.some((c) =>
-                        /no prepayment/i.test(c)
+                        /no prepayment/i.test(c),
                       ) && (
                         <div className="flex items-center gap-2 text-green-600">
                           <span>✓</span>
@@ -422,7 +422,7 @@ export default function HotelInfoPrices({
                       <select className="border border-gray-300 rounded px-2 py-1 text-sm">
                         {Array.from(
                           { length: (room.availableRooms || 0) + 1 },
-                          (_, i) => i
+                          (_, i) => i,
                         ).map((num) => (
                           <option key={num} value={num}>
                             {num}

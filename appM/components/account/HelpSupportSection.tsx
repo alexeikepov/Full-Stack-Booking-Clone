@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Text,
   TextStyle,
+  TouchableOpacity,
   UIManager,
   View,
   ViewStyle,
@@ -20,15 +21,17 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
-
 interface Style {
   fullPage: ViewStyle;
   header: ViewStyle;
   headerText: TextStyle;
   backButton: ViewStyle;
+  modalHeader: ViewStyle;
+  modalHeaderText: TextStyle;
+  closeButton: ViewStyle;
   infoContainer: ViewStyle;
   infoText: TextStyle;
   section: ViewStyle;
@@ -45,132 +48,130 @@ interface Style {
   faqItemText: TextStyle;
   faqAnswer: TextStyle;
 }
-
-const items = [
-  {
-    title: "Contact Customer Service",
-    icon: (
-      <Ionicons name="help-circle-outline" size={20} color={Colors.dark.icon} />
-    ),
-  },
-  {
-    title: "Dispute resolution",
-    icon: (
-      <Ionicons name="help-buoy-outline" size={20} color={Colors.dark.icon} />
-    ),
-  },
-  {
-    title: "Safety resource center",
-    icon: (
-      <Ionicons name="help-buoy-outline" size={20} color={Colors.dark.icon} />
-    ),
-  },
-];
-
 export interface HelpSupportSectionProps {
   onBack?: () => void;
 }
-
 if (
   RNPlatform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const styles = StyleSheet.create<Style>({
-  fullPage: { flex: 1, backgroundColor: Colors.dark.background },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: Colors.dark.card,
-  },
-  backButton: { paddingRight: 10 },
-  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
-  infoContainer: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginTop: 20,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  infoText: {
-    fontSize: 14,
-    color: Colors.dark.textSecondary,
-    flex: 1,
-    lineHeight: 20,
-  },
-  section: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-  },
-  sectionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.separator,
-  },
-  sectionItemText: { fontSize: 16, color: Colors.dark.text },
-  sectionItemSubText: {
-    fontSize: 14,
-    color: Colors.dark.textSecondary,
-    marginTop: 4,
-  },
-  blueButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginHorizontal: 16,
-    marginTop: 20,
-  },
-  blueButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },
-  faqTabs: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    marginTop: 20,
-  },
-  faqTab: {
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingBottom: 5,
-  },
-  faqTabText: { color: Colors.dark.textSecondary, fontSize: 14 },
-  faqItem: {
-    flexDirection: "column",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.separator,
-  },
-  faqItemText: { fontSize: 16, color: Colors.dark.text },
-  faqAnswer: { fontSize: 14, color: Colors.dark.textSecondary, marginTop: 8 },
-});
-
+const createStyles = (colors: Record<string, string>, theme: string) =>
+  StyleSheet.create<Style>({
+    fullPage: { flex: 1, backgroundColor: colors.background },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.card,
+    },
+    backButton: { paddingRight: 10 },
+    modalHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.card,
+    },
+    modalHeaderText: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    closeButton: { paddingRight: 10 },
+    headerText: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    infoContainer: {
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      marginHorizontal: 16,
+      marginTop: 20,
+      padding: 16,
+      flexDirection: "row",
+      alignItems: "flex-start",
+    },
+    infoText: {
+      fontSize: 14,
+      color: colors.textSecondary || colors.icon,
+      flex: 1,
+      lineHeight: 20,
+    },
+    section: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      marginHorizontal: 16,
+      marginTop: 20,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: colors.text,
+      paddingHorizontal: 16,
+      paddingVertical: 20,
+    },
+    sectionItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator || colors.border || "#E5E5E5",
+    },
+    sectionItemText: { fontSize: 16, color: colors.text },
+    sectionItemSubText: {
+      fontSize: 14,
+      color: colors.textSecondary || colors.icon,
+      marginTop: 4,
+    },
+    blueButton: {
+      backgroundColor: "#007AFF",
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: "center",
+      marginHorizontal: 16,
+      marginTop: 20,
+    },
+    blueButtonText: { color: "white", fontSize: 16, fontWeight: "bold" },
+    faqTabs: {
+      flexDirection: "row",
+      paddingHorizontal: 16,
+      marginTop: 20,
+    },
+    faqTab: {
+      alignItems: "center",
+      paddingHorizontal: 10,
+      paddingBottom: 5,
+    },
+    faqTabText: { color: colors.textSecondary || colors.icon, fontSize: 14 },
+    faqItem: {
+      flexDirection: "column",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator || colors.border || "#E5E5E5",
+    },
+    faqItemText: { fontSize: 16, color: colors.text },
+    faqAnswer: {
+      fontSize: 14,
+      color: colors.textSecondary || colors.icon,
+      marginTop: 8,
+    },
+  });
 export default function HelpSupport({
   onBack,
 }: HelpSupportSectionProps): JSX.Element {
+  const { colors, theme } = useTheme();
+  const styles = createStyles(colors, theme);
   const [showModal, setShowModal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("Stays");
   const [openQuestionIndex, setOpenQuestionIndex] = useState<number | null>(
     null,
   );
   const insets = useSafeAreaInsets();
-
   useEffect(() => {
     if (!showModal) return;
     const handler = () => true;
@@ -181,7 +182,6 @@ export default function HelpSupport({
       if (subscription) subscription.remove();
     };
   }, [showModal]);
-
   const faqData: { [key: string]: { question: string; answer: string }[] } = {
     Stays: [
       {
@@ -332,7 +332,6 @@ export default function HelpSupport({
       },
     ],
   };
-
   const getModalContent = () => {
     switch (showModal) {
       case "Contact Customer Service":
@@ -348,7 +347,7 @@ export default function HelpSupport({
                 <Ionicons
                   name="warning-outline"
                   size={24}
-                  color={Colors.dark.yellow}
+                  color="#FFD700"
                   style={{ marginRight: 10 }}
                 />
                 <Text style={styles.infoText}>
@@ -361,12 +360,10 @@ export default function HelpSupport({
                     }}
                     onPress={() => Linking.openURL("https://www.booking.com")}
                   >
-                    {" "}
                     Learn more
                   </Text>
                 </Text>
               </View>
-
               <View style={{ marginHorizontal: 16, marginTop: 20 }}>
                 <Text style={styles.sectionTitle}>
                   Welcome to the Help Center
@@ -374,7 +371,7 @@ export default function HelpSupport({
                 <Text
                   style={{
                     fontSize: 14,
-                    color: Colors.dark.textSecondary,
+                    color: colors.textSecondary || colors.icon,
                     marginTop: -10,
                     marginBottom: 10,
                   }}
@@ -394,12 +391,10 @@ export default function HelpSupport({
                   </Text>
                 </Pressable>
               </View>
-
               <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
                 Frequently asked questions
               </Text>
               <ScrollView
-                horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{
                   flexDirection: "row",
@@ -427,8 +422,8 @@ export default function HelpSupport({
                         {
                           color:
                             activeTab === tab
-                              ? Colors.dark.text
-                              : Colors.dark.textSecondary,
+                              ? colors.text
+                              : colors.textSecondary || colors.icon,
                         },
                       ]}
                     >
@@ -437,10 +432,9 @@ export default function HelpSupport({
                   </Pressable>
                 ))}
               </ScrollView>
-
               <View
                 style={{
-                  backgroundColor: Colors.dark.card,
+                  backgroundColor: colors.card,
                   borderRadius: 12,
                   marginHorizontal: 16,
                   marginTop: 10,
@@ -475,7 +469,6 @@ export default function HelpSupport({
             </View>
           </ScrollView>
         );
-
       case "Dispute resolution":
         return (
           <ScrollView
@@ -486,17 +479,15 @@ export default function HelpSupport({
               paddingBottom: insets.bottom + 20,
             }}
           >
-            <Text style={{ color: Colors.dark.text }}>
+            <Text style={{ color: colors.text }}>
               Dispute resolution content goes here.
             </Text>
           </ScrollView>
         );
-
       default:
         return null;
     }
   };
-
   const getModalHeaderTitle = () => {
     switch (showModal) {
       case "Contact Customer Service":
@@ -507,7 +498,6 @@ export default function HelpSupport({
         return "";
     }
   };
-
   const ModalComponent = (
     <Modal
       visible={!!showModal}
@@ -526,7 +516,11 @@ export default function HelpSupport({
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons
+              name="chevron-back"
+              size={24}
+              color={theme === "light" ? colors.background : colors.text}
+            />
           </Pressable>
           <Text style={styles.headerText}>{getModalHeaderTitle()}</Text>
         </View>
@@ -534,7 +528,6 @@ export default function HelpSupport({
       </SafeAreaView>
     </Modal>
   );
-
   const handleItemPress = (title: string) => {
     if (title === "Safety resource center")
       Linking.openURL(
@@ -543,10 +536,44 @@ export default function HelpSupport({
     else setShowModal(title);
   };
 
+  // Create dynamic items with theme-aware colors
+  const dynamicItems = [
+    {
+      title: "Contact Customer Service",
+      icon: (
+        <Ionicons name="help-circle-outline" size={20} color={colors.icon} />
+      ),
+    },
+    {
+      title: "Dispute resolution",
+      icon: <Ionicons name="help-buoy-outline" size={20} color={colors.icon} />,
+    },
+    {
+      title: "Safety resource center",
+      icon: <Ionicons name="help-buoy-outline" size={20} color={colors.icon} />,
+    },
+  ];
+
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.dark.background }}>
-      <AccountSection title="Help and support">
-        {items.map((item) => (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+      }}
+    >
+      <View style={styles.modalHeader}>
+        <TouchableOpacity onPress={onBack} style={styles.closeButton}>
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text
+          style={[styles.modalHeaderText, { flex: 1 }, { textAlign: "center" }]}
+        >
+          Help Center
+        </Text>
+      </View>
+
+      <AccountSection title="">
+        {dynamicItems.map((item) => (
           <AccountItem
             key={item.title}
             icon={item.icon}

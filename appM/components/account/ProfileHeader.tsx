@@ -15,12 +15,11 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
-// To avoid implicit 'any' errors, define types for complex data structures.
+import { useTheme } from "../../hooks/ThemeContext";
 interface FaqItem {
   question: string;
   answer: string;
 }
-
 interface ProfileHeaderProps {
   userName?: string;
   geniusLevel?: string;
@@ -28,9 +27,7 @@ interface ProfileHeaderProps {
   onMessagesPress?: () => void;
   onNotificationsPress?: () => void;
 }
-
 const { height } = Dimensions.get("window");
-
 const faqs: FaqItem[] = [
   {
     question: "How to progress in Genius",
@@ -89,17 +86,6 @@ const faqs: FaqItem[] = [
       "It's a free loyalty program that rewards you with discounts and travel perks as you complete more bookings.",
   },
 ];
-
-// Define a placeholder for the colors, as the original import is from a local file.
-// In a real application, you would ensure the `Colors` file is available.
-const Colors = {
-  dark: {
-    icon: "#E0E0E0",
-    text: "#E0E0E0",
-  },
-  // Add other necessary colors from the original file
-};
-
 export default function ProfileHeader({
   userName = "guest",
   geniusLevel = "Level 1",
@@ -109,21 +95,19 @@ export default function ProfileHeader({
 }: ProfileHeaderProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
-
+  const { colors, theme } = useTheme();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [openRateModal, setOpenRateModal] = useState<boolean>(false);
   const [openThanksModal, setOpenThanksModal] = useState<boolean>(false);
+  const [openPhotoModal, setOpenPhotoModal] = useState<boolean>(false);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
-
   // useRef to get a reference to the ScrollView
   const scrollViewRef = useRef<any>(null);
   const faqSectionRef = useRef<View | null>(null);
-
   const toggleFaq = (index: number) => {
     setFaqOpen(faqOpen === index ? null : index);
   };
-
   const handleRateSubmit = (rating?: number) => {
     // store the rating and show thank you overlay
     if (typeof rating === "number") {
@@ -133,14 +117,20 @@ export default function ProfileHeader({
     setOpenRateModal(false);
     setOpenThanksModal(true);
   };
-
   const handleCloseAllModals = () => {
     setOpenModal(false);
     setOpenRateModal(false);
     setOpenThanksModal(false);
+    setOpenPhotoModal(false);
     setSelectedRating(null);
   };
 
+  const handlePhotoSelection = (option: string) => {
+    // Here you would implement the actual photo selection logic
+    // For now, we'll just close the modal
+    console.log(`Photo selection option: ${option}`);
+    setOpenPhotoModal(false);
+  };
   // Function to scroll to a specific section and open the corresponding FAQ
   const scrollToFaq = () => {
     setOpenModal(true);
@@ -160,7 +150,6 @@ export default function ProfileHeader({
       setFaqOpen(0);
     }, 200);
   };
-
   // Robust navigation attempts to reach the Search screen.
   // Robust navigation attempts to reach the Search screen.
   const handleFindNextStay = () => {
@@ -183,63 +172,93 @@ export default function ProfileHeader({
           .getParent()
           ?.dispatch(CommonActions.navigate({ name: "SearchScreen" })),
     ];
-
     for (const attempt of attempts) {
       try {
         attempt();
-        break; // exit once one attempt succeeds
+        break;
       } catch (err) {
         console.error("Navigation attempt failed:", err);
       }
     }
-
-    // Always close modal after navigation attempt
     setOpenModal(false);
   };
-
   return (
     <Fragment>
-      {/* Pressable header area */}
-      <TouchableOpacity
-        onPress={() => setOpenModal(true)}
-        activeOpacity={0.8}
-        style={styles.headerContainer}
+      <View
+        style={[
+          styles.headerContainer,
+          {
+            backgroundColor:
+              theme === "light" ? colors.blue : colors.background,
+          },
+        ]}
       >
         <View style={styles.userInfo}>
-          <Image
-            source={
-              profileImage || require("../../assets/images/place-holder.jpg")
-            }
-            style={styles.profileImage}
-          />
-          <View>
-            <Text style={styles.userNameText}>Hi, {userName}</Text>
-            <View style={styles.geniusLevelBadge}>
-              <Text style={styles.geniusLabelText}>Genius </Text>
-              <Text style={styles.geniusLevelText}>{geniusLevel}</Text>
+          <TouchableOpacity onPress={() => setOpenPhotoModal(true)}>
+            <Image
+              source={
+                profileImage || require("../../assets/images/place-holder.jpg")
+              }
+              style={[
+                styles.profileImage,
+                { borderColor: theme === "light" ? "#FFD700" : "#FFD700" },
+              ]}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setOpenModal(true)}>
+            <Text
+              style={[
+                styles.userNameText,
+                { color: theme === "light" ? "#FFFFFF" : colors.text },
+              ]}
+            >
+              Hi, {userName}
+            </Text>
+            <View
+              style={[
+                styles.geniusLevelBadge,
+                {
+                  backgroundColor:
+                    theme === "light" ? "rgba(255,255,255,0.2)" : colors.card,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.geniusLabelText,
+                  { color: theme === "light" ? "#FFFFFF" : colors.text },
+                ]}
+              >
+                Genius{" "}
+              </Text>
+              <Text
+                style={[
+                  styles.geniusLevelText,
+                  { color: theme === "light" ? "#FFD700" : "#FFD700" },
+                ]}
+              >
+                {geniusLevel}
+              </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
-
         <View style={styles.actionButtons}>
           <TouchableOpacity onPress={onMessagesPress}>
             <Ionicons
               name="chatbubble-outline"
-              size={22}
-              color={Colors.dark.icon}
+              size={28}
+              color={theme === "light" ? "#FFFFFF" : colors.icon}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={onNotificationsPress}>
             <Ionicons
               name="notifications-outline"
-              size={22}
-              color={Colors.dark.icon}
+              size={28}
+              color={theme === "light" ? "#FFFFFF" : colors.icon}
             />
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
-
-      {/* Main Genius Modal */}
+      </View>
       <Modal
         visible={openModal}
         animationType="slide"
@@ -247,33 +266,35 @@ export default function ProfileHeader({
         onRequestClose={() => setOpenModal(false)}
         presentationStyle="fullScreen"
       >
-        {/* Use SafeAreaView to prevent content from overlapping with the top bar */}
         <SafeAreaView
           edges={["top", "left", "right"]}
           style={{
             flex: 1,
-            backgroundColor: "#121417",
+            backgroundColor: colors.background,
             paddingTop: insets.top,
             position: "relative",
           }}
         >
-          {/* Header */}
           <View
-            style={[styles.modalHeader, { paddingTop: 0, paddingBottom: 12 }]}
+            style={[
+              styles.modalHeader,
+              {
+                paddingTop: 0,
+                paddingBottom: 12,
+                backgroundColor: colors.background,
+                borderBottomColor: colors.textSecondary,
+              },
+            ]}
           >
             <TouchableOpacity onPress={() => setOpenModal(false)}>
-              <Ionicons
-                name="chevron-back"
-                size={24}
-                color={Colors.dark.text}
-              />
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
             </TouchableOpacity>
-            <Text style={styles.modalHeaderText}>Genius loyalty program</Text>
+            <Text style={[styles.modalHeaderText, { color: colors.text }]}>
+              Genius loyalty program
+            </Text>
             <Text style={styles.modalHeaderTime}></Text>
           </View>
-
           <ScrollView style={styles.scrollView} ref={scrollViewRef}>
-            {/* Content Section 1 */}
             <View style={styles.heroSection}>
               <Image
                 source={require("../../assets/images/place-holder.jpg")} // Using placeholder image
@@ -290,234 +311,399 @@ export default function ProfileHeader({
                 </View>
               </View>
             </View>
-
-            {/* Progress Section */}
-            <View style={styles.progressCard}>
-              <Text style={styles.progressTitle}>
+            <View
+              style={[styles.progressCard, { backgroundColor: colors.card }]}
+            >
+              <Text style={[styles.progressTitle, { color: colors.text }]}>
                 Crazy, you are at Level 1!
               </Text>
-              <Text style={styles.progressText}>
+              <Text
+                style={[styles.progressText, { color: colors.textSecondary }]}
+              >
                 Complete 3 more bookings before 10 April 2027 to unlock bigger
                 discounts and rewards at Level 2. Every booking counts!
               </Text>
               <View style={styles.progressIconsContainer}>
                 <View style={styles.progressIcon}>
-                  <View style={styles.progressIconCircle}>
-                    <Image
-                      source={require("../../assets/images/place-holder.jpg")}
-                      style={styles.iconImage}
-                    />
+                  <View
+                    style={[
+                      styles.placeholderCircle,
+                      {
+                        backgroundColor: colors.blue,
+                        borderColor: colors.blue,
+                      },
+                    ]}
+                  >
+                    <Ionicons name="bed" size={24} color="#FFF" />
                   </View>
-                  <Text style={styles.iconText}>Bed Icon</Text>
                 </View>
                 <View style={styles.progressIcon}>
-                  <View style={styles.progressIconCircle}>
-                    <Image
-                      source={require("../../assets/images/place-holder.jpg")}
-                      style={styles.iconImage}
-                    />
+                  <View
+                    style={[
+                      styles.placeholderCircle,
+                      {
+                        backgroundColor: colors.blue,
+                        borderColor: colors.blue,
+                      },
+                    ]}
+                  >
+                    <Ionicons name="bed" size={24} color="#FFF" />
                   </View>
-                  <Text style={styles.iconText}>Bed Icon</Text>
                 </View>
-                <View style={styles.placeholderCircle}>
-                  <Text style={styles.placeholderDots}>...</Text>
+                <View
+                  style={[
+                    styles.placeholderCircle,
+                    { borderColor: colors.textSecondary },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.placeholderDots,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    ...
+                  </Text>
                 </View>
-                <View style={styles.placeholderCircle}>
-                  <Text style={styles.placeholderDots}>...</Text>
+                <View
+                  style={[
+                    styles.placeholderCircle,
+                    { borderColor: colors.textSecondary },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.placeholderDots,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    ...
+                  </Text>
                 </View>
-                <View style={styles.placeholderCircle}>
-                  <Text style={styles.placeholderDots}>...</Text>
+                <View
+                  style={[
+                    styles.placeholderCircle,
+                    { borderColor: colors.textSecondary },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.placeholderDots,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    ...
+                  </Text>
                 </View>
               </View>
               <TouchableOpacity onPress={scrollToFaq}>
-                <Text style={styles.progressLink}>
+                <Text style={[styles.progressLink, { color: colors.blue }]}>
                   How to progress in Genius
                 </Text>
               </TouchableOpacity>
             </View>
-
-            {/* Content Sections */}
             <View style={styles.contentSection}>
-              <Text style={styles.sectionTitle}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
                 Book your next trip for less
               </Text>
-              <Text style={styles.sectionText}>
+              <Text
+                style={[styles.sectionText, { color: colors.textSecondary }]}
+              >
                 Enjoy free lifetime access to Genius Level 1 discounts on select
                 stays and rental cars worldwide. Discounts are applied to the
                 price before taxes and fees.
               </Text>
             </View>
-
             <View style={styles.contentSection}>
-              <Text style={styles.sectionTitle}>Savings made simple</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Savings made simple
+              </Text>
               <Image
                 source={require("../../assets/images/place-holder.jpg")} // Using placeholder image
                 style={styles.simpleImage}
               />
-              <Text style={styles.sectionTextCentered}>
+              <Text
+                style={[
+                  styles.sectionTextCentered,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 You will recognize participating properties and rental cars by
                 the blue Genius label. All discounts and rewards are
                 automatically applied when you book, you do not have to do a
                 thing. So simple, it is Genius.
               </Text>
             </View>
-
             <View style={styles.contentSection}>
-              <Text style={styles.sectionTitle}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
                 Booking.com is better with Genius
               </Text>
-              <Text style={styles.sectionText}>
+              <Text
+                style={[styles.sectionText, { color: colors.textSecondary }]}
+              >
                 Enjoy a lifetime of discounts and travel rewards on hundreds of
                 thousands of stays and rental cars worldwide with Booking.coms
                 loyalty program.
               </Text>
             </View>
-
-            {/* Discounts Section */}
             <View style={styles.contentSection}>
-              <Text style={styles.sectionTitle}>Genius discounts</Text>
-              <Text style={styles.sectionText}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Genius discounts
+              </Text>
+              <Text
+                style={[styles.sectionText, { color: colors.textSecondary }]}
+              >
                 Enjoy savings at 850,000 participating properties worldwide and
                 save on select rental cars
               </Text>
               <View style={styles.discountCardsContainer}>
-                <View style={styles.discountCard}>
+                <View
+                  style={[
+                    styles.discountCard,
+                    { backgroundColor: colors.card },
+                  ]}
+                >
                   <View style={styles.discountIconCircleYellow}>
                     <Ionicons name="star" size={24} color="#FFF" />
                   </View>
                   <View>
-                    <Text style={styles.discountLevelText}>Level 1</Text>
-                    <Text style={styles.discountInfoText}>
+                    <Text
+                      style={[styles.discountLevelText, { color: colors.text }]}
+                    >
+                      Level 1
+                    </Text>
+                    <Text
+                      style={[
+                        styles.discountInfoText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       10% discounts on stays
                     </Text>
                   </View>
                 </View>
-                <View style={styles.discountCard}>
-                  <View style={styles.discountIconCircleGray}>
+                <View
+                  style={[
+                    styles.discountCard,
+                    { backgroundColor: colors.card },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.discountIconCircleGray,
+                      { backgroundColor: colors.textSecondary },
+                    ]}
+                  >
                     <Ionicons name="lock-closed" size={24} color="#FFF" />
                   </View>
                   <View>
-                    <Text style={styles.lockedLevelText}>Level 2</Text>
-                    <Text style={styles.discountInfoText}>
+                    <Text
+                      style={[
+                        styles.lockedLevelText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      Level 2
+                    </Text>
+                    <Text
+                      style={[
+                        styles.discountInfoText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       10–15% discounts on stays
                     </Text>
                   </View>
                 </View>
-                <View style={styles.discountCard}>
-                  <View style={styles.discountIconCircleGray}>
+                <View
+                  style={[
+                    styles.discountCard,
+                    { backgroundColor: colors.card },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.discountIconCircleGray,
+                      { backgroundColor: colors.textSecondary },
+                    ]}
+                  >
                     <Ionicons name="lock-closed" size={24} color="#FFF" />
                   </View>
                   <View>
-                    <Text style={styles.lockedLevelText}>Level 3</Text>
-                    <Text style={styles.discountInfoText}>
+                    <Text
+                      style={[
+                        styles.lockedLevelText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      Level 3
+                    </Text>
+                    <Text
+                      style={[
+                        styles.discountInfoText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       10–20% discounts on stays
                     </Text>
                   </View>
                 </View>
               </View>
             </View>
-
-            {/* How it works section */}
             <View style={styles.contentSection}>
-              <Text style={styles.sectionTitle}>How it works</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                How it works
+              </Text>
               <View style={styles.howItWorksContainer}>
                 <View style={styles.howItWorksItem}>
-                  <Text style={styles.howItWorksTitle}>Easy to find</Text>
-                  <Text style={styles.howItWorksText}>
+                  <Text
+                    style={[styles.howItWorksTitle, { color: colors.text }]}
+                  >
+                    Easy to find
+                  </Text>
+                  <Text
+                    style={[
+                      styles.howItWorksText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     Once signed in, look for the blue Genius label to find your
                     travel rewards.
                   </Text>
                 </View>
                 <View style={styles.howItWorksItem}>
-                  <Text style={styles.howItWorksTitle}>Easy to keep</Text>
-                  <Text style={styles.howItWorksText}>
+                  <Text
+                    style={[styles.howItWorksTitle, { color: colors.text }]}
+                  >
+                    Easy to keep
+                  </Text>
+                  <Text
+                    style={[
+                      styles.howItWorksText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     After unlocking each Genius Level, the rewards are yours to
                     enjoy for life.
                   </Text>
                 </View>
                 <View style={styles.howItWorksItem}>
-                  <Text style={styles.howItWorksTitle}>Easy to grow</Text>
-                  <Text style={styles.howItWorksText}>
+                  <Text
+                    style={[styles.howItWorksTitle, { color: colors.text }]}
+                  >
+                    Easy to grow
+                  </Text>
+                  <Text
+                    style={[
+                      styles.howItWorksText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     The more you book, the more you get – every booking counts
                     toward your progress.
                   </Text>
                 </View>
               </View>
             </View>
-
-            {/* FAQ Section */}
             <View style={styles.contentSection} ref={faqSectionRef}>
-              <Text style={styles.sectionTitle}>Genius FAQs</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Genius FAQs
+              </Text>
               <View style={styles.faqsContainer}>
                 {faqs.map((faq, index) => (
-                  <View key={index} style={styles.faqCard}>
+                  <View
+                    key={index}
+                    style={[styles.faqCard, { backgroundColor: colors.card }]}
+                  >
                     <TouchableOpacity
                       onPress={() => toggleFaq(index)}
                       style={styles.faqHeader}
                     >
-                      <Text style={styles.faqQuestion}>{faq.question}</Text>
+                      <Text
+                        style={[styles.faqQuestion, { color: colors.text }]}
+                      >
+                        {faq.question}
+                      </Text>
                       {faqOpen === index ? (
                         <Ionicons
                           name="chevron-up-outline"
                           size={20}
-                          color={Colors.dark.text}
+                          color={colors.text}
                         />
                       ) : (
                         <Ionicons
                           name="chevron-down-outline"
                           size={20}
-                          color={Colors.dark.text}
+                          color={colors.text}
                         />
                       )}
                     </TouchableOpacity>
                     {faqOpen === index && (
-                      <View style={styles.faqAnswerContainer}>
-                        <Text style={styles.faqAnswer}>{faq.answer}</Text>
+                      <View
+                        style={[
+                          styles.faqAnswerContainer,
+                          { backgroundColor: colors.background },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.faqAnswer,
+                            { color: colors.textSecondary },
+                          ]}
+                        >
+                          {faq.answer}
+                        </Text>
                       </View>
                     )}
                   </View>
                 ))}
               </View>
             </View>
-
-            {/* Rate Us Button */}
             <View style={styles.rateButtonContainer}>
               <TouchableOpacity
                 onPress={() => setOpenRateModal(true)}
-                style={styles.rateButton}
+                style={[styles.rateButton, { backgroundColor: colors.blue }]}
               >
                 <Text style={styles.rateButtonText}>Rate us</Text>
               </TouchableOpacity>
             </View>
-
-            {/* Find Next Stay Button (footer) */}
-            <View style={styles.footerButtonContainer}>
-              {/* This button would typically navigate to a new screen. */}
+            <View
+              style={[
+                styles.footerButtonContainer,
+                {
+                  backgroundColor: colors.background,
+                  borderTopColor: colors.textSecondary,
+                },
+              ]}
+            >
               <TouchableOpacity
                 onPress={handleFindNextStay}
-                style={styles.footerButton}
+                style={[styles.footerButton, { backgroundColor: colors.blue }]}
               >
                 <Text style={styles.footerButtonText}>Find your next stay</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
-
-          {/* In-modal Rate overlay (fixes Android nested Modal issue) */}
           {openRateModal && (
             <View style={styles.rateModalOverlay}>
               <View
                 style={[
                   styles.rateModalCard,
-                  { marginTop: insets.top ? insets.top + 20 : 40 },
+                  {
+                    marginTop: insets.top ? insets.top + 20 : 40,
+                    backgroundColor: colors.card,
+                  },
                 ]}
               >
                 <View style={styles.rateModalHeader}>
-                  <Text style={styles.rateModalTitle}>How are we doing?</Text>
+                  <Text style={[styles.rateModalTitle, { color: colors.text }]}>
+                    How are we doing?
+                  </Text>
                   <TouchableOpacity onPress={() => setOpenRateModal(false)}>
                     <Ionicons
                       name="close-outline"
                       size={24}
-                      color={Colors.dark.text}
+                      color={colors.text}
                     />
                   </TouchableOpacity>
                 </View>
@@ -526,7 +712,12 @@ export default function ProfileHeader({
                     source={require("../../assets/images/place-holder.jpg")}
                     style={styles.rateModalImage}
                   />
-                  <Text style={styles.rateModalPromptText}>
+                  <Text
+                    style={[
+                      styles.rateModalPromptText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     The Genius program is relevant to me
                   </Text>
                 </View>
@@ -535,40 +726,73 @@ export default function ProfileHeader({
                     <TouchableOpacity
                       key={rating}
                       onPress={() => handleRateSubmit(rating)}
-                      style={styles.ratingButton}
+                      style={[
+                        styles.ratingButton,
+                        { backgroundColor: colors.background },
+                      ]}
                     >
-                      <Text style={styles.ratingButtonText}>{rating}</Text>
+                      <Text
+                        style={[
+                          styles.ratingButtonText,
+                          { color: colors.text },
+                        ]}
+                      >
+                        {rating}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
                 <View style={styles.ratingLabels}>
-                  <Text style={styles.ratingLabelText}>Strongly disagree</Text>
-                  <Text style={styles.ratingLabelText}>Strongly agree</Text>
+                  <Text
+                    style={[
+                      styles.ratingLabelText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    Strongly disagree
+                  </Text>
+                  <Text
+                    style={[
+                      styles.ratingLabelText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    Strongly agree
+                  </Text>
                 </View>
               </View>
             </View>
           )}
-
-          {/* In-modal Thanks overlay (also avoids nested Modal issues) */}
           {openThanksModal && (
             <View style={styles.thanksModalOverlay}>
               <View
                 style={[
                   styles.thanksModalCard,
-                  { marginTop: insets.top ? insets.top + 20 : 40 },
+                  {
+                    marginTop: insets.top ? insets.top + 20 : 40,
+                    backgroundColor: colors.card,
+                  },
                 ]}
               >
-                <Text style={styles.thanksModalTitle}>
+                <Text style={[styles.thanksModalTitle, { color: colors.text }]}>
                   Thank you for submitting!
                 </Text>
-                <Text style={styles.thanksModalText}>
+                <Text
+                  style={[
+                    styles.thanksModalText,
+                    { color: colors.textSecondary },
+                  ]}
+                >
                   {selectedRating
                     ? `We appreciate your feedback. Your rating: ${selectedRating}`
                     : "We appreciate your feedback."}
                 </Text>
                 <TouchableOpacity
                   onPress={handleCloseAllModals}
-                  style={styles.thanksModalButton}
+                  style={[
+                    styles.thanksModalButton,
+                    { backgroundColor: colors.blue },
+                  ]}
                 >
                   <Text style={styles.thanksModalButtonText}>Close</Text>
                 </TouchableOpacity>
@@ -578,18 +802,76 @@ export default function ProfileHeader({
         </SafeAreaView>
       </Modal>
 
-      {/* NOTE: Rate/Thanks are rendered as in-modal overlays above so they appear immediately on press while the Genius modal is open. */}
+      {/* Photo Selection Modal */}
+      {openPhotoModal && (
+        <Modal
+          visible={openPhotoModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setOpenPhotoModal(false)}
+        >
+          <View style={styles.photoModalOverlay}>
+            <View
+              style={[styles.photoModalCard, { backgroundColor: colors.card }]}
+            >
+              <View style={styles.photoModalHeader}>
+                <Text style={[styles.photoModalTitle, { color: colors.text }]}>
+                  Choose Profile Photo
+                </Text>
+                <TouchableOpacity onPress={() => setOpenPhotoModal(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.photoOptionsContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.photoOptionButton,
+                    { backgroundColor: colors.blue },
+                  ]}
+                  onPress={() => handlePhotoSelection("camera")}
+                >
+                  <Ionicons name="camera" size={24} color="#FFFFFF" />
+                  <Text style={styles.photoOptionText}>Take Photo</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.photoOptionButton,
+                    { backgroundColor: colors.blue },
+                  ]}
+                  onPress={() => handlePhotoSelection("gallery")}
+                >
+                  <Ionicons name="images" size={24} color="#FFFFFF" />
+                  <Text style={styles.photoOptionText}>
+                    Choose from Gallery
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.photoOptionButton,
+                    { backgroundColor: colors.textSecondary },
+                  ]}
+                  onPress={() => handlePhotoSelection("remove")}
+                >
+                  <Ionicons name="trash" size={24} color="#FFFFFF" />
+                  <Text style={styles.photoOptionText}>Remove Photo</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </Fragment>
   );
 }
-
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#121417",
   },
   userInfo: {
     flexDirection: "row",
@@ -601,27 +883,22 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginRight: 12,
     borderWidth: 2,
-    borderColor: "#FFD700",
   },
   userNameText: {
-    color: "#E0E0E0",
     fontSize: 18,
     fontWeight: "bold",
   },
   geniusLevelBadge: {
     flexDirection: "row",
-    backgroundColor: "#1C1F22",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     marginTop: 4,
   },
   geniusLabelText: {
-    color: "#E0E0E0",
     fontSize: 14,
   },
   geniusLevelText: {
-    color: "#FFD700",
     fontSize: 14,
   },
   actionButtons: {
@@ -637,12 +914,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
-    backgroundColor: "#121417",
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
   },
   modalHeaderText: {
-    color: "#E0E0E0",
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -689,18 +963,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   progressCard: {
-    backgroundColor: "#1C1F22",
     padding: 24,
     borderRadius: 12,
     margin: 16,
   },
   progressTitle: {
-    color: "#FFF",
     fontSize: 24,
     fontWeight: "bold",
   },
   progressText: {
-    color: "#AAA",
     fontSize: 14,
     marginTop: 8,
   },
@@ -715,23 +986,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   progressIconCircle: {
-    backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 50,
     padding: 16,
     marginBottom: 4,
   },
-  iconImage: {
-    width: 24,
-    height: 24,
-  },
   iconText: {
-    color: "#888",
     fontSize: 12,
     textAlign: "center",
   },
   placeholderCircle: {
     backgroundColor: "transparent",
-    borderColor: "rgba(255,255,255,0.2)",
     borderWidth: 2,
     borderRadius: 50,
     width: 64,
@@ -740,11 +1004,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   placeholderDots: {
-    color: "rgba(255,255,255,0.5)",
     fontSize: 24,
   },
   progressLink: {
-    color: "#006CE4",
     fontWeight: "600",
     fontSize: 14,
   },
@@ -777,7 +1039,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   discountCard: {
-    backgroundColor: "#1C1F22",
     borderRadius: 12,
     padding: 16,
     flexDirection: "row",
@@ -790,7 +1051,6 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   discountIconCircleGray: {
-    backgroundColor: "#888",
     borderRadius: 50,
     padding: 8,
   },
@@ -800,12 +1060,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   lockedLevelText: {
-    color: "#888",
     fontWeight: "bold",
     fontSize: 14,
   },
   discountInfoText: {
-    color: "#AAA",
     fontSize: 14,
   },
   howItWorksContainer: {
@@ -831,7 +1089,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   faqCard: {
-    backgroundColor: "#1C1F22",
     borderRadius: 8,
   },
   faqHeader: {
@@ -841,25 +1098,21 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   faqQuestion: {
-    color: "#FFF",
     fontSize: 14,
     flex: 1,
   },
   faqAnswerContainer: {
-    backgroundColor: "#24272B",
     padding: 16,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
   faqAnswer: {
-    color: "#AAA",
     fontSize: 14,
   },
   rateButtonContainer: {
     padding: 16,
   },
   rateButton: {
-    backgroundColor: "#006CE4",
     borderRadius: 50,
     paddingVertical: 16,
     alignItems: "center",
@@ -872,11 +1125,8 @@ const styles = StyleSheet.create({
   footerButtonContainer: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: "#333",
-    backgroundColor: "#121417",
   },
   footerButton: {
-    backgroundColor: "#006CE4",
     borderRadius: 50,
     paddingVertical: 16,
     alignItems: "center",
@@ -886,12 +1136,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-
   /* Original modal styles reused for the in-modal overlays */
   rateModalCard: {
     width: "90%",
     maxWidth: 400,
-    backgroundColor: "#24272B",
     borderRadius: 12,
     padding: 24,
   },
@@ -902,7 +1150,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   rateModalTitle: {
-    color: "#FFF",
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -918,7 +1165,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   rateModalPromptText: {
-    color: "#AAA",
     fontSize: 14,
   },
   ratingButtonsContainer: {
@@ -928,14 +1174,12 @@ const styles = StyleSheet.create({
   },
   ratingButton: {
     flex: 1,
-    backgroundColor: "#1C1F22",
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: "center",
   },
   ratingButtonText: {
-    color: "#FFF",
     fontWeight: "bold",
   },
   ratingLabels: {
@@ -944,30 +1188,25 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   ratingLabelText: {
-    color: "#888",
     fontSize: 10,
   },
   thanksModalCard: {
     width: "90%",
     maxWidth: 300,
-    backgroundColor: "#24272B",
     borderRadius: 12,
     padding: 24,
     alignItems: "center",
   },
   thanksModalTitle: {
-    color: "#FFF",
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 8,
   },
   thanksModalText: {
-    color: "#AAA",
     fontSize: 14,
     textAlign: "center",
   },
   thanksModalButton: {
-    backgroundColor: "#006CE4",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 50,
@@ -978,7 +1217,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 14,
   },
-
   /* New overlay containers (absolute so they appear immediately above modal content) */
   rateModalOverlay: {
     position: "absolute",
@@ -1001,5 +1239,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.7)",
     zIndex: 1000,
+  },
+  /* Photo Selection Modal Styles */
+  photoModalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
+  },
+  photoModalCard: {
+    width: "90%",
+    maxWidth: 350,
+    borderRadius: 12,
+    padding: 24,
+  },
+  photoModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  photoModalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  photoOptionsContainer: {
+    gap: 16,
+  },
+  photoOptionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+  },
+  photoOptionText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

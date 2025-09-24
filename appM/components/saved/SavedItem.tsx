@@ -1,6 +1,7 @@
+import { useMemo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 
 type SavedItemProps = {
   title: string;
@@ -15,49 +16,49 @@ export default function SavedItem({
   onPress,
   onDotsPress,
 }: SavedItemProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={styles.textContainer}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Ionicons name="heart-outline" size={20} color={Colors.dark.red} />
+          <Ionicons name="heart" size={20} color={colors.red} />
           <Text style={[styles.title, { marginLeft: 8 }]}>{title}</Text>
         </View>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
       <TouchableOpacity onPress={onDotsPress} style={styles.dotsButton}>
-        <Ionicons
-          name="ellipsis-horizontal"
-          size={24}
-          color={Colors.dark.icon}
-        />
+        <Ionicons name="ellipsis-vertical" size={24} color={colors.icon} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 8,
-    justifyContent: "space-between",
-  },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    color: Colors.dark.text,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    color: Colors.dark.icon,
-    fontSize: 14,
-  },
-  dotsButton: {
-    paddingLeft: 10,
-  },
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      padding: 16,
+      marginBottom: 8,
+      justifyContent: "space-between",
+    },
+    textContainer: {
+      flex: 1,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    subtitle: {
+      color: colors.icon,
+      fontSize: 14,
+    },
+    dotsButton: {
+      paddingLeft: 10,
+    },
+  });

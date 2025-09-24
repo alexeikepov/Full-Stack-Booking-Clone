@@ -21,6 +21,7 @@ import {
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 const placeholderImg = require("../../assets/images/place-holder.jpg");
 
 interface Style {
@@ -177,6 +178,7 @@ const styles = StyleSheet.create<Style>({
 });
 
 export default function NoCreditsVouchersBanner(): JSX.Element {
+  const { colors } = useTheme();
   const [activeModal, setActiveModal] = useState<
     "fullPage" | "info" | "rewards" | "faq" | null
   >(null);
@@ -207,18 +209,20 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
   // Banner
   const Banner = (
     <Pressable
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.card }]}
       onPress={() => setActiveModal("fullPage")}
     >
       <View style={styles.content}>
-        <Text style={styles.mainText}>No Credits or vouchers yet</Text>
+        <Text style={[styles.mainText, { color: colors.text }]}>
+          No Credits or vouchers yet
+        </Text>
       </View>
       <View style={styles.content}>
-        <Text style={styles.mainText}>€ 0</Text>
+        <Text style={[styles.mainText, { color: colors.text }]}>€ 0</Text>
         <Ionicons
           name="chevron-forward"
           size={24}
-          color={Colors.dark.icon}
+          color={colors.icon}
           style={styles.iconContainer}
         />
       </View>
@@ -270,43 +274,60 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
           presentationStyle="fullScreen"
           onRequestClose={() => setActiveModal(null)}
         >
-          <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-            <View style={styles.header}>
+          <SafeAreaView
+            style={[
+              styles.fullPage,
+              { paddingTop: insets.top, backgroundColor: colors.background },
+            ]}
+          >
+            <View style={[styles.header, { backgroundColor: colors.card }]}>
               <Pressable
                 onPress={() => setActiveModal(null)}
                 style={styles.backButton}
                 accessibilityLabel="Back"
               >
-                <Ionicons
-                  name="chevron-back"
-                  size={24}
-                  color={Colors.dark.text}
-                />
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </Pressable>
-              <Text style={styles.headerText}>Rewards & Wallet</Text>
+              <Text style={[styles.headerText, { color: colors.text }]}>
+                Rewards & Wallet
+              </Text>
             </View>
             <ScrollView
               contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
             >
-              <View style={styles.walletSection}>
+              <View
+                style={[styles.walletSection, { backgroundColor: colors.card }]}
+              >
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Ionicons
                     name="wallet"
                     size={24}
-                    color={Colors.dark.icon}
+                    color={colors.icon}
                     style={{ marginRight: 8 }}
                   />
-                  <Text style={styles.walletTitle}>Wallet balance</Text>
+                  <Text style={[styles.walletTitle, { color: colors.text }]}>
+                    Wallet balance
+                  </Text>
                   <Text
                     style={[
                       styles.walletBalanceText,
-                      { fontSize: 18, marginLeft: "auto", marginBottom: 0 },
+                      {
+                        fontSize: 18,
+                        marginLeft: "auto",
+                        marginBottom: 0,
+                        color: colors.text,
+                      },
                     ]}
                   >
                     € 0
                   </Text>
                 </View>
-                <Text style={styles.walletSubtext}>
+                <Text
+                  style={[
+                    styles.walletSubtext,
+                    { color: colors.textSecondary },
+                  ]}
+                >
                   Includes all spendable rewards
                 </Text>
                 <View
@@ -316,16 +337,23 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                     marginBottom: 8,
                   }}
                 >
-                  <Text style={styles.creditText}>Credits</Text>
+                  <Text style={[styles.creditText, { color: colors.text }]}>
+                    Credits
+                  </Text>
                   <TouchableOpacity onPress={() => setActiveModal("info")}>
                     <Ionicons
                       name="information-circle-outline"
                       size={16}
-                      color={Colors.dark.textSecondary}
+                      color={colors.textSecondary}
                       style={styles.infoIcon}
                     />
                   </TouchableOpacity>
-                  <Text style={[styles.creditText, { marginLeft: "auto" }]}>
+                  <Text
+                    style={[
+                      styles.creditText,
+                      { marginLeft: "auto", color: colors.text },
+                    ]}
+                  >
                     € 0
                   </Text>
                 </View>
@@ -336,36 +364,38 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                 </TouchableOpacity>
               </View>
               <View style={styles.whatIsSection}>
-                <Text style={styles.whatIsTitle}>
+                <Text style={[styles.whatIsTitle, { color: colors.text }]}>
                   What is Rewards & Wallet?
                 </Text>
                 <View style={styles.whatIsItem}>
-                  <Ionicons
-                    name="gift-outline"
-                    size={32}
-                    color={Colors.dark.icon}
-                  />
+                  <Ionicons name="gift-outline" size={32} color={colors.icon} />
                   <View style={styles.whatIsItemContent}>
-                    <Text style={styles.itemMainText}>
+                    <Text style={[styles.itemMainText, { color: colors.text }]}>
                       Book and earn travel rewards
                     </Text>
-                    <Text style={styles.itemSubText}>
+                    <Text
+                      style={[
+                        styles.itemSubText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       Credits, vouchers, you name it! These are all spendable on
                       your next Booking.com trip.
                     </Text>
                   </View>
                 </View>
                 <View style={styles.whatIsItem}>
-                  <Ionicons
-                    name="eye-outline"
-                    size={32}
-                    color={Colors.dark.icon}
-                  />
+                  <Ionicons name="eye-outline" size={32} color={colors.icon} />
                   <View style={styles.whatIsItemContent}>
-                    <Text style={styles.itemMainText}>
+                    <Text style={[styles.itemMainText, { color: colors.text }]}>
                       Track everything at a glance
                     </Text>
-                    <Text style={styles.itemSubText}>
+                    <Text
+                      style={[
+                        styles.itemSubText,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
                       Your Wallet keeps all rewards safe, while updating you
                       about your earnings and spendings.
                     </Text>
@@ -417,7 +447,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
           >
             <View
               style={{
-                backgroundColor: Colors.dark.card,
+                backgroundColor: colors.card,
                 borderRadius: 16,
                 padding: 24,
                 width: 320,
@@ -428,7 +458,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                 style={{
                   fontWeight: "bold",
                   fontSize: 18,
-                  color: Colors.dark.text,
+                  color: colors.text,
                   marginBottom: 8,
                 }}
               >
@@ -436,7 +466,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
               </Text>
               <Text
                 style={{
-                  color: Colors.dark.textSecondary,
+                  color: colors.textSecondary,
                   fontSize: 15,
                   textAlign: "center",
                   marginBottom: 24,
@@ -474,24 +504,27 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
           presentationStyle="fullScreen"
           onRequestClose={() => setActiveModal(null)}
         >
-          <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-            <View style={styles.header}>
+          <SafeAreaView
+            style={[
+              styles.fullPage,
+              { paddingTop: insets.top, backgroundColor: colors.background },
+            ]}
+          >
+            <View style={[styles.header, { backgroundColor: colors.card }]}>
               <Pressable
                 onPress={() => setActiveModal(null)}
                 style={styles.backButton}
                 accessibilityLabel="Back"
               >
-                <Ionicons
-                  name="chevron-back"
-                  size={24}
-                  color={Colors.dark.text}
-                />
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </Pressable>
-              <Text style={styles.headerText}>Rewards & Wallet activity</Text>
+              <Text style={[styles.headerText, { color: colors.text }]}>
+                Rewards & Wallet activity
+              </Text>
             </View>
             <View
               style={{
-                backgroundColor: Colors.dark.card,
+                backgroundColor: colors.card,
                 margin: 16,
                 borderRadius: 16,
                 padding: 16,
@@ -507,14 +540,14 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                 <Ionicons
                   name="wallet"
                   size={24}
-                  color={Colors.dark.icon}
+                  color={colors.icon}
                   style={{ marginRight: 8 }}
                 />
                 <Text
                   style={{
                     fontWeight: "bold",
                     fontSize: 20,
-                    color: Colors.dark.text,
+                    color: colors.text,
                   }}
                 >
                   Wallet balance
@@ -523,7 +556,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                   style={{
                     fontWeight: "bold",
                     fontSize: 20,
-                    color: Colors.dark.text,
+                    color: colors.text,
                     marginLeft: "auto",
                   }}
                 >
@@ -532,7 +565,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
               </View>
               <Text
                 style={{
-                  color: Colors.dark.textSecondary,
+                  color: colors.textSecondary,
                   fontSize: 14,
                   marginBottom: 8,
                 }}
@@ -559,7 +592,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                 >
                   <Text
                     style={{
-                      color: walletTab === tab ? "#007AFF" : Colors.dark.text,
+                      color: walletTab === tab ? "#007AFF" : colors.text,
                       fontWeight: "bold",
                       fontSize: 16,
                     }}
@@ -591,7 +624,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                 style={{
                   fontWeight: "bold",
                   fontSize: 22,
-                  color: Colors.dark.text,
+                  color: colors.text,
                   marginBottom: 12,
                   textAlign: "center",
                 }}
@@ -600,7 +633,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
               </Text>
               <Text
                 style={{
-                  color: Colors.dark.textSecondary,
+                  color: colors.textSecondary,
                   fontSize: 16,
                   textAlign: "center",
                 }}
@@ -622,20 +655,23 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
           presentationStyle="fullScreen"
           onRequestClose={() => setActiveModal(null)}
         >
-          <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-            <View style={styles.header}>
+          <SafeAreaView
+            style={[
+              styles.fullPage,
+              { paddingTop: insets.top, backgroundColor: colors.background },
+            ]}
+          >
+            <View style={[styles.header, { backgroundColor: colors.card }]}>
               <Pressable
                 onPress={() => setActiveModal(null)}
                 style={styles.backButton}
                 accessibilityLabel="Back"
               >
-                <Ionicons
-                  name="chevron-back"
-                  size={24}
-                  color={Colors.dark.text}
-                />
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </Pressable>
-              <Text style={styles.headerText}>Rewards & Wallet FAQs</Text>
+              <Text style={[styles.headerText, { color: colors.text }]}>
+                Rewards & Wallet FAQs
+              </Text>
             </View>
             <ScrollView
               contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
@@ -643,7 +679,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
               <View style={{ marginHorizontal: 16, marginTop: 20 }}>
                 <Text
                   style={{
-                    color: Colors.dark.textSecondary,
+                    color: colors.textSecondary,
                     fontWeight: "bold",
                     fontSize: 18,
                     marginBottom: 16,
@@ -656,7 +692,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                     key={item.q}
                     style={{
                       borderBottomWidth: 1,
-                      borderBottomColor: Colors.dark.card,
+                      borderBottomColor: colors.textSecondary,
                       marginBottom: 8,
                     }}
                   >
@@ -673,7 +709,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                     >
                       <Text
                         style={{
-                          color: Colors.dark.text,
+                          color: colors.text,
                           fontSize: 16,
                           fontWeight: "bold",
                           flex: 1,
@@ -684,13 +720,13 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                       <AntDesign
                         name={faqOpen === item.q ? "up" : "down"}
                         size={18}
-                        color={Colors.dark.textSecondary}
+                        color={colors.textSecondary}
                       />
                     </TouchableOpacity>
                     {faqOpen === item.q && (
                       <Text
                         style={{
-                          color: Colors.dark.textSecondary,
+                          color: colors.textSecondary,
                           fontSize: 15,
                           marginBottom: 10,
                           marginLeft: 4,
@@ -703,7 +739,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                 ))}
                 <Text
                   style={{
-                    color: Colors.dark.textSecondary,
+                    color: colors.textSecondary,
                     fontWeight: "bold",
                     fontSize: 18,
                     marginTop: 24,
@@ -717,7 +753,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                     key={item.q}
                     style={{
                       borderBottomWidth: 1,
-                      borderBottomColor: Colors.dark.card,
+                      borderBottomColor: colors.textSecondary,
                       marginBottom: 8,
                     }}
                   >
@@ -734,7 +770,7 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                     >
                       <Text
                         style={{
-                          color: Colors.dark.text,
+                          color: colors.text,
                           fontSize: 16,
                           fontWeight: "bold",
                           flex: 1,
@@ -745,13 +781,13 @@ export default function NoCreditsVouchersBanner(): JSX.Element {
                       <AntDesign
                         name={faqOpen === item.q ? "up" : "down"}
                         size={18}
-                        color={Colors.dark.textSecondary}
+                        color={colors.textSecondary}
                       />
                     </TouchableOpacity>
                     {faqOpen === item.q && (
                       <Text
                         style={{
-                          color: Colors.dark.textSecondary,
+                          color: colors.textSecondary,
                           fontSize: 15,
                           marginBottom: 10,
                           marginLeft: 4,
