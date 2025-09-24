@@ -119,10 +119,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid, redirect to login
+      // Token expired or invalid — clear local state and let caller decide navigation
       localStorage.removeItem("auth_token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -150,6 +149,25 @@ export async function searchHotels(params: SearchHotelsParams) {
 // Admin Hotel management API functions
 export async function getOwnerHotels() {
   const res = await api.get("/api/admin-hotel/hotels");
+  return res.data;
+}
+
+// Platform owner: fetch ALL hotels regardless of admin/owner
+export async function getAllHotelsForOwner() {
+  // Prefer admin-hotel with all=1; then dedicated OWNER endpoint; then generic
+  try {
+    const res = await api.get("/api/admin-hotel/hotels", { params: { all: 1 } });
+    return res.data;
+  } catch {}
+  try {
+    const res = await api.get("/api/owner/hotels");
+    return res.data;
+  } catch {}
+  try {
+    const res = await api.get("/api/hotels", { params: { all: 1 } });
+    return res.data;
+  } catch {}
+  const res = await api.get("/api/hotels");
   return res.data;
 }
 
@@ -230,16 +248,37 @@ export async function getMyReviews(params?: { page?: number; limit?: number }) {
 }
 
 export async function getMe() {
-  const res = await api.get("/api/me");
-  return res.data as {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    role?: string;
-    ownerApplicationStatus?: "none" | "pending" | "approved" | "rejected";
-    genius?: { level: number; completedLast24Months: number; nextThreshold: number | null; remaining: number };
-  };
+  try {
+    const res = await api.get("/api/me");
+    return res.data as {
+      id: string;
+      name: string;
+      email: string;
+      phone?: string;
+      role?: string;
+      ownerApplicationStatus?: "none" | "pending" | "approved" | "rejected";
+      genius?: { level: number; completedLast24Months: number; nextThreshold: number | null; remaining: number };
+    };
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      // Fallback: use local user info so the app can proceed (e.g., OWNER dashboard)
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        try {
+          const u = JSON.parse(raw) as { id?: string; name?: string; email?: string; role?: string };
+          return {
+            id: String(u.id || ""),
+            name: u.name || "",
+            email: u.email || "",
+            role: u.role,
+            ownerApplicationStatus: undefined,
+            genius: undefined,
+          } as any;
+        } catch {}
+      }
+    }
+    throw err;
+  }
 }
 
 // ----- Search History -----
