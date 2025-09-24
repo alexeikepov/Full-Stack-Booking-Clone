@@ -1,7 +1,7 @@
 // src/pages/AdminSignInPage.tsx
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getMe, loginUser } from "@/lib/api";
+import { api, getMe, loginUser } from "@/lib/api";
 
 type Step = "username" | "password";
 
@@ -63,19 +63,31 @@ export default function AdminSignInPage() {
     }
     if (!password.trim()) return;
     try {
-      const auth = await loginUser({ email: username, password });
-      localStorage.setItem("auth_token", auth.token);
-      localStorage.setItem("user", JSON.stringify(auth.user));
-      const me = await getMe();
-      if (me.role === "HOTEL_ADMIN") {
-        navigate("/AdminHotel");
-      } else if (me.ownerApplicationStatus === "pending") {
-        navigate("/owner/waiting-approval");
-      } else {
-        navigate("/partner-register");
+      const u = username.trim();
+      const p = password.trim();
+      if (!u || !p) return alert("Missing email or password");
+      // Try email path first, fallback to username path
+      try {
+        const auth = await loginUser({ email: u, password: p });
+        localStorage.setItem("auth_token", auth.token);
+        localStorage.setItem("user", JSON.stringify(auth.user));
+      } catch {
+        const { data: auth } = await api.post("/api/users/login", { username: u, password: p });
+        localStorage.setItem("auth_token", auth.token);
+        localStorage.setItem("user", JSON.stringify(auth.user));
       }
-    } catch (e) {
-      alert("Sign in failed");
+      try {
+        const me = await getMe();
+        if (me.role === "HOTEL_ADMIN") navigate("/adminhotel");
+        else if (me.ownerApplicationStatus === "pending") navigate("/owner/waiting-approval");
+        else navigate("/partner-register");
+      } catch {
+        // If /api/me fails (e.g., token cookie mismatch), still send admin to dashboard
+        navigate("/adminhotel");
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || "Sign in failed";
+      alert(msg);
     }
   };
 
@@ -133,6 +145,10 @@ export default function AdminSignInPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username or email"
+                autoComplete="username email"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isNextDisabled) onNext();
+                }}
               />
             </>
           )}
@@ -146,6 +162,10 @@ export default function AdminSignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                autoComplete="current-password"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isNextDisabled) onNext();
+                }}
               />
             </>
           )}
