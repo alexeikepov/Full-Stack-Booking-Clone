@@ -33,6 +33,7 @@ import AdminHeader from "@/components/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getOwnerHotels,
+  getAllHotelsForOwner,
   createHotel,
   updateHotel,
   deleteHotel,
@@ -464,8 +465,43 @@ export default function AdminHotelPage() {
     error: hotelsError,
   } = useQuery({
     queryKey: ["owner-hotels"],
-    queryFn: getOwnerHotels,
-    // Fallback to mock data if API fails
+    queryFn: async () => {
+      try {
+        // Try multiple endpoints to get hotels
+        console.log("Trying to load hotels from API...");
+
+        // First try: public hotels endpoint
+        try {
+          const response = await fetch("/api/hotels?limit=1000");
+          if (response.ok) {
+            const data = await response.json();
+            console.log("Loaded hotels from public API:", data);
+            return Array.isArray(data) ? data : data.items || [];
+          }
+        } catch (e) {
+          console.log("Public API failed:", e);
+        }
+
+        // Second try: owner hotels endpoint
+        try {
+          return await getOwnerHotels();
+        } catch (e) {
+          console.log("Owner hotels API failed:", e);
+        }
+
+        // Third try: all hotels for owner
+        try {
+          return await getAllHotelsForOwner();
+        } catch (e) {
+          console.log("All hotels API failed:", e);
+        }
+
+        throw new Error("All API endpoints failed");
+      } catch (error) {
+        console.log("All APIs failed, using mock data:", error);
+        return mockOwnerHotels;
+      }
+    },
     retry: false,
   });
 
@@ -678,7 +714,10 @@ export default function AdminHotelPage() {
         const out: any = {};
         Object.entries(obj).forEach(([k, v]) => {
           const cleaned = deepClean(v as any);
-          if (
+          // Special handling for facilities - keep empty arrays and empty strings
+          if (k === "facilities" || k.startsWith("facilities")) {
+            out[k] = cleaned;
+          } else if (
             cleaned !== undefined &&
             !(typeof cleaned === "string" && cleaned.trim() === "") &&
             !(Array.isArray(cleaned) && cleaned.length === 0)
@@ -702,10 +741,23 @@ export default function AdminHotelPage() {
     const baseFacilities = {
       ...(selectedHotel?.facilities || {}),
       ...((updatedHotel.facilities as any) || {}),
-      languagesSpoken:
-        updatedHotel.languagesSpoken ||
-        (selectedHotel as any)?.facilities?.languagesSpoken ||
-        [],
+      // Ensure all facility categories are present with empty arrays if not set
+      greatForStay: updatedHotel.facilities?.greatForStay || [],
+      bathroom: updatedHotel.facilities?.bathroom || [],
+      bedroom: updatedHotel.facilities?.bedroom || [],
+      view: updatedHotel.facilities?.view || [],
+      outdoors: updatedHotel.facilities?.outdoors || [],
+      kitchen: updatedHotel.facilities?.kitchen || [],
+      roomAmenities: updatedHotel.facilities?.roomAmenities || [],
+      livingArea: updatedHotel.facilities?.livingArea || [],
+      mediaTechnology: updatedHotel.facilities?.mediaTechnology || [],
+      foodDrink: updatedHotel.facilities?.foodDrink || [],
+      internet: updatedHotel.facilities?.internet || "",
+      parking: updatedHotel.facilities?.parking || "",
+      receptionServices: updatedHotel.facilities?.receptionServices || [],
+      safetySecurity: updatedHotel.facilities?.safetySecurity || [],
+      generalFacilities: updatedHotel.facilities?.generalFacilities || [],
+      languagesSpoken: updatedHotel.facilities?.languagesSpoken || [],
     };
 
     // Merge and sanitize houseRules to match server schema and avoid empty required strings
@@ -779,13 +831,47 @@ export default function AdminHotelPage() {
     const mappedRooms = sanitizeRooms(updatedHotel.rooms || []);
     if (mappedRooms.length > 0) base.rooms = mappedRooms;
 
+    // Convert facility objects to strings for server compatibility
+    const convertFacilitiesToServerFormat = (facilities: any) => {
+      const converted: any = {};
+
+      Object.keys(facilities || {}).forEach((key) => {
+        const value = facilities[key];
+
+        if (Array.isArray(value)) {
+          // Convert array of objects to array of strings
+          converted[key] = value.map((item: any) => {
+            if (typeof item === "object" && item.name) {
+              // Object format: {name: 'Free WiFi', available: true, note: 'Additional charge'}
+              let result = item.name;
+              if (item.note && item.note.trim()) {
+                result += ` (${item.note})`;
+              }
+              return result;
+            }
+            return String(item); // Already a string
+          });
+        } else if (typeof value === "string") {
+          // Keep string values as is
+          converted[key] = value;
+        }
+      });
+
+      return converted;
+    };
+
+    const dataToSave = {
+      ...base,
+      facilities: convertFacilitiesToServerFormat(base.facilities),
+    };
+
     if (id) {
       updateHotelMutation.mutate({
         hotelId: String(id),
-        hotelData: base,
+        hotelData: dataToSave,
       });
     } else {
-      createHotelMutation.mutate(base);
+      createHotelMutation.mutate(dataToSave);
     }
   };
 
