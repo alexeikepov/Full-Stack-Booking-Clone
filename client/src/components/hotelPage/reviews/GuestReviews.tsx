@@ -12,6 +12,7 @@ interface GuestReviewsProps {
 
 export default function GuestReviews({ hotel }: GuestReviewsProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "rating_high" | "rating_low" | "helpful"
   >("newest");
@@ -32,6 +33,18 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
   const { data: reviewStats } = useQuery({
     queryKey: ["reviewStats", hotel.id || hotel._id?.$oid],
     queryFn: () => getReviewStats(hotel.id || hotel._id?.$oid),
+  });
+
+  // Fetch all reviews for modal (enabled only when modal is open)
+  const { data: allReviewsData, isLoading: allReviewsLoading } = useQuery({
+    queryKey: ["reviews", hotel.id || hotel._id?.$oid, "all", "newest"],
+    queryFn: () =>
+      getHotelReviews(hotel.id || hotel._id?.$oid, {
+        sort: "newest",
+        limit: 1000,
+      }),
+    enabled: showAllReviews,
+    staleTime: 0,
   });
 
   // Use backend data if available, otherwise fallback to hotel data
@@ -62,28 +75,20 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
     "location",
   ];
   const highScoreTexts = hotel.highScoreTexts || {};
-  const reviewTopics = hotel.reviewTopics || [
-    "Location",
-    "Room",
-    "Clean",
-    "Noise",
-    "Bed",
-  ];
+  const reviewTopics = Array.isArray(hotel.reviewTopics)
+    ? hotel.reviewTopics
+    : [];
 
   // Use reviews from backend if available
   const guestReviews = reviewsData || hotel.guestReviews || [];
-  const totalReviews =
-    reviewStats?.totalReviews ||
-    hotel.guestReviews?.totalReviews ||
-    hotel.reviewsCount ||
-    375;
-  const averageRating =
-    reviewStats?.averageRating ||
-    hotel.guestReviews?.overallRating ||
-    hotel.averageRating ||
-    8.9;
-  const ratingLabel =
-    hotel.guestReviews?.overallLabel || hotel.ratingLabel || "Fabulous";
+  const totalReviews = (reviewStats?.totalReviews ??
+    hotel.guestReviews?.totalReviews ??
+    hotel.reviewsCount) as number | undefined;
+  const averageRating = (reviewStats?.averageRating ??
+    hotel.guestReviews?.overallRating ??
+    hotel.averageRating) as number | undefined;
+  const ratingLabel = (hotel.guestReviews?.overallLabel ??
+    hotel.ratingLabel) as string | undefined;
 
   // Функция для получения флага страны
   const getCountryFlag = (country: string) => {
@@ -196,18 +201,27 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Guest reviews</h2>
           <div className="flex items-center gap-4">
-            <div className="bg-[#003b95] text-white px-4 py-2 rounded font-bold text-lg">
-              {averageRating.toFixed(1)}
-            </div>
+            {typeof averageRating === "number" && (
+              <div className="bg-[#003b95] text-white px-4 py-2 rounded font-bold text-lg">
+                {averageRating.toFixed(1)}
+              </div>
+            )}
             <div>
-              <div className="font-bold text-lg text-gray-900">
-                {ratingLabel}
-              </div>
-              <div className="text-sm text-gray-600">
-                {totalReviews} reviews
-              </div>
+              {ratingLabel && (
+                <div className="font-bold text-lg text-gray-900">
+                  {ratingLabel}
+                </div>
+              )}
+              {typeof totalReviews === "number" && (
+                <div className="text-sm text-gray-600">
+                  {totalReviews} reviews
+                </div>
+              )}
             </div>
-            <button className="text-[#0071c2] hover:underline font-medium">
+            <button
+              className="text-[#0071c2] hover:underline font-medium"
+              onClick={() => setShowAllReviews(true)}
+            >
               Read all reviews
             </button>
           </div>
@@ -265,21 +279,23 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
           </div>
         </div>
 
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Select topics to read reviews:
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {reviewTopics.map((topic) => (
-              <button
-                key={topic}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                + {topic}
-              </button>
-            ))}
+        {reviewTopics.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Select topics to read reviews:
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {reviewTopics.map((topic) => (
+                <button
+                  key={topic}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  + {topic}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Reviews section */}
         <div className="mt-12">
@@ -351,6 +367,49 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
           )}
         </div>
       </div>
+
+      {/* All Reviews Modal */}
+      {showAllReviews && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white w-full max-w-4xl max-h-[80vh] rounded-lg shadow-lg overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">
+                All reviews
+              </h3>
+              <button
+                aria-label="Close"
+                onClick={() => setShowAllReviews(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto max-h-[70vh]">
+              {allReviewsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Loading reviews...</p>
+                </div>
+              ) : Array.isArray(allReviewsData) && allReviewsData.length > 0 ? (
+                <div className="space-y-6">
+                  {allReviewsData.map((review: any) => (
+                    <ReviewCard
+                      key={review._id || review.id}
+                      review={review}
+                      onVoteHelpful={() => {}}
+                      onReport={() => {}}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-600">
+                  No reviews yet.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
