@@ -710,10 +710,18 @@ export default function EditHotelDialog({
                       <Label htmlFor="address">Address</Label>
                       <Input
                         id="address"
+                        ref={addressInputRef}
                         value={formData.address}
                         onChange={(e) =>
                           handleChange("address", e.target.value)
                         }
+                        autoComplete="off"
+                        onKeyDown={(e) => {
+                          // Prevent form submit when selecting from Google autocomplete
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                          }
+                        }}
                       />
                       <div className="text-xs text-gray-500">
                         Street and number (you may include ZIP).
