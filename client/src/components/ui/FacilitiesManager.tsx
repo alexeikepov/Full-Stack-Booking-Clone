@@ -22,7 +22,6 @@ interface FacilitiesData {
   receptionServices: FacilityItem[];
   safetySecurity: FacilityItem[];
   generalFacilities: FacilityItem[];
-  languagesSpoken: FacilityItem[];
 }
 
 interface FacilitiesManagerProps {
@@ -175,13 +174,6 @@ export default function FacilitiesManager({
             icon="ℹ️"
             items={facilities.generalFacilities || []}
             onUpdate={(items) => updateSection("generalFacilities", items)}
-          />
-
-          <FacilitiesSection
-            title="Languages spoken"
-            icon="💬"
-            items={facilities.languagesSpoken || []}
-            onUpdate={(items) => updateSection("languagesSpoken", items)}
           />
         </div>
       </div>

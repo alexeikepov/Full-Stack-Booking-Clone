@@ -54,7 +54,8 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
   // Use backend data if available, otherwise fallback to hotel data
   const categoryRatings = reviewStats?.categoryAverages ||
     hotel.guestReviews?.categories ||
-    hotel.categoryRatings || {
+    hotel.categoryRatings ||
+    (hotel as any).categoryRatings || {
       staff: 9.5,
       comfort: 9.1,
       freeWifi: 9.9,
@@ -64,35 +65,58 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
       location: 9.5,
     };
 
-  const categoryNames = hotel.categoryNames || {
-    staff: "Staff",
-    comfort: "Comfort",
-    freeWifi: "Free WiFi",
-    facilities: "Facilities",
-    valueForMoney: "Value for money",
-    cleanliness: "Cleanliness",
-    location: "Location",
-  };
+  const categoryNames = hotel.categoryNames ||
+    (hotel as any).categoryNames || {
+      staff: "Staff",
+      comfort: "Comfort",
+      freeWifi: "Free WiFi",
+      facilities: "Facilities",
+      valueForMoney: "Value for money",
+      cleanliness: "Cleanliness",
+      location: "Location",
+    };
 
-  const highScoreCategories = hotel.highScoreCategories || [
-    "freeWifi",
-    "location",
-  ];
-  const highScoreTexts = hotel.highScoreTexts || {};
+  const highScoreCategories = hotel.highScoreCategories ||
+    (hotel as any).highScoreCategories || ["freeWifi", "location"];
+  const highScoreTexts =
+    hotel.highScoreTexts || (hotel as any).highScoreTexts || {};
   const reviewTopics = Array.isArray(hotel.reviewTopics)
     ? hotel.reviewTopics
     : [];
 
-  // Use reviews from backend if available
+  // Use reviews from backend if available, otherwise fallback to hotel data
   const guestReviews = reviewsData || hotel.guestReviews || [];
-  const totalReviews = (reviewStats?.totalReviews ??
+
+  // Use the same logic as HotelGallery
+  const totalReviews =
+    (hotel as any).reviewsCount ??
     hotel.guestReviews?.totalReviews ??
-    hotel.reviewsCount) as number | undefined;
-  const averageRating = (reviewStats?.averageRating ??
+    reviewStats?.totalReviews ??
+    undefined;
+  const averageRating =
+    (hotel as any).averageRating ??
     hotel.guestReviews?.overallRating ??
-    hotel.averageRating) as number | undefined;
-  const ratingLabel = (hotel.guestReviews?.overallLabel ??
-    hotel.ratingLabel) as string | undefined;
+    reviewStats?.averageRating ??
+    undefined;
+  const ratingLabel =
+    (hotel as any).ratingLabel ?? hotel.guestReviews?.overallLabel ?? undefined;
+
+  // Debug logging
+  console.log("GuestReviews Debug:", {
+    reviewStats,
+    hotelData: {
+      reviewsCount: hotel.reviewsCount,
+      averageRating: hotel.averageRating,
+      ratingLabel: hotel.ratingLabel,
+      categoryRatings: hotel.categoryRatings,
+    },
+    finalValues: {
+      totalReviews,
+      averageRating,
+      ratingLabel,
+      categoryRatings,
+    },
+  });
 
   // Функция для получения флага страны
   const getCountryFlag = (country: string) => {
@@ -205,22 +229,20 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Guest reviews</h2>
           <div className="flex items-center gap-4">
-            {typeof averageRating === "number" && (
-              <div className="bg-[#003b95] text-white px-4 py-2 rounded font-bold text-lg">
-                {averageRating.toFixed(1)}
-              </div>
-            )}
+            <div className="bg-[#003b95] text-white px-4 py-2 rounded font-bold text-lg">
+              {typeof averageRating === "number"
+                ? averageRating.toFixed(1)
+                : "8.9"}
+            </div>
             <div>
-              {ratingLabel && (
-                <div className="font-bold text-lg text-gray-900">
-                  {ratingLabel}
-                </div>
-              )}
-              {typeof totalReviews === "number" && (
-                <div className="text-sm text-gray-600">
-                  {totalReviews} reviews
-                </div>
-              )}
+              <div className="font-bold text-lg text-gray-900">
+                {ratingLabel || "Fabulous"}
+              </div>
+              <div className="text-sm text-gray-600">
+                {typeof totalReviews === "number"
+                  ? `${totalReviews} reviews`
+                  : "372 reviews"}
+              </div>
             </div>
             <button
               className="text-[#0071c2] hover:underline font-medium"
@@ -302,7 +324,6 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             </div>
           </div>
         )}
-
         {/* Reviews section */}
         <div className="mt-12">
           <div className="flex items-center justify-between mb-6">
@@ -372,50 +393,3 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             </div>
           )}
         </div>
-      </div>
-
-      {/* All Reviews Modal */}
-      {showAllReviews && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white w-full max-w-4xl max-h-[80vh] rounded-lg shadow-lg overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">
-                All reviews
-              </h3>
-              <button
-                aria-label="Close"
-                onClick={() => setShowAllReviews(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
-              >
-                ×
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto max-h-[70vh]">
-              {allReviewsLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Loading reviews...</p>
-                </div>
-              ) : Array.isArray(allReviewsData) && allReviewsData.length > 0 ? (
-                <div className="space-y-6">
-                  {allReviewsData.map((review: any) => (
-                    <ReviewCard
-                      key={review._id || review.id}
-                      review={review}
-                      onVoteHelpful={() => {}}
-                      onReport={() => {}}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-600">
-                  No reviews yet.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}

@@ -51,6 +51,7 @@ const router = createBrowserRouter([
       { path: "/adminhotel", element: <AdminHotelPage /> },
       { path: "/admin-hotel/sign-in", element: <AdminHotelSignInPage /> },
       { path: "/flights", element: <FlightsPage /> },
+      { path: "/coming-soon", element: <ComingSoonPage /> },
       { path: "*", element: <ComingSoonPage /> },
     ],
   },
