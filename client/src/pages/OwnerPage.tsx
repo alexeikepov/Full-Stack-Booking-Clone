@@ -26,7 +26,7 @@ import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import { useEffect } from "react";
 import AdminHeader from "@/components/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { approveAdminApplication, getAdminApplications, rejectAdminApplication, getOwnerHotels, setHotelVisibility, deleteHotel as apiDeleteHotel, getHotelById, updateHotel as apiUpdateHotel } from "@/lib/api";
+import { api, approveAdminApplication, getAdminApplications, rejectAdminApplication, getOwnerHotels, getAllHotelsForOwner, setHotelVisibility, deleteHotel as apiDeleteHotel, getHotelById, updateHotel as apiUpdateHotel, getMe } from "@/lib/api";
 
 export default function OwnerPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,10 +44,15 @@ export default function OwnerPage() {
     };
   }, [setShowTabs]);
 
-  // Load admin applications
+  // Load current user to check role
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: getMe });
+
+  // Load admin applications (OWNER only)
   const { data: applicationsData } = useQuery({
     queryKey: ["adminApplications"],
     queryFn: () => getAdminApplications({ status: undefined }),
+    enabled: me?.role === "OWNER",
+    retry: 0,
   });
   const applications = (applicationsData?.items || []).map((u: any) => ({
     id: String(u._id),
@@ -60,17 +65,30 @@ export default function OwnerPage() {
     hotelName: "",
   }));
 
-  // Load hotels the current user can manage (platform owner can also use this for now)
+  // Load ALL hotels for platform owner (falls back to own hotels if not owner)
   const { data: hotelsData } = useQuery({
     queryKey: ["ownerHotels"],
-    queryFn: () => getOwnerHotels(),
+    queryFn: async () => {
+      // Prefer the public catalog endpoints first to list ALL hotels
+      try { const r = await api.get("/api/hotels", { params: { all: 1, limit: 10000 } }); return r.data; } catch {}
+      try { const r = await api.get("/api/hotels", { params: { limit: 10000 } }); return r.data; } catch {}
+      // Then try owner-specific aggregated endpoints
+      try { return await getAllHotelsForOwner(); } catch {}
+      // Final fallback: only the hotels current user manages
+      return await getOwnerHotels();
+    },
+    enabled: true,
+    retry: 0,
   });
-  const hotels = (hotelsData || []).map((h: any) => ({
-    id: String(h.id || h._id),
+  const hotelsSource = Array.isArray(hotelsData)
+    ? hotelsData
+    : (hotelsData as any)?.items ?? [];
+  const hotels = (hotelsSource || []).map((h: any) => ({
+    id: String((h as any)._id?.$oid || h.id || h._id),
     name: h.name,
     location: [h.address, h.city].filter(Boolean).join(", "),
-    rating: h.averageRating ?? 0,
-    rooms: h.rooms ?? 0,
+    rating: Number(h.averageRating ?? 0),
+    rooms: Array.isArray(h.rooms) ? h.rooms.length : Number(h.rooms ?? 0),
     status: h.status,
     approvalStatus: h.approvalStatus || "PENDING",
     owner: "",
@@ -199,7 +217,7 @@ export default function OwnerPage() {
             </TabsTrigger>
           </TabsList>
 
-          {activeTab === "applications" && (
+          {activeTab === "applications" && me?.role === "OWNER" && (
             <div className="space-y-6">
               <Card>
                 <CardHeader>

@@ -152,6 +152,25 @@ export async function getOwnerHotels() {
   return res.data;
 }
 
+// Platform owner: fetch ALL hotels regardless of admin/owner
+export async function getAllHotelsForOwner() {
+  // Prefer admin-hotel with all=1; then dedicated OWNER endpoint; then generic
+  try {
+    const res = await api.get("/api/admin-hotel/hotels", { params: { all: 1 } });
+    return res.data;
+  } catch {}
+  try {
+    const res = await api.get("/api/owner/hotels");
+    return res.data;
+  } catch {}
+  try {
+    const res = await api.get("/api/hotels", { params: { all: 1 } });
+    return res.data;
+  } catch {}
+  const res = await api.get("/api/hotels");
+  return res.data;
+}
+
 export async function createHotel(hotelData: any) {
   const res = await api.post("/api/admin-hotel/hotels", hotelData);
   return res.data;
@@ -229,16 +248,37 @@ export async function getMyReviews(params?: { page?: number; limit?: number }) {
 }
 
 export async function getMe() {
-  const res = await api.get("/api/me");
-  return res.data as {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    role?: string;
-    ownerApplicationStatus?: "none" | "pending" | "approved" | "rejected";
-    genius?: { level: number; completedLast24Months: number; nextThreshold: number | null; remaining: number };
-  };
+  try {
+    const res = await api.get("/api/me");
+    return res.data as {
+      id: string;
+      name: string;
+      email: string;
+      phone?: string;
+      role?: string;
+      ownerApplicationStatus?: "none" | "pending" | "approved" | "rejected";
+      genius?: { level: number; completedLast24Months: number; nextThreshold: number | null; remaining: number };
+    };
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      // Fallback: use local user info so the app can proceed (e.g., OWNER dashboard)
+      const raw = localStorage.getItem("user");
+      if (raw) {
+        try {
+          const u = JSON.parse(raw) as { id?: string; name?: string; email?: string; role?: string };
+          return {
+            id: String(u.id || ""),
+            name: u.name || "",
+            email: u.email || "",
+            role: u.role,
+            ownerApplicationStatus: undefined,
+            genius: undefined,
+          } as any;
+        } catch {}
+      }
+    }
+    throw err;
+  }
 }
 
 // ----- Search History -----
