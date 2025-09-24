@@ -1,5 +1,4 @@
 import type { Hotel } from "@/types/hotel";
-import ReactCountryFlag from "react-country-flag";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelReviews, getReviewStats } from "@/lib/api";
 import { useState } from "react";
@@ -10,7 +9,6 @@ interface GuestReviewsProps {
 }
 
 export default function GuestReviews({ hotel }: GuestReviewsProps) {
-  const [showAllReviews, setShowAllReviews] = useState(false);
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "rating_high" | "rating_low" | "helpful"
   >("newest");
@@ -39,17 +37,7 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
     queryFn: () => getReviewStats(String(hotelId)),
   });
 
-  // Fetch all reviews for modal (enabled only when modal is open)
-  const { data: allReviewsData, isLoading: allReviewsLoading } = useQuery({
-    queryKey: ["reviews", hotelId, "all", "newest"],
-    queryFn: () =>
-      getHotelReviews(String(hotelId), {
-        sort: "newest",
-        limit: 1000,
-      }),
-    enabled: showAllReviews,
-    staleTime: 0,
-  });
+  // Removed modal "read all reviews" query to reduce unused code
 
   // Use backend data if available, otherwise fallback to hotel data
   const categoryRatings = reviewStats?.categoryAverages ||
@@ -101,84 +89,7 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
   const ratingLabel =
     (hotel as any).ratingLabel ?? hotel.guestReviews?.overallLabel ?? undefined;
 
-  // Debug logging
-  console.log("GuestReviews Debug:", {
-    reviewStats,
-    hotelData: {
-      reviewsCount: hotel.reviewsCount,
-      averageRating: hotel.averageRating,
-      ratingLabel: hotel.ratingLabel,
-      categoryRatings: hotel.categoryRatings,
-    },
-    finalValues: {
-      totalReviews,
-      averageRating,
-      ratingLabel,
-      categoryRatings,
-    },
-  });
-
-  // Функция для получения флага страны
-  const getCountryFlag = (country: string) => {
-    const countryCodeMap: Record<string, string> = {
-      Israel: "IL",
-      "United States": "US",
-      "United Kingdom": "GB",
-      Germany: "DE",
-      France: "FR",
-      Spain: "ES",
-      Italy: "IT",
-      Canada: "CA",
-      Australia: "AU",
-      Japan: "JP",
-      China: "CN",
-      Brazil: "BR",
-      Mexico: "MX",
-      India: "IN",
-      Russia: "RU",
-      "South Korea": "KR",
-      Netherlands: "NL",
-      Sweden: "SE",
-      Norway: "NO",
-      Denmark: "DK",
-      Finland: "FI",
-      Poland: "PL",
-      "Czech Republic": "CZ",
-      Hungary: "HU",
-      Romania: "RO",
-      Bulgaria: "BG",
-      Greece: "GR",
-      Turkey: "TR",
-      Egypt: "EG",
-      "South Africa": "ZA",
-      Argentina: "AR",
-      Chile: "CL",
-      Colombia: "CO",
-      Peru: "PE",
-      Venezuela: "VE",
-      Uruguay: "UY",
-      Paraguay: "PY",
-      Bolivia: "BO",
-      Ecuador: "EC",
-      Guyana: "GY",
-      Suriname: "SR",
-      "French Guiana": "GF",
-    };
-
-    const countryCode = countryCodeMap[country] || "IL";
-
-    return (
-      <ReactCountryFlag
-        countryCode={countryCode}
-        svg
-        style={{
-          width: "20px",
-          height: "15px",
-          borderRadius: "2px",
-        }}
-      />
-    );
-  };
+  // removed debug logging and unused helpers
 
   const ProgressBar = ({ score }: { score: number }) => {
     const percentage = (score / 10) * 100;
@@ -200,12 +111,10 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
     name,
     score,
     showArrow = false,
-    arrowText = "",
   }: {
     name: string;
     score: number;
     showArrow?: boolean;
-    arrowText?: string;
   }) => (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -244,12 +153,7 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
                   : "372 reviews"}
               </div>
             </div>
-            <button
-              className="text-[#0071c2] hover:underline font-medium"
-              onClick={() => setShowAllReviews(true)}
-            >
-              Read all reviews
-            </button>
+            
           </div>
         </div>
 
@@ -273,7 +177,6 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
                 name={(categoryNames as any).freeWifi ?? (categoryNames as any).wifi ?? "Free WiFi"}
                 score={(categoryRatings as any).freeWifi ?? (categoryRatings as any).wifi ?? 0}
                 showArrow={highScoreCategories.includes("freeWifi")}
-                arrowText={(highScoreTexts as any).freeWifi ?? (highScoreTexts as any).wifi}
               />
             </div>
 
@@ -301,7 +204,6 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
                 name={categoryNames.location}
                 score={categoryRatings.location ?? 0}
                 showArrow={highScoreCategories.includes("location")}
-                arrowText={highScoreTexts.location}
               />
             </div>
           </div>
@@ -393,3 +295,7 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
