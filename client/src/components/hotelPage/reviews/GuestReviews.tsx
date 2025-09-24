@@ -3,19 +3,24 @@ import ReactCountryFlag from "react-country-flag";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelReviews, getReviewStats } from "@/lib/api";
 import { useState } from "react";
-import ReviewCard from "./ReviewCard";
-import CreateReviewForm from "./CreateReviewForm";
+import ReviewCard, { type Review as ReviewCardType } from "./ReviewCard";
 
 interface GuestReviewsProps {
   hotel: Hotel;
 }
 
 export default function GuestReviews({ hotel }: GuestReviewsProps) {
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "rating_high" | "rating_low" | "helpful"
   >("newest");
+
+  // Normalize hotel id across possible shapes (id | _id | _id.$oid)
+  const hotelId =
+    (hotel as any)?.id ||
+    (hotel as any)?._id?.$oid ||
+    (hotel as any)?._id ||
+    "";
 
   // Fetch reviews from backend
   const {
@@ -23,23 +28,22 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
     isLoading: reviewsLoading,
     error: reviewsError,
   } = useQuery({
-    queryKey: ["reviews", hotel.id || hotel._id?.$oid, sortBy],
-    queryFn: () =>
-      getHotelReviews(hotel.id || hotel._id?.$oid, { sort: sortBy, limit: 10 }),
+    queryKey: ["reviews", hotelId, sortBy],
+    queryFn: () => getHotelReviews(String(hotelId), { sort: sortBy, limit: 10 }),
     retry: 1,
   });
 
   // Fetch review stats
   const { data: reviewStats } = useQuery({
-    queryKey: ["reviewStats", hotel.id || hotel._id?.$oid],
-    queryFn: () => getReviewStats(hotel.id || hotel._id?.$oid),
+    queryKey: ["reviewStats", hotelId],
+    queryFn: () => getReviewStats(String(hotelId)),
   });
 
   // Fetch all reviews for modal (enabled only when modal is open)
   const { data: allReviewsData, isLoading: allReviewsLoading } = useQuery({
-    queryKey: ["reviews", hotel.id || hotel._id?.$oid, "all", "newest"],
+    queryKey: ["reviews", hotelId, "all", "newest"],
     queryFn: () =>
-      getHotelReviews(hotel.id || hotel._id?.$oid, {
+      getHotelReviews(String(hotelId), {
         sort: "newest",
         limit: 1000,
       }),
@@ -259,17 +263,17 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             <div className="space-y-4">
               <CategoryItem
                 name={categoryNames.staff}
-                score={categoryRatings.staff}
+                score={categoryRatings.staff ?? 0}
               />
               <CategoryItem
                 name={categoryNames.comfort}
-                score={categoryRatings.comfort}
+                score={categoryRatings.comfort ?? 0}
               />
               <CategoryItem
-                name={categoryNames.freeWifi}
-                score={categoryRatings.freeWifi}
+                name={(categoryNames as any).freeWifi ?? (categoryNames as any).wifi ?? "Free WiFi"}
+                score={(categoryRatings as any).freeWifi ?? (categoryRatings as any).wifi ?? 0}
                 showArrow={highScoreCategories.includes("freeWifi")}
-                arrowText={highScoreTexts.freeWifi}
+                arrowText={(highScoreTexts as any).freeWifi ?? (highScoreTexts as any).wifi}
               />
             </div>
 
@@ -277,23 +281,25 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             <div className="space-y-4">
               <CategoryItem
                 name={categoryNames.facilities}
-                score={categoryRatings.facilities}
+                score={categoryRatings.facilities ?? 0}
               />
-              <CategoryItem
-                name={categoryNames.valueForMoney}
-                score={categoryRatings.valueForMoney}
-              />
+              {(
+                <CategoryItem
+                  name={(categoryNames as any).valueForMoney ?? (categoryNames as any).value ?? "Value for money"}
+                  score={(categoryRatings as any).valueForMoney ?? (categoryRatings as any).value ?? 0}
+                />
+              )}
             </div>
 
             {/* Right Column */}
             <div className="space-y-4">
               <CategoryItem
                 name={categoryNames.cleanliness}
-                score={categoryRatings.cleanliness}
+                score={categoryRatings.cleanliness ?? 0}
               />
               <CategoryItem
                 name={categoryNames.location}
-                score={categoryRatings.location}
+                score={categoryRatings.location ?? 0}
                 showArrow={highScoreCategories.includes("location")}
                 arrowText={highScoreTexts.location}
               />
@@ -318,50 +324,72 @@ export default function GuestReviews({ hotel }: GuestReviewsProps) {
             </div>
           </div>
         )}
-      </div>
+        {/* Reviews section */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Recent Reviews
+            </h3>
 
-      {/* All Reviews Modal */}
-      {showAllReviews && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white w-full max-w-4xl max-h-[80vh] rounded-lg shadow-lg overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">
-                All reviews
-              </h3>
-              <button
-                aria-label="Close"
-                onClick={() => setShowAllReviews(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+            <div className="flex items-center space-x-4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                ×
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto max-h-[70vh]">
-              {allReviewsLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Loading reviews...</p>
-                </div>
-              ) : Array.isArray(allReviewsData) && allReviewsData.length > 0 ? (
-                <div className="space-y-6">
-                  {allReviewsData.map((review: any) => (
-                    <ReviewCard
-                      key={review._id || review.id}
-                      review={review}
-                      onVoteHelpful={() => {}}
-                      onReport={() => {}}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-600">
-                  No reviews yet.
-                </div>
-              )}
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="rating_high">Highest Rating</option>
+                <option value="rating_low">Lowest Rating</option>
+                <option value="helpful">Most Helpful</option>
+              </select>
             </div>
           </div>
+
+          {/* Create Review Form - removed per requirement, reviews are written from bookings */}
+
+          {/* Reviews List */}
+          <div className="space-y-6">
+            {reviewsLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading reviews...</p>
+              </div>
+            ) : reviewsError ? (
+              <div className="text-center py-8">
+                <p className="text-red-600 mb-2">Failed to load reviews</p>
+                <p className="text-gray-500 text-sm">Please try again later</p>
+              </div>
+            ) : guestReviews.length > 0 ? (
+              guestReviews.map((review: ReviewCardType) => (
+                <ReviewCard
+                  key={(review as any)._id}
+                  review={review}
+                  onVoteHelpful={(reviewId) => {
+                    // Handle vote helpful
+                    console.log("Vote helpful for review:", reviewId);
+                  }}
+                  onReport={(reviewId) => {
+                    // Handle report
+                    console.log("Report review:", reviewId);
+                  }}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600">
+                  No reviews yet. Be the first to write a review!
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Load More Button */}
+          {guestReviews.length > 0 && (
+            <div className="flex items-center justify-center mt-8">
+              <button className="px-6 py-2 border border-[#0071c2] text-[#0071c2] rounded-lg font-medium hover:bg-[#0071c2] hover:text-white transition-colors">
+                Load More Reviews
+              </button>
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  );
-}
