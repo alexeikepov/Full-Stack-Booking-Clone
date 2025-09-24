@@ -1,10 +1,18 @@
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getHotelById } from "@/lib/api";
 
 interface HotelSurroundingsProps {
   hotelId?: string;
 }
 
 export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
+  const { data: hotel } = useQuery({
+    queryKey: ["hotel", hotelId],
+    queryFn: () => getHotelById(String(hotelId)),
+    enabled: Boolean(hotelId),
+    staleTime: 5 * 60 * 1000,
+  });
   const handleShowMap = () => {
     // TODO: Implement map display
     console.log("Show map clicked");
@@ -74,18 +82,20 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  { name: "Zion Square", distance: "1.1 km" },
-                  { name: "Shrine of the Book", distance: "1.9 km" },
-                  { name: "Israel Museum", distance: "2 km" },
-                  { name: "Jaffa Gate", distance: "2.1 km" },
-                  { name: "Damascus Gate", distance: "2.1 km" },
-                  { name: "Tower of David Museum", distance: "2.1 km" },
-                  { name: "Holyland Model of Jerusalem", distance: "2.2 km" },
-                  { name: "Montefiore Windmill", distance: "2.3 km" },
-                  { name: "Jerusalem Botanical Garden", distance: "2.7 km" },
-                  { name: "Rockefeller Museum", distance: "3 km" },
-                ].map((location, index) => (
+                {(
+                  hotel?.surroundings?.nearbyAttractions || [
+                    { name: "Zion Square", distance: "1.1 km" },
+                    { name: "Shrine of the Book", distance: "1.9 km" },
+                    { name: "Israel Museum", distance: "2 km" },
+                    { name: "Jaffa Gate", distance: "2.1 km" },
+                    { name: "Damascus Gate", distance: "2.1 km" },
+                    { name: "Tower of David Museum", distance: "2.1 km" },
+                    { name: "Holyland Model of Jerusalem", distance: "2.2 km" },
+                    { name: "Montefiore Windmill", distance: "2.3 km" },
+                    { name: "Jerusalem Botanical Garden", distance: "2.7 km" },
+                    { name: "Rockefeller Museum", distance: "3 km" },
+                  ]
+                ).map((location, index) => (
                   <button
                     key={index}
                     onClick={() => handleLocationClick(location.name)}
@@ -123,13 +133,15 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  { name: "Garden of Gethsemane", distance: "3.5 km" },
-                  { name: "Yad Vashem", distance: "4.8 km" },
-                  { name: "Rachel's Tomb", distance: "8 km" },
-                  { name: "Manger Square", distance: "11 km" },
-                  { name: "Al Manara Square", distance: "18 km" },
-                ].map((location, index) => (
+                {(
+                  hotel?.surroundings?.topAttractions || [
+                    { name: "Garden of Gethsemane", distance: "3.5 km" },
+                    { name: "Yad Vashem", distance: "4.8 km" },
+                    { name: "Rachel's Tomb", distance: "8 km" },
+                    { name: "Manger Square", distance: "11 km" },
+                    { name: "Al Manara Square", distance: "18 km" },
+                  ]
+                ).map((location, index) => (
                   <button
                     key={index}
                     onClick={() => handleLocationClick(location.name)}
@@ -170,17 +182,19 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  { name: "Cafe/bar • Cafe Rosterie", distance: "250 m" },
-                  {
-                    name: "Cafe/bar • Gatsby Cocktail Room",
-                    distance: "950 m",
-                  },
-                  {
-                    name: "Cafe/bar • The Barrel Public House",
-                    distance: "1.1 km",
-                  },
-                ].map((location, index) => (
+                {(
+                  hotel?.surroundings?.restaurantsCafes || [
+                    { name: "Cafe/bar • Cafe Rosterie", distance: "250 m" },
+                    {
+                      name: "Cafe/bar • Gatsby Cocktail Room",
+                      distance: "950 m",
+                    },
+                    {
+                      name: "Cafe/bar • The Barrel Public House",
+                      distance: "1.1 km",
+                    },
+                  ]
+                ).map((location, index) => (
                   <button
                     key={index}
                     onClick={() => handleLocationClick(location.name)}
@@ -218,22 +232,24 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[{ name: "Mountain • Temple Mount", distance: "3.1 km" }].map(
-                  (location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors">
-                        {location.name}
-                      </span>
-                      <span className="text-gray-600 text-sm">
-                        {location.distance}
-                      </span>
-                    </button>
-                  )
-                )}
+                {(
+                  hotel?.surroundings?.naturalBeauty || [
+                    { name: "Mountain • Temple Mount", distance: "3.1 km" },
+                  ]
+                ).map((location, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleLocationClick(location.name)}
+                    className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                  >
+                    <span className="text-gray-900 group-hover:text-[#003b95] transition-colors">
+                      {location.name}
+                    </span>
+                    <span className="text-gray-600 text-sm">
+                      {location.distance}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -261,18 +277,20 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  {
-                    name: "Bus • Jerusalem Central Bus Station",
-                    distance: "1.1 km",
-                  },
-                  {
-                    name: "Train • Jerusalem - Yitzhak Navon",
-                    distance: "1.1 km",
-                  },
-                  { name: "Train • Jerusalem Malha", distance: "5 km" },
-                  { name: "Bus • Ramallah Bus Station", distance: "18 km" },
-                ].map((location, index) => (
+                {(
+                  hotel?.surroundings?.publicTransport || [
+                    {
+                      name: "Bus • Jerusalem Central Bus Station",
+                      distance: "1.1 km",
+                    },
+                    {
+                      name: "Train • Jerusalem - Yitzhak Navon",
+                      distance: "1.1 km",
+                    },
+                    { name: "Train • Jerusalem Malha", distance: "5 km" },
+                    { name: "Bus • Ramallah Bus Station", distance: "18 km" },
+                  ]
+                ).map((location, index) => (
                   <button
                     key={index}
                     onClick={() => handleLocationClick(location.name)}
@@ -310,22 +328,24 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[{ name: "Ben Gurion Airport", distance: "46 km" }].map(
-                  (location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors">
-                        {location.name}
-                      </span>
-                      <span className="text-gray-600 text-sm">
-                        {location.distance}
-                      </span>
-                    </button>
-                  )
-                )}
+                {(
+                  hotel?.surroundings?.closestAirports || [
+                    { name: "Ben Gurion Airport", distance: "46 km" },
+                  ]
+                ).map((location, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleLocationClick(location.name)}
+                    className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                  >
+                    <span className="text-gray-900 group-hover:text-[#003b95] transition-colors">
+                      {location.name}
+                    </span>
+                    <span className="text-gray-600 text-sm">
+                      {location.distance}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>

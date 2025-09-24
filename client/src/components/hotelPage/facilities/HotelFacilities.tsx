@@ -1,4 +1,6 @@
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getHotelById } from "@/lib/api";
 import {
   Leaf,
   Users,
@@ -14,6 +16,13 @@ interface HotelFacilitiesProps {
 }
 
 export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
+  const { data: hotel } = useQuery({
+    queryKey: ["hotel", hotelId],
+    queryFn: () => getHotelById(String(hotelId)),
+    enabled: Boolean(hotelId),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const handleSeeAvailability = () => {
     // TODO: Navigate to booking or show availability
     console.log("See availability clicked");
@@ -31,10 +40,16 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">
-              Facilities of Villa Albi - Machne Yehuda Hotel
+              {hotel?.name
+                ? `Facilities of ${hotel.name}`
+                : "Facilities of Villa Albi - Machne Yehuda Hotel"}
             </h2>
             <p className="text-sm text-gray-600">
-              Great facilities! Review score, 8.8
+              {`Great facilities! Review score, ${(
+                (hotel?.guestReviews?.overallRating ??
+                  hotel?.averageRating ??
+                  8.8) as number
+              ).toFixed(1)}`}
             </p>
           </div>
           <button
@@ -51,27 +66,18 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
             Most popular facilities
           </h3>
           <div className="flex flex-wrap gap-4">
-            {[
-              { icon: Leaf, name: "Non-smoking rooms" },
-              { icon: Users, name: "Family rooms" },
-              { icon: Wifi, name: "Free WiFi" },
-              { icon: Home, name: "Terrace" },
-              { icon: Sparkles, name: "Daily housekeeping" },
-              { icon: Coffee, name: "Tea/coffee maker in all rooms" },
-              { icon: Utensils, name: "Good breakfast" },
-            ].map((facility, index) => {
-              const IconComponent = facility.icon;
-              return (
+            {(hotel?.mostPopularFacilities || []).map(
+              (facility: string, index: number) => (
                 <button
                   key={index}
-                  onClick={() => handleFacilityClick(facility.name)}
+                  onClick={() => handleFacilityClick(facility)}
                   className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <IconComponent className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-gray-900">{facility.name}</span>
+                  <span className="w-4 h-4" />
+                  <span className="text-sm text-gray-900">{facility}</span>
                 </button>
-              );
-            })}
+              )
+            )}
           </div>
         </div>
 
@@ -100,18 +106,20 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  "Private bathroom",
-                  "Air conditioning",
-                  "Free WiFi",
-                  "Family rooms",
-                  "Flat-screen TV",
-                  "Shower",
-                  "Non-smoking rooms",
-                  "Luggage storage",
-                  "Laundry",
-                  "Designated smoking area",
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.greatForStay || [
+                    "Private bathroom",
+                    "Air conditioning",
+                    "Free WiFi",
+                    "Family rooms",
+                    "Flat-screen TV",
+                    "Shower",
+                    "Non-smoking rooms",
+                    "Luggage storage",
+                    "Laundry",
+                    "Designated smoking area",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -151,17 +159,19 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">Bathroom</h3>
               </div>
               <div className="space-y-2">
-                {[
-                  "Toilet paper",
-                  "Towels",
-                  "Bath or shower",
-                  "Slippers",
-                  "Private bathroom",
-                  "Toilet",
-                  "Free toiletries",
-                  "Hairdryer",
-                  "Shower",
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.bathroom || [
+                    "Toilet paper",
+                    "Towels",
+                    "Bath or shower",
+                    "Slippers",
+                    "Private bathroom",
+                    "Toilet",
+                    "Free toiletries",
+                    "Hairdryer",
+                    "Shower",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -201,11 +211,13 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">Bedroom</h3>
               </div>
               <div className="space-y-2">
-                {[
-                  "Linen",
-                  "Wardrobe or closet",
-                  "Extra long beds (> 2 metres)",
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.bedroom || [
+                    "Linen",
+                    "Wardrobe or closet",
+                    "Extra long beds (> 2 metres)",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -245,24 +257,26 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">View</h3>
               </div>
               <div className="space-y-2">
-                {["City view"].map((facility, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <svg
-                      className="w-3 h-3 text-green-600 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-sm text-gray-900">{facility}</span>
-                  </div>
-                ))}
+                {(hotel?.facilities?.view || ["City view"]).map(
+                  (facility, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <svg
+                        className="w-3 h-3 text-green-600 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-sm text-gray-900">{facility}</span>
+                    </div>
+                  )
+                )}
               </div>
             </div>
 
@@ -285,7 +299,12 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">Outdoors</h3>
               </div>
               <div className="space-y-2">
-                {["Outdoor furniture", "Terrace"].map((facility, index) => (
+                {(
+                  hotel?.facilities?.outdoors || [
+                    "Outdoor furniture",
+                    "Terrace",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -328,12 +347,14 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">Kitchen</h3>
               </div>
               <div className="space-y-2">
-                {[
-                  "Coffee machine",
-                  "Stovetop",
-                  "Electric kettle",
-                  "Refrigerator",
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.kitchen || [
+                    "Coffee machine",
+                    "Stovetop",
+                    "Electric kettle",
+                    "Refrigerator",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -375,7 +396,9 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {["Socket near the bed"].map((facility, index) => (
+                {(
+                  hotel?.facilities?.roomAmenities || ["Socket near the bed"]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -415,24 +438,26 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">Living Area</h3>
               </div>
               <div className="space-y-2">
-                {["Seating Area"].map((facility, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <svg
-                      className="w-3 h-3 text-green-600 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span className="text-sm text-gray-900">{facility}</span>
-                  </div>
-                ))}
+                {(hotel?.facilities?.livingArea || ["Seating Area"]).map(
+                  (facility, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <svg
+                        className="w-3 h-3 text-green-600 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-sm text-gray-900">{facility}</span>
+                    </div>
+                  )
+                )}
               </div>
             </div>
 
@@ -457,12 +482,14 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  "Streaming service (like Netflix)",
-                  "Flat-screen TV",
-                  "Satellite channels",
-                  "TV",
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.mediaTechnology || [
+                    "Streaming service (like Netflix)",
+                    "Flat-screen TV",
+                    "Satellite channels",
+                    "TV",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -504,10 +531,12 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  { name: "Wine/champagne", note: "Additional charge" },
-                  { name: "Tea/Coffee maker", note: "" },
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.foodDrink || [
+                    { name: "Wine/champagne", note: "Additional charge" },
+                    { name: "Tea/Coffee maker", note: "" },
+                  ]
+                ).map((facility: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
@@ -527,7 +556,9 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                         />
                       </svg>
                       <span className="text-sm text-gray-900">
-                        {facility.name}
+                        {typeof facility === "string"
+                          ? facility
+                          : facility.name}
                       </span>
                     </div>
                     {facility.note && (
@@ -560,7 +591,8 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  WiFi is available in the rooms and is free of charge.
+                  {hotel?.facilities?.internet ||
+                    "WiFi is available in the rooms and is free of charge."}
                 </p>
               </div>
             </div>
@@ -584,7 +616,9 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">Parking</h3>
               </div>
               <div className="space-y-2">
-                <p className="text-sm text-gray-600">No parking available.</p>
+                <p className="text-sm text-gray-600">
+                  {hotel?.facilities?.parking || "No parking available."}
+                </p>
               </div>
             </div>
           </div>
@@ -612,7 +646,9 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {["Invoice provided"].map((facility, index) => (
+                {(
+                  hotel?.facilities?.receptionServices || ["Invoice provided"]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -654,12 +690,14 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {[
-                  "Fire extinguishers",
-                  "CCTV outside property",
-                  "CCTV in common areas",
-                  "Key access",
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.safetySecurity || [
+                    "Fire extinguishers",
+                    "CCTV outside property",
+                    "CCTV in common areas",
+                    "Key access",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -699,18 +737,20 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 <h3 className="text-sm font-bold text-gray-900">General</h3>
               </div>
               <div className="space-y-2">
-                {[
-                  "Designated smoking area",
-                  "Air conditioning",
-                  "Non-smoking throughout",
-                  "Mosquito net",
-                  "Heating",
-                  "Soundproofing",
-                  "Private entrance",
-                  "Family rooms",
-                  "Non-smoking rooms",
-                  "Iron",
-                ].map((facility, index) => (
+                {(
+                  hotel?.facilities?.generalFacilities || [
+                    "Designated smoking area",
+                    "Air conditioning",
+                    "Non-smoking throughout",
+                    "Mosquito net",
+                    "Heating",
+                    "Soundproofing",
+                    "Private entrance",
+                    "Family rooms",
+                    "Non-smoking rooms",
+                    "Iron",
+                  ]
+                ).map((facility, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <svg
                       className="w-3 h-3 text-green-600 flex-shrink-0"
@@ -752,26 +792,31 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
                 </h3>
               </div>
               <div className="space-y-2">
-                {["German", "English", "Spanish", "Hebrew"].map(
-                  (facility, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <svg
-                        className="w-3 h-3 text-green-600 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span className="text-sm text-gray-900">{facility}</span>
-                    </div>
-                  )
-                )}
+                {(
+                  hotel?.facilities?.languagesSpoken || [
+                    "German",
+                    "English",
+                    "Spanish",
+                    "Hebrew",
+                  ]
+                ).map((facility, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <svg
+                      className="w-3 h-3 text-green-600 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span className="text-sm text-gray-900">{facility}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

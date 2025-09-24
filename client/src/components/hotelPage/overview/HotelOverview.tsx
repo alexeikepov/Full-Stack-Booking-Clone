@@ -20,19 +20,7 @@ export default function HotelOverview({ hotel }: HotelOverviewProps) {
     return Array.from(amenities).slice(0, 8);
   };
 
-  const features =
-    getHotelAmenities().length > 0
-      ? getHotelAmenities()
-      : [
-          "Free WiFi",
-          "Air conditioning",
-          "Private bathroom",
-          "Flat-screen TV",
-          "Kitchenette",
-          "Balcony",
-          "City view",
-          "Non-smoking rooms",
-        ];
+  const features = hotel.mostPopularFacilities || getHotelAmenities();
 
   return (
     <div id="overview" className="bg-white">
