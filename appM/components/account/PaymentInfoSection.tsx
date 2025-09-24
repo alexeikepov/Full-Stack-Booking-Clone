@@ -21,10 +21,10 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 import { FAQItem, faqs } from "../../data/paymentInfoData";
+import { useTheme } from "../../hooks/ThemeContext";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
 import { itemIcons } from "./itemIcons";
-
 interface Style {
   fullPage: ViewStyle;
   header: ViewStyle;
@@ -57,7 +57,6 @@ interface Style {
   faqQuestion: TextStyle;
   faqAnswer: TextStyle;
 }
-
 const styles = StyleSheet.create<Style>({
   fullPage: { flex: 1, backgroundColor: Colors.dark.background },
   header: {
@@ -177,8 +176,8 @@ const styles = StyleSheet.create<Style>({
   },
   faqAnswer: { fontSize: 14, color: Colors.dark.textSecondary, marginTop: 10 },
 });
-
 export default function PaymentInfoSection(): JSX.Element {
+  const { colors } = useTheme();
   const [activeModal, setActiveModal] = useState<
     null | "main" | "info" | "rewards" | "faq" | "addCard" | "paymentMethods"
   >(null);
@@ -190,7 +189,6 @@ export default function PaymentInfoSection(): JSX.Element {
   const [cvc, setCvc] = useState("");
   const [name, setName] = useState("");
   const insets = useSafeAreaInsets();
-
   // Android back handler
   useEffect(() => {
     if (!activeModal) return;
@@ -205,9 +203,7 @@ export default function PaymentInfoSection(): JSX.Element {
       if (subscription) subscription.remove();
     };
   }, [activeModal]);
-
   const items = ["Rewards & Wallet", "Payment methods"];
-
   // Track if a card was just saved to keep AddCardModal open while showing SavedModal
   const [justSavedCard, setJustSavedCard] = useState(false);
   const handleSaveCard = (details: any) => {
@@ -222,49 +218,65 @@ export default function PaymentInfoSection(): JSX.Element {
       }, 100);
     }, 1200);
   };
-
   // Modals
   const MainModal = activeModal === "main" && (
     <Modal
-      visible
       animationType="slide"
       transparent={false}
       presentationStyle="fullScreen"
       onRequestClose={() => setActiveModal(null)}
     >
-      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
+      <SafeAreaView
+        style={[
+          styles.fullPage,
+          { backgroundColor: colors.background, paddingTop: insets.top },
+        ]}
+      >
+        <View style={[styles.header, { backgroundColor: colors.card }]}>
           <Pressable
             onPress={() => setActiveModal(null)}
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={styles.headerText}>Rewards & Wallet</Text>
+          <Text style={[styles.headerText, { color: colors.text }]}>
+            Rewards & Wallet
+          </Text>
         </View>
         <ScrollView
           contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         >
-          <View style={styles.walletSection}>
+          <View
+            style={[styles.walletSection, { backgroundColor: colors.card }]}
+          >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Ionicons
                 name="wallet"
                 size={24}
-                color={Colors.dark.icon}
+                color={colors.icon}
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.walletTitle}>Wallet balance</Text>
+              <Text style={[styles.walletTitle, { color: colors.text }]}>
+                Wallet balance
+              </Text>
               <Text
                 style={[
                   styles.walletBalanceText,
-                  { fontSize: 18, marginLeft: "auto", marginBottom: 0 },
+                  {
+                    fontSize: 18,
+                    marginLeft: "auto",
+                    marginBottom: 0,
+                    color: colors.text,
+                  },
                 ]}
               >
                 € 0
               </Text>
             </View>
-            <Text style={styles.walletSubtext}>
+            <Text
+              style={[styles.walletSubtext, { color: colors.textSecondary }]}
+            >
               Includes all spendable rewards
             </Text>
             <View
@@ -274,16 +286,23 @@ export default function PaymentInfoSection(): JSX.Element {
                 marginBottom: 8,
               }}
             >
-              <Text style={styles.creditText}>Credits</Text>
+              <Text style={[styles.creditText, { color: colors.text }]}>
+                Credits
+              </Text>
               <TouchableOpacity onPress={() => setActiveModal("info")}>
                 <Ionicons
                   name="information-circle-outline"
                   size={16}
-                  color={Colors.dark.textSecondary}
+                  color={colors.textSecondary}
                   style={styles.infoIcon}
                 />
               </TouchableOpacity>
-              <Text style={[styles.creditText, { marginLeft: "auto" }]}>
+              <Text
+                style={[
+                  styles.creditText,
+                  { marginLeft: "auto", color: colors.text },
+                ]}
+              >
                 € 0
               </Text>
             </View>
@@ -294,41 +313,39 @@ export default function PaymentInfoSection(): JSX.Element {
             </TouchableOpacity>
           </View>
           <View style={styles.whatIsSection}>
-            <Text style={styles.whatIsTitle}>What is Rewards & Wallet?</Text>
+            <Text style={[styles.whatIsTitle, { color: colors.text }]}>
+              What is Rewards & Wallet?
+            </Text>
             <View style={styles.whatIsItem}>
-              <Ionicons
-                name="gift-outline"
-                size={32}
-                color={Colors.dark.icon}
-              />
+              <Ionicons name="gift-outline" size={32} color={colors.icon} />
               <View style={styles.whatIsItemContent}>
-                <Text style={styles.itemMainText}>
+                <Text style={[styles.itemMainText, { color: colors.text }]}>
                   Book and earn travel rewards
                 </Text>
-                <Text style={styles.itemSubText}>
+                <Text
+                  style={[styles.itemSubText, { color: colors.textSecondary }]}
+                >
                   Credits, vouchers, you name it! These are all spendable on
                   your next Booking.com trip.
                 </Text>
               </View>
             </View>
             <View style={styles.whatIsItem}>
-              <Ionicons name="eye-outline" size={32} color={Colors.dark.icon} />
+              <Ionicons name="eye-outline" size={32} color={colors.icon} />
               <View style={styles.whatIsItemContent}>
-                <Text style={styles.itemMainText}>
+                <Text style={[styles.itemMainText, { color: colors.text }]}>
                   Track everything at a glance
                 </Text>
-                <Text style={styles.itemSubText}>
+                <Text
+                  style={[styles.itemSubText, { color: colors.textSecondary }]}
+                >
                   Your Wallet keeps all rewards safe, while updating you about
                   your earnings and spendings.
                 </Text>
               </View>
             </View>
             <View style={styles.whatIsItem}>
-              <Ionicons
-                name="wallet-outline"
-                size={32}
-                color={Colors.dark.icon}
-              />
+              <Ionicons name="wallet-outline" size={32} color={colors.icon} />
               <View style={styles.whatIsItemContent}>
                 <Text style={styles.itemMainText}>
                   Pay with Wallet to save money
@@ -350,14 +367,8 @@ export default function PaymentInfoSection(): JSX.Element {
       </SafeAreaView>
     </Modal>
   );
-
   const InfoModal = activeModal === "info" && (
-    <Modal
-      visible
-      animationType="fade"
-      transparent
-      onRequestClose={() => setActiveModal(null)}
-    >
+    <Modal animationType="fade" onRequestClose={() => setActiveModal(null)}>
       <View
         style={{
           flex: 1,
@@ -368,7 +379,7 @@ export default function PaymentInfoSection(): JSX.Element {
       >
         <View
           style={{
-            backgroundColor: Colors.dark.card,
+            backgroundColor: colors.card,
             borderRadius: 16,
             padding: 24,
             width: 320,
@@ -379,7 +390,7 @@ export default function PaymentInfoSection(): JSX.Element {
             style={{
               fontWeight: "bold",
               fontSize: 18,
-              color: Colors.dark.text,
+              color: colors.text,
               marginBottom: 8,
             }}
           >
@@ -387,7 +398,7 @@ export default function PaymentInfoSection(): JSX.Element {
           </Text>
           <Text
             style={{
-              color: Colors.dark.textSecondary,
+              color: colors.textSecondary,
               fontSize: 15,
               textAlign: "center",
               marginBottom: 24,
@@ -413,29 +424,34 @@ export default function PaymentInfoSection(): JSX.Element {
       </View>
     </Modal>
   );
-
   const RewardsModal = activeModal === "rewards" && (
     <Modal
-      visible
       animationType="slide"
       transparent={false}
       presentationStyle="fullScreen"
       onRequestClose={() => setActiveModal(null)}
     >
-      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
+      <SafeAreaView
+        style={[
+          styles.fullPage,
+          { backgroundColor: colors.background, paddingTop: insets.top },
+        ]}
+      >
+        <View style={[styles.header, { backgroundColor: colors.card }]}>
           <Pressable
             onPress={() => setActiveModal(null)}
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={styles.headerText}>Rewards & Wallet activity</Text>
+          <Text style={[styles.headerText, { color: colors.text }]}>
+            Rewards & Wallet activity
+          </Text>
         </View>
         <View
           style={{
-            backgroundColor: Colors.dark.card,
+            backgroundColor: colors.card,
             margin: 16,
             borderRadius: 16,
             padding: 16,
@@ -451,14 +467,14 @@ export default function PaymentInfoSection(): JSX.Element {
             <Ionicons
               name="wallet"
               size={24}
-              color={Colors.dark.icon}
+              color={colors.icon}
               style={{ marginRight: 8 }}
             />
             <Text
               style={{
                 fontWeight: "bold",
                 fontSize: 20,
-                color: Colors.dark.text,
+                color: colors.text,
               }}
             >
               Wallet balance
@@ -467,7 +483,7 @@ export default function PaymentInfoSection(): JSX.Element {
               style={{
                 fontWeight: "bold",
                 fontSize: 20,
-                color: Colors.dark.text,
+                color: colors.text,
                 marginLeft: "auto",
               }}
             >
@@ -476,7 +492,7 @@ export default function PaymentInfoSection(): JSX.Element {
           </View>
           <Text
             style={{
-              color: Colors.dark.textSecondary,
+              color: colors.textSecondary,
               fontSize: 14,
               marginBottom: 8,
             }}
@@ -502,7 +518,7 @@ export default function PaymentInfoSection(): JSX.Element {
             >
               <Text
                 style={{
-                  color: Colors.dark.text,
+                  color: colors.text,
                   fontWeight: "bold",
                   fontSize: 16,
                 }}
@@ -524,7 +540,7 @@ export default function PaymentInfoSection(): JSX.Element {
             style={{
               fontWeight: "bold",
               fontSize: 22,
-              color: Colors.dark.text,
+              color: colors.text,
               marginBottom: 12,
               textAlign: "center",
             }}
@@ -533,7 +549,7 @@ export default function PaymentInfoSection(): JSX.Element {
           </Text>
           <Text
             style={{
-              color: Colors.dark.textSecondary,
+              color: colors.textSecondary,
               fontSize: 16,
               textAlign: "center",
             }}
@@ -545,31 +561,37 @@ export default function PaymentInfoSection(): JSX.Element {
       </SafeAreaView>
     </Modal>
   );
-
   const FaqModal = activeModal === "faq" && (
     <Modal
-      visible
       animationType="slide"
       transparent={false}
       presentationStyle="fullScreen"
       onRequestClose={() => setActiveModal(null)}
     >
-      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
+      <SafeAreaView
+        style={[
+          styles.fullPage,
+          { backgroundColor: colors.background, paddingTop: insets.top },
+        ]}
+      >
+        <View style={[styles.header, { backgroundColor: colors.card }]}>
           <Pressable
             onPress={() => setActiveModal(null)}
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={styles.headerText}>FAQs</Text>
+          <Text style={[styles.headerText, { color: colors.text }]}>FAQs</Text>
         </View>
         <ScrollView style={styles.faqContainer}>
           {faqs.map((faq: FAQItem, index) => (
             <Pressable
               key={index}
-              style={styles.faqItem}
+              style={[
+                styles.faqItem,
+                { borderBottomColor: colors.textSecondary },
+              ]}
               onPress={() =>
                 setExpandedFAQ(
                   expandedFAQ === faq.question ? null : faq.question,
@@ -577,17 +599,23 @@ export default function PaymentInfoSection(): JSX.Element {
               }
             >
               <View style={styles.faqQuestionContainer}>
-                <Text style={styles.faqQuestion}>{faq.question}</Text>
+                <Text style={[styles.faqQuestion, { color: colors.text }]}>
+                  {faq.question}
+                </Text>
                 <Ionicons
                   name={
                     expandedFAQ === faq.question ? "chevron-up" : "chevron-down"
                   }
                   size={24}
-                  color={Colors.dark.icon}
+                  color={colors.icon}
                 />
               </View>
               {expandedFAQ === faq.question && (
-                <Text style={styles.faqAnswer}>{faq.answer}</Text>
+                <Text
+                  style={[styles.faqAnswer, { color: colors.textSecondary }]}
+                >
+                  {faq.answer}
+                </Text>
               )}
             </Pressable>
           ))}
@@ -595,33 +623,43 @@ export default function PaymentInfoSection(): JSX.Element {
       </SafeAreaView>
     </Modal>
   );
-
   const AddCardModal = (activeModal === "addCard" || justSavedCard) && (
     <Modal
-      visible
       animationType="slide"
       transparent={false}
       presentationStyle="fullScreen"
       onRequestClose={() => setActiveModal(null)}
     >
-      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
+      <SafeAreaView
+        style={[
+          styles.fullPage,
+          { backgroundColor: colors.background, paddingTop: insets.top },
+        ]}
+      >
+        <View style={[styles.header, { backgroundColor: colors.card }]}>
           <Pressable
             onPress={() => setActiveModal(null)}
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={styles.headerText}>Add card</Text>
+          <Text style={[styles.headerText, { color: colors.text }]}>
+            Add card
+          </Text>
         </View>
         <ScrollView
           contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
         >
           <View style={styles.cardFormContainer}>
-            <Text style={styles.label}>Card number</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              Card number
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { backgroundColor: colors.card, color: colors.text },
+              ]}
               keyboardType="numeric"
               value={cardNumber}
               onChangeText={setCardNumber}
@@ -630,27 +668,42 @@ export default function PaymentInfoSection(): JSX.Element {
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
               <View style={{ flex: 1, marginRight: 8 }}>
-                <Text style={styles.label}>Expiration date</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>
+                  Expiration date
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    { backgroundColor: colors.card, color: colors.text },
+                  ]}
                   placeholder="MM/YY"
                   value={expiry}
                   onChangeText={setExpiry}
                 />
               </View>
               <View style={{ flex: 1, marginLeft: 8 }}>
-                <Text style={styles.label}>CVC</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>
+                  CVC
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    { backgroundColor: colors.card, color: colors.text },
+                  ]}
                   keyboardType="numeric"
                   value={cvc}
                   onChangeText={setCvc}
                 />
               </View>
             </View>
-            <Text style={styles.label}>Name on card</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              Name on card
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { backgroundColor: colors.card, color: colors.text },
+              ]}
               value={name}
               onChangeText={setName}
             />
@@ -665,29 +718,38 @@ export default function PaymentInfoSection(): JSX.Element {
       </SafeAreaView>
     </Modal>
   );
-
   const PaymentMethodsModal = activeModal === "paymentMethods" && (
     <Modal
-      visible
       animationType="slide"
       transparent={false}
       presentationStyle="fullScreen"
       onRequestClose={() => setActiveModal(null)}
     >
-      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
+      <SafeAreaView
+        style={[
+          styles.fullPage,
+          { backgroundColor: colors.background, paddingTop: insets.top },
+        ]}
+      >
+        <View style={[styles.header, { backgroundColor: colors.card }]}>
           <Pressable
             onPress={() => setActiveModal(null)}
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
-          <Text style={styles.headerText}>Payment details</Text>
+          <Text style={[styles.headerText, { color: colors.text }]}>
+            Payment details
+          </Text>
         </View>
         <View style={styles.cardSection}>
-          <Text style={styles.itemMainText}>Payment details</Text>
-          <Text style={styles.cardSectionText}>
+          <Text style={[styles.itemMainText, { color: colors.text }]}>
+            Payment details
+          </Text>
+          <Text
+            style={[styles.cardSectionText, { color: colors.textSecondary }]}
+          >
             Securely add or remove payment methods to make it easier when you
             book.
           </Text>
@@ -696,27 +758,27 @@ export default function PaymentInfoSection(): JSX.Element {
               style={{
                 marginTop: 24,
                 width: "100%",
-                backgroundColor: Colors.dark.card,
+                backgroundColor: colors.card,
                 borderRadius: 8,
                 padding: 16,
               }}
             >
               <Text
                 style={{
-                  color: Colors.dark.text,
+                  color: colors.text,
                   fontWeight: "bold",
                   fontSize: 16,
                 }}
               >
                 Saved Card
               </Text>
-              <Text style={{ color: Colors.dark.text, marginTop: 8 }}>
+              <Text style={{ color: colors.text, marginTop: 8 }}>
                 Card Number: **** **** **** {cardDetails.cardNumber?.slice(-4)}
               </Text>
-              <Text style={{ color: Colors.dark.text }}>
+              <Text style={{ color: colors.text }}>
                 Expiry: {cardDetails.expiry}
               </Text>
-              <Text style={{ color: Colors.dark.text }}>
+              <Text style={{ color: colors.text }}>
                 Name: {cardDetails.name}
               </Text>
             </View>
@@ -731,7 +793,6 @@ export default function PaymentInfoSection(): JSX.Element {
       </SafeAreaView>
     </Modal>
   );
-
   const SavedModal = showSavedModal && (
     <Modal visible transparent animationType="fade">
       <View
@@ -761,7 +822,6 @@ export default function PaymentInfoSection(): JSX.Element {
       </View>
     </Modal>
   );
-
   return (
     <AccountSection title="Payment info">
       {items.map((title) => (

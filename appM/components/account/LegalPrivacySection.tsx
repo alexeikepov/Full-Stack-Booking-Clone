@@ -1,11 +1,10 @@
-import React, { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import {
   BackHandler,
   Modal,
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextStyle,
   View,
@@ -17,6 +16,7 @@ import {
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 
 interface Style {
   container: ViewStyle;
@@ -48,42 +48,46 @@ interface Style {
   buttonText: TextStyle;
 }
 
-const styles = StyleSheet.create<Style>({
+const createStyles = (colors: typeof Colors.light): Style => ({
   container: {
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     marginVertical: 20,
   },
   content: { flexDirection: "row", alignItems: "center" },
   textContainer: { flex: 1, marginLeft: 12 },
-  mainText: { fontSize: 16, fontWeight: "bold", color: Colors.dark.text },
-  subText: { fontSize: 14, color: Colors.dark.textSecondary },
-  separator: { height: 1, backgroundColor: "#333", marginVertical: 16 },
+  mainText: { fontSize: 16, fontWeight: "bold", color: colors.text },
+  subText: { fontSize: 14, color: colors.textSecondary },
+  separator: {
+    height: 1,
+    backgroundColor: colors.separator,
+    marginVertical: 16,
+  },
   fullContainer: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
   },
   backButton: { paddingRight: 10 },
-  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
+  headerText: { fontSize: 20, fontWeight: "bold", color: colors.text },
   pageSection: { marginTop: 20, marginHorizontal: 16 },
   pageSectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
     marginBottom: 10,
   },
   pageItemContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
     borderRadius: 8,
     padding: 16,
     marginBottom: 10,
@@ -92,33 +96,32 @@ const styles = StyleSheet.create<Style>({
   pageItemMainText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
   },
-  pageItemSubText: { fontSize: 14, color: Colors.dark.textSecondary },
-
+  pageItemSubText: { fontSize: 14, color: colors.textSecondary },
   // New styles for cookie policy page
   privacyHeader: {
     padding: 16,
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: colors.separator,
   },
   privacyHeaderTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
     marginBottom: 8,
   },
   privacyDescription: {
     fontSize: 16,
-    color: Colors.dark.text,
+    color: colors.text,
   },
   privacyOption: {
     flexDirection: "row",
     alignItems: "flex-start",
     paddingHorizontal: 16,
     paddingVertical: 20,
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
     marginBottom: 10,
   },
   privacyTextContainer: {
@@ -128,18 +131,18 @@ const styles = StyleSheet.create<Style>({
   privacyTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
   },
   privacyDetails: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
   },
   privacyButtonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 16,
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
   },
   privacyButton: {
     flex: 1,
@@ -149,16 +152,18 @@ const styles = StyleSheet.create<Style>({
     marginHorizontal: 5,
   },
   saveButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.blue,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
   },
 });
 
 export default function LegalPrivacySection(): JSX.Element {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [showFullPage, setShowFullPage] = useState(false);
   const [activeItem, setActiveItem] = useState<number | null>(null);
   const insets = useSafeAreaInsets();
@@ -187,230 +192,281 @@ export default function LegalPrivacySection(): JSX.Element {
     };
   }, [showFullPage]);
 
+  const handleItemPress = (item: number) => {
+    setActiveItem(item);
+    setShowFullPage(true);
+  };
+
+  const getModalContent = () => {
+    switch (activeItem) {
+      case 0:
+        return (
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+          >
+            <View style={styles.pageSection}>
+              <Text style={styles.pageSectionTitle}>
+                Cookie settings and privacy policy
+              </Text>
+              <Text
+                style={{ fontSize: 16, color: colors.text, marginBottom: 20 }}
+              >
+                We use cookies to improve your experience on our platform. You
+                can customize your cookie preferences below.
+              </Text>
+            </View>
+
+            <View style={styles.privacyOption}>
+              <Ionicons
+                name="checkmark-circle"
+                size={24}
+                color={colors.green}
+                style={{ marginTop: 4 }}
+              />
+              <View style={styles.privacyTextContainer}>
+                <Text style={styles.privacyTitle}>Functional cookies</Text>
+                <Text style={styles.privacyDetails}>
+                  These cookies are essential for the website to function
+                  properly. They cannot be disabled.
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={styles.privacyOption}
+              onPress={() => handleCookieToggle("analytical")}
+            >
+              <Ionicons
+                name={
+                  cookiePreferences.analytical
+                    ? "checkmark-circle"
+                    : "ellipse-outline"
+                }
+                size={24}
+                color={cookiePreferences.analytical ? colors.blue : colors.icon}
+                style={{ marginTop: 4 }}
+              />
+              <View style={styles.privacyTextContainer}>
+                <Text style={styles.privacyTitle}>Analytical cookies</Text>
+                <Text style={styles.privacyDetails}>
+                  Help us understand how visitors interact with our website.
+                </Text>
+              </View>
+            </Pressable>
+
+            <Pressable
+              style={styles.privacyOption}
+              onPress={() => handleCookieToggle("marketing")}
+            >
+              <Ionicons
+                name={
+                  cookiePreferences.marketing
+                    ? "checkmark-circle"
+                    : "ellipse-outline"
+                }
+                size={24}
+                color={cookiePreferences.marketing ? colors.blue : colors.icon}
+                style={{ marginTop: 4 }}
+              />
+              <View style={styles.privacyTextContainer}>
+                <Text style={styles.privacyTitle}>Marketing cookies</Text>
+                <Text style={styles.privacyDetails}>
+                  Used to deliver personalized ads and track their
+                  effectiveness.
+                </Text>
+              </View>
+            </Pressable>
+          </ScrollView>
+        );
+
+      case 1:
+        return (
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+          >
+            <View style={styles.pageSection}>
+              <Text style={styles.pageSectionTitle}>Terms & Conditions</Text>
+              <Text
+                style={{ fontSize: 16, color: colors.text, lineHeight: 24 }}
+              >
+                By using our services, you agree to these terms and
+                conditions...
+                {"\n\n"}
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                {"\n\n"}
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat.
+              </Text>
+            </View>
+          </ScrollView>
+        );
+
+      case 2:
+        return (
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+          >
+            <View style={styles.pageSection}>
+              <Text style={styles.pageSectionTitle}>Privacy Policy</Text>
+              <Text
+                style={{ fontSize: 16, color: colors.text, lineHeight: 24 }}
+              >
+                Your privacy is important to us. This policy explains how we
+                collect, use, and protect your information...
+                {"\n\n"}
+                We collect information when you use our services, including
+                personal details and usage data.
+                {"\n\n"}
+                This information is used to improve our services and provide
+                personalized experiences.
+              </Text>
+            </View>
+          </ScrollView>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const getModalHeaderTitle = () => {
+    switch (activeItem) {
+      case 0:
+        return "Cookie Settings";
+      case 1:
+        return "Terms & Conditions";
+      case 2:
+        return "Privacy Policy";
+      default:
+        return "";
+    }
+  };
+
   const items = [
     {
-      title: "Terms of Service",
-      description: "Read the terms that govern your use of our services.",
-      content:
-        "Welcome to our platform. By using our services, you agree to these Terms of Service. These terms outline user responsibilities, intellectual property rights, and limitations of liability. You are responsible for all activity on your account. We reserve the right to modify these terms at any time.",
+      icon: "shield-checkmark-outline",
+      title: "Cookie settings",
+      subtitle: "Manage your cookie preferences",
     },
     {
+      icon: "document-text-outline",
+      title: "Terms & Conditions",
+      subtitle: "Read our terms of service",
+    },
+    {
+      icon: "lock-closed-outline",
       title: "Privacy Policy",
-      description: "Understand how we collect and use your information.",
-      content:
-        "This Privacy Policy explains how we collect, use, and protect your personal information. We gather data you provide, like name and contact details, and also automatically collect information about your device and usage. This data is used to improve our services and personalize your experience. We do not sell your personal data to third parties.",
-    },
-    {
-      title: "Cookie Policy",
-      description: "Learn about cookies and how we use them.",
-      content: "Custom component for Cookie Policy.",
-      isCookiePolicy: true,
+      subtitle: "How we handle your data",
     },
   ];
 
-  const renderCookiePolicy = () => (
-    <View style={{ flex: 1 }}>
-      <ScrollView>
-        <View style={styles.pageSection}>
-          <Text style={styles.pageSectionTitle}>
-            Select which cookies (and similar tracking technologies) you want to
-            accept:
-          </Text>
-        </View>
-
-        <View style={styles.privacyOption}>
-          <Pressable onPress={() => {}}>
-            <Ionicons
-              name={
-                cookiePreferences.functional
-                  ? "checkmark-circle"
-                  : "ellipse-outline"
-              }
-              size={24}
-              color={
-                cookiePreferences.functional
-                  ? "#007AFF"
-                  : Colors.dark.textSecondary
-              }
-            />
-          </Pressable>
-          <View style={styles.privacyTextContainer}>
-            <Text style={styles.privacyTitle}>Functional cookies</Text>
-            <Text style={styles.privacyDetails}>
-              We use functional cookies to enable our website to work properly
-              so you can create an account, sign in, and manage bookings. They
-              also remember your selected currency, language, and past searches.
-              These technical cookies must be enabled to use our site and
-              services.
+  return (
+    <>
+      <Pressable style={styles.container} onPress={() => setShowFullPage(true)}>
+        <View style={styles.content}>
+          <Ionicons name="shield-outline" size={24} color={colors.icon} />
+          <View style={styles.textContainer}>
+            <Text style={styles.mainText}>Legal & Privacy</Text>
+            <Text style={styles.subText}>
+              Cookie settings, terms, and privacy policy
             </Text>
           </View>
+          <Ionicons name="chevron-forward" size={24} color={colors.icon} />
         </View>
+      </Pressable>
 
-        <Pressable
-          style={styles.privacyOption}
-          onPress={() => handleCookieToggle("analytical")}
+      <Modal
+        visible={showFullPage}
+        animationType="slide"
+        transparent={false}
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowFullPage(false)}
+      >
+        <SafeAreaView
+          style={[styles.fullContainer, { paddingTop: insets.top }]}
         >
-          <Ionicons
-            name={
-              cookiePreferences.analytical
-                ? "checkmark-circle"
-                : "ellipse-outline"
-            }
-            size={24}
-            color={
-              cookiePreferences.analytical
-                ? "#007AFF"
-                : Colors.dark.textSecondary
-            }
-          />
-          <View style={styles.privacyTextContainer}>
-            <Text style={styles.privacyTitle}>Analytical cookies</Text>
-            <Text style={styles.privacyDetails}>
-              We and our partners use analytical cookies to gain information on
-              your website usage, which is then used to understand how visitors
-              like you use our platform and to improve the performance of our
-              site and services.
-            </Text>
+          <View style={styles.header}>
+            <Pressable
+              onPress={() => setShowFullPage(false)}
+              style={styles.backButton}
+              accessibilityLabel="Back"
+            >
+              <Ionicons name="chevron-back" size={24} color={colors.text} />
+            </Pressable>
+            <Text style={styles.headerText}>Legal & Privacy</Text>
           </View>
-        </Pressable>
 
-        <Pressable
-          style={styles.privacyOption}
-          onPress={() => handleCookieToggle("marketing")}
-        >
-          <Ionicons
-            name={
-              cookiePreferences.marketing
-                ? "checkmark-circle"
-                : "ellipse-outline"
-            }
-            size={24}
-            color={
-              cookiePreferences.marketing
-                ? "#007AFF"
-                : Colors.dark.textSecondary
-            }
-          />
-          <View style={styles.privacyTextContainer}>
-            <Text style={styles.privacyTitle}>Marketing cookies</Text>
-            <Text style={styles.privacyDetails}>
-              We and our partners use marketing cookies, including social media
-              cookies, to collect information about your browsing behavior on
-              this website that helps us decide which products to show you on
-              and off our site.
-            </Text>
-          </View>
-        </Pressable>
-      </ScrollView>
-      <View style={styles.privacyButtonContainer}>
-        <Pressable
-          style={[styles.privacyButton, { backgroundColor: Colors.dark.card }]}
-          onPress={() => setActiveItem(null)}
-        >
-          <Text style={styles.buttonText}>Close</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.privacyButton, styles.saveButton]}
-          onPress={() => setActiveItem(null)}
-        >
-          <Text style={[styles.buttonText, { color: "white" }]}>
-            Save changes
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-
-  const Banner = (
-    <Pressable style={styles.container} onPress={() => setShowFullPage(true)}>
-      <View style={styles.content}>
-        <Ionicons
-          name="document-text-outline"
-          size={24}
-          color={Colors.dark.icon}
-        />
-        <View style={styles.textContainer}>
-          <Text style={styles.mainText}>Legal & Privacy</Text>
-          <Text style={styles.subText}>Read our terms, policies and more</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={24} color={Colors.dark.icon} />
-      </View>
-    </Pressable>
-  );
-
-  const FullPage = (
-    <Modal
-      visible={showFullPage}
-      animationType="slide"
-      transparent={false}
-      presentationStyle="fullScreen"
-    >
-      <SafeAreaView style={[styles.fullContainer, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => {
-              if (activeItem !== null) {
-                setActiveItem(null);
-              } else {
-                setShowFullPage(false);
-              }
-            }}
-            style={styles.backButton}
-            accessibilityLabel="Back"
-          >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
-          </Pressable>
-          <Text style={styles.headerText}>
-            {activeItem === null ? "Legal & Privacy" : items[activeItem].title}
-          </Text>
-        </View>
-
-        {activeItem === null ? (
-          <ScrollView
-            contentContainerStyle={{
-              paddingBottom: Math.max(24, insets.bottom + 16),
-            }}
-          >
-            <View style={styles.pageSection}>
-              <Text style={styles.pageSectionTitle}>Documents</Text>
-              {items.map((item, index) => (
+          {activeItem !== null ? (
+            <>
+              <View style={styles.header}>
                 <Pressable
-                  key={index}
-                  style={styles.pageItemContainer}
-                  onPress={() => setActiveItem(index)}
+                  onPress={() => setActiveItem(null)}
+                  style={styles.backButton}
+                  accessibilityLabel="Back"
                 >
-                  <View style={styles.pageItemTextContainer}>
-                    <Text style={styles.pageItemMainText}>{item.title}</Text>
-                    <Text style={styles.pageItemSubText}>
-                      {item.description}
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color={Colors.dark.icon}
-                  />
+                  <Ionicons name="chevron-back" size={24} color={colors.text} />
                 </Pressable>
-              ))}
-            </View>
-          </ScrollView>
-        ) : items[activeItem].isCookiePolicy ? (
-          renderCookiePolicy()
-        ) : (
-          <ScrollView
-            contentContainerStyle={{
-              padding: 16,
-              paddingBottom: Math.max(24, insets.bottom + 16),
-            }}
-          >
-            <Text style={styles.pageItemMainText}>
-              {items[activeItem].content}
-            </Text>
-          </ScrollView>
-        )}
-      </SafeAreaView>
-    </Modal>
+                <Text style={styles.headerText}>{getModalHeaderTitle()}</Text>
+              </View>
+              {getModalContent()}
+              {activeItem === 0 && (
+                <View style={styles.privacyButtonContainer}>
+                  <Pressable
+                    style={[
+                      styles.privacyButton,
+                      { backgroundColor: colors.card },
+                    ]}
+                    onPress={() => setActiveItem(null)}
+                  >
+                    <Text style={styles.buttonText}>Close</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.privacyButton, styles.saveButton]}
+                    onPress={() => setActiveItem(null)}
+                  >
+                    <Text style={[styles.buttonText, { color: "white" }]}>
+                      Save Preferences
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </>
+          ) : (
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+            >
+              <View style={styles.pageSection}>
+                <Text style={styles.pageSectionTitle}>Legal & Privacy</Text>
+                {items.map((item, index) => (
+                  <Pressable
+                    key={index}
+                    style={styles.pageItemContainer}
+                    onPress={() => handleItemPress(index)}
+                  >
+                    <Ionicons
+                      name={item.icon as any}
+                      size={24}
+                      color={colors.icon}
+                    />
+                    <View style={styles.pageItemTextContainer}>
+                      <Text style={styles.pageItemMainText}>{item.title}</Text>
+                      <Text style={styles.pageItemSubText}>
+                        {item.subtitle}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={24}
+                      color={colors.icon}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
+    </>
   );
-
-  return showFullPage ? FullPage : Banner;
 }

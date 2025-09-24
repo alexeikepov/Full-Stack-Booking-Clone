@@ -1,21 +1,20 @@
 import React from "react";
-import { View, Text } from "react-native";
-import { Colors } from "../../constants/Colors";
-
+import { Text, View } from "react-native";
+import { useTheme } from "../../hooks/ThemeContext";
 interface AccountSectionProps {
   title: string;
   children: React.ReactNode;
 }
-
 export default function AccountSection({
   title,
   children,
 }: AccountSectionProps) {
+  const { colors } = useTheme();
   return (
     <View style={{ marginBottom: 24 }}>
       <Text
         style={{
-          color: Colors.dark.text,
+          color: colors.text,
           fontSize: 16,
           fontWeight: "bold",
           marginBottom: 8,

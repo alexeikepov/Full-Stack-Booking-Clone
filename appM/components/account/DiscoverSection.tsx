@@ -1,3 +1,4 @@
+// path: src/components/account/DiscoverSection.tsx
 import { JSX, useState } from "react";
 import {
   Alert,
@@ -15,10 +16,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
-
 interface Style {
   fullContainer: ViewStyle;
   header: ViewStyle;
@@ -63,236 +63,9 @@ interface Style {
   applyButtonText: TextStyle;
   roomsGuestsFooter: ViewStyle;
 }
-
-const { width } = Dimensions.get("window");
-
-const styles = StyleSheet.create<Style>({
-  fullContainer: { flex: 1, backgroundColor: Colors.dark.background },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: Colors.dark.background,
-  },
-  backButton: { paddingRight: 10 },
-  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
-  heroImage: {
-    width: "100%",
-    height: width * 0.7,
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  heroTextContainer: {
-    backgroundColor: "rgba(0,0,0,0.4)",
-    width: "100%",
-    padding: 20,
-    alignItems: "center",
-  },
-  heroTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "center",
-  },
-  heroSubtitle: {
-    fontSize: 14,
-    color: "white",
-    textAlign: "center",
-    marginTop: 5,
-  },
-  searchSection: {
-    backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginTop: -20,
-    padding: 16,
-  },
-  searchField: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.dark.background,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 10,
-  },
-  searchFieldText: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.dark.text,
-    marginLeft: 12,
-  },
-  searchButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  searchButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  conditionsSection: {
-    marginHorizontal: 16,
-    marginTop: 20,
-  },
-  conditionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  conditionText: {
-    fontSize: 16,
-    color: Colors.dark.text,
-    marginLeft: 10,
-  },
-  scrollContent: { paddingBottom: 24 },
-  subModalContainer: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  searchInput: {
-    height: 40,
-    color: Colors.dark.text,
-    fontSize: 16,
-    backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginTop: 20,
-  },
-  yellowBorder: {
-    borderWidth: 2,
-    borderColor: "#FFA500", // A representative yellow color
-  },
-  searchHistoryContainer: {
-    marginTop: 20,
-    paddingHorizontal: 16,
-  },
-  searchHistoryTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-    marginBottom: 10,
-  },
-  searchHistoryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 15,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.dark.text,
-  },
-  datesModalTabs: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: Colors.dark.card,
-    borderRadius: 8,
-    marginVertical: 10,
-    padding: 5,
-    marginHorizontal: 16,
-  },
-  datesModalTab: {
-    paddingVertical: 10,
-    flex: 1,
-    alignItems: "center",
-    borderRadius: 8,
-  },
-  datesModalTabText: {
-    color: Colors.dark.text,
-    fontWeight: "bold",
-  },
-  datesModalCalendar: {
-    marginTop: 20,
-    backgroundColor: Colors.dark.card,
-    padding: 10,
-    borderRadius: 8,
-    marginHorizontal: 16,
-  },
-  datesModalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  datesModalDay: {
-    width: 30,
-    height: 30,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  datesModalDayText: {
-    color: Colors.dark.text,
-  },
-  datesModalFooter: {
-    backgroundColor: Colors.dark.card,
-    marginTop: 20,
-    padding: 16,
-    borderRadius: 8,
-    marginHorizontal: 16,
-  },
-  roomsCounter: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 15,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.dark.text,
-  },
-  roomsCounterLabel: {
-    color: Colors.dark.text,
-    fontSize: 16,
-  },
-  roomsCounterControls: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  roomsCounterButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: Colors.dark.icon,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  roomsCounterButtonText: {
-    color: Colors.dark.icon,
-    fontSize: 20,
-  },
-  roomsCounterValue: {
-    color: Colors.dark.text,
-    fontSize: 18,
-    marginHorizontal: 15,
-  },
-  roomsModalSection: {
-    backgroundColor: Colors.dark.card,
-    padding: 16,
-    borderRadius: 8,
-  },
-  roomsModalSectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: Colors.dark.text,
-    marginBottom: 10,
-  },
-  applyButton: {
-    backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  applyButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  roomsGuestsFooter: {
-    padding: 16,
-  },
-});
-
 export default function DiscoverSection(): JSX.Element {
+  const { width } = Dimensions.get("window");
+  const { colors } = useTheme();
   const [showDealsModal, setShowDealsModal] = useState(false);
   const [activeSubModal, setActiveSubModal] = useState<
     "none" | "destination" | "dates" | "rooms"
@@ -307,25 +80,254 @@ export default function DiscoverSection(): JSX.Element {
   const [selectedDestination, setSelectedDestination] =
     useState("Enter destination");
   const [searchQuery, setSearchQuery] = useState("");
-
+  const styles = StyleSheet.create<Style>({
+    fullContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 44, // iOS status bar height
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator,
+    },
+    backButton: { paddingRight: 10 },
+    headerText: { fontSize: 20, fontWeight: "bold", color: colors.text },
+    heroImage: {
+      width: "100%",
+      height: width * 0.7,
+      justifyContent: "flex-end",
+      alignItems: "center",
+    },
+    heroTextContainer: {
+      backgroundColor: `${colors.card}E6`, // Adding E6 for 90% opacity
+      width: "100%",
+      padding: 30,
+      alignItems: "center",
+    },
+    heroTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.text,
+      textAlign: "center",
+    },
+    heroSubtitle: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginTop: 8,
+    },
+    searchSection: {
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      marginHorizontal: 16,
+      marginTop: -20,
+      padding: 16,
+    },
+    searchField: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.background,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 10,
+    },
+    searchFieldText: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.text,
+      marginLeft: 12,
+    },
+    searchButton: {
+      backgroundColor: colors.button,
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: "center",
+      marginTop: 10,
+    },
+    searchButtonText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    conditionsSection: {
+      marginHorizontal: 16,
+      marginTop: 20,
+    },
+    conditionItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    conditionText: {
+      fontSize: 16,
+      color: colors.text,
+      marginLeft: 10,
+    },
+    scrollContent: { paddingBottom: 24 },
+    subModalContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 44, // iOS status bar height
+    },
+    searchInput: {
+      height: 40,
+      color: colors.text,
+      fontSize: 16,
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      marginTop: 20,
+    },
+    yellowBorder: {
+      borderWidth: 2,
+      borderColor: "#FFA500",
+    },
+    searchHistoryContainer: {
+      marginTop: 20,
+      paddingHorizontal: 16,
+    },
+    searchHistoryTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: colors.text,
+      marginBottom: 10,
+    },
+    searchHistoryItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 15,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.text,
+    },
+    datesModalTabs: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      marginVertical: 10,
+      padding: 5,
+      marginHorizontal: 16,
+    },
+    datesModalTab: {
+      paddingVertical: 10,
+      flex: 1,
+      alignItems: "center",
+      borderRadius: 8,
+    },
+    datesModalTabText: {
+      color: colors.text,
+      fontWeight: "bold",
+    },
+    datesModalCalendar: {
+      marginTop: 20,
+      backgroundColor: colors.card,
+      padding: 10,
+      borderRadius: 8,
+      marginHorizontal: 16,
+    },
+    datesModalRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    datesModalDay: {
+      width: 30,
+      height: 30,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    datesModalDayText: {
+      color: colors.text,
+    },
+    datesModalFooter: {
+      backgroundColor: colors.card,
+      marginTop: 20,
+      padding: 16,
+      borderRadius: 8,
+      marginHorizontal: 16,
+    },
+    roomsCounter: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 15,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.text,
+    },
+    roomsCounterLabel: {
+      color: colors.text,
+      fontSize: 16,
+    },
+    roomsCounterControls: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    roomsCounterButton: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: colors.icon,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    roomsCounterButtonText: {
+      color: colors.icon,
+      fontSize: 20,
+    },
+    roomsCounterValue: {
+      color: colors.text,
+      fontSize: 18,
+      marginHorizontal: 15,
+    },
+    roomsModalSection: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 8,
+    },
+    roomsModalSectionTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: colors.text,
+      marginBottom: 10,
+    },
+    applyButton: {
+      backgroundColor: colors.button,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: "center",
+      marginTop: 20,
+    },
+    applyButtonText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    roomsGuestsFooter: {
+      padding: 16,
+    },
+  });
   const items = [
     {
       title: "Deals",
-      icon: (
-        <Ionicons name="pricetag-outline" size={20} color={Colors.dark.icon} />
-      ),
+      icon: <Ionicons name="pricetag-outline" size={20} color={colors.icon} />,
     },
   ];
-
   const renderModalHeader = (title: string, onClose: () => void) => (
-    <View style={styles.header}>
-      <Pressable onPress={onClose} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
-      </Pressable>
-      <Text style={styles.headerText}>{title}</Text>
-    </View>
+    <SafeAreaView style={{ backgroundColor: colors.card }} edges={["top"]}>
+      <View style={styles.header}>
+        <Pressable onPress={onClose} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
+        </Pressable>
+        <Text style={styles.headerText}>{title}</Text>
+      </View>
+    </SafeAreaView>
   );
-
   const handleDateSelection = (day: number) => {
     if (!selectedDates.checkIn) {
       setSelectedDates({ checkIn: day, checkOut: null });
@@ -335,33 +337,28 @@ export default function DiscoverSection(): JSX.Element {
       setSelectedDates({ checkIn: day, checkOut: null });
     }
   };
-
   const handleDestinationPress = (destination: string) => {
     setSelectedDestination(destination);
     setActiveSubModal("none");
   };
-
   const handleSearch = () => {
     Alert.alert(
       "Search",
       `Searching for ${selectedDestination} from ${selectedDates.checkIn} to ${selectedDates.checkOut} for ${rooms} rooms, ${adults} adults and ${children} children.`,
     );
   };
-
   const handleApplyDates = () => {
     setActiveSubModal("none");
   };
-
   const handleApplyRooms = () => {
     setActiveSubModal("none");
   };
-
   const renderDestinationModal = () => (
-    <SafeAreaView style={styles.subModalContainer}>
+    <View style={styles.subModalContainer}>
       {renderModalHeader("Booking.com", () => setActiveSubModal("none"))}
       <TextInput
         placeholder="Enter destination"
-        placeholderTextColor={Colors.dark.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         style={[
           styles.searchInput,
           styles.yellowBorder,
@@ -369,34 +366,29 @@ export default function DiscoverSection(): JSX.Element {
         ]}
         value={searchQuery}
         onChangeText={setSearchQuery}
-        autoFocus
       />
       <ScrollView>
         <View style={styles.searchHistoryContainer}>
           <Text style={styles.searchHistoryTitle}>Continue your search</Text>
           <Pressable
-            style={styles.searchHistoryItem}
+            style={[styles.searchHistoryItem, { backgroundColor: colors.card }]}
             onPress={() =>
               handleDestinationPress("Lisbon, Lisbon District, Portugal")
             }
           >
-            <Ionicons
-              name="location-outline"
-              size={20}
-              color={Colors.dark.icon}
-            />
-            <Text style={styles.searchFieldText}>
+            <Ionicons name="location-outline" size={20} color={colors.icon} />
+            <Text style={[styles.searchFieldText, { color: colors.text }]}>
               Lisbon, Lisbon District, Portugal
             </Text>
           </Pressable>
           <Pressable
-            style={styles.searchHistoryItem}
+            style={[styles.searchHistoryItem, { backgroundColor: colors.card }]}
             onPress={() =>
               handleDestinationPress("London, England, United Kingdom")
             }
           >
-            <Ionicons name="time-outline" size={20} color={Colors.dark.icon} />
-            <Text style={styles.searchFieldText}>
+            <Ionicons name="time-outline" size={20} color={colors.icon} />
+            <Text style={[styles.searchFieldText, { color: colors.text }]}>
               London, England, United Kingdom
             </Text>
           </Pressable>
@@ -404,34 +396,26 @@ export default function DiscoverSection(): JSX.Element {
         <View style={styles.searchHistoryContainer}>
           <Text style={styles.searchHistoryTitle}>Recent searches</Text>
           <Pressable
-            style={styles.searchHistoryItem}
+            style={[styles.searchHistoryItem, { backgroundColor: colors.card }]}
             onPress={() =>
               handleDestinationPress("Paris, Île-de-France, France")
             }
           >
-            <Ionicons
-              name="location-outline"
-              size={20}
-              color={Colors.dark.icon}
-            />
-            <Text style={styles.searchFieldText}>
+            <Ionicons name="location-outline" size={20} color={colors.icon} />
+            <Text style={[styles.searchFieldText, { color: colors.text }]}>
               Paris, Île-de-France, France
             </Text>
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
-
   const renderDatesModal = () => (
-    <SafeAreaView style={styles.subModalContainer}>
+    <View style={styles.subModalContainer}>
       {renderModalHeader("Select dates", () => setActiveSubModal("none"))}
       <View style={styles.datesModalTabs}>
         <View
-          style={[
-            styles.datesModalTab,
-            { backgroundColor: Colors.dark.background },
-          ]}
+          style={[styles.datesModalTab, { backgroundColor: colors.background }]}
         >
           <Text style={styles.datesModalTabText}>Calendar</Text>
         </View>
@@ -458,7 +442,7 @@ export default function DiscoverSection(): JSX.Element {
                 <Text
                   style={[
                     styles.datesModalDayText,
-                    { color: Colors.dark.textSecondary },
+                    { color: colors.textSecondary },
                   ]}
                 >
                   {day}
@@ -484,10 +468,10 @@ export default function DiscoverSection(): JSX.Element {
                     style={[
                       styles.datesModalDay,
                       isBetween
-                        ? { backgroundColor: "rgba(0,122,255,0.2)" }
+                        ? { backgroundColor: colors.button, opacity: 0.3 }
                         : null,
                       isSelected
-                        ? { backgroundColor: "#007AFF", borderRadius: 15 }
+                        ? { backgroundColor: colors.button, borderRadius: 15 }
                         : null,
                     ]}
                     onPress={() => handleDateSelection(day)}
@@ -508,11 +492,7 @@ export default function DiscoverSection(): JSX.Element {
             }}
             onPress={() => Alert.alert("Exact dates")}
           >
-            <Ionicons
-              name="radio-button-on"
-              size={20}
-              color={Colors.dark.blue}
-            />
+            <Ionicons name="radio-button-on" size={20} color={colors.blue} />
             <Text style={[styles.conditionText, { marginLeft: 10 }]}>
               Exact dates
             </Text>
@@ -524,7 +504,7 @@ export default function DiscoverSection(): JSX.Element {
             <Ionicons
               name="radio-button-off"
               size={20}
-              color={Colors.dark.textSecondary}
+              color={colors.textSecondary}
             />
             <Text style={[styles.conditionText, { marginLeft: 10 }]}>
               +-3 days
@@ -535,11 +515,10 @@ export default function DiscoverSection(): JSX.Element {
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
-
   const renderRoomsGuestsModal = () => (
-    <SafeAreaView style={styles.fullContainer}>
+    <View style={styles.fullContainer}>
       {renderModalHeader("Select rooms and guests", () =>
         setActiveSubModal("none"),
       )}
@@ -619,7 +598,7 @@ export default function DiscoverSection(): JSX.Element {
             <Ionicons
               name="checkbox-outline"
               size={24}
-              color={Colors.dark.textSecondary}
+              color={colors.textSecondary}
             />
             <Text style={[styles.conditionText, { marginLeft: 10 }]}>Yes</Text>
           </Pressable>
@@ -630,9 +609,8 @@ export default function DiscoverSection(): JSX.Element {
           <Text style={styles.applyButtonText}>Apply</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
-
   const renderDealsModalContent = () => {
     switch (activeSubModal) {
       case "destination":
@@ -650,17 +628,13 @@ export default function DiscoverSection(): JSX.Element {
           ? `Oct ${selectedDates.checkOut} 2025`
           : "Thu, 2 Oct";
         return (
-          <SafeAreaView style={styles.fullContainer}>
+          <SafeAreaView style={styles.fullContainer} edges={["top", "bottom"]}>
             <View style={styles.header}>
               <Pressable
                 onPress={() => setShowDealsModal(false)}
                 style={styles.backButton}
               >
-                <Ionicons
-                  name="chevron-back"
-                  size={24}
-                  color={Colors.dark.text}
-                />
+                <Ionicons name="chevron-back" size={24} color={colors.text} />
               </Pressable>
               <Text style={styles.headerText}>Booking.com</Text>
             </View>
@@ -687,7 +661,7 @@ export default function DiscoverSection(): JSX.Element {
                   <Ionicons
                     name="search-outline"
                     size={20}
-                    color={Colors.dark.icon}
+                    color={colors.icon}
                   />
                   <Text style={styles.searchFieldText}>
                     {selectedDestination}
@@ -700,7 +674,7 @@ export default function DiscoverSection(): JSX.Element {
                   <Ionicons
                     name="calendar-outline"
                     size={20}
-                    color={Colors.dark.icon}
+                    color={colors.icon}
                   />
                   <Text style={styles.searchFieldText}>
                     {checkInDate} - {checkOutDate}
@@ -713,7 +687,7 @@ export default function DiscoverSection(): JSX.Element {
                   <Ionicons
                     name="person-outline"
                     size={20}
-                    color={Colors.dark.icon}
+                    color={colors.icon}
                   />
                   <Text style={styles.searchFieldText}>
                     {rooms} room{rooms > 1 ? "s" : ""} • {adults} adult
@@ -726,31 +700,19 @@ export default function DiscoverSection(): JSX.Element {
               </View>
               <View style={styles.conditionsSection}>
                 <View style={styles.conditionItem}>
-                  <Ionicons
-                    name="checkmark"
-                    size={20}
-                    color={Colors.dark.green}
-                  />
+                  <Ionicons name="checkmark" size={20} color={colors.green} />
                   <Text style={styles.conditionText}>
                     Book anytime until Jan 7 2026
                   </Text>
                 </View>
                 <View style={styles.conditionItem}>
-                  <Ionicons
-                    name="checkmark"
-                    size={20}
-                    color={Colors.dark.green}
-                  />
+                  <Ionicons name="checkmark" size={20} color={colors.green} />
                   <Text style={styles.conditionText}>
                     Stay between Oct 1 2025 and Jan 7 2026
                   </Text>
                 </View>
                 <View style={styles.conditionItem}>
-                  <Ionicons
-                    name="checkmark"
-                    size={20}
-                    color={Colors.dark.green}
-                  />
+                  <Ionicons name="checkmark" size={20} color={colors.green} />
                   <Text style={styles.conditionText}>Save 15% or more</Text>
                 </View>
                 <Pressable
@@ -759,7 +721,7 @@ export default function DiscoverSection(): JSX.Element {
                 >
                   <Text
                     style={{
-                      color: "#007AFF",
+                      color: colors.blue,
                       fontSize: 16,
                       fontWeight: "bold",
                       textDecorationLine: "underline",
@@ -774,9 +736,8 @@ export default function DiscoverSection(): JSX.Element {
         );
     }
   };
-
   return (
-    <SafeAreaView style={styles.fullContainer}>
+    <SafeAreaView style={styles.fullContainer} edges={["top"]}>
       <AccountSection title="Discover">
         {items.map((item) => (
           <AccountItem
@@ -787,7 +748,12 @@ export default function DiscoverSection(): JSX.Element {
           />
         ))}
       </AccountSection>
-      <Modal visible={showDealsModal} animationType="slide" transparent={false}>
+      <Modal
+        visible={showDealsModal}
+        animationType="slide"
+        transparent={false}
+        presentationStyle="fullScreen"
+      >
         {renderDealsModalContent()}
       </Modal>
     </SafeAreaView>

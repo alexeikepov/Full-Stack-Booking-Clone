@@ -6,7 +6,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TextStyle,
@@ -19,6 +18,7 @@ import {
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
 import { itemIcons } from "./itemIcons";
@@ -44,19 +44,19 @@ interface Style {
   saveButton: ViewStyle;
 }
 
-const styles = StyleSheet.create<Style>({
-  fullPage: { flex: 1, backgroundColor: Colors.dark.background },
+const createStyles = (colors: typeof Colors.light): Style => ({
+  fullPage: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
   },
   backButton: { paddingRight: 10 },
-  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
+  headerText: { fontSize: 20, fontWeight: "bold", color: colors.text },
   section: {
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
     borderRadius: 12,
     marginHorizontal: 16,
     marginTop: 20,
@@ -64,10 +64,10 @@ const styles = StyleSheet.create<Style>({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.separator,
+    borderBottomColor: colors.separator,
   },
   sectionItem: {
     flexDirection: "row",
@@ -75,16 +75,16 @@ const styles = StyleSheet.create<Style>({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.separator,
+    borderBottomColor: colors.separator,
   },
-  sectionItemText: { fontSize: 16, color: Colors.dark.text },
+  sectionItemText: { fontSize: 16, color: colors.text },
   sectionItemSubText: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
   },
   addTravelerButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.blue,
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
@@ -95,31 +95,31 @@ const styles = StyleSheet.create<Style>({
   travelerFormContainer: { padding: 16 },
   travelerFormInfo: {
     fontSize: 16,
-    color: Colors.dark.textSecondary,
+    color: colors.textSecondary,
     textAlign: "center",
     marginBottom: 20,
   },
-  label: { fontSize: 14, color: Colors.dark.textSecondary, marginBottom: 8 },
+  label: { fontSize: 14, color: colors.textSecondary, marginBottom: 8 },
   input: {
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
-    color: Colors.dark.text,
+    color: colors.text,
     padding: 16,
     marginBottom: 16,
     fontSize: 16,
-  },
+  } as TextStyle,
   genderInput: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
   },
-  genderText: { fontSize: 16, color: Colors.dark.text },
+  genderText: { fontSize: 16, color: colors.text },
   saveButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.blue,
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
@@ -128,6 +128,8 @@ const styles = StyleSheet.create<Style>({
 });
 
 export default function ManageAccountSection(): JSX.Element {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [showModal, setShowModal] = useState<string | null>(null);
 
   // Personal details
@@ -329,7 +331,7 @@ export default function ManageAccountSection(): JSX.Element {
             <Pressable
               style={[
                 styles.addTravelerButton,
-                { backgroundColor: Colors.dark.red, marginTop: 40 },
+                { backgroundColor: colors.red, marginTop: 40 },
               ]}
               onPress={() => setShowModal("Delete account confirm")}
             >
@@ -359,7 +361,7 @@ export default function ManageAccountSection(): JSX.Element {
                   <Ionicons
                     name="create-outline"
                     size={20}
-                    color={Colors.dark.icon}
+                    color={colors.icon}
                   />
                 </Pressable>
               </View>
@@ -444,7 +446,7 @@ export default function ManageAccountSection(): JSX.Element {
               <Pressable
                 style={[
                   styles.addTravelerButton,
-                  { backgroundColor: Colors.dark.red, flex: 1 },
+                  { backgroundColor: colors.red, flex: 1 },
                 ]}
                 onPress={() => {
                   /* TODO: handle actual account deletion */ setShowModal(null);
@@ -457,13 +459,11 @@ export default function ManageAccountSection(): JSX.Element {
               <Pressable
                 style={[
                   styles.addTravelerButton,
-                  { backgroundColor: Colors.dark.card, flex: 1 },
+                  { backgroundColor: colors.card, flex: 1 },
                 ]}
                 onPress={() => setShowModal(null)}
               >
-                <Text
-                  style={[styles.sectionItemText, { color: Colors.dark.text }]}
-                >
+                <Text style={[styles.sectionItemText, { color: colors.text }]}>
                   Cancel
                 </Text>
               </Pressable>
@@ -506,7 +506,7 @@ export default function ManageAccountSection(): JSX.Element {
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
           <Text style={styles.headerText}>{getModalHeaderTitle()}</Text>
         </View>
@@ -521,11 +521,7 @@ export default function ManageAccountSection(): JSX.Element {
         <AccountItem
           key={title}
           icon={
-            <Ionicons
-              name={itemIcons[title]}
-              size={20}
-              color={Colors.dark.icon}
-            />
+            <Ionicons name={itemIcons[title]} size={20} color={colors.icon} />
           }
           title={title}
           onPress={() => setShowModal(title)}

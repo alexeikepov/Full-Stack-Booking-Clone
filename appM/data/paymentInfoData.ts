@@ -15,8 +15,7 @@ export const faqs: FAQItem[] = [
       "It helps you keep track of your rewards, spend them easily, and get the most out of your bookings.",
   },
   {
-    question:
-      "What's the difference between the Genius loyalty program and Rewards & Wallet?",
+    question: "What's the difference between the 4e and Rewards & Wallet?",
     answer:
       "Genius is a loyalty program with exclusive discounts, while Rewards & Wallet is where you manage and spend your earned credits and vouchers.",
   },

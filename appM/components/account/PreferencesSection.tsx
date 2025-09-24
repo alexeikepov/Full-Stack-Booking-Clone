@@ -1,13 +1,13 @@
 // path: src/components/account/PreferencesSection.tsx
 import { JSX, useEffect, useState } from "react";
 import {
+  Animated,
   BackHandler,
   Linking,
   Modal,
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Switch,
   Text,
   TextStyle,
@@ -20,6 +20,7 @@ import {
 } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
+import { useTheme } from "../../hooks/ThemeContext";
 import AccountItem from "./AccountItem";
 import AccountSection from "./AccountSection";
 
@@ -37,19 +38,30 @@ interface Style {
   switchContainer: ViewStyle;
 }
 
-const styles = StyleSheet.create<Style>({
-  fullPage: { flex: 1, backgroundColor: Colors.dark.background },
+const createStyles = (colors: typeof Colors.light): Style => ({
+  fullPage: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.dark.card,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.separator,
   },
-  backButton: { paddingRight: 10 },
-  headerText: { fontSize: 20, fontWeight: "bold", color: Colors.dark.text },
+  headerText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.text,
+    marginLeft: 16,
+  },
+  backButton: {
+    padding: 8,
+  },
   section: {
-    backgroundColor: Colors.dark.card,
+    backgroundColor: colors.card,
     borderRadius: 12,
     marginHorizontal: 16,
     marginTop: 20,
@@ -57,10 +69,10 @@ const styles = StyleSheet.create<Style>({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: Colors.dark.text,
+    color: colors.text,
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.separator,
+    borderBottomColor: colors.separator,
   },
   sectionItem: {
     flexDirection: "row",
@@ -68,26 +80,28 @@ const styles = StyleSheet.create<Style>({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.separator,
+    borderBottomColor: colors.separator,
   },
-  sectionItemText: { fontSize: 16, color: Colors.dark.text },
+  sectionItemText: { fontSize: 16, color: colors.text },
   sectionItemSubText: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
+    color: colors.textSecondary,
     marginTop: 4,
   },
-  sectionItemValue: { fontSize: 16, color: Colors.dark.textSecondary },
+  sectionItemValue: { fontSize: 16, color: colors.textSecondary },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.separator,
+    borderBottomColor: colors.separator,
   },
 });
 
 export default function PreferencesSection(): JSX.Element {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [showModal, setShowModal] = useState<string | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [accessibilityChoice, setAccessibilityChoice] = useState<
@@ -98,6 +112,7 @@ export default function PreferencesSection(): JSX.Element {
   const [currencyChoice, setCurrencyChoice] = useState("Euro (€)");
   const [unitsChoice, setUnitsChoice] = useState("Metric (km, m²)");
   const [temperatureChoice, setTemperatureChoice] = useState("Celsius");
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -112,32 +127,86 @@ export default function PreferencesSection(): JSX.Element {
     };
   }, [showModal, showAccessibilityModal, showSavedModal]);
 
-  useEffect(() => {
-    if (showModal === "Travel preferences") setShowAccessibilityModal(true);
-  }, [showModal]);
-
   const items = [
     {
       title: "Device preferences",
-      icon: (
-        <Ionicons name="settings-outline" size={20} color={Colors.dark.icon} />
-      ),
+      icon: <Ionicons name="settings-outline" size={20} color={colors.icon} />,
     },
     {
       title: "Travel preferences",
-      icon: (
-        <Ionicons name="options-outline" size={20} color={Colors.dark.icon} />
-      ),
+      icon: <Ionicons name="options-outline" size={20} color={colors.icon} />,
     },
     {
       title: "Email preferences",
-      icon: <Ionicons name="mail-outline" size={20} color={Colors.dark.icon} />,
+      icon: <Ionicons name="mail-outline" size={20} color={colors.icon} />,
     },
   ];
 
   const currencyOptions = ["Euro (€)", "USD ($)", "GBP (£)", "JPY (¥)"];
   const unitsOptions = ["Metric (km, m²)", "Imperial (mi, ft²)"];
   const temperatureOptions = ["Celsius", "Fahrenheit"];
+
+  const toggleSection = (sectionName: string) => {
+    setExpandedSection(expandedSection === sectionName ? null : sectionName);
+  };
+
+  const renderCollapsibleSection = (
+    title: string,
+    options: string[],
+    currentChoice: string,
+    onSelect: (option: string) => void,
+    sectionKey: string,
+  ) => {
+    const isExpanded = expandedSection === sectionKey;
+
+    return (
+      <View style={styles.section}>
+        {/* Header row */}
+        <Pressable
+          style={styles.sectionItem}
+          onPress={() => toggleSection(sectionKey)}
+        >
+          <Text style={styles.sectionItemText}>{title}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.sectionItemValue}>{currentChoice}</Text>
+            <Ionicons
+              name={isExpanded ? "chevron-up" : "chevron-down"}
+              size={20}
+              color={colors.icon}
+              style={{ marginLeft: 8 }}
+            />
+          </View>
+        </Pressable>
+
+        {/* Expandable options */}
+        {isExpanded && (
+          <Animated.View>
+            {options.map((option, index) => (
+              <Pressable
+                key={option}
+                style={[
+                  styles.sectionItem,
+                  {
+                    paddingLeft: 32,
+                    borderBottomWidth: index === options.length - 1 ? 0 : 1,
+                  },
+                ]}
+                onPress={() => {
+                  onSelect(option);
+                  setExpandedSection(null);
+                }}
+              >
+                <Text style={styles.sectionItemText}>{option}</Text>
+                {option === currentChoice && (
+                  <Ionicons name="checkmark" size={20} color={colors.blue} />
+                )}
+              </Pressable>
+            ))}
+          </Animated.View>
+        )}
+      </View>
+    );
+  };
 
   const getModalContent = () => {
     switch (showModal) {
@@ -154,89 +223,54 @@ export default function PreferencesSection(): JSX.Element {
                 style={styles.sectionItem}
                 onPress={() => Linking.openSettings()}
               >
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.sectionItemText}>Language</Text>
                   <Text style={styles.sectionItemSubText}>
                     This will take you to your system settings
                   </Text>
-                </View>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={styles.sectionItemValue}>
+                  <Text style={[styles.sectionItemValue, { marginTop: 8 }]}>
                     English (United States)
                   </Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={24}
-                    color={Colors.dark.icon}
-                  />
                 </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={colors.icon}
+                />
               </Pressable>
 
               {/* Currency */}
-              <View style={styles.section}>
-                {currencyOptions.map((option) => (
-                  <Pressable
-                    key={option}
-                    style={styles.sectionItem}
-                    onPress={() => setCurrencyChoice(option)}
-                  >
-                    <Text style={styles.sectionItemText}>Currency</Text>
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Text style={styles.sectionItemValue}>
-                        {option === currencyChoice ? `✔ ${option}` : option}
-                      </Text>
-                    </View>
-                  </Pressable>
-                ))}
-              </View>
+              {renderCollapsibleSection(
+                "Currency",
+                currencyOptions,
+                currencyChoice,
+                setCurrencyChoice,
+                "currency",
+              )}
 
               {/* Units */}
-              <View style={styles.section}>
-                {unitsOptions.map((option) => (
-                  <Pressable
-                    key={option}
-                    style={styles.sectionItem}
-                    onPress={() => setUnitsChoice(option)}
-                  >
-                    <Text style={styles.sectionItemText}>Units</Text>
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Text style={styles.sectionItemValue}>
-                        {option === unitsChoice ? `✔ ${option}` : option}
-                      </Text>
-                    </View>
-                  </Pressable>
-                ))}
-              </View>
+              {renderCollapsibleSection(
+                "Units",
+                unitsOptions,
+                unitsChoice,
+                setUnitsChoice,
+                "units",
+              )}
 
               {/* Temperature */}
-              <View style={styles.section}>
-                {temperatureOptions.map((option) => (
-                  <Pressable
-                    key={option}
-                    style={styles.sectionItem}
-                    onPress={() => setTemperatureChoice(option)}
-                  >
-                    <Text style={styles.sectionItemText}>Temperature</Text>
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Text style={styles.sectionItemValue}>
-                        {option === temperatureChoice ? `✔ ${option}` : option}
-                      </Text>
-                    </View>
-                  </Pressable>
-                ))}
-              </View>
+              {renderCollapsibleSection(
+                "Temperature",
+                temperatureOptions,
+                temperatureChoice,
+                setTemperatureChoice,
+                "temperature",
+              )}
 
               {/* Notifications */}
               <View style={styles.switchContainer}>
                 <Text style={styles.sectionItemText}>Notifications</Text>
                 <Switch
-                  trackColor={{ false: "#767577", true: "#34C759" }}
+                  trackColor={{ false: colors.gray, true: colors.green }}
                   thumbColor={notificationsEnabled ? "#f4f3f4" : "#f4f3f4"}
                   onValueChange={() =>
                     setNotificationsEnabled(!notificationsEnabled)
@@ -275,10 +309,52 @@ export default function PreferencesSection(): JSX.Element {
                   <Ionicons
                     name="chevron-forward"
                     size={24}
-                    color={Colors.dark.icon}
+                    color={colors.icon}
                   />
                 </Pressable>
               ))}
+            </View>
+          </ScrollView>
+        );
+
+      case "Travel preferences":
+        return (
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+          >
+            <View style={styles.section}>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  { borderBottomWidth: 0, paddingBottom: 8 },
+                ]}
+              >
+                We will remember this info to make it faster when you book.
+              </Text>
+
+              <Pressable
+                style={styles.sectionItem}
+                onPress={() => {
+                  setShowModal(null);
+                  setShowAccessibilityModal(true);
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.sectionItemText}>
+                    Accessibility requirements
+                  </Text>
+                  <Text style={styles.sectionItemSubText}>
+                    {accessibilityChoice === "all"
+                      ? "Show all properties"
+                      : "Only show accessible properties"}
+                  </Text>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={colors.icon}
+                />
+              </Pressable>
             </View>
           </ScrollView>
         );
@@ -314,7 +390,7 @@ export default function PreferencesSection(): JSX.Element {
             style={styles.backButton}
             accessibilityLabel="Back"
           >
-            <Ionicons name="chevron-back" size={24} color={Colors.dark.text} />
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </Pressable>
           <Text style={styles.headerText}>{getModalHeaderTitle()}</Text>
         </View>
@@ -327,67 +403,115 @@ export default function PreferencesSection(): JSX.Element {
     <Modal
       visible={showAccessibilityModal}
       animationType="slide"
-      transparent
-      presentationStyle="overFullScreen"
+      transparent={false}
+      presentationStyle="fullScreen"
       onRequestClose={() => setShowAccessibilityModal(false)}
     >
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "flex-end",
-          backgroundColor: "rgba(0,0,0,0.5)",
-        }}
-      >
+      <SafeAreaView style={[styles.fullPage, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => setShowAccessibilityModal(false)}
+            style={styles.backButton}
+            accessibilityLabel="Back"
+          >
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
+          </Pressable>
+          <Text style={styles.headerText}>Preferences</Text>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        >
+          <View style={styles.section}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { borderBottomWidth: 0, paddingBottom: 8 },
+              ]}
+            >
+              We&apos;ll remember this info to make it faster when you book.
+            </Text>
+
+            <View
+              style={[
+                styles.sectionItem,
+                { borderBottomWidth: 0, paddingBottom: 24 },
+              ]}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={styles.sectionItemText}>
+                  Accessibility requirements
+                </Text>
+                <Text style={styles.sectionItemSubText}>
+                  {accessibilityChoice === "all"
+                    ? "Show all properties"
+                    : "Only show accessible properties"}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Bottom sheet style accessibility selector */}
         <View
           style={{
-            backgroundColor: Colors.dark.card,
-            padding: 20,
+            backgroundColor: colors.card,
             borderTopLeftRadius: 12,
             borderTopRightRadius: 12,
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: insets.bottom + 20,
           }}
         >
           <Text
             style={{
               fontSize: 18,
               fontWeight: "bold",
-              color: Colors.dark.text,
+              color: colors.text,
               marginBottom: 20,
             }}
           >
-            Select accessibility preference
+            Accessibility requirements
           </Text>
-          {["all", "accessible"].map((option) => (
+
+          {[
+            { key: "all", label: "Show all properties" },
+            { key: "accessible", label: "Only show accessible properties" },
+          ].map((option) => (
             <Pressable
-              key={option}
+              key={option.key}
               style={{
                 padding: 16,
                 flexDirection: "row",
                 alignItems: "center",
               }}
               onPress={() =>
-                setAccessibilityChoice(option as "all" | "accessible")
+                setAccessibilityChoice(option.key as "all" | "accessible")
               }
             >
               <Ionicons
                 name={
-                  accessibilityChoice === option
+                  accessibilityChoice === option.key
                     ? "radio-button-on"
                     : "radio-button-off"
                 }
                 size={24}
-                color={Colors.dark.icon}
+                color={
+                  accessibilityChoice === option.key ? colors.blue : colors.icon
+                }
               />
-              <Text style={{ color: Colors.dark.text, marginLeft: 12 }}>
-                {option === "all"
-                  ? "Show all properties"
-                  : "Only show accessible properties"}
+              <Text
+                style={{ color: colors.text, marginLeft: 12, fontSize: 16 }}
+              >
+                {option.label}
               </Text>
             </Pressable>
           ))}
+
           <Pressable
             style={{
               marginTop: 20,
-              backgroundColor: "#007AFF",
+              backgroundColor: colors.blue,
               borderRadius: 8,
               paddingVertical: 16,
               alignItems: "center",
@@ -397,10 +521,12 @@ export default function PreferencesSection(): JSX.Element {
               setShowSavedModal(true);
             }}
           >
-            <Text style={{ color: "white", fontSize: 16 }}>Save</Text>
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+              Save
+            </Text>
           </Pressable>
         </View>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 
@@ -422,35 +548,58 @@ export default function PreferencesSection(): JSX.Element {
       >
         <View
           style={{
-            backgroundColor: Colors.dark.card,
-            padding: 30,
+            backgroundColor: colors.card,
             borderRadius: 12,
+            padding: 32,
             alignItems: "center",
+            maxWidth: 280,
+            margin: 20,
           }}
         >
+          <Ionicons
+            name="checkmark-circle"
+            size={60}
+            color={colors.blue}
+            style={{ marginBottom: 16 }}
+          />
           <Text
             style={{
               fontSize: 18,
               fontWeight: "bold",
-              color: Colors.dark.text,
+              color: colors.text,
+              textAlign: "center",
+              marginBottom: 8,
             }}
           >
-            Saved
+            Preferences saved
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.textSecondary,
+              textAlign: "center",
+              marginBottom: 24,
+            }}
+          >
+            Your accessibility preferences have been updated
           </Text>
           <Pressable
             style={{
-              marginTop: 20,
-              backgroundColor: "#007AFF",
+              backgroundColor: colors.blue,
               borderRadius: 8,
               paddingVertical: 12,
-              paddingHorizontal: 30,
+              paddingHorizontal: 24,
+              alignItems: "center",
             }}
             onPress={() => {
               setShowSavedModal(false);
-              setShowModal("Travel preferences");
+              setShowModal(null);
+              setShowAccessibilityModal(false);
             }}
           >
-            <Text style={{ color: "white" }}>OK</Text>
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+              OK
+            </Text>
           </Pressable>
         </View>
       </View>

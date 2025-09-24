@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MdBed, MdBathtub, MdSquare, MdGroup } from "react-icons/md";
+import { MdBed, MdBathtub, MdSquare } from "react-icons/md";
 
 interface RoomOption {
   _id: { $oid: string };
@@ -31,7 +31,7 @@ interface RoomSelectionProps {
 
 export default function RoomSelection({ rooms }: RoomSelectionProps) {
   const [selectedRooms, setSelectedRooms] = useState<Record<string, number>>(
-    {}
+    {},
   );
 
   const handleRoomSelect = (roomId: string, count: number) => {
@@ -95,7 +95,7 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
 
                     {/* Recommendation banner */}
                     <div className="bg-green-100 text-green-800 px-3 py-1 rounded text-sm font-medium">
-                      Recommended for {room.maxAdults} adults,{" "}
+                      Recommended for {room.maxAdults} adults,
                       {room.maxChildren} children
                     </div>
 
@@ -156,7 +156,7 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
                           <span key={i} className="inline-block mr-1">
                             👤
                           </span>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
@@ -196,17 +196,17 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
                   <div className="flex items-center gap-2">
                     <select
                       value={selectedRooms[room._id.$oid] || 0}
-                      onChange={(e) =>
+                      onChange={(e: { target: { value: string } }) =>
                         handleRoomSelect(
                           room._id.$oid,
-                          parseInt(e.target.value)
+                          parseInt(e.target.value),
                         )
                       }
                       className="border border-gray-300 rounded px-2 py-1 text-sm"
                     >
                       {Array.from(
                         { length: (room.availableRooms || 0) + 1 },
-                        (_, i) => i
+                        (_, i) => i,
                       ).map((num) => (
                         <option key={num} value={num}>
                           {num}
