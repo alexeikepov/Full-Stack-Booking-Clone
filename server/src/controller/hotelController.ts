@@ -17,6 +17,36 @@ const roomSchema = z.object({
   availableRooms: z.number().int().nonnegative().optional(),
 });
 
+const surroundingsSchema = z.object({
+  nearbyAttractions: z.array(z.object({
+    name: z.string(),
+    distance: z.string(),
+  })).optional(),
+  topAttractions: z.array(z.object({
+    name: z.string(),
+    distance: z.string(),
+  })).optional(),
+  restaurantsCafes: z.array(z.object({
+    name: z.string(),
+    type: z.string(),
+    distance: z.string(),
+  })).optional(),
+  naturalBeauty: z.array(z.object({
+    name: z.string(),
+    type: z.string(),
+    distance: z.string(),
+  })).optional(),
+  publicTransport: z.array(z.object({
+    name: z.string(),
+    type: z.string(),
+    distance: z.string(),
+  })).optional(),
+  closestAirports: z.array(z.object({
+    name: z.string(),
+    distance: z.string(),
+  })).optional(),
+});
+
 const createHotelSchema = z.object({
   name: z.string().min(2),
   city: z.string().min(2),
@@ -32,6 +62,7 @@ const createHotelSchema = z.object({
   images: z.array(z.string()).optional(),
   categories: z.array(z.string()).optional(),
   rooms: z.array(roomSchema).min(1),
+  surroundings: surroundingsSchema.optional(),
 });
 
 const updateHotelSchema = createHotelSchema.partial();
@@ -124,6 +155,7 @@ export async function createHotel(
       categories: dto.categories,
       media: dto.images?.map((src) => ({ src })) ?? [],
       rooms: normalizedRooms,
+      surroundings: dto.surroundings,
       ownerId: req.user?.id,
     });
 

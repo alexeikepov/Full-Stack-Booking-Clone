@@ -21,6 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, Building2, MapPin, Star, Users } from "lucide-react";
+import SurroundingsSection from "@/components/ui/SurroundingsSection";
 
 interface Hotel {
   id?: number;
@@ -102,10 +103,18 @@ export default function AddHotelDialog({
       phone: "",
       email: "",
     },
+    surroundings: {
+      nearbyAttractions: [],
+      topAttractions: [],
+      restaurantsCafes: [],
+      naturalBeauty: [],
+      publicTransport: [],
+      closestAirports: [],
+    },
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,6 +139,14 @@ export default function AddHotelDialog({
         phone: "",
         email: "",
       },
+      surroundings: {
+        nearbyAttractions: [],
+        topAttractions: [],
+        restaurantsCafes: [],
+        naturalBeauty: [],
+        publicTransport: [],
+        closestAirports: [],
+      },
     });
     setCurrentStep(1);
     onClose();
@@ -148,6 +165,23 @@ export default function AddHotelDialog({
       contactInfo: {
         ...prev.contactInfo,
         [field]: value,
+      },
+    }));
+  };
+
+  const handleSurroundingsChange = (
+    field: string,
+    items: Array<{
+      name: string;
+      distance: string;
+      type?: string;
+    }>
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      surroundings: {
+        ...prev.surroundings,
+        [field]: items,
       },
     }));
   };
@@ -191,6 +225,8 @@ export default function AddHotelDialog({
       case 3:
         return formData.description;
       case 4:
+        return true;
+      case 5:
         return true;
       default:
         return false;
@@ -407,6 +443,68 @@ export default function AddHotelDialog({
           </div>
         );
 
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="text-sm font-medium">Hotel Surroundings</div>
+            <div className="space-y-6">
+              <SurroundingsSection
+                title="What's nearby"
+                items={formData.surroundings?.nearbyAttractions || []}
+                onUpdate={(items) =>
+                  handleSurroundingsChange("nearbyAttractions", items)
+                }
+                hasType={false}
+              />
+
+              <SurroundingsSection
+                title="Top attractions"
+                items={formData.surroundings?.topAttractions || []}
+                onUpdate={(items) =>
+                  handleSurroundingsChange("topAttractions", items)
+                }
+                hasType={false}
+              />
+
+              <SurroundingsSection
+                title="Restaurants & Cafes"
+                items={formData.surroundings?.restaurantsCafes || []}
+                onUpdate={(items) =>
+                  handleSurroundingsChange("restaurantsCafes", items)
+                }
+                hasType={true}
+              />
+
+              <SurroundingsSection
+                title="Natural beauty"
+                items={formData.surroundings?.naturalBeauty || []}
+                onUpdate={(items) =>
+                  handleSurroundingsChange("naturalBeauty", items)
+                }
+                hasType={true}
+              />
+
+              <SurroundingsSection
+                title="Public transport"
+                items={formData.surroundings?.publicTransport || []}
+                onUpdate={(items) =>
+                  handleSurroundingsChange("publicTransport", items)
+                }
+                hasType={true}
+              />
+
+              <SurroundingsSection
+                title="Closest airports"
+                items={formData.surroundings?.closestAirports || []}
+                onUpdate={(items) =>
+                  handleSurroundingsChange("closestAirports", items)
+                }
+                hasType={false}
+              />
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -422,6 +520,8 @@ export default function AddHotelDialog({
         return "Description";
       case 4:
         return "Amenities and Services";
+      case 5:
+        return "Hotel Surroundings";
       default:
         return "";
     }
