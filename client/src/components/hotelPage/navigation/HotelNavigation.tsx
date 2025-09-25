@@ -6,13 +6,10 @@ interface HotelNavigationProps {
 const navItems = [
   { id: "overview", label: "Overview" },
   { id: "info", label: "Info & prices" },
-  { id: "activity", label: "Activity" },
   { id: "facilities", label: "Facilities" },
   { id: "house-rules", label: "House rules" },
   { id: "fine-print", label: "The fine print" },
   { id: "reviews", label: "Guest reviews" },
-  { id: "travellers-asking", label: "Travellers are asking" },
-  { id: "hotel-surroundings", label: "Hotel surroundings" },
 ];
 
 export default function HotelNavigation({

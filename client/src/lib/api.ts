@@ -7,15 +7,19 @@ export type CreateReviewData = {
   negative?: string;
   guestName: string;
   guestCountry: string;
+  guestInitial: string;
   categoryRatings?: {
     staff?: number;
     comfort?: number;
+    freeWifi?: number;
     facilities?: number;
-    location?: number;
+    valueForMoney?: number;
     cleanliness?: number;
-    value?: number;
+    location?: number;
   };
   travelType?: string;
+  stayDate?: string;
+  roomType?: string;
   photos?: string[];
   helpful?: number;
   verified?: boolean;

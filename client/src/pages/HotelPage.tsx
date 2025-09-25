@@ -9,11 +9,10 @@ import HotelGallery from "@/components/hotelPage/gallery/HotelGallery";
 import HotelOverview from "@/components/hotelPage/overview/HotelOverview";
 import HotelInfoPrices from "@/components/hotelPage/info/HotelInfoPrices";
 import GuestReviews from "@/components/hotelPage/reviews/GuestReviews";
-import TravellersAsking from "@/components/hotelPage/reviews/TravellersAsking";
-import HotelSurroundings from "@/components/hotelPage/surroundings/HotelSurroundings";
 import HotelFacilities from "@/components/hotelPage/facilities/HotelFacilities";
 import HouseRules from "@/components/hotelPage/rules/HouseRules";
 import FinePrint from "@/components/hotelPage/rules/FinePrint";
+import FullscreenMapModal from "@/components/hotelPage/gallery/FullscreenMapModal";
 import Footer from "@/components/Footer";
 import { useNavigationStore } from "@/stores/navigation";
 import { useSearchStore } from "@/stores/search";
@@ -22,6 +21,7 @@ export default function HotelPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState("overview");
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const { setActiveTab } = useNavigationStore();
   const { picker, setSearchParams } = useSearchStore();
 
@@ -87,7 +87,7 @@ export default function HotelPage() {
     },
     enabled: Boolean(id),
     refetchOnWindowFocus: false,
-    staleTime: 0, // Always refetch when query key changes
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   if (isLoading) {
@@ -205,21 +205,26 @@ export default function HotelPage() {
         />
       </div>
 
-      <HotelHeader hotel={hotel} />
+      <HotelHeader hotel={hotel} onShowMap={() => setIsMapModalOpen(true)} />
       <HotelGallery hotel={hotel} />
 
       <div className="space-y-10">
         <HotelOverview hotel={hotel} />
         <HotelInfoPrices hotel={hotel} isLoading={isLoading} />
         <GuestReviews hotel={hotel} />
-        <TravellersAsking hotelId={hotel.id} />
-        <HotelSurroundings hotelId={hotel.id} />
         <HotelFacilities hotelId={hotel.id} />
         <HouseRules hotelId={hotel.id} />
         <FinePrint hotelName={hotel.name} />
       </div>
 
       <Footer />
+
+      {/* Fullscreen Map Modal */}
+      <FullscreenMapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        hotel={hotel}
+      />
     </div>
   );
 }

@@ -18,33 +18,57 @@ const roomSchema = z.object({
 });
 
 const surroundingsSchema = z.object({
-  nearbyAttractions: z.array(z.object({
-    name: z.string(),
-    distance: z.string(),
-  })).optional(),
-  topAttractions: z.array(z.object({
-    name: z.string(),
-    distance: z.string(),
-  })).optional(),
-  restaurantsCafes: z.array(z.object({
-    name: z.string(),
-    type: z.string(),
-    distance: z.string(),
-  })).optional(),
-  naturalBeauty: z.array(z.object({
-    name: z.string(),
-    type: z.string(),
-    distance: z.string(),
-  })).optional(),
-  publicTransport: z.array(z.object({
-    name: z.string(),
-    type: z.string(),
-    distance: z.string(),
-  })).optional(),
-  closestAirports: z.array(z.object({
-    name: z.string(),
-    distance: z.string(),
-  })).optional(),
+  nearbyAttractions: z
+    .array(
+      z.object({
+        name: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  topAttractions: z
+    .array(
+      z.object({
+        name: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  restaurantsCafes: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  naturalBeauty: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  publicTransport: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  closestAirports: z
+    .array(
+      z.object({
+        name: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
 });
 
 const createHotelSchema = z.object({
@@ -153,7 +177,7 @@ export async function createHotel(
       location: loc,
       description: dto.description,
       categories: dto.categories,
-      media: dto.images?.map((src) => ({ src })) ?? [],
+      media: dto.images?.map((src) => ({ url: src, type: "image" })) ?? [],
       rooms: normalizedRooms,
       surroundings: dto.surroundings,
       ownerId: req.user?.id,
@@ -1006,18 +1030,23 @@ export async function createReview(
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
+    console.log(`createReview: hotelId=${hotelId}, userId=${userId}`);
+
     const dto = reviewCreateSchema.parse(req.body);
 
     const exists = await ReviewModel.findOne({
       hotel: hotelId,
       user: userId,
     }).lean();
+
+    console.log("Existing review found:", exists);
+
     if (exists)
       return res
         .status(409)
         .json({ error: "User already reviewed this hotel" });
 
-    const review = await ReviewModel.create({
+    console.log("Creating review with data:", {
       hotel: hotelId,
       user: userId,
       rating: dto.rating,
@@ -1032,10 +1061,36 @@ export async function createReview(
       travelType: dto.travelType,
     });
 
+    const review = await ReviewModel.findOneAndUpdate(
+      { hotel: hotelId, user: userId },
+      {
+        hotel: hotelId,
+        user: userId,
+        rating: dto.rating,
+        comment: dto.comment,
+        negative: dto.negative,
+        guestName: dto.guestName,
+        guestCountry: dto.guestCountry,
+        guestInitial: dto.guestInitial,
+        categoryRatings: dto.categoryRatings,
+        stayDate: dto.stayDate ? new Date(dto.stayDate) : undefined,
+        roomType: dto.roomType,
+        travelType: dto.travelType,
+        status: "APPROVED",
+      },
+      { upsert: true, new: true }
+    );
+
+    console.log("Review created/updated successfully:", review);
+
     await recomputeHotelRating(hotelId);
     res.status(201).json(review);
   } catch (err) {
+    console.error("createReview error:", err);
     if ((err as any)?.code === 11000) {
+      console.log(
+        "MongoDB duplicate key error - user already reviewed this hotel"
+      );
       return res
         .status(409)
         .json({ error: "User already reviewed this hotel" });
@@ -1056,18 +1111,26 @@ export async function updateMyReview(
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
+    console.log(`updateMyReview: hotelId=${hotelId}, userId=${userId}`);
+    console.log("Request body:", req.body);
+
     const dto = reviewUpdateSchema.parse(req.body);
+    console.log("Parsed DTO:", dto);
 
     const review = await ReviewModel.findOneAndUpdate(
       { hotel: hotelId, user: userId },
       { $set: { ...dto } },
       { new: true }
     );
+
+    console.log("Found review:", review);
+
     if (!review) return res.status(404).json({ error: "Review not found" });
 
     await recomputeHotelRating(hotelId);
     res.json(review);
   } catch (err) {
+    console.error("updateMyReview error:", err);
     next(err);
   }
 }
