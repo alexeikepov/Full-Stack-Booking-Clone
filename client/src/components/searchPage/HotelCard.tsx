@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import WishlistDialog from "@/components/ui/WishlistDialog";
 import { useAuth } from "@/context/AuthContext";
+import { getPrimaryImage } from "@/utils/hotel-images";
 
 const fmt = (n: number, currency = "ILS") =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency }).format(n);
@@ -54,22 +55,6 @@ function getRatingLabel(hotel: Hotel, ratingStr: string) {
   if (n >= 8) return "Very good";
   if (n >= 7) return "Good";
   return "Review";
-}
-
-function getPrimaryImage(hotel: Hotel): string {
-  const hotelImage: string | undefined =
-    (hotel.media?.find((m: any) => m?.url)?.url as string | undefined) ??
-    (hotel.media?.[0]?.url as string | undefined);
-  if (hotelImage) return hotelImage;
-
-  for (const r of hotel.rooms ?? []) {
-    const roomImg =
-      (r.media?.find((m: any) => m?.url)?.url as string | undefined) ??
-      (r.media?.[0]?.url as string | undefined) ??
-      r.photos?.[0];
-    if (roomImg) return roomImg;
-  }
-  return "/placeholder-hotel.svg";
 }
 
 function starsRow(stars?: number | null) {
@@ -405,7 +390,7 @@ export default function HotelCard({
             </div>
 
             <Link
-              to={buildHotelUrl(hotelId)}
+              to="/coming-soon"
               className="inline-flex items-center rounded-md bg-[#0071c2] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-[#005fa3] focus:outline-none focus:ring-0"
             >
               See availability

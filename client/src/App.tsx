@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import { CartSheet } from "@/components/CartSheet";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import ScrollToTop from "@/components/ScrollToTop";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { Outlet, useLocation } from "react-router-dom";
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
       </main>
       <CartSheet />
       <ConfirmModal />
+      <ScrollToTopButton />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelById } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 interface TravellersAskingProps {
   hotelId?: string;
@@ -13,6 +14,7 @@ export default function TravellersAsking({ hotelId }: TravellersAskingProps) {
     enabled: Boolean(hotelId),
     staleTime: 5 * 60 * 1000,
   });
+  const navigate = useNavigate();
 
   type QA = { question: string; answer?: string };
   const allQAs: QA[] = Array.isArray(hotel?.travellersQuestions)
@@ -39,8 +41,7 @@ export default function TravellersAsking({ hotelId }: TravellersAskingProps) {
   };
 
   const handleSeeAvailability = () => {
-    // TODO: Navigate to booking or show availability
-    console.log("See availability clicked");
+    navigate("/coming-soon");
   };
 
   const handleAskQuestion = () => {

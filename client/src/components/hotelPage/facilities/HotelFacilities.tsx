@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelById } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 import {
   Leaf,
   Users,
@@ -22,10 +23,10 @@ export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
     enabled: Boolean(hotelId),
     staleTime: 5 * 60 * 1000,
   });
+  const navigate = useNavigate();
 
   const handleSeeAvailability = () => {
-    // TODO: Navigate to booking or show availability
-    console.log("See availability clicked");
+    navigate("/coming-soon");
   };
 
   const handleFacilityClick = (facility: string) => {

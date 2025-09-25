@@ -121,7 +121,12 @@ export default function PartnerRegisterPage() {
       const fullName = `${firstName} ${lastName}`.trim();
       const cleanEmail = email.trim();
       const cleanPhone = `+972${String(phone).replace(/\D/g, "")}`;
-      const auth = await registerUser({ name: fullName, email: cleanEmail, phone: cleanPhone, password });
+      const auth = await registerUser({
+        name: fullName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        password,
+      });
       localStorage.setItem("auth_token", auth.token);
       localStorage.setItem("user", JSON.stringify(auth.user));
       await requestAdminRole();
@@ -234,7 +239,7 @@ export default function PartnerRegisterPage() {
 
               {/* Fixed: route to our admin sign-in page */}
               <Link
-                to="/owner/sign-in"
+                to="/admin-hotel/sign-in"
                 className="inline-flex h-[52px] w-full items-center justify-center rounded-[8px] border-2 border-[#0071c2] bg-white text-[18px] font-semibold text-[#0071c2] hover:bg-[#eaf3ff] active:bg-[#d7e8ff] focus:outline-none focus:ring-2 focus:ring-[#99c2e8]"
               >
                 Sign in

@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelById } from "@/lib/api";
 import { Utensils, User, Mountain, Star, Bus, Plane } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface HotelSurroundingsProps {
   hotelId?: string;
@@ -14,14 +15,15 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
     enabled: Boolean(hotelId),
     staleTime: 5 * 60 * 1000,
   });
+  const navigate = useNavigate();
+
   const handleShowMap = () => {
     // TODO: Implement map display
     console.log("Show map clicked");
   };
 
   const handleSeeAvailability = () => {
-    // TODO: Navigate to booking or show availability
-    console.log("See availability clicked");
+    navigate("/coming-soon");
   };
 
   const handleLocationClick = (location: string) => {
