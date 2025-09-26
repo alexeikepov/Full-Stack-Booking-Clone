@@ -21,6 +21,7 @@ import cron from "node-cron";
 import { ReservationModel } from "./src/models/Reservation";
 import searchHistoryRoutes from "./src/routes/searchHistory";
 import authRoutes from "./src/routes/auth";
+import friendRequestRoutes from "./src/routes/friendRequests";
 
 async function start() {
   const app = express();
@@ -61,6 +62,7 @@ async function start() {
   app.use("/api/admin-hotel", adminHotelRoutes);
   app.use("/api", trendingCitiesRoutes);
   app.use("/api", searchHistoryRoutes);
+  app.use("/api/friend-requests", friendRequestRoutes);
 
   // 404 + error handling
   app.use(notFound);

@@ -267,6 +267,11 @@ export default function AccountPage() {
               icon={<FileText className="h-4 w-4" />}
               label="My reviews"
             />
+            <Row
+              to="/account/friends"
+              icon={<Users className="h-4 w-4" />}
+              label="Friends"
+            />
           </Section>
 
           <Section title="Help and support">
