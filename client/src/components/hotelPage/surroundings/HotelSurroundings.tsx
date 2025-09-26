@@ -6,9 +6,13 @@ import { useNavigate } from "react-router-dom";
 
 interface HotelSurroundingsProps {
   hotelId?: string;
+  onShowMap?: () => void;
 }
 
-export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
+export default function HotelSurroundings({
+  hotelId,
+  onShowMap,
+}: HotelSurroundingsProps) {
   const { data: hotel } = useQuery({
     queryKey: ["hotel", hotelId],
     queryFn: () => getHotelById(String(hotelId)),
@@ -17,9 +21,34 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
   });
   const navigate = useNavigate();
 
+  // Check if hotel has any surroundings data
+  const hasSurroundingsData =
+    hotel?.surroundings &&
+    (hotel.surroundings.nearbyAttractions?.length > 0 ||
+      hotel.surroundings.topAttractions?.length > 0 ||
+      hotel.surroundings.restaurantsCafes?.length > 0 ||
+      hotel.surroundings.naturalBeauty?.length > 0 ||
+      hotel.surroundings.publicTransport?.length > 0 ||
+      hotel.surroundings.closestAirports?.length > 0);
+
+  // Don't render the component if there's no surroundings data
+  if (!hasSurroundingsData) {
+    return null;
+  }
+
   const handleShowMap = () => {
-    // TODO: Implement map display
-    console.log("Show map clicked");
+    if (onShowMap) {
+      onShowMap();
+    } else {
+      // Fallback to scroll behavior
+      const mapElement = document.getElementById("hotel-map");
+      if (mapElement) {
+        mapElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }
   };
 
   const handleSeeAvailability = () => {
@@ -41,12 +70,12 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
               Hotel surroundings
             </h2>
             <div className="flex items-center gap-2">
-              <p className="text-[#003b95] text-xs">
+              <p className="text-[#003b95] text-sm">
                 Guests loved walking around the neighbourhood!
               </p>
               <button
                 onClick={handleShowMap}
-                className="text-[#003b95] text-xs underline hover:no-underline"
+                className="text-[#003b95] text-sm underline hover:no-underline"
               >
                 Excellent location - show map
               </button>
@@ -65,44 +94,46 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
           {/* Left Column */}
           <div className="space-y-8">
             {/* What's nearby */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <User className="w-5 h-5 text-gray-600" />
-                <h3 className="text-sm font-bold text-gray-900">
-                  What's nearby
-                </h3>
+            {hotel?.surroundings?.nearbyAttractions?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <User className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-sm font-bold text-gray-900">
+                    What's nearby
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {hotel.surroundings.nearbyAttractions.map(
+                    (location, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleLocationClick(location.name)}
+                        className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                      >
+                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                          {location.name}
+                        </span>
+                        <span className="text-gray-600 text-xs">
+                          {location.distance}
+                        </span>
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
-              <div className="space-y-2">
-                {(hotel?.surroundings?.nearbyAttractions || []).map(
-                  (location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
-                        {location.name}
-                      </span>
-                      <span className="text-gray-600 text-xs">
-                        {location.distance}
-                      </span>
-                    </button>
-                  )
-                )}
-              </div>
-            </div>
+            )}
 
             {/* Top attractions */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Star className="w-5 h-5 text-gray-600" />
-                <h3 className="text-sm font-bold text-gray-900">
-                  Top attractions
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {(hotel?.surroundings?.topAttractions || []).map(
-                  (location, index) => (
+            {hotel?.surroundings?.topAttractions?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Star className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Top attractions
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {hotel.surroundings.topAttractions.map((location, index) => (
                     <button
                       key={index}
                       onClick={() => handleLocationClick(location.name)}
@@ -115,63 +146,65 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                         {location.distance}
                       </span>
                     </button>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Middle Column */}
           <div className="space-y-8">
             {/* Restaurants & cafes */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Utensils className="w-5 h-5 text-gray-600" />
-                <h3 className="text-sm font-bold text-gray-900">
-                  Restaurants & cafes
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {(hotel?.surroundings?.restaurantsCafes || []).map(
-                  (location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <div className="flex items-center">
-                        {location.type && (
-                          <>
-                            <span className="text-gray-500 text-xs">
-                              {location.type}
-                            </span>
-                            <span className="text-gray-400 mx-1">•</span>
-                          </>
-                        )}
-                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
-                          {location.name}
+            {hotel?.surroundings?.restaurantsCafes?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Utensils className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Restaurants & cafes
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {hotel.surroundings.restaurantsCafes.map(
+                    (location, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleLocationClick(location.name)}
+                        className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                      >
+                        <div className="flex items-center">
+                          {location.type && (
+                            <>
+                              <span className="text-gray-500 text-xs">
+                                {location.type}
+                              </span>
+                              <span className="text-gray-400 mx-1">•</span>
+                            </>
+                          )}
+                          <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                            {location.name}
+                          </span>
+                        </div>
+                        <span className="text-gray-600 text-xs">
+                          {location.distance}
                         </span>
-                      </div>
-                      <span className="text-gray-600 text-xs">
-                        {location.distance}
-                      </span>
-                    </button>
-                  )
-                )}
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Natural beauty */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Mountain className="w-5 h-5 text-gray-600" />
-                <h3 className="text-sm font-bold text-gray-900">
-                  Natural beauty
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {(hotel?.surroundings?.naturalBeauty || []).map(
-                  (location, index) => (
+            {hotel?.surroundings?.naturalBeauty?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Mountain className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Natural beauty
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {hotel.surroundings.naturalBeauty.map((location, index) => (
                     <button
                       key={index}
                       onClick={() => handleLocationClick(location.name)}
@@ -194,25 +227,25 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                         {location.distance}
                       </span>
                     </button>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column */}
           <div className="space-y-8">
             {/* Public transport */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Bus className="w-5 h-5 text-gray-600" />
-                <h3 className="text-sm font-bold text-gray-900">
-                  Public transport
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {(hotel?.surroundings?.publicTransport || []).map(
-                  (location, index) => (
+            {hotel?.surroundings?.publicTransport?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Bus className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Public transport
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {hotel.surroundings.publicTransport.map((location, index) => (
                     <button
                       key={index}
                       onClick={() => handleLocationClick(location.name)}
@@ -235,22 +268,22 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                         {location.distance}
                       </span>
                     </button>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Closest airports */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Plane className="w-5 h-5 text-gray-600" />
-                <h3 className="text-sm font-bold text-gray-900">
-                  Closest airports
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {(hotel?.surroundings?.closestAirports || []).map(
-                  (location, index) => (
+            {hotel?.surroundings?.closestAirports?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Plane className="w-5 h-5 text-gray-600" />
+                  <h3 className="text-sm font-bold text-gray-900">
+                    Closest airports
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {hotel.surroundings.closestAirports.map((location, index) => (
                     <button
                       key={index}
                       onClick={() => handleLocationClick(location.name)}
@@ -263,10 +296,10 @@ export default function HotelSurroundings({ hotelId }: HotelSurroundingsProps) {
                         {location.distance}
                       </span>
                     </button>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ import HotelOverview from "@/components/hotelPage/overview/HotelOverview";
 import HotelInfoPrices from "@/components/hotelPage/info/HotelInfoPrices";
 import GuestReviews from "@/components/hotelPage/reviews/GuestReviews";
 import HotelFacilities from "@/components/hotelPage/facilities/HotelFacilities";
+import HotelSurroundings from "@/components/hotelPage/surroundings/HotelSurroundings";
 import HouseRules from "@/components/hotelPage/rules/HouseRules";
 import FinePrint from "@/components/hotelPage/rules/FinePrint";
 import FullscreenMapModal from "@/components/hotelPage/gallery/FullscreenMapModal";
@@ -209,12 +210,30 @@ export default function HotelPage() {
       <HotelGallery hotel={hotel} />
 
       <div className="space-y-10">
-        <HotelOverview hotel={hotel} />
-        <HotelInfoPrices hotel={hotel} isLoading={isLoading} />
-        <GuestReviews hotel={hotel} />
-        <HotelFacilities hotelId={hotel.id} />
-        <HouseRules hotelId={hotel.id} />
-        <FinePrint hotelName={hotel.name} />
+        <div id="overview">
+          <HotelOverview hotel={hotel} />
+        </div>
+        <div id="info">
+          <HotelInfoPrices hotel={hotel} isLoading={isLoading} />
+        </div>
+        <div id="reviews">
+          <GuestReviews hotel={hotel} />
+        </div>
+        <div id="facilities">
+          <HotelFacilities hotelId={hotel.id} />
+        </div>
+        <div id="surroundings">
+          <HotelSurroundings
+            hotelId={hotel.id}
+            onShowMap={() => setIsMapModalOpen(true)}
+          />
+        </div>
+        <div id="house-rules">
+          <HouseRules hotelId={hotel.id} />
+        </div>
+        <div id="fine-print">
+          <FinePrint hotelName={hotel.name} />
+        </div>
       </div>
 
       <Footer />

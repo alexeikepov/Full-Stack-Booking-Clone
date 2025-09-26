@@ -7,6 +7,7 @@ const navItems = [
   { id: "overview", label: "Overview" },
   { id: "info", label: "Info & prices" },
   { id: "facilities", label: "Facilities" },
+  { id: "surroundings", label: "Surroundings" },
   { id: "house-rules", label: "House rules" },
   { id: "fine-print", label: "The fine print" },
   { id: "reviews", label: "Guest reviews" },
