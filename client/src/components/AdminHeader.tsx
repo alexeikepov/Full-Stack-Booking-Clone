@@ -76,9 +76,9 @@ export default function AdminHeader() {
       <div className="admin-header">
         <header className="page-header">
           <div className="wrap header-in">
-            <a href="/list-your-property" className="logo">
+            <Link to="/" className="logo">
               Booking.com
-            </a>
+            </Link>
             <nav className="header-nav">
               <LanguageSelector variant="header" />
 

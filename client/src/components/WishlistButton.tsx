@@ -49,12 +49,10 @@ export default function WishlistButton({
 
   const handleToggleWishlist = async () => {
     if (!user) {
-      // Redirect to login or show login modal
       return;
     }
 
     if (isInWishlist) {
-      // Remove from all wishlists
       try {
         setLoading(true);
         for (const wishlist of wishlists) {
@@ -68,7 +66,6 @@ export default function WishlistButton({
         setLoading(false);
       }
     } else {
-      // Show wishlist dialog
       setShowWishlistDialog(true);
     }
   };

@@ -15,6 +15,7 @@ import {
   Building2,
   ChevronRight,
   BriefcaseBusiness,
+  Unlock,
 } from "lucide-react";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 
@@ -33,9 +34,16 @@ export default function AccountPage() {
       try {
         setLoadingMe(true);
         const me = await getMe();
-        signIn({ id: me.id, name: me.name, email: me.email, genius: me.genius });
-      } catch {}
-      finally { setLoadingMe(false); }
+        signIn({
+          id: me.id,
+          name: me.name,
+          email: me.email,
+          genius: me.genius,
+        });
+      } catch {
+      } finally {
+        setLoadingMe(false);
+      }
     })();
   }, []);
   const { setShowTabs } = useNavigationTabsStore();
@@ -125,7 +133,7 @@ export default function AccountPage() {
                 <PerkTile
                   img={perkStays}
                   title="10–20% off stays"
-                  badge="Level 3"
+                  badge="Level 1"
                 />
                 <PerkTile
                   img={perkCars}
@@ -155,33 +163,22 @@ export default function AccountPage() {
             {/* Top right panel: Genius level */}
             <div className="rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,.06)] ring-1 ring-[#e6eaf0]">
               <div className="px-6 py-8">
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <img src={highestGenius} alt="" className="h-16 w-16 object-contain" />
-                  <div className="text-[16px] font-semibold">
-                    Genius Level {geniusLevel}
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src="https://t-cf.bstatic.com/design-assets/assets/v3.160.0/illustrations-traveller/GeniusAllBookingsStamp@2x.png"
+                      alt=""
+                      className="h-12 w-12 object-contain"
+                    />
+                    <div className="text-[16px] font-semibold text-black">
+                      You're 5 bookings away from Genius Level 2
+                    </div>
                   </div>
-                  {authUser?.genius?.nextThreshold ? (
-                    <>
-                      <div className="text-[13px] text-black/70">
-                        {authUser.genius.completedLast24Months} bookings in the last 24 months
-                      </div>
-                      <div className="w-full max-w-[220px]">
-                        <div className="h-2 w-full overflow-hidden rounded bg-[#eef2f7]">
-                          <div
-                            className="h-2 bg-[#003b95]"
-                            style={{ width: `${Math.min(100, Math.round((authUser.genius.completedLast24Months / (authUser.genius.nextThreshold || 1)) * 100))}%` }}
-                          />
-                        </div>
-                        <div className="mt-2 text-[12px] text-black/60">
-                          {authUser.genius.remaining} more to reach Level {geniusLevel + 1}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-[13px] text-black/70">You're at the highest Genius level</div>
-                  )}
-                  <Link to="/account/genius" className="mt-1 text-[13px] font-medium text-[#0071c2] hover:underline">
-                    View Genius details
+                  <Link
+                    to="/account/genius"
+                    className="inline-block bg-transparent text-[#0071c2] px-4 py-2 rounded-md text-[13px] font-medium hover:bg-[#e6f2ff] hover:text-[#0071c2] text-left"
+                  >
+                    Check your progress
                   </Link>
                 </div>
               </div>
@@ -347,7 +344,8 @@ function PerkTile({
       <img src={img} alt="" className="h-8 w-8 object-contain" />
       <div className="text-[14px] font-medium leading-5">{title}</div>
       {badge && (
-        <span className="absolute -top-2 left-2 rounded-full bg-[#fff3cd] px-2 py-[2px] text-[10px] font-semibold text-[#8a6d3b]">
+        <span className="absolute -top-2 left-2 rounded-full bg-[#fff3cd] px-2 py-[2px] text-[10px] font-semibold text-[#8a6d3b] flex items-center gap-1">
+          <Unlock className="h-3 w-3" />
           {badge}
         </span>
       )}

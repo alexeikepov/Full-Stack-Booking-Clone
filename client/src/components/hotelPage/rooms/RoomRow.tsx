@@ -35,10 +35,6 @@ export default function RoomRow({
   children,
   hotel,
 }: RoomRowProps) {
-  console.log(
-    `RoomRow ${index}: ${room.name}, isFirstOfType: ${isFirstOfType}`
-  );
-
   // Calculate required rooms based on current guests
   const calculateRequiredRooms = (adults: number, children: number) => {
     const totalGuests = adults + children;

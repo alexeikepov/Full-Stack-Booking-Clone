@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { api, getMyReviews } from "@/lib/api";
 import Footer from "@/components/Footer";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
+import { getPrimaryImage } from "@/utils/hotel-images";
 
 type Review = {
   id: string;
@@ -36,7 +37,7 @@ const DEMO: Review[] = [];
 
 export default function ReviewsTimelinePage() {
   const { setShowTabs } = useNavigationTabsStore();
-  const [year, setYear] = useState("2024");
+  const [year, setYear] = useState("2025");
   const [months, setMonths] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,10 +67,16 @@ export default function ReviewsTimelinePage() {
           });
           const stayed = it.stayDate || reviewed;
           const thumb = (() => {
+            // Use the hotel-images utility to get the primary image
+            if (it.hotel) {
+              return getPrimaryImage(it.hotel as any);
+            }
+            // Fallback to direct media access
             const m = it.hotel?.media || [];
             return m.find((x: any) => x?.url)?.url || m[0]?.url;
           })();
-          const hotelResponseText = it.hotelResponse?.text || it.response || it.reply || "";
+          const hotelResponseText =
+            it.hotelResponse?.text || it.response || it.reply || "";
           return {
             id: String(it._id),
             hotel: it.hotel?.name || "",
@@ -90,9 +97,13 @@ export default function ReviewsTimelinePage() {
         // months will be computed per selected year in a separate effect
         // Summary stats (fallback if server doesn't provide)
         const total = mapped.length;
-        const sum = mapped.reduce((s, r) => s + (Number.isFinite(r.score) ? r.score : 0), 0);
+        const sum = mapped.reduce(
+          (s, r) => s + (Number.isFinite(r.score) ? r.score : 0),
+          0
+        );
         setAvgScore(total ? sum / total : 0);
-        const byStatus = (st: string) => mapped.filter((r) => (r.status || "").toUpperCase() === st).length;
+        const byStatus = (st: string) =>
+          mapped.filter((r) => (r.status || "").toUpperCase() === st).length;
         setPublishedCount(byStatus("APPROVED") || total); // if no status, treat all as published
         setPendingCount(byStatus("PENDING"));
         setRejectedCount(byStatus("REJECTED"));
@@ -107,7 +118,9 @@ export default function ReviewsTimelinePage() {
   // Recompute months and filtered list when year or reviews change
   const selectedYear = Number(year);
   const filteredReviews = reviews.filter((r) =>
-    r.reviewedYear ? r.reviewedYear === selectedYear : (r.reviewed.includes(String(selectedYear)))
+    r.reviewedYear
+      ? r.reviewedYear === selectedYear
+      : r.reviewed.includes(String(selectedYear))
   );
 
   useEffect(() => {
@@ -151,7 +164,9 @@ export default function ReviewsTimelinePage() {
               </div>
               <div className="grid grid-cols-2 gap-y-1">
                 <span className="text-[#6b7280]">Average score</span>
-                <span className="text-right font-medium">{avgScore.toFixed(1)}</span>
+                <span className="text-right font-medium">
+                  {avgScore.toFixed(1)}
+                </span>
 
                 <span className="text-[#6b7280]">Published</span>
                 <span className="text-right font-medium">{publishedCount}</span>
@@ -186,12 +201,21 @@ export default function ReviewsTimelinePage() {
 
             {/* cards column (narrow) */}
             <div className="mx-auto w-full max-w-[580px] space-y-3">
-              {(loading ? [] : filteredReviews.length ? filteredReviews : DEMO).map((r) => (
+              {(loading
+                ? []
+                : filteredReviews.length
+                ? filteredReviews
+                : DEMO
+              ).map((r) => (
                 <ReviewCard
                   key={r.id}
                   r={r}
                   onUpdated={(updated) =>
-                    setReviews((prev) => prev.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)))
+                    setReviews((prev) =>
+                      prev.map((x) =>
+                        x.id === updated.id ? { ...x, ...updated } : x
+                      )
+                    )
                   }
                   onDeleted={(id) =>
                     setReviews((prev) => prev.filter((x) => x.id !== id))
@@ -200,7 +224,9 @@ export default function ReviewsTimelinePage() {
               ))}
 
               {!loading && !error && !reviews.length && (
-                <div className="text-center text-[13px] text-[#6b7280]">No reviews yet.</div>
+                <div className="text-center text-[13px] text-[#6b7280]">
+                  No reviews yet.
+                </div>
               )}
 
               <div className="pt-2 text-center">
@@ -296,7 +322,13 @@ function ReviewCard({
         negative: draft.negative,
         categoryRatings: draft.categoryRatings,
       });
-      onUpdated?.({ ...r, positive: draft.positive, negative: draft.negative, score: draft.score, categoryRatings: draft.categoryRatings });
+      onUpdated?.({
+        ...r,
+        positive: draft.positive,
+        negative: draft.negative,
+        score: draft.score,
+        categoryRatings: draft.categoryRatings,
+      });
       setEditOpen(false);
     } catch (e) {
       alert("Failed to update review");
@@ -317,10 +349,7 @@ function ReviewCard({
         {/* thumbnail */}
         <div className="hidden shrink-0 sm:block">
           <img
-            src={
-              r.thumbnail ??
-              "https://images.unsplash.com/photo-1505691723518-36a5ac3b2d93?q=80&w=400&auto=format&fit=crop"
-            }
+            src={r.thumbnail ?? "/placeholder-hotel.svg"}
             alt=""
             className="h-20 w-28 rounded-[6px] object-cover ring-1 ring-black/5"
           />
@@ -343,7 +372,7 @@ function ReviewCard({
             </div>
 
             <div className="flex items-start gap-2">
-            <ScoreBadge value={r.score} />
+              <ScoreBadge value={r.score} />
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen((v) => !v)}
@@ -382,7 +411,11 @@ function ReviewCard({
           {r.positive && (
             <div className="mt-2 rounded-[8px] border border-[#e6eaf0] bg-[#f7fbff] p-2">
               <RowLabel label="Positive" />
-              <p className={`mt-[6px] text-[12px] leading-5 text-[#1f2937] ${expanded ? "" : "line-clamp-3"}`}>
+              <p
+                className={`mt-[6px] text-[12px] leading-5 text-[#1f2937] ${
+                  expanded ? "" : "line-clamp-3"
+                }`}
+              >
                 {r.positive}
               </p>
               {r.positive.length > 180 && (
@@ -418,7 +451,9 @@ function ReviewCard({
 
           {editOpen && (
             <div className="mt-2 rounded-[10px] border border-[#dfe6ef] bg-white p-3">
-              <div className="text-[14px] font-semibold text-[#1f2937]">Edit your review</div>
+              <div className="text-[14px] font-semibold text-[#1f2937]">
+                Edit your review
+              </div>
               <div className="mt-3 flex items-center gap-2">
                 <label className="text-[12px] text-[#6b7280]">Score</label>
                 <input
@@ -426,26 +461,42 @@ function ReviewCard({
                   min={1}
                   max={10}
                   value={draft.score}
-                  onChange={(e) => setDraft({ ...draft, score: Math.max(1, Math.min(10, Number(e.target.value) || 1)) })}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      score: Math.max(
+                        1,
+                        Math.min(10, Number(e.target.value) || 1)
+                      ),
+                    })
+                  }
                   className="w-20 rounded border px-2 py-1 text-[13px]"
                 />
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
-                  <div className="text-[12px] font-medium text-[#0a5ad6]">Positive</div>
+                  <div className="text-[12px] font-medium text-[#0a5ad6]">
+                    Positive
+                  </div>
                   <textarea
                     value={draft.positive}
-                    onChange={(e) => setDraft({ ...draft, positive: e.target.value })}
+                    onChange={(e) =>
+                      setDraft({ ...draft, positive: e.target.value })
+                    }
                     rows={6}
                     className="mt-1 w-full rounded border px-3 py-2 text-[13px]"
                     placeholder="What did you like?"
                   />
                 </div>
                 <div>
-                  <div className="text-[12px] font-medium text-[#b00020]">Negative</div>
+                  <div className="text-[12px] font-medium text-[#b00020]">
+                    Negative
+                  </div>
                   <textarea
                     value={draft.negative}
-                    onChange={(e) => setDraft({ ...draft, negative: e.target.value })}
+                    onChange={(e) =>
+                      setDraft({ ...draft, negative: e.target.value })
+                    }
                     rows={6}
                     className="mt-1 w-full rounded border px-3 py-2 text-[13px]"
                     placeholder="What could be improved?"
@@ -453,18 +504,25 @@ function ReviewCard({
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                {([
-                  ["staff", "Staff"],
-                  ["comfort", "Comfort"],
-                  ["freeWifi", "Free WiFi"],
-                  ["facilities", "Facilities"],
-                  ["valueForMoney", "Value for Money"],
-                  ["cleanliness", "Cleanliness"],
-                  ["location", "Location"],
-                ] as const).map(([key, label]) => (
-                  <div key={key} className="rounded-[8px] border border-[#e6eaf0] bg-[#fafafa] p-2">
+                {(
+                  [
+                    ["staff", "Staff"],
+                    ["comfort", "Comfort"],
+                    ["freeWifi", "Free WiFi"],
+                    ["facilities", "Facilities"],
+                    ["valueForMoney", "Value for Money"],
+                    ["cleanliness", "Cleanliness"],
+                    ["location", "Location"],
+                  ] as const
+                ).map(([key, label]) => (
+                  <div
+                    key={key}
+                    className="rounded-[8px] border border-[#e6eaf0] bg-[#fafafa] p-2"
+                  >
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="text-[12px] font-medium text-[#374151]">{label}</span>
+                      <span className="text-[12px] font-medium text-[#374151]">
+                        {label}
+                      </span>
                       <span className="text-[11px] text-[#6b7280]">
                         {(draft.categoryRatings as any)[key] || 0}/10
                       </span>
@@ -474,7 +532,10 @@ function ReviewCard({
                       onChange={(n) =>
                         setDraft({
                           ...draft,
-                          categoryRatings: { ...draft.categoryRatings, [key]: n },
+                          categoryRatings: {
+                            ...draft.categoryRatings,
+                            [key]: n,
+                          },
                         })
                       }
                     />
@@ -482,9 +543,19 @@ function ReviewCard({
                 ))}
               </div>
               <div className="mt-3 flex gap-2">
-                <button onClick={() => setEditOpen(false)} className="rounded border px-3 py-2 text-[13px]">Cancel</button>
-                <button onClick={saveEdit} className="rounded bg-[#0071c2] px-4 py-2 text-[13px] text-white">Save</button>
-          </div>
+                <button
+                  onClick={() => setEditOpen(false)}
+                  className="rounded border px-3 py-2 text-[13px]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEdit}
+                  className="rounded bg-[#0071c2] px-4 py-2 text-[13px] text-white"
+                >
+                  Save
+                </button>
+              </div>
             </div>
           )}
         </div>

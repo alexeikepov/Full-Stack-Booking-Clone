@@ -237,10 +237,6 @@ export default function HotelInfoPrices({
                 const isFirstOfType =
                   index === 0 || room.name !== rooms[index - 1].name;
 
-                console.log(
-                  `Room ${index}: ${room.name}, isFirstOfType: ${isFirstOfType}`
-                );
-
                 return (
                   <RoomRow
                     key={room._id || room.id}

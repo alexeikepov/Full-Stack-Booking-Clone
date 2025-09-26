@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import WishlistDialog from "@/components/ui/WishlistDialog";
 import { useAuth } from "@/context/AuthContext";
+import { getPrimaryImage } from "@/utils/hotel-images";
 
 const fmt = (n: number, currency = "ILS") =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency }).format(n);
@@ -19,8 +20,10 @@ function coerceNumber(value: any): number {
   if (Number.isFinite(direct)) return direct;
   if (value && typeof value === "object") {
     if (typeof value.$numberInt === "string") return Number(value.$numberInt);
-    if (typeof value.$numberDouble === "string") return Number(value.$numberDouble);
-    if (typeof value.$numberDecimal === "string") return Number(value.$numberDecimal);
+    if (typeof value.$numberDouble === "string")
+      return Number(value.$numberDouble);
+    if (typeof value.$numberDecimal === "string")
+      return Number(value.$numberDecimal);
     if (typeof value.value === "number") return value.value;
     if (typeof value.value === "string") return Number(value.value);
   }
@@ -38,7 +41,8 @@ function getDistanceText(hotel: Hotel): string | null {
   const text: string | undefined = anyHotel.distanceFromCenterText;
   if (text) return text;
   const km: number | undefined = anyHotel.distanceFromCenterKm;
-  if (typeof km === "number" && Number.isFinite(km)) return `${km.toFixed(1)} km from centre`;
+  if (typeof km === "number" && Number.isFinite(km))
+    return `${km.toFixed(1)} km from centre`;
   return null;
 }
 
@@ -51,22 +55,6 @@ function getRatingLabel(hotel: Hotel, ratingStr: string) {
   if (n >= 8) return "Very good";
   if (n >= 7) return "Good";
   return "Review";
-}
-
-function getPrimaryImage(hotel: Hotel): string {
-  const hotelImage: string | undefined =
-    (hotel.media?.find((m: any) => m?.url)?.url as string | undefined) ??
-    (hotel.media?.[0]?.url as string | undefined);
-  if (hotelImage) return hotelImage;
-
-  for (const r of hotel.rooms ?? []) {
-    const roomImg =
-      (r.media?.find((m: any) => m?.url)?.url as string | undefined) ??
-      (r.media?.[0]?.url as string | undefined) ??
-      r.photos?.[0];
-    if (roomImg) return roomImg;
-  }
-  return "/placeholder-hotel.jpg";
 }
 
 function starsRow(stars?: number | null) {
@@ -97,13 +85,13 @@ export default function HotelCard({
   const toggleLike = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!user) {
       // If user is not logged in, show wishlist dialog to prompt login
       setShowWishlistDialog(true);
       return;
     }
-    
+
     if (!liked) {
       // If not liked, show wishlist dialog to choose where to save
       setShowWishlistDialog(true);
@@ -121,7 +109,8 @@ export default function HotelCard({
 
   const getHotelId = (hotel: Hotel): string => {
     if ((hotel as any)._id?.$oid) return (hotel as any)._id.$oid as string;
-    if (typeof (hotel as any)._id === "string") return (hotel as any)._id as string;
+    if (typeof (hotel as any)._id === "string")
+      return (hotel as any)._id as string;
     return "";
   };
 
@@ -150,7 +139,8 @@ export default function HotelCard({
   // Strict: show rating only if backend provided both averageRating and reviewsCount
   const reviews = coerceNumber((hotel as any)?.reviewsCount) || 0;
   const ratingNumber = coerceNumber((hotel as any)?.averageRating);
-  const hasRealRating = reviews > 0 && Number.isFinite(ratingNumber) && ratingNumber > 0;
+  const hasRealRating =
+    reviews > 0 && Number.isFinite(ratingNumber) && ratingNumber > 0;
   const ratingStr = hasRealRating ? safeFixed(ratingNumber, 1) : "";
 
   const total = Number.isFinite(Number((hotel as any).totalPrice))
@@ -165,15 +155,22 @@ export default function HotelCard({
   const firstRoom = hotel.rooms?.[0];
   const featuresLine = (() => {
     if (!firstRoom) return "";
-    const typeOrName = (firstRoom.roomType || firstRoom.roomCategory || firstRoom.name || "").toString();
+    const typeOrName = (
+      firstRoom.roomType ||
+      firstRoom.roomCategory ||
+      firstRoom.name ||
+      ""
+    ).toString();
     const title = typeOrName ? typeOrName.toUpperCase() : "STANDARD";
     const bedrooms = Number(firstRoom.bedrooms) || 0;
     const bathrooms = Number(firstRoom.bathrooms) || 0;
     const size = Number(firstRoom.sizeSqm) || 0;
     const parts: string[] = [];
     if (title) parts.push(title);
-    if (bedrooms > 0) parts.push(`${bedrooms} bedroom${bedrooms > 1 ? "s" : ""}`);
-    if (bathrooms > 0) parts.push(`${bathrooms} bathroom${bathrooms > 1 ? "s" : ""}`);
+    if (bedrooms > 0)
+      parts.push(`${bedrooms} bedroom${bedrooms > 1 ? "s" : ""}`);
+    if (bathrooms > 0)
+      parts.push(`${bathrooms} bathroom${bathrooms > 1 ? "s" : ""}`);
     const right = [] as string[];
     if (parts.length > 1) {
       // title — details (bed/bath)
@@ -230,11 +227,16 @@ export default function HotelCard({
               <div className="line-clamp-2 text-[16px] font-semibold text-[#0071c2]">
                 {hotel.name}
               </div>
-              {!!hotel.stars && <span className="text-[#febb02]">{starsRow(hotel.stars)}</span>}
+              {!!hotel.stars && (
+                <span className="text-[#febb02]">{starsRow(hotel.stars)}</span>
+              )}
               <div className="mt-0.5 text-[12px]">
                 <span className="text-[#0071c2]">{hotel.city}</span>
                 {getDistanceText(hotel) && (
-                  <span className="text-muted-foreground"> • {getDistanceText(hotel)}</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    • {getDistanceText(hotel)}
+                  </span>
                 )}
               </div>
             </div>
@@ -244,7 +246,9 @@ export default function HotelCard({
                   {ratingStr}
                 </div>
                 <div className="text-right">
-                  <div className="text-[11px] font-medium">{getRatingLabel(hotel, ratingStr)}</div>
+                  <div className="text-[11px] font-medium">
+                    {getRatingLabel(hotel, ratingStr)}
+                  </div>
                   <div className="text-[11px] text-muted-foreground">{`${reviews} reviews`}</div>
                 </div>
               </div>
@@ -260,16 +264,24 @@ export default function HotelCard({
               <div className="text-right">
                 {priceToShow !== null ? (
                   <>
-                    <div className="text-[18px] font-bold leading-none">{fmt(priceToShow)}</div>
+                    <div className="text-[18px] font-bold leading-none">
+                      {fmt(priceToShow)}
+                    </div>
                     <div className="mt-1 text-[11px] text-muted-foreground">
                       {isTotal
-                        ? `${nights ?? 2} nights, ${params.get("adults") ?? 1} adult`
+                        ? `${nights ?? 2} nights, ${
+                            params.get("adults") ?? 1
+                          } adult`
                         : "1 night, 1 adult"}
                     </div>
-                    <div className="text-[11px] text-muted-foreground">Includes taxes and charges</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Includes taxes and charges
+                    </div>
                   </>
                 ) : (
-                  <div className="text-sm text-muted-foreground">Price unavailable</div>
+                  <div className="text-sm text-muted-foreground">
+                    Price unavailable
+                  </div>
                 )}
               </div>
             </div>
@@ -291,7 +303,10 @@ export default function HotelCard({
     <Card className="min-h-[274px] overflow-hidden rounded-xl border border-[#e7e7e7] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-3 pb-0 mb-3 focus:outline-none focus:ring-0">
       <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-2.5">
         <div className="relative shrink-0 overflow-hidden rounded-lg sm:h-[240px] sm:w-[240px]">
-          <Link to={buildHotelUrl(hotelId)} className="block h-full w-full focus:outline-none focus:ring-0">
+          <Link
+            to={buildHotelUrl(hotelId)}
+            className="block h-full w-full focus:outline-none focus:ring-0"
+          >
             <img
               src={getPrimaryImage(hotel)}
               alt={hotel.name}
@@ -310,7 +325,9 @@ export default function HotelCard({
             >
               {hotel.name}
             </Link>
-            {!!hotel.stars && <span className="text-[#febb02]">{starsRow(hotel.stars)}</span>}
+            {!!hotel.stars && (
+              <span className="text-[#febb02]">{starsRow(hotel.stars)}</span>
+            )}
           </div>
 
           <div className="text-[13px]">
@@ -318,7 +335,10 @@ export default function HotelCard({
               {hotel.city}
             </Link>
             {getDistanceText(hotel) && (
-              <span className="text-muted-foreground"> • {getDistanceText(hotel)}</span>
+              <span className="text-muted-foreground">
+                {" "}
+                • {getDistanceText(hotel)}
+              </span>
             )}
           </div>
 
@@ -336,7 +356,9 @@ export default function HotelCard({
                 {ratingStr}
               </div>
               <div className="text-right">
-                <div className="text-[12px] font-medium">{getRatingLabel(hotel, ratingStr)}</div>
+                <div className="text-[12px] font-medium">
+                  {getRatingLabel(hotel, ratingStr)}
+                </div>
                 <div className="text-[11px] text-muted-foreground">{`${reviews} reviews`}</div>
               </div>
             </div>
@@ -346,21 +368,29 @@ export default function HotelCard({
             <div className="text-right">
               {priceToShow !== null ? (
                 <>
-                  <div className="text-[20px] font-bold leading-none">{fmt(priceToShow)}</div>
+                  <div className="text-[20px] font-bold leading-none">
+                    {fmt(priceToShow)}
+                  </div>
                   <div className="mt-1 text-[11px] text-muted-foreground">
                     {isTotal
-                      ? `${nights ?? 2} nights, ${params.get("adults") ?? 1} adult`
+                      ? `${nights ?? 2} nights, ${
+                          params.get("adults") ?? 1
+                        } adult`
                       : "1 night, 1 adult"}
                   </div>
-                  <div className="text-[11px] text-muted-foreground">Includes taxes and charges</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    Includes taxes and charges
+                  </div>
                 </>
               ) : (
-                <div className="text-sm text-muted-foreground">Price unavailable</div>
+                <div className="text-sm text-muted-foreground">
+                  Price unavailable
+                </div>
               )}
             </div>
 
             <Link
-              to={buildHotelUrl(hotelId)}
+              to="/coming-soon"
               className="inline-flex items-center rounded-md bg-[#0071c2] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-[#005fa3] focus:outline-none focus:ring-0"
             >
               See availability
