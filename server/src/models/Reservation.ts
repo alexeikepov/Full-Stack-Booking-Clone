@@ -180,6 +180,9 @@ const ReservationSchema = new Schema(
     reviewSubmitted: { type: Boolean, default: false },
     reviewSubmittedAt: { type: Date },
     reviewId: { type: Schema.Types.ObjectId, ref: "Review" },
+
+    // Shared with friends
+    sharedWith: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true, collection: "reservations" }
 );
@@ -236,5 +239,6 @@ ReservationSchema.index({ status: 1, checkIn: 1 });
 ReservationSchema.index({ "confirmation.confirmationNumber": 1 });
 ReservationSchema.index({ "guestInfo.email": 1 });
 ReservationSchema.index({ checkIn: 1, checkOut: 1 });
+ReservationSchema.index({ sharedWith: 1 });
 
 export const ReservationModel = model("Reservation", ReservationSchema);
