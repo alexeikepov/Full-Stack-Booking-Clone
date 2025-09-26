@@ -65,6 +65,14 @@ export default function HeroSearch() {
   }, [params, setSearchParams]);
 
   const submit = () => {
+    // Helper function to format date without timezone issues
+    const formatDateForAPI = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     const base: Record<string, string> = {
       ...(city ? { city } : {}),
       adults: String(adults),
@@ -81,18 +89,19 @@ export default function HeroSearch() {
           adults,
           children,
           rooms,
-          from: r?.from ? r.from.toISOString() : undefined,
-          to: r?.to ? r.to.toISOString() : undefined,
+          from: r?.from ? formatDateForAPI(r.from) : undefined,
+          to: r?.to ? formatDateForAPI(r.to) : undefined,
         });
       } catch {}
     })();
 
     if (picker.mode === "calendar") {
       const r: DateRange | undefined = picker.range;
+      
       const next = new URLSearchParams({
         ...base,
-        ...(r?.from ? { from: r.from.toISOString().slice(0, 10) } : {}),
-        ...(r?.to ? { to: r.to.toISOString().slice(0, 10) } : {}),
+        ...(r?.from ? { from: formatDateForAPI(r.from) } : {}),
+        ...(r?.to ? { to: formatDateForAPI(r.to) } : {}),
       });
       setParams(next);
       navigate(`/search?${next.toString()}`);

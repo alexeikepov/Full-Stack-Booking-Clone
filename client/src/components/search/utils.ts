@@ -18,9 +18,16 @@ export function monthsForward(count = 18) {
 
 export function normalizeRange(r?: DateRange): DateRange | undefined {
   if (!r?.from && !r?.to) return undefined;
-  if (r?.from && r?.to && isAfter(r.from, r.to))
-    return { from: r.to, to: r.from };
-  return r?.from ? { from: r.from, to: r.to } : undefined;
+  
+  const today = new Date(new Date().setHours(0, 0, 0, 0));
+  
+  // Ensure dates are not before today
+  const from = r.from && r.from < today ? today : r.from;
+  const to = r.to && r.to < today ? today : r.to;
+  
+  if (from && to && isAfter(from, to))
+    return { from: to, to: from };
+  return from ? { from, to } : undefined;
 }
 
 export function capitalize(s: string) {

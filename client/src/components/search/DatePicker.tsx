@@ -61,10 +61,11 @@ export function DatePicker({
   }, [value]);
 
   const setExactDays = (days: number) => {
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
     const start =
-      value.mode === "calendar" && value.range?.from
+      value.mode === "calendar" && value.range?.from && value.range.from >= today
         ? value.range.from
-        : new Date();
+        : today;
     const end = addDays(start, Math.max(1, days));
     onChange({ mode: "calendar", range: { from: start, to: end } });
   };
@@ -140,6 +141,7 @@ export function DatePicker({
               onSelect={(r: DateRange | undefined) =>
                 onChange({ mode: "calendar", range: normalizeRange(r) })
               }
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
               autoFocus
               classNames={{
                 day: "h-9 w-9 p-0 rounded aria-selected:opacity-100",
@@ -164,7 +166,7 @@ export function DatePicker({
                 size="sm"
                 onClick={() => setExactDays(0)}
               >
-                Exact dates
+                Today
               </Button>
               <Button
                 variant="outline"
