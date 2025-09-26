@@ -7,7 +7,7 @@ import { getMyReviews } from "../controller/hotelController";
 const router = Router();
 
 // GET /api/me
-router.get("/", requireAuth, async (req: AuthedRequest, res, next) => {
+router.get("/me", requireAuth, async (req: AuthedRequest, res, next) => {
   try {
     const me = await UserModel.findById(req.user!.id).lean();
     if (!me) return res.status(404).json({ error: "User not found" });

@@ -647,3 +647,88 @@ export async function requestAdminRole() {
   const res = await api.post("/api/users/request-admin");
   return res.data as { ok: true; ownerApplicationStatus: string };
 }
+
+// ----- Friend Requests API -----
+export type FriendRequest = {
+  _id: string;
+  sender: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  receiver: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Friend = {
+  _id: string;
+  name: string;
+  email: string;
+};
+
+export type SendFriendRequestData = {
+  receiverId: string;
+};
+
+// Send a friend request
+export async function sendFriendRequest(data: SendFriendRequestData): Promise<FriendRequest> {
+  const res = await api.post("/api/friend-requests", data);
+  return res.data;
+}
+
+// Get friend requests (sent, received, or all)
+export async function getFriendRequests(type: 'sent' | 'received' | 'all' = 'all'): Promise<FriendRequest[]> {
+  const res = await api.get("/api/friend-requests", { params: { type } });
+  return res.data;
+}
+
+// Accept a friend request
+export async function acceptFriendRequest(requestId: string): Promise<FriendRequest> {
+  const res = await api.patch(`/api/friend-requests/${requestId}/accept`);
+  return res.data;
+}
+
+// Reject a friend request
+export async function rejectFriendRequest(requestId: string): Promise<FriendRequest> {
+  const res = await api.patch(`/api/friend-requests/${requestId}/reject`);
+  return res.data;
+}
+
+// Cancel a friend request (sender can cancel)
+export async function cancelFriendRequest(requestId: string): Promise<{ message: string }> {
+  const res = await api.delete(`/api/friend-requests/${requestId}`);
+  return res.data;
+}
+
+// Get friends list
+export async function getFriends(): Promise<Friend[]> {
+  const res = await api.get("/api/friend-requests/friends");
+  return res.data;
+}
+
+// Remove a friend
+export async function removeFriend(friendId: string): Promise<{ message: string }> {
+  const res = await api.delete(`/api/friend-requests/friends/${friendId}`);
+  return res.data;
+}
+
+// Search users
+export async function searchUsers(query: string): Promise<User[]> {
+  console.log("API: Searching users with query:", query);
+  const res = await api.get("/api/friend-requests/search", { params: { q: query } });
+  console.log("API: Search response:", res.data);
+  return res.data;
+}
+
+export type User = {
+  _id: string;
+  name: string;
+  email: string;
+  role?: string;
+};
