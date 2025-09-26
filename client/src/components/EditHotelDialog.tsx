@@ -418,13 +418,24 @@ export default function EditHotelDialog({
 
     const init = async () => {
       try {
+        console.log("Initializing Google Places Autocomplete...");
         const loader = new Loader({
           apiKey,
           version: "weekly",
           libraries: ["places"],
         });
         await loader.load();
-        if (!addressInputRef.current) return;
+        console.log("Google Maps API loaded successfully");
+        
+        // Small delay to ensure the input is mounted
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (!addressInputRef.current) {
+          console.log("Address input ref not found");
+          return;
+        }
+        
+        console.log("Creating autocomplete instance");
         autocomplete = new google.maps.places.Autocomplete(
           addressInputRef.current as HTMLInputElement,
           {
@@ -432,26 +443,41 @@ export default function EditHotelDialog({
             types: ["geocode"],
           }
         );
+        console.log("Autocomplete created successfully");
         autocomplete.addListener("place_changed", () => {
           const place = autocomplete!.getPlace();
-          if (!place) return;
+          if (!place || !place.geometry) return;
+          
           const components = place.address_components || [];
           const getPart = (type: string) => {
             const comp = components.find((c) => (c.types || []).includes(type));
             return comp?.long_name || "";
           };
+          
           const city =
             getPart("locality") ||
             getPart("administrative_area_level_2") ||
             getPart("administrative_area_level_1");
           const country = getPart("country");
-          const address =
-            place.formatted_address || addressInputRef.current!.value || "";
-          const lat = place.geometry?.location?.lat();
-          const lng = place.geometry?.location?.lng();
+          const address = place.formatted_address || "";
+          
+          // Extract coordinates properly
+          const location = place.geometry.location;
+          const lat = location?.lat();
+          const lng = location?.lng();
+
+          console.log("Google Places result:", {
+            address,
+            city,
+            country,
+            lat,
+            lng
+          });
 
           // Update the input display immediately
-          if (addressInputRef.current) addressInputRef.current.value = address;
+          if (addressInputRef.current) {
+            addressInputRef.current.value = address;
+          }
 
           setFormData((prev: any) => ({
             ...prev,
@@ -459,31 +485,23 @@ export default function EditHotelDialog({
             city: city || prev.city,
             country: country || prev.country,
             location: {
-              lat:
-                typeof lat === "number"
-                  ? lat
-                  : lat
-                  ? lat
-                  : prev.location?.lat || 0,
-              lng:
-                typeof lng === "number"
-                  ? lng
-                  : lng
-                  ? lng
-                  : prev.location?.lng || 0,
+              lat: typeof lat === "number" ? lat : prev.location?.lat || 0,
+              lng: typeof lng === "number" ? lng : prev.location?.lng || 0,
             },
           }));
         });
-      } catch {
-        // ignore loader errors
+      } catch (error) {
+        console.error("Error initializing Google Places Autocomplete:", error);
       }
     };
 
     init();
 
     return () => {
-      // Autocomplete cleans up on GC; no explicit dispose in JS API
-      autocomplete = null;
+      if (autocomplete) {
+        google.maps.event.clearInstanceListeners(autocomplete);
+        autocomplete = null;
+      }
     };
   }, [isOpen]);
 
