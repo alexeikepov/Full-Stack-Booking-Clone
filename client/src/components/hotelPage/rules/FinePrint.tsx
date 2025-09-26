@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface FinePrintProps {
   hotelName?: string;
@@ -14,45 +15,37 @@ export default function FinePrint({
   hotelName = "Villa Albi - Machne Yehuda Hotel",
 }: FinePrintProps) {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   const toggleFAQ = (index: number) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
 
   const handleSeeAvailability = () => {
-    // TODO: Navigate to booking or show availability
-    console.log("See availability clicked");
+    navigate("/coming-soon");
   };
 
   const faqs: FAQ[] = [
     {
-      question:
-        "What type of room can I book at Villa Albi - Machne Yehuda Hotel?",
-      answer:
-        "Room options at Villa Albi - Machne Yehuda Hotel include: • Suite • Double",
+      question: `What type of room can I book at ${hotelName}?`,
+      answer: `Room options at ${hotelName} include: • Suite • Double`,
     },
     {
-      question:
-        "How much does it cost to stay at Villa Albi - Machne Yehuda Hotel?",
-      answer:
-        "The prices at Villa Albi - Machne Yehuda Hotel may vary depending on your stay (e.g. dates you select, hotel's policy etc.). See the prices by entering your dates.",
+      question: `How much does it cost to stay at ${hotelName}?`,
+      answer: `The prices at ${hotelName} may vary depending on your stay (e.g. dates you select, hotel's policy etc.). See the prices by entering your dates.`,
     },
     {
-      question:
-        "What are the check-in and check-out times at Villa Albi - Machne Yehuda Hotel?",
-      answer:
-        "Check-in at Villa Albi - Machne Yehuda Hotel is from 15:00, and check-out is until 11:00.",
+      question: `What are the check-in and check-out times at ${hotelName}?`,
+      answer: `Check-in at ${hotelName} is from 15:00, and check-out is until 11:00.`,
     },
     {
-      question:
-        "How far is Villa Albi - Machne Yehuda Hotel from the centre of Jerusalem?",
-      answer:
-        "Villa Albi - Machne Yehuda Hotel is 1.1 km from the centre of Jerusalem.",
+      question: `How far is ${hotelName} from the centre of the city?`,
+      answer: `${hotelName} is 1.1 km from the centre of the city.`,
     },
   ];
 
   return (
-    <div className="bg-white">
+    <div id="fine-print" className="bg-white">
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* The fine print section */}
         <div className="mb-12">

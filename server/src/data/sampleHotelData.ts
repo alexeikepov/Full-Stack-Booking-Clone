@@ -223,6 +223,26 @@ export const sampleHotelData = {
     },
   ],
 
+  // Hotel media/images
+  media: [
+    {
+      url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=400&auto=format&fit=crop",
+      type: "image",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=400&auto=format&fit=crop",
+      type: "image",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=400&auto=format&fit=crop",
+      type: "image",
+    },
+    {
+      url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=400&auto=format&fit=crop",
+      type: "image",
+    },
+  ],
+
   // Room types based on the data
   rooms: [
     {

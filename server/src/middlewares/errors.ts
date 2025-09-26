@@ -17,7 +17,12 @@ export function notFound(_req: Request, res: Response) {
 }
 
 // Centralized error handler
-export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction) {
+export function errorHandler(
+  err: any,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+) {
   // Default status/message
   let status = typeof err?.status === "number" ? err.status : 500;
   let code: string | undefined;
@@ -32,12 +37,21 @@ export function errorHandler(err: any, _req: Request, res: Response, _next: Next
     details = err.issues;
   }
 
-  // Mongoose duplicate key error
+  // Mongoose duplicate key error - ignore for reviews
   else if (err?.code === 11000) {
-    status = 409;
-    code = "DUPLICATE_KEY";
-    message = "Resource already exists";
-    details = { keyValue: err.keyValue };
+    // For reviews, we want to allow multiple reviews per user per hotel
+    // So we'll treat this as a success and return the existing review
+    if (err?.keyValue && (err.keyValue.hotel || err.keyValue.recipe)) {
+      status = 200;
+      code = "REVIEW_EXISTS";
+      message = "Review already exists, but continuing...";
+      details = { keyValue: err.keyValue };
+    } else {
+      status = 409;
+      code = "DUPLICATE_KEY";
+      message = "Resource already exists";
+      details = { keyValue: err.keyValue };
+    }
   }
 
   // Mongoose validation error
@@ -109,7 +123,8 @@ function isBodyParseError(err: any): boolean {
   // body-parser sets "type" for JSON parse failures; also catch SyntaxError with "body" prop
   return (
     err?.type === "entity.parse.failed" ||
-    (err instanceof SyntaxError && Object.prototype.hasOwnProperty.call(err as any, "body"))
+    (err instanceof SyntaxError &&
+      Object.prototype.hasOwnProperty.call(err as any, "body"))
   );
 }
 

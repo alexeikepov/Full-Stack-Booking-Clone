@@ -8,9 +8,10 @@ import { useState } from "react";
 
 interface HotelHeaderProps {
   hotel: Hotel;
+  onShowMap?: () => void;
 }
 
-export default function HotelHeader({ hotel }: HotelHeaderProps) {
+export default function HotelHeader({ hotel, onShowMap }: HotelHeaderProps) {
   const navigate = useNavigate();
   const [isPriceMatchModalOpen, setIsPriceMatchModalOpen] = useState(false);
 
@@ -71,9 +72,25 @@ export default function HotelHeader({ hotel }: HotelHeaderProps) {
                 {hotel.address}, {hotel.city}
               </span>
               <span className="text-gray-900">–</span>
-              <span className="text-blue-600 hover:underline cursor-pointer font-medium">
+              <button
+                onClick={() => {
+                  if (onShowMap) {
+                    onShowMap();
+                  } else {
+                    // Fallback to scroll behavior
+                    const mapElement = document.getElementById("hotel-map");
+                    if (mapElement) {
+                      mapElement.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                      });
+                    }
+                  }
+                }}
+                className="text-blue-600 hover:underline cursor-pointer font-medium"
+              >
                 Excellent location - show map
-              </span>
+              </button>
             </div>
           </div>
 
@@ -108,7 +125,7 @@ export default function HotelHeader({ hotel }: HotelHeaderProps) {
                 </svg>
               </button>
 
-              <Button 
+              <Button
                 onClick={handleReserveClick}
                 className="bg-[#0071c2] hover:bg-[#005fa3] px-6 py-2 text-base font-semibold rounded-sm"
               >

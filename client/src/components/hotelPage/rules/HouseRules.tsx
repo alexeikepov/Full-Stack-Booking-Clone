@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 import {
   LogIn,
   LogOut,
@@ -26,10 +27,10 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
     },
     enabled: Boolean(hotelId),
   });
+  const navigate = useNavigate();
 
   const handleSeeAvailability = () => {
-    // TODO: Navigate to booking or show availability
-    console.log("See availability clicked");
+    navigate("/coming-soon");
   };
 
   if (isLoading) {

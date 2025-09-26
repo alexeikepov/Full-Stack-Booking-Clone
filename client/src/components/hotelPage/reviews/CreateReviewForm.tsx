@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createReview, updateMyReviewForHotel } from "@/lib/api";
 
-// Define CreateReviewData type locally to avoid import issues
+// Define CreateReviewData type locally to match server schema
 export type CreateReviewData = {
   rating: number;
   comment: string;
@@ -57,20 +57,23 @@ export default function CreateReviewForm({
 
   const createReviewMutation = useMutation({
     mutationFn: async (data: CreateReviewData) => {
-      try {
-        return await createReview(hotelId, data);
-      } catch (e: any) {
-        if (e?.response?.status === 409) {
-          // Already exists → update instead
-          return await updateMyReviewForHotel(hotelId, data);
-        }
-        throw e;
-      }
+      console.log("Creating/updating review with data:", data);
+      return await createReview(hotelId, data);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Review created/updated successfully:", data);
       queryClient.invalidateQueries({ queryKey: ["hotel", hotelId] });
       queryClient.invalidateQueries({ queryKey: ["reviews", hotelId] });
+      alert("Review saved successfully!");
       onSuccess?.();
+    },
+    onError: (error: any) => {
+      console.error("Review creation/update failed:", error);
+      const errorMessage =
+        error?.response?.data?.error ||
+        error?.message ||
+        "An error occurred while saving the review";
+      alert(`Error: ${errorMessage}`);
     },
   });
 
@@ -276,7 +279,7 @@ export default function CreateReviewForm({
               placeholder="Negative aspects (optional)..."
             />
             <div className="text-xs text-gray-500 text-right">
-              {(formData.negative?.length || 0)}/2000
+              {formData.negative?.length || 0}/2000
             </div>
           </div>
         </div>
@@ -295,7 +298,7 @@ export default function CreateReviewForm({
           <button
             type="submit"
             disabled={createReviewMutation.isPending}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {createReviewMutation.isPending ? "Submitting..." : "Submit Review"}
           </button>

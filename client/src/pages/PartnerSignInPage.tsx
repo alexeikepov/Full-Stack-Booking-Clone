@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, getMe, loginUser } from "@/lib/api";
+import AdminHeader from "@/components/AdminHeader";
 
 type Step = "username" | "password";
 
@@ -72,14 +73,18 @@ export default function AdminSignInPage() {
         localStorage.setItem("auth_token", auth.token);
         localStorage.setItem("user", JSON.stringify(auth.user));
       } catch {
-        const { data: auth } = await api.post("/api/users/login", { username: u, password: p });
+        const { data: auth } = await api.post("/api/users/login", {
+          username: u,
+          password: p,
+        });
         localStorage.setItem("auth_token", auth.token);
         localStorage.setItem("user", JSON.stringify(auth.user));
       }
       try {
         const me = await getMe();
         if (me.role === "HOTEL_ADMIN") navigate("/adminhotel");
-        else if (me.ownerApplicationStatus === "pending") navigate("/owner/waiting-approval");
+        else if (me.ownerApplicationStatus === "pending")
+          navigate("/owner/waiting-approval");
         else navigate("/partner-register");
       } catch {
         // If /api/me fails (e.g., token cookie mismatch), still send admin to dashboard
@@ -97,22 +102,7 @@ export default function AdminSignInPage() {
 
   return (
     <div className="min-h-screen bg-white antialiased">
-      <header className="page-header">
-        <div className="wrap header-in">
-          <a className="logo" href="#">Booking.com</a>
-          <div className="header-right">
-            <div className="flex items-center gap-1.5">
-              <img
-                className="flag"
-                alt="GB"
-                src="https://flagicons.lipis.dev/flags/4x3/gb.svg"
-              />
-              <span style={{ fontSize: 13 }}>GB</span>
-            </div>
-            <button aria-label="Help" className="help-btn">?</button>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
 
       <main className="container">
         {showBanner && (
@@ -120,15 +110,24 @@ export default function AdminSignInPage() {
             <span className="icon" aria-hidden>
               <svg width="20" height="20" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10.5" fill="none" stroke="#a6a6a6" />
-                <path d="M12 7v7" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" />
+                <path
+                  d="M12 7v7"
+                  stroke="#6b7280"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
                 <circle cx="12" cy="16.5" r="1.25" fill="#6b7280" />
               </svg>
             </span>
             <span>
-              We’ve completed the signup form using your account information as you’re
-              logged in to your Booking.com account.
+              We’ve completed the signup form using your account information as
+              you’re logged in to your Booking.com account.
             </span>
-            <button className="close" onClick={() => setShowBanner(false)} aria-label="Close">
+            <button
+              className="close"
+              onClick={() => setShowBanner(false)}
+              aria-label="Close"
+            >
               ✕
             </button>
           </div>
@@ -180,7 +179,9 @@ export default function AdminSignInPage() {
           </button>
 
           <div className="center-link trouble">
-            <a href="#" className="text-[#0071c2] underline">Having trouble signing in?</a>
+            <a href="#" className="text-[#0071c2] underline">
+              Having trouble signing in?
+            </a>
           </div>
 
           <hr className="hr" />
@@ -194,7 +195,8 @@ export default function AdminSignInPage() {
               rel="noreferrer"
             >
               Partner Help
-            </a>.
+            </a>
+            .
           </p>
 
           <div style={{ height: 12 }} />

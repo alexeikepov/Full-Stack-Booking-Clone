@@ -124,6 +124,11 @@ export async function createReview(
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
+    console.log(
+      `[REVIEW CONTROLLER] createReview: hotelId=${hotelId}, userId=${userId}`
+    );
+    console.log(`[REVIEW CONTROLLER] Request body:`, req.body);
+
     const dto = reviewCreateSchema.parse(req.body);
 
     // Check if hotel exists
@@ -132,16 +137,28 @@ export async function createReview(
       return res.status(404).json({ error: "Hotel not found" });
     }
 
-    // Check if user already reviewed this hotel
-    const existingReview = await ReviewModel.findOne({
+    // Check if user is trying to review their own hotel
+    const isOwner = hotel.ownerId.toString() === userId;
+    const isAdmin = hotel.adminIds.includes(userId as any);
+    
+    if (isOwner || isAdmin) {
+      console.log(`User ${userId} is ${isOwner ? 'owner' : 'admin'} of hotel ${hotelId}, allowing review creation`);
+    }
+
+    console.log("Creating new review with data:", {
       hotel: hotelId,
       user: userId,
+      rating: dto.rating,
+      comment: dto.comment,
+      negative: dto.negative,
+      guestName: dto.guestName,
+      guestCountry: dto.guestCountry,
+      guestInitial: dto.guestInitial,
+      categoryRatings: dto.categoryRatings,
+      stayDate: dto.stayDate ? new Date(dto.stayDate) : undefined,
+      roomType: dto.roomType,
+      travelType: dto.travelType,
     });
-    if (existingReview) {
-      return res
-        .status(409)
-        .json({ error: "User already reviewed this hotel" });
-    }
 
     const review = await ReviewModel.create({
       hotel: hotelId,
@@ -159,15 +176,13 @@ export async function createReview(
       status: "APPROVED", // Auto-approve for now
     });
 
+    console.log("Review created successfully:", review);
+
     await recomputeHotelRating(hotelId);
 
     res.status(201).json(review);
   } catch (err) {
-    if ((err as any)?.code === 11000) {
-      return res
-        .status(409)
-        .json({ error: "User already reviewed this hotel" });
-    }
+    console.error("createReview error:", err);
     next(err);
   }
 }
