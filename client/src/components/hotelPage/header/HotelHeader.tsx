@@ -5,6 +5,7 @@ import WishlistButton from "@/components/WishlistButton";
 import PriceMatchModal from "@/components/ui/PriceMatchModal";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import HotelShareModal from "./HotelShareModal";
 
 interface HotelHeaderProps {
   hotel: Hotel;
@@ -14,10 +15,10 @@ interface HotelHeaderProps {
 export default function HotelHeader({ hotel, onShowMap }: HotelHeaderProps) {
   const navigate = useNavigate();
   const [isPriceMatchModalOpen, setIsPriceMatchModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handleShareClick = () => {
-    // Navigate to Coming Soon page
-    navigate("/coming-soon");
+    setIsShareModalOpen(true);
   };
 
   const handlePriceMatchClick = () => {
@@ -163,6 +164,13 @@ export default function HotelHeader({ hotel, onShowMap }: HotelHeaderProps) {
       <PriceMatchModal
         isOpen={isPriceMatchModalOpen}
         onClose={() => setIsPriceMatchModalOpen(false)}
+      />
+
+      {/* Hotel Share Modal */}
+      <HotelShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        hotel={hotel}
       />
     </div>
   );
