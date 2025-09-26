@@ -28,8 +28,16 @@ export default function PriceSummary({
   // Calculate number of nights
   const calculateNights = () => {
     if (picker.range.from && picker.range.to) {
-      const from = new Date(picker.range.from);
-      const to = new Date(picker.range.to);
+      const from = picker.range.from;
+      const to = picker.range.to;
+      
+      // Validate that both are Date objects
+      if (!(from instanceof Date) || !(to instanceof Date) || 
+          isNaN(from.getTime()) || isNaN(to.getTime())) {
+        console.warn('Invalid dates in PriceSummary calculateNights');
+        return 1; // Default to 1 night if dates are invalid
+      }
+      
       const diffTime = Math.abs(to.getTime() - from.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return Math.max(1, diffDays);

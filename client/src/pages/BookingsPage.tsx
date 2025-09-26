@@ -52,7 +52,11 @@ export default function BookingsPage() {
           try {
             const dt = new Date(d);
             if (isNaN(+dt)) return String(d ?? "");
-            return dt.toISOString().split("T")[0];
+            // Use timezone-safe date formatting
+            const year = dt.getFullYear();
+            const month = String(dt.getMonth() + 1).padStart(2, '0');
+            const day = String(dt.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
           } catch {
             return String(d ?? "");
           }
@@ -622,8 +626,11 @@ function EditReservationModal({
   const [saving, setSaving] = useState(false);
   
   const toLocalISO = (d: Date) => {
-    const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-    return z.toISOString().split("T")[0];
+    // Use timezone-safe date formatting
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
   const todayIso = (() => {
     const d = new Date();

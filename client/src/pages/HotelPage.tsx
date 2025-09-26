@@ -46,16 +46,24 @@ export default function HotelPage() {
     queryFn: async () => {
       const params = new URLSearchParams();
 
+      // Helper function to format date without timezone issues
+      const formatDateForAPI = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       // Use URL parameters if available, otherwise fall back to picker
       const from =
         searchParams.get("from") ||
         (picker.mode === "calendar" && picker.range?.from
-          ? picker.range.from.toISOString().split("T")[0]
+          ? formatDateForAPI(picker.range.from)
           : null);
       const to =
         searchParams.get("to") ||
         (picker.mode === "calendar" && picker.range?.to
-          ? picker.range.to.toISOString().split("T")[0]
+          ? formatDateForAPI(picker.range.to)
           : null);
       const adults = searchParams.get("adults");
       const children = searchParams.get("children");

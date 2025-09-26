@@ -31,10 +31,18 @@ export default function SearchBar({ requiredRooms }: SearchBarProps) {
     };
 
     if (picker.mode === "calendar" && picker.range?.from && picker.range?.to) {
+      // Helper function to format date without timezone issues
+      const formatDateForAPI = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
       const next = new URLSearchParams({
         ...base,
-        from: picker.range.from.toISOString().slice(0, 10),
-        to: picker.range.to.toISOString().slice(0, 10),
+        from: formatDateForAPI(picker.range.from),
+        to: formatDateForAPI(picker.range.to),
       });
       setSearchParams(next);
       // Обновляем URL без перенаправления и прокрутки
