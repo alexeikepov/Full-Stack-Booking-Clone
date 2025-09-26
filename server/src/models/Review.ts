@@ -75,8 +75,8 @@ const ReviewSchema = new Schema(
   { timestamps: true, collection: "reviews" }
 );
 
-// One review per user per hotel
-ReviewSchema.index({ hotel: 1, user: 1 }, { unique: true });
+// Allow multiple reviews per user per hotel
+ReviewSchema.index({ hotel: 1, user: 1 });
 ReviewSchema.index({ hotel: 1, rating: -1, createdAt: -1 });
 ReviewSchema.index({ status: 1, createdAt: -1 });
 

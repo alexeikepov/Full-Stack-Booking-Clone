@@ -14,27 +14,22 @@ export default function ScrollToTopButton() {
         window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
 
-      // Показываем кнопку когда пользователь проскроллил больше половины видимой области
       const halfWindowHeight = windowHeight / 2;
 
       setScrollTop(currentScrollTop);
       setIsVisible(currentScrollTop > halfWindowHeight);
     };
 
-    // Добавляем слушатель события скролла
     window.addEventListener("scroll", toggleVisibility);
 
-    // Очищаем слушатель при размонтировании компонента
     return () => {
       window.removeEventListener("scroll", toggleVisibility);
     };
   }, []);
 
-  // Кнопка показывается если проскроллили на половину ИЛИ навели мышь, но не в самом верху
   const shouldShow = (isVisible || isHovered) && scrollTop > 100;
 
   const scrollToTop = () => {
-    // Плавный скролл поверх всего - только плавные анимации
     window.scrollTo({
       top: 0,
       left: 0,

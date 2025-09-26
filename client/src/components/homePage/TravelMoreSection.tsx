@@ -37,8 +37,8 @@ export default function TravelMoreSection() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8 py-10">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {FEATURES.map((f) => (
-          <Card key={f.title} className="rounded-sm border p-5.5">
+        {FEATURES.map((f, index) => (
+          <Card key={f.titleKey} className="rounded-sm border p-5.5">
             <div className="flex items-start gap-4">
               <div className="flex h-15 w-15 items-center justify-center rounded-xl ">
                 <img
