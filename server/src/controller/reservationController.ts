@@ -52,6 +52,8 @@ const createReservationSchema = z.object({
     )
     .optional(),
 
+  sharedWith: z.array(z.string()).optional(),
+
   payment: z
     .object({
       method: z
@@ -229,11 +231,21 @@ export async function listReservations(
   next: NextFunction
 ) {
   try {
+    console.log('listReservations - User ID:', req.user?.id);
+    
     const wantsAll =
       (req.query.all === "1" || req.query.all === "true") &&
       isAdmin(req.user?.role);
     const q = req.query as any;
-    const filter: any = wantsAll ? {} : { user: req.user!.id };
+    const filter: any = wantsAll ? {} : { 
+      $or: [
+        { user: req.user!.id },
+        { sharedWith: { $in: [req.user!.id] } }
+      ]
+    };
+    
+    console.log('Filter:', JSON.stringify(filter, null, 2));
+    
     if (q.status) filter.status = q.status;
     if (q.hotelId && isAdmin(req.user?.role)) {
       try {
@@ -246,6 +258,11 @@ export async function listReservations(
       .populate("hotel", "name city address media rooms")
       .select("-__v")
       .lean();
+
+    console.log('Found reservations:', list.length);
+    list.forEach(r => {
+      console.log('Reservation ID:', r._id, 'User:', r.user, 'SharedWith:', r.sharedWith);
+    });
 
     res.json(list);
   } catch (err) {
@@ -457,6 +474,11 @@ export async function updateReservation(
     }
     if (dto.checkOut) {
       reservation.checkOut = new Date(dto.checkOut as any);
+    }
+
+    // Handle sharedWith - convert string IDs to ObjectIds
+    if (dto.sharedWith) {
+      reservation.sharedWith = dto.sharedWith.map(id => new mongoose.Types.ObjectId(id));
     }
 
     if (dto.checkIn || dto.checkOut || dto.quantity) {
