@@ -118,3 +118,4 @@ export type UpdateReservationInput = z.infer<typeof updateReservationSchema>;
 export type CheckInInput = z.infer<typeof checkInSchema>;
 export type CheckOutInput = z.infer<typeof checkOutSchema>;
 export type SpecialRequestInput = z.infer<typeof specialRequestSchema>;
+

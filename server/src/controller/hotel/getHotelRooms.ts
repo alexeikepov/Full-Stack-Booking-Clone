@@ -96,3 +96,4 @@ export async function getHotelRooms(
     next(err);
   }
 }
+

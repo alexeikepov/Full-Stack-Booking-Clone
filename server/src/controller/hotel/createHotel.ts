@@ -120,3 +120,4 @@ export async function createHotel(
     next(err);
   }
 }
+
