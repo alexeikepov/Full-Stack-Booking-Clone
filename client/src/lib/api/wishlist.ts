@@ -1,5 +1,9 @@
-import type { Wishlist, CreateWishlistData, UpdateWishlistData } from './types';
-import { api } from './instance';
+import type {
+  Wishlist,
+  CreateWishlistData,
+  UpdateWishlistData,
+} from "./types/index.js";
+import { api } from "./instance.js";
 
 export type { Wishlist, CreateWishlistData, UpdateWishlistData };
 

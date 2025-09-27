@@ -1,7 +1,17 @@
-import type { CreateReviewData, UpdateReviewData, HotelResponseData, ReviewStats } from './types';
-import { api } from './instance';
+import type {
+  CreateReviewData,
+  UpdateReviewData,
+  HotelResponseData,
+  ReviewStats,
+} from "./types/index.js";
+import { api } from "./instance.js";
 
-export type { CreateReviewData, UpdateReviewData, HotelResponseData, ReviewStats };
+export type {
+  CreateReviewData,
+  UpdateReviewData,
+  HotelResponseData,
+  ReviewStats,
+};
 
 export async function getHotelReviews(
   hotelId: string,
@@ -24,7 +34,14 @@ export async function getMyReviews(params?: { page?: number; limit?: number }) {
     return res.data as {
       items: Array<{
         _id: string;
-        hotel: { _id: string; name: string; city: string; averageRating?: number; reviewsCount?: number; media?: any[] };
+        hotel: {
+          _id: string;
+          name: string;
+          city: string;
+          averageRating?: number;
+          reviewsCount?: number;
+          media?: any[];
+        };
         rating: number;
         comment?: string;
         createdAt: string;
@@ -46,7 +63,9 @@ export async function getMyReviews(params?: { page?: number; limit?: number }) {
         return alt.data;
       } catch {}
       try {
-        const alt2 = await api.get("/api/reviews", { params: { ...params, me: 1 } });
+        const alt2 = await api.get("/api/reviews", {
+          params: { ...params, me: 1 },
+        });
         return alt2.data;
       } catch {}
     }
@@ -97,10 +116,7 @@ export async function addHotelResponse(
 }
 
 export async function respondToReview(reviewId: string, text: string) {
-  const res = await api.post(
-    `/api/reviews/${reviewId}/response`,
-    { text }
-  );
+  const res = await api.post(`/api/reviews/${reviewId}/response`, { text });
   return res.data;
 }
 

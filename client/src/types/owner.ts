@@ -23,6 +23,4 @@ export interface Hotel {
   _id?: string;
 }
 
-export interface OwnerPageProps {
-  // Add any props if needed
-}
+export interface OwnerPageProps {}

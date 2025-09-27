@@ -1,51 +1,61 @@
-import type { 
-  FriendRequest, 
-  Friend, 
-  SendFriendRequestData, 
-  SharedHotel, 
-  Group, 
-  Chat, 
-  Message, 
-  SendSharedHotelData, 
-  CreateGroupData, 
-  SendMessageData 
-} from './types';
-import { api } from './instance';
+import type {
+  FriendRequest,
+  Friend,
+  SendFriendRequestData,
+  SharedHotel,
+  Group,
+  Chat,
+  Message,
+  SendSharedHotelData,
+  CreateGroupData,
+  SendMessageData,
+} from "./types/index.js";
+import { api } from "./instance.js";
 
-export type { 
-  FriendRequest, 
-  Friend, 
-  SendFriendRequestData, 
-  SharedHotel, 
-  Group, 
-  Chat, 
-  Message, 
-  SendSharedHotelData, 
-  CreateGroupData, 
-  SendMessageData 
+export type {
+  FriendRequest,
+  Friend,
+  SendFriendRequestData,
+  SharedHotel,
+  Group,
+  Chat,
+  Message,
+  SendSharedHotelData,
+  CreateGroupData,
+  SendMessageData,
 };
 
-export async function sendFriendRequest(data: SendFriendRequestData): Promise<FriendRequest> {
+export async function sendFriendRequest(
+  data: SendFriendRequestData
+): Promise<FriendRequest> {
   const res = await api.post("/api/friend-requests", data);
   return res.data;
 }
 
-export async function getFriendRequests(type: 'sent' | 'received' | 'all' = 'all'): Promise<FriendRequest[]> {
+export async function getFriendRequests(
+  type: "sent" | "received" | "all" = "all"
+): Promise<FriendRequest[]> {
   const res = await api.get("/api/friend-requests", { params: { type } });
   return res.data;
 }
 
-export async function acceptFriendRequest(requestId: string): Promise<FriendRequest> {
+export async function acceptFriendRequest(
+  requestId: string
+): Promise<FriendRequest> {
   const res = await api.patch(`/api/friend-requests/${requestId}/accept`);
   return res.data;
 }
 
-export async function rejectFriendRequest(requestId: string): Promise<FriendRequest> {
+export async function rejectFriendRequest(
+  requestId: string
+): Promise<FriendRequest> {
   const res = await api.patch(`/api/friend-requests/${requestId}/reject`);
   return res.data;
 }
 
-export async function cancelFriendRequest(requestId: string): Promise<{ message: string }> {
+export async function cancelFriendRequest(
+  requestId: string
+): Promise<{ message: string }> {
   const res = await api.delete(`/api/friend-requests/${requestId}`);
   return res.data;
 }
@@ -55,17 +65,23 @@ export async function getFriends(): Promise<Friend[]> {
   return res.data;
 }
 
-export async function removeFriend(friendId: string): Promise<{ message: string }> {
+export async function removeFriend(
+  friendId: string
+): Promise<{ message: string }> {
   const res = await api.delete(`/api/friend-requests/friends/${friendId}`);
   return res.data;
 }
 
-export async function shareHotel(data: SendSharedHotelData): Promise<SharedHotel> {
+export async function shareHotel(
+  data: SendSharedHotelData
+): Promise<SharedHotel> {
   const res = await api.post("/api/shared-hotels", data);
   return res.data;
 }
 
-export async function getSharedHotels(status: string = 'all'): Promise<SharedHotel[]> {
+export async function getSharedHotels(
+  status: string = "all"
+): Promise<SharedHotel[]> {
   const res = await api.get("/api/shared-hotels", { params: { status } });
   return res.data;
 }
@@ -75,8 +91,13 @@ export async function getMySharedHotels(): Promise<SharedHotel[]> {
   return res.data;
 }
 
-export async function updateSharedHotelStatus(sharedHotelId: string, status: string): Promise<SharedHotel> {
-  const res = await api.patch(`/api/shared-hotels/${sharedHotelId}/status`, { status });
+export async function updateSharedHotelStatus(
+  sharedHotelId: string,
+  status: string
+): Promise<SharedHotel> {
+  const res = await api.patch(`/api/shared-hotels/${sharedHotelId}/status`, {
+    status,
+  });
   return res.data;
 }
 
@@ -89,7 +110,7 @@ export async function createGroup(data: CreateGroupData): Promise<Group> {
   return res.data;
 }
 
-export async function getMyGroups(status: string = 'all'): Promise<Group[]> {
+export async function getMyGroups(status: string = "all"): Promise<Group[]> {
   const res = await api.get("/api/groups", { params: { status } });
   return res.data;
 }
@@ -99,17 +120,28 @@ export async function getGroupById(groupId: string): Promise<Group> {
   return res.data;
 }
 
-export async function addMemberToGroup(groupId: string, memberId: string): Promise<Group> {
+export async function addMemberToGroup(
+  groupId: string,
+  memberId: string
+): Promise<Group> {
   const res = await api.post(`/api/groups/${groupId}/members`, { memberId });
   return res.data;
 }
 
-export async function removeMemberFromGroup(groupId: string, memberId: string): Promise<Group> {
-  const res = await api.delete(`/api/groups/${groupId}/members`, { data: { memberId } });
+export async function removeMemberFromGroup(
+  groupId: string,
+  memberId: string
+): Promise<Group> {
+  const res = await api.delete(`/api/groups/${groupId}/members`, {
+    data: { memberId },
+  });
   return res.data;
 }
 
-export async function updateGroupStatus(groupId: string, status: string): Promise<Group> {
+export async function updateGroupStatus(
+  groupId: string,
+  status: string
+): Promise<Group> {
   const res = await api.patch(`/api/groups/${groupId}/status`, { status });
   return res.data;
 }
@@ -128,14 +160,21 @@ export async function getMyChats(): Promise<Chat[]> {
   return res.data;
 }
 
-export async function getChatMessages(chatId: string, page: number = 1, limit: number = 50): Promise<Message[]> {
-  const res = await api.get(`/api/chats/${chatId}/messages`, { 
-    params: { page, limit } 
+export async function getChatMessages(
+  chatId: string,
+  page: number = 1,
+  limit: number = 50
+): Promise<Message[]> {
+  const res = await api.get(`/api/chats/${chatId}/messages`, {
+    params: { page, limit },
   });
   return res.data;
 }
 
-export async function sendMessage(chatId: string, data: SendMessageData): Promise<Message> {
+export async function sendMessage(
+  chatId: string,
+  data: SendMessageData
+): Promise<Message> {
   const res = await api.post(`/api/chats/${chatId}/messages`, data);
   return res.data;
 }

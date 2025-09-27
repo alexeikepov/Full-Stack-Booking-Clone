@@ -1,5 +1,5 @@
-import type { LastSearch } from './types';
-import { api } from './instance';
+import type { LastSearch } from "./types/index.js";
+import { api } from "./instance.js";
 
 export type { LastSearch };
 
