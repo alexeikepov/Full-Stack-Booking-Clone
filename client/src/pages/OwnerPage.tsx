@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { EditHotelDialog } from "@/components/EditHotelDialog";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import { useEffect } from "react";
-import AdminHeader from "@/components/AdminHeader";
+import AdminHeader from "@/components/admin/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   api,

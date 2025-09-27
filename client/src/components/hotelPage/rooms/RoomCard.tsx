@@ -1,6 +1,3 @@
-import React from "react";
-
-// Define Room type locally to avoid import issues
 export type Room = {
   _id: string;
   id?: string;
@@ -22,6 +19,48 @@ export type Room = {
   categories: string[];
   features: string[];
   description?: string;
+  specialFeatures?: {
+    hasPrivateBathroom?: boolean;
+    hasTV?: boolean;
+    hasMiniFridge?: boolean;
+    hasFreeWifi?: boolean;
+    hasCityView?: boolean;
+    hasSeaView?: boolean;
+    hasBalcony?: boolean;
+    hasPoolView?: boolean;
+    hasSmartTV?: boolean;
+    hasEspresso?: boolean;
+    hasNespresso?: boolean;
+    hasSofaBed?: boolean;
+    hasRainShower?: boolean;
+    hasBath?: boolean;
+    hasQueenBeds?: boolean;
+    hasKitchenette?: boolean;
+    hasTwoBedrooms?: boolean;
+    hasMicrowave?: boolean;
+    hasLivingArea?: boolean;
+    hasDiningTable?: boolean;
+    hasKingBed?: boolean;
+    hasKettle?: boolean;
+    hasDesk?: boolean;
+    hasTwinBeds?: boolean;
+    hasAccessibleBathroom?: boolean;
+    hasStepFreeAccess?: boolean;
+    hasPrivateTerrace?: boolean;
+    hasOutdoorSeating?: boolean;
+    hasJacuzzi?: boolean;
+    hasSpaAccess?: boolean;
+    hasPanoramicView?: boolean;
+    hasTwoTerraces?: boolean;
+  };
+  pricing?: {
+    basePrice: number;
+    currency: string;
+    includesBreakfast?: boolean;
+    freeCancellation: boolean;
+    noPrepayment: boolean;
+    priceMatch: boolean;
+  };
   policies?: {
     freeCancellation?: boolean;
     noPrepayment?: boolean;
@@ -123,7 +162,6 @@ export default function RoomCard({ room, onSelect, selected }: RoomCardProps) {
         </div>
       </div>
 
-      {/* Features */}
       {room.features && room.features.length > 0 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
@@ -144,7 +182,6 @@ export default function RoomCard({ room, onSelect, selected }: RoomCardProps) {
         </div>
       )}
 
-      {/* Special Features */}
       {getSpecialFeatures().length > 0 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
@@ -160,7 +197,6 @@ export default function RoomCard({ room, onSelect, selected }: RoomCardProps) {
         </div>
       )}
 
-      {/* Pricing Info */}
       {room.pricing && (
         <div className="mb-4 text-sm text-gray-600">
           {room.pricing.includesBreakfast && (

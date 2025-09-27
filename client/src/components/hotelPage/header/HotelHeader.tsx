@@ -1,9 +1,8 @@
 import type { Hotel } from "@/types/hotel";
 import { Button } from "@/components/ui/button";
 import HotelStars from "./HotelStars";
-import WishlistButton from "@/components/WishlistButton";
+import WishlistButton from "@/components/layout/WishlistButton";
 import PriceMatchModal from "@/components/ui/PriceMatchModal";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import HotelShareModal from "./HotelShareModal";
 
@@ -13,7 +12,6 @@ interface HotelHeaderProps {
 }
 
 export default function HotelHeader({ hotel, onShowMap }: HotelHeaderProps) {
-  const navigate = useNavigate();
   const [isPriceMatchModalOpen, setIsPriceMatchModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
@@ -100,7 +98,7 @@ export default function HotelHeader({ hotel, onShowMap }: HotelHeaderProps) {
             {/* Top row: Heart, Share, Reserve */}
             <div className="flex items-center gap-3">
               <WishlistButton
-                hotelId={hotel.id || hotel._id}
+                hotelId={hotel._id.$oid}
                 hotelName={hotel.name}
                 className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 size="md"

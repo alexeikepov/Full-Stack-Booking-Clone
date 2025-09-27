@@ -4,12 +4,13 @@ import { useState } from "react";
 import BookingModal from "../booking/BookingModal";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import type { Hotel, Room } from "@/types/hotel";
 
 interface PriceSummaryProps {
   totalSelectedRooms: number;
   totalPrice: number;
-  firstSelectedRoom: any;
-  hotel: any;
+  firstSelectedRoom: Room | null;
+  hotel: Hotel;
   selectedRooms: Record<string, number>;
 }
 
@@ -27,17 +28,21 @@ export default function PriceSummary({
 
   // Calculate number of nights
   const calculateNights = () => {
-    if (picker.range.from && picker.range.to) {
+    if (picker.mode === "calendar" && picker.range?.from && picker.range?.to) {
       const from = picker.range.from;
       const to = picker.range.to;
-      
+
       // Validate that both are Date objects
-      if (!(from instanceof Date) || !(to instanceof Date) || 
-          isNaN(from.getTime()) || isNaN(to.getTime())) {
-        console.warn('Invalid dates in PriceSummary calculateNights');
+      if (
+        !(from instanceof Date) ||
+        !(to instanceof Date) ||
+        isNaN(from.getTime()) ||
+        isNaN(to.getTime())
+      ) {
+        console.warn("Invalid dates in PriceSummary calculateNights");
         return 1; // Default to 1 night if dates are invalid
       }
-      
+
       const diffTime = Math.abs(to.getTime() - from.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return Math.max(1, diffDays);

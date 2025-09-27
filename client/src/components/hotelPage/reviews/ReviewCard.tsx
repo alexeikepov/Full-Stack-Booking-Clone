@@ -1,6 +1,3 @@
-import React from "react";
-
-// Define Review type locally to avoid import issues
 export type Review = {
   _id: string;
   hotel: string;
@@ -10,6 +7,9 @@ export type Review = {
   guestName: string;
   guestCountry: string;
   guestInitial: string;
+  stayDate?: Date | string;
+  roomType?: string;
+  isVerified?: boolean;
   categoryRatings?: {
     staff?: number;
     comfort?: number;
@@ -21,15 +21,17 @@ export type Review = {
   travelType?: string;
   photos?: string[];
   helpful?: number;
+  helpfulVotes?: number;
   verified?: boolean;
   anonymous?: boolean;
   hotelResponse?: {
     response: string;
+    text?: string;
     respondedBy?: string;
     respondedAt?: Date;
   };
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 };
 
 interface ReviewCardProps {
@@ -45,7 +47,8 @@ export default function ReviewCard({
   onReport,
   showActions = true,
 }: ReviewCardProps) {
-  const formatDate = (date: Date | string) => {
+  const formatDate = (date: Date | string | undefined) => {
+    if (!date) return "";
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -98,7 +101,6 @@ export default function ReviewCard({
         </div>
       </div>
 
-      {/* Travel type and room type */}
       <div className="flex items-center space-x-4 mb-3 text-sm text-gray-600">
         {review.travelType && (
           <span className="bg-gray-100 px-2 py-1 rounded">
@@ -117,7 +119,6 @@ export default function ReviewCard({
         )}
       </div>
 
-      {/* Category ratings */}
       {review.categoryRatings && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           {Object.entries(review.categoryRatings).map(([category, rating]) => (
@@ -135,14 +136,12 @@ export default function ReviewCard({
         </div>
       )}
 
-      {/* Review comment */}
       {review.comment && (
         <div className="text-gray-700 mb-4">
           <p className="leading-relaxed">{review.comment}</p>
         </div>
       )}
 
-      {/* Hotel response */}
       {review.hotelResponse && (
         <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
           <div className="flex items-center mb-2">
@@ -155,11 +154,12 @@ export default function ReviewCard({
               </span>
             )}
           </div>
-          <p className="text-blue-700 text-sm">{review.hotelResponse.text}</p>
+          <p className="text-blue-700 text-sm">
+            {review.hotelResponse.response}
+          </p>
         </div>
       )}
 
-      {/* Actions */}
       {showActions && (
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">

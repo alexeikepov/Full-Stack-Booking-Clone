@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api, getMyReviews } from "@/lib/api";
-import Footer from "@/components/Footer";
+import Footer from "@/components/navigation/Footer";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import { getPrimaryImage } from "@/utils/hotel-images";
 

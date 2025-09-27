@@ -18,7 +18,7 @@ import {
   Edit,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
 } from "lucide-react";
 import {
   getMyGroups,
@@ -30,10 +30,10 @@ import {
   getFriends,
   type Group,
   type Friend,
-  type CreateGroupData
+  type CreateGroupData,
 } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import HotelSelector from "./HotelSelector";
+import HotelSelector from "@/components/maps/HotelSelector";
 
 export default function Groups() {
   const { user: currentUser } = useAuth();
@@ -51,7 +51,7 @@ export default function Groups() {
     description: "",
     adults: 1,
     children: 0,
-    rooms: 1
+    rooms: 1,
   });
 
   useEffect(() => {
@@ -62,8 +62,8 @@ export default function Groups() {
     setLoading(true);
     try {
       const [groupsList, friendsList] = await Promise.all([
-        getMyGroups('all'),
-        getFriends()
+        getMyGroups("all"),
+        getFriends(),
       ]);
       setGroups(groupsList);
       setFriends(friendsList);
@@ -81,7 +81,12 @@ export default function Groups() {
   };
 
   const handleCreateGroup = async () => {
-    if (!newGroup.name || !newGroup.hotelId || !newGroup.checkIn || !newGroup.checkOut) {
+    if (
+      !newGroup.name ||
+      !newGroup.hotelId ||
+      !newGroup.checkIn ||
+      !newGroup.checkOut
+    ) {
       alert("Please fill in all required fields");
       return;
     }
@@ -95,7 +100,7 @@ export default function Groups() {
         description: "",
         adults: 1,
         children: 0,
-        rooms: 1
+        rooms: 1,
       });
       await loadData();
       alert("Group created successfully");
@@ -116,7 +121,7 @@ export default function Groups() {
 
   const handleRemoveMember = async (groupId: string, memberId: string) => {
     if (!confirm("Are you sure you want to remove this member?")) return;
-    
+
     try {
       await removeMemberFromGroup(groupId, memberId);
       await loadData();
@@ -138,7 +143,7 @@ export default function Groups() {
 
   const handleDeleteGroup = async (groupId: string) => {
     if (!confirm("Are you sure you want to delete this group?")) return;
-    
+
     try {
       await deleteGroup(groupId);
       await loadData();
@@ -150,21 +155,31 @@ export default function Groups() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'planning': return 'bg-yellow-100 text-yellow-800';
-      case 'booked': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "planning":
+        return "bg-yellow-100 text-yellow-800";
+      case "booked":
+        return "bg-green-100 text-green-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'planning': return <Clock className="h-4 w-4" />;
-      case 'booked': return <CheckCircle className="h-4 w-4" />;
-      case 'completed': return <CheckCircle className="h-4 w-4" />;
-      case 'cancelled': return <XCircle className="h-4 w-4" />;
-      default: return null;
+      case "planning":
+        return <Clock className="h-4 w-4" />;
+      case "booked":
+        return <CheckCircle className="h-4 w-4" />;
+      case "completed":
+        return <CheckCircle className="h-4 w-4" />;
+      case "cancelled":
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return null;
     }
   };
 
@@ -237,8 +252,12 @@ export default function Groups() {
             <Card>
               <CardContent className="p-8 text-center">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No groups yet</h3>
-                <p className="text-gray-600">Create your first group to start planning trips with friends.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No groups yet
+                </h3>
+                <p className="text-gray-600">
+                  Create your first group to start planning trips with friends.
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -249,21 +268,28 @@ export default function Groups() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <div>
-                          <h3 className="text-lg font-semibold">{group.name}</h3>
+                          <h3 className="text-lg font-semibold">
+                            {group.name}
+                          </h3>
                           <p className="text-sm text-gray-600">
-                            Created by {group.creator.name} • {group.members.length} members
+                            Created by {group.creator.name} •{" "}
+                            {group.members.length} members
                           </p>
                         </div>
                       </div>
 
                       {group.description && (
-                        <p className="text-gray-700 mb-3">{group.description}</p>
+                        <p className="text-gray-700 mb-3">
+                          {group.description}
+                        </p>
                       )}
 
                       <div className="bg-gray-50 p-4 rounded-lg mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Hotel className="h-5 w-5 text-blue-600" />
-                          <h4 className="font-semibold text-lg">{group.hotel.name}</h4>
+                          <h4 className="font-semibold text-lg">
+                            {group.hotel.name}
+                          </h4>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
@@ -276,30 +302,42 @@ export default function Groups() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {new Date(group.checkIn).toLocaleDateString()} - {new Date(group.checkOut).toLocaleDateString()}
+                            {new Date(
+                              group.checkIn
+                            ).toLocaleDateString()} -{" "}
+                            {new Date(group.checkOut).toLocaleDateString()}
                           </div>
                         </div>
                         <div className="mt-2 text-sm text-gray-600">
-                          {group.adults} adults, {group.children} children, {group.rooms} rooms
+                          {group.adults} adults, {group.children} children,{" "}
+                          {group.rooms} rooms
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 mb-4">
                         <Badge className={getStatusColor(group.status)}>
                           {getStatusIcon(group.status)}
-                          <span className="ml-1 capitalize">{group.status}</span>
+                          <span className="ml-1 capitalize">
+                            {group.status}
+                          </span>
                         </Badge>
                         <span className="text-sm text-gray-500">
-                          Created {new Date(group.createdAt).toLocaleDateString()}
+                          Created{" "}
+                          {new Date(group.createdAt).toLocaleDateString()}
                         </span>
                       </div>
 
                       {/* Members */}
                       <div className="mb-4">
-                        <h4 className="font-medium text-gray-900 mb-2">Members ({group.members.length})</h4>
+                        <h4 className="font-medium text-gray-900 mb-2">
+                          Members ({group.members.length})
+                        </h4>
                         <div className="flex flex-wrap gap-2">
                           {group.members.map((member) => (
-                            <div key={member._id} className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
+                            <div
+                              key={member._id}
+                              className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full"
+                            >
                               <Avatar className="h-6 w-6">
                                 <AvatarFallback className="text-xs">
                                   {member.name.charAt(0).toUpperCase()}
@@ -307,18 +345,23 @@ export default function Groups() {
                               </Avatar>
                               <span className="text-sm">{member.name}</span>
                               {group.creator._id === member._id && (
-                                <Badge className="bg-blue-100 text-blue-800 text-xs">Creator</Badge>
+                                <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                  Creator
+                                </Badge>
                               )}
-                              {group.creator._id === currentUser?.id && member._id !== currentUser?.id && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleRemoveMember(group._id, member._id)}
-                                  className="h-6 w-6 p-0"
-                                >
-                                  <UserMinus className="h-3 w-3" />
-                                </Button>
-                              )}
+                              {group.creator._id === currentUser?.id &&
+                                member._id !== currentUser?.id && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleRemoveMember(group._id, member._id)
+                                    }
+                                    className="h-6 w-6 p-0"
+                                  >
+                                    <UserMinus className="h-3 w-3" />
+                                  </Button>
+                                )}
                             </div>
                           ))}
                         </div>
@@ -359,88 +402,114 @@ export default function Groups() {
 
       {activeTab === "planning" && (
         <div className="space-y-4">
-          {groups.filter(g => g.status === 'planning').length === 0 ? (
+          {groups.filter((g) => g.status === "planning").length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
                 <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No planning groups</h3>
-                <p className="text-gray-600">No groups are currently in planning phase.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No planning groups
+                </h3>
+                <p className="text-gray-600">
+                  No groups are currently in planning phase.
+                </p>
               </CardContent>
             </Card>
           ) : (
-            groups.filter(g => g.status === 'planning').map((group) => (
-              <Card key={group._id}>
-                <CardContent className="p-6">
-                  {/* Same content as my-groups but filtered */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2">{group.name}</h3>
-                      <p className="text-gray-600 mb-4">{group.description}</p>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(group.status)}>
-                          {getStatusIcon(group.status)}
-                          <span className="ml-1 capitalize">{group.status}</span>
-                        </Badge>
-                        <span className="text-sm text-gray-500">
-                          {group.members.length} members
-                        </span>
+            groups
+              .filter((g) => g.status === "planning")
+              .map((group) => (
+                <Card key={group._id}>
+                  <CardContent className="p-6">
+                    {/* Same content as my-groups but filtered */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold mb-2">
+                          {group.name}
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          {group.description}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(group.status)}>
+                            {getStatusIcon(group.status)}
+                            <span className="ml-1 capitalize">
+                              {group.status}
+                            </span>
+                          </Badge>
+                          <span className="text-sm text-gray-500">
+                            {group.members.length} members
+                          </span>
+                        </div>
                       </div>
+                      {group.creator._id === currentUser?.id && (
+                        <Button
+                          onClick={() =>
+                            handleUpdateStatus(group._id, "booked")
+                          }
+                        >
+                          Mark as Booked
+                        </Button>
+                      )}
                     </div>
-                    {group.creator._id === currentUser?.id && (
-                      <Button
-                        onClick={() => handleUpdateStatus(group._id, 'booked')}
-                      >
-                        Mark as Booked
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              ))
           )}
         </div>
       )}
 
       {activeTab === "booked" && (
         <div className="space-y-4">
-          {groups.filter(g => g.status === 'booked').length === 0 ? (
+          {groups.filter((g) => g.status === "booked").length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
                 <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No booked groups</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No booked groups
+                </h3>
                 <p className="text-gray-600">No groups have been booked yet.</p>
               </CardContent>
             </Card>
           ) : (
-            groups.filter(g => g.status === 'booked').map((group) => (
-              <Card key={group._id}>
-                <CardContent className="p-6">
-                  {/* Same content as my-groups but filtered */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2">{group.name}</h3>
-                      <p className="text-gray-600 mb-4">{group.description}</p>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(group.status)}>
-                          {getStatusIcon(group.status)}
-                          <span className="ml-1 capitalize">{group.status}</span>
-                        </Badge>
-                        <span className="text-sm text-gray-500">
-                          {group.members.length} members
-                        </span>
+            groups
+              .filter((g) => g.status === "booked")
+              .map((group) => (
+                <Card key={group._id}>
+                  <CardContent className="p-6">
+                    {/* Same content as my-groups but filtered */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold mb-2">
+                          {group.name}
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          {group.description}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(group.status)}>
+                            {getStatusIcon(group.status)}
+                            <span className="ml-1 capitalize">
+                              {group.status}
+                            </span>
+                          </Badge>
+                          <span className="text-sm text-gray-500">
+                            {group.members.length} members
+                          </span>
+                        </div>
                       </div>
+                      {group.creator._id === currentUser?.id && (
+                        <Button
+                          onClick={() =>
+                            handleUpdateStatus(group._id, "completed")
+                          }
+                        >
+                          Mark as Completed
+                        </Button>
+                      )}
                     </div>
-                    {group.creator._id === currentUser?.id && (
-                      <Button
-                        onClick={() => handleUpdateStatus(group._id, 'completed')}
-                      >
-                        Mark as Completed
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              ))
           )}
         </div>
       )}
@@ -460,7 +529,9 @@ export default function Groups() {
                 <Input
                   placeholder="Enter group name"
                   value={newGroup.name || ""}
-                  onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewGroup({ ...newGroup, name: e.target.value })
+                  }
                 />
               </div>
 
@@ -471,7 +542,9 @@ export default function Groups() {
                 <Textarea
                   placeholder="Describe your trip..."
                   value={newGroup.description || ""}
-                  onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewGroup({ ...newGroup, description: e.target.value })
+                  }
                   rows={3}
                 />
               </div>
@@ -485,7 +558,12 @@ export default function Groups() {
                     type="number"
                     min="1"
                     value={newGroup.adults || 1}
-                    onChange={(e) => setNewGroup({ ...newGroup, adults: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setNewGroup({
+                        ...newGroup,
+                        adults: parseInt(e.target.value),
+                      })
+                    }
                   />
                 </div>
                 <div>
@@ -496,7 +574,12 @@ export default function Groups() {
                     type="number"
                     min="0"
                     value={newGroup.children || 0}
-                    onChange={(e) => setNewGroup({ ...newGroup, children: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setNewGroup({
+                        ...newGroup,
+                        children: parseInt(e.target.value),
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -509,7 +592,12 @@ export default function Groups() {
                   type="number"
                   min="1"
                   value={newGroup.rooms || 1}
-                  onChange={(e) => setNewGroup({ ...newGroup, rooms: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setNewGroup({
+                      ...newGroup,
+                      rooms: parseInt(e.target.value),
+                    })
+                  }
                 />
               </div>
 
@@ -521,7 +609,9 @@ export default function Groups() {
                   <Input
                     type="date"
                     value={newGroup.checkIn || ""}
-                    onChange={(e) => setNewGroup({ ...newGroup, checkIn: e.target.value })}
+                    onChange={(e) =>
+                      setNewGroup({ ...newGroup, checkIn: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -531,7 +621,9 @@ export default function Groups() {
                   <Input
                     type="date"
                     value={newGroup.checkOut || ""}
-                    onChange={(e) => setNewGroup({ ...newGroup, checkOut: e.target.value })}
+                    onChange={(e) =>
+                      setNewGroup({ ...newGroup, checkOut: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -553,7 +645,9 @@ export default function Groups() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 text-yellow-500" />
-                        {selectedHotel.rating || selectedHotel.averageRating || 0}
+                        {selectedHotel.rating ||
+                          selectedHotel.averageRating ||
+                          0}
                       </div>
                     </div>
                     <Button
@@ -581,10 +675,7 @@ export default function Groups() {
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  onClick={handleCreateGroup}
-                  className="flex-1"
-                >
+                <Button onClick={handleCreateGroup} className="flex-1">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Group
                 </Button>
@@ -597,7 +688,7 @@ export default function Groups() {
                       description: "",
                       adults: 1,
                       children: 0,
-                      rooms: 1
+                      rooms: 1,
                     });
                   }}
                 >
@@ -633,7 +724,12 @@ export default function Groups() {
                 >
                   <option value="">Choose a friend...</option>
                   {friends
-                    .filter(friend => !selectedGroup.members.some(member => member._id === friend._id))
+                    .filter(
+                      (friend) =>
+                        !selectedGroup.members.some(
+                          (member) => member._id === friend._id
+                        )
+                    )
                     .map((friend) => (
                       <option key={friend._id} value={friend._id}>
                         {friend.name}

@@ -11,7 +11,7 @@ import {
   Trash2,
   ChevronDown,
 } from "lucide-react";
-import Footer from "@/components/Footer";
+import Footer from "@/components/navigation/Footer";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useAuth } from "@/context/AuthContext";
 import {

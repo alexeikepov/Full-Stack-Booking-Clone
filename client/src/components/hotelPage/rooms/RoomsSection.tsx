@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import RoomCard from "./RoomCard";
 
-// Define Hotel type locally to avoid import issues
 export type Hotel = {
   _id: string;
   id?: string;
@@ -62,7 +61,7 @@ export default function RoomsSection({
     { value: "size", label: "Room Size" },
   ];
 
-  const filteredAndSortedRooms = hotel.rooms
+  const filteredAndSortedRooms = (hotel.rooms || [])
     .filter((room) => {
       if (filter === "all") return true;
       return room.roomType === filter;
@@ -93,7 +92,7 @@ export default function RoomsSection({
       { count: number; minPrice: number; maxPrice: number }
     > = {};
 
-    hotel.rooms.forEach((room) => {
+    (hotel.rooms || []).forEach((room) => {
       if (!stats[room.roomType]) {
         stats[room.roomType] = {
           count: 0,
@@ -126,7 +125,6 @@ export default function RoomsSection({
             Available Rooms
           </h2>
 
-          {/* Room Type Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {Object.entries(roomTypeStats).map(([type, stats]) => (
               <div key={type} className="bg-gray-50 rounded-lg p-4">
@@ -141,7 +139,6 @@ export default function RoomsSection({
             ))}
           </div>
 
-          {/* Filters and Sort */}
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -179,7 +176,6 @@ export default function RoomsSection({
           </div>
         </div>
 
-        {/* Rooms Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredAndSortedRooms.map((room) => (
             <RoomCard
@@ -200,7 +196,6 @@ export default function RoomsSection({
           </div>
         )}
 
-        {/* Selected Room Summary */}
         {selectedRoom && (
           <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">

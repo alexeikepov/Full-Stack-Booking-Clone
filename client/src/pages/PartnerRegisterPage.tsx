@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import PartnerRegisterHeader from "@/components/PartnerRegisterHeader";
+import PartnerRegisterHeader from "@/components/admin/PartnerRegisterHeader";
 import { registerUser, requestAdminRole, getMe } from "@/lib/api";
 
 type Step = "email" | "contact" | "password";

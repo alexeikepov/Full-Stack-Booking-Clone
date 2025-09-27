@@ -14,7 +14,7 @@ import HotelSurroundings from "@/components/hotelPage/surroundings/HotelSurround
 import HouseRules from "@/components/hotelPage/rules/HouseRules";
 import FinePrint from "@/components/hotelPage/rules/FinePrint";
 import FullscreenMapModal from "@/components/hotelPage/gallery/FullscreenMapModal";
-import Footer from "@/components/Footer";
+import Footer from "@/components/navigation/Footer";
 import { useNavigationStore } from "@/stores/navigation";
 import { useSearchStore } from "@/stores/search";
 
@@ -49,8 +49,8 @@ export default function HotelPage() {
       // Helper function to format date without timezone issues
       const formatDateForAPI = (date: Date) => {
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
       };
 

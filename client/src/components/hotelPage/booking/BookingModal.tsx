@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { createReservation } from "@/lib/api";
 import { useSearchStore } from "@/stores/search";
-import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 interface BookingModalProps {
@@ -33,9 +32,8 @@ export default function BookingModal({
   });
 
   const { adults, children, picker } = useSearchStore();
-  const from = picker.range.from;
-  const to = picker.range.to;
-  const { user } = useAuth();
+  const from = picker.mode === "calendar" ? picker.range?.from : undefined;
+  const to = picker.mode === "calendar" ? picker.range?.to : undefined;
   const navigate = useNavigate();
 
   // Calculate number of nights
@@ -107,15 +105,15 @@ export default function BookingModal({
       checkIn: (() => {
         const date = from || new Date();
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
       })(),
       checkOut: (() => {
         const date = to || new Date(Date.now() + 86400000);
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
       })(),
       guestInfo: {

@@ -1,7 +1,7 @@
-import LanguageSelector from "@/components/LanguageSelector";
+import LanguageSelector from "@/components/forms/LanguageSelector";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import ProfileMenu from "./ProfileMenu";
+import ProfileMenu from "@/components/layout/ProfileMenu";
 
 export default function AdminHeader() {
   const { user, isLoading, signOut } = useAuth();

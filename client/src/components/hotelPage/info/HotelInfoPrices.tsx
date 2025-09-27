@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Hotel } from "@/types/hotel";
+import type { Hotel, Room } from "@/types/hotel";
 import { useSearchStore } from "@/stores/search";
 import { getHotelRooms } from "@/lib/api";
 import SearchBar from "./SearchBar";
@@ -30,9 +30,11 @@ export default function HotelInfoPrices({
     children,
     rooms: searchRooms,
     setRooms,
-    from,
-    to,
+    picker,
   } = useSearchStore();
+
+  const from = picker.mode === "calendar" ? picker.range?.from : undefined;
+  const to = picker.mode === "calendar" ? picker.range?.to : undefined;
 
   // Fetch rooms from backend with availability data
   const {
@@ -40,22 +42,21 @@ export default function HotelInfoPrices({
     isLoading: roomsLoading,
     error: roomsError,
   } = useQuery({
-    queryKey: ["hotelRooms", hotel.id || hotel._id?.$oid, from, to],
+    queryKey: ["hotelRooms", hotel._id?.$oid, from, to],
     queryFn: () => {
-      // Helper function to format date without timezone issues
       const formatDateForAPI = (date: Date) => {
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
       };
-      
-      return getHotelRooms(hotel.id || hotel._id?.$oid, {
+
+      return getHotelRooms(hotel._id?.$oid, {
         from: from ? formatDateForAPI(from) : undefined,
         to: to ? formatDateForAPI(to) : undefined,
       });
     },
-    enabled: Boolean(hotel.id || hotel._id?.$oid),
+    enabled: Boolean(hotel._id?.$oid),
     retry: 1,
   });
 
@@ -105,8 +106,8 @@ export default function HotelInfoPrices({
   }, [searchRooms, requiredRooms]);
 
   // Helper function to get room ID
-  const getRoomId = (room: any) => {
-    return room.id || room._id?.$oid || room._id || "";
+  const getRoomId = (room: Room) => {
+    return room._id?.$oid || "";
   };
 
   // Handle room selection
@@ -122,7 +123,7 @@ export default function HotelInfoPrices({
     let total = 0;
     Object.entries(selectedRooms).forEach(([roomId, count]) => {
       if (count > 0) {
-        const room = rooms.find((r) => getRoomId(r) === roomId);
+        const room = rooms.find((r: Room) => getRoomId(r) === roomId);
         if (room && room.pricePerNight) {
           total += room.pricePerNight * count;
         }
@@ -130,9 +131,6 @@ export default function HotelInfoPrices({
     });
     return total;
   };
-
-  // Calculate price per night for all selected rooms
-  const pricePerNight = calculateTotalPrice(); // This already includes room count
 
   // Get total selected rooms count
   const totalSelectedRooms = Object.values(selectedRooms).reduce(
@@ -144,7 +142,7 @@ export default function HotelInfoPrices({
   const getFirstSelectedRoomDetails = () => {
     for (const roomId in selectedRooms) {
       if (selectedRooms[roomId] > 0) {
-        return rooms.find((r) => getRoomId(r) === roomId);
+        return rooms.find((r: Room) => getRoomId(r) === roomId);
       }
     }
     return null;
@@ -157,7 +155,6 @@ export default function HotelInfoPrices({
     const handleScroll = () => {
       if (tableRef.current && headerRef.current) {
         const tableRect = tableRef.current.getBoundingClientRect();
-        const headerHeight = headerRef.current.offsetHeight;
 
         // Header becomes sticky when table top reaches viewport top
         const tableTopReached = tableRect.top <= 0;
@@ -241,23 +238,17 @@ export default function HotelInfoPrices({
               className="bg-white"
               style={{ paddingTop: isSticky ? "60px" : "0" }}
             >
-              {rooms.map((room, index) => {
-                // Check if this is the first room of a new type
-                const isFirstOfType =
-                  index === 0 || room.name !== rooms[index - 1].name;
-
+              {rooms.map((room: Room, index: number) => {
                 return (
                   <RoomRow
-                    key={room._id || room.id}
+                    key={room._id?.$oid}
                     room={room}
                     index={index}
-                    isFirstOfType={isFirstOfType}
                     selectedRooms={selectedRooms}
                     onRoomSelect={handleRoomSelect}
                     getRoomId={getRoomId}
                     totalSelectedRooms={totalSelectedRooms}
                     totalPrice={calculateTotalPrice()}
-                    pricePerNight={pricePerNight}
                     firstSelectedRoom={firstSelectedRoom}
                     adults={adults}
                     children={children}

@@ -11,10 +11,10 @@ import {
   Calendar,
   Heart,
 } from "lucide-react";
-import FriendRequests from "@/components/FriendRequests";
-import FindFriends from "@/components/FindFriends";
-import SharedHotels from "@/components/SharedHotels";
-import Groups from "@/components/Groups";
+import FriendRequests from "@/components/social/FriendRequests";
+import FindFriends from "@/components/social/FindFriends";
+import SharedHotels from "@/components/social/SharedHotels";
+import Groups from "@/components/social/Groups";
 import Chat from "@/components/Chat";
 
 export default function FriendsPage() {

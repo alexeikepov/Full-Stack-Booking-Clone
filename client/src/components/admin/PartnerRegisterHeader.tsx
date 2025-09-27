@@ -1,4 +1,4 @@
-import LanguageSelector from "@/components/LanguageSelector";
+import LanguageSelector from "@/components/forms/LanguageSelector";
 
 export default function PartnerRegisterHeader() {
   return (

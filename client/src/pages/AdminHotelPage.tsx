@@ -29,7 +29,7 @@ import { Input } from "@/components/ui/input";
 import { EditHotelDialog } from "@/components/EditHotelDialog";
 // import AddHotelDialog from "@/components/AddHotelDialog"; // removed, using EditHotelDialog for full add
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
-import AdminHeader from "@/components/AdminHeader";
+import AdminHeader from "@/components/admin/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getOwnerHotels,

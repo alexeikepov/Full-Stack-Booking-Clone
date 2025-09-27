@@ -1,7 +1,7 @@
 // src/pages/ListYourPropertyPage.tsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import AdminHeader from "@/components/AdminHeader";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 import importPropertyDetailsImg from "../img/ListYourPropertyPageImg/Import your property details.png";
 import startFastImg from "../img/ListYourPropertyPageImg/Start fast with review scores.png";
@@ -42,7 +42,13 @@ function Tick() {
 
 function ChevronDown({ className = "" }: { className?: string }) {
   return (
-    <svg className={className} width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path
         d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"
         fill="currentColor"
@@ -56,7 +62,11 @@ function TestimonialCard({ quote, name, role, imgSrc }: TestimonialCardProps) {
     <div className="mb-6 break-inside-avoid rounded-lg border border-[#ffb700] bg-white p-6">
       <p className="mb-4 text-[16px] leading-7 text-[#595959]">"{quote}"</p>
       <div className="flex items-center gap-3">
-        <img src={imgSrc} alt={name} className="h-12 w-12 rounded-full object-cover" />
+        <img
+          src={imgSrc}
+          alt={name}
+          className="h-12 w-12 rounded-full object-cover"
+        />
         <div className="text-[14px]">
           <div className="font-bold text-[#262626]">{name}</div>
           <div className="text-[#595959]">{role}</div>
@@ -94,18 +104,24 @@ export default function ListYourPropertyPage() {
             <div className="grid items-start gap-8 lg:grid-cols-[1fr_400px]">
               <div>
                 <h1 className="mb-2 text-[52px] font-bold leading-[1.1] tracking-[-0.5px]">
-                  List your <span className="bg-gradient-to-b from-[#31b4ff] to-[#0a6adf] bg-clip-text text-transparent">apartment</span>
+                  List your{" "}
+                  <span className="bg-gradient-to-b from-[#31b4ff] to-[#0a6adf] bg-clip-text text-transparent">
+                    apartment
+                  </span>
                   <br />
                   on Booking.com
                 </h1>
                 <p className="max-w-[550px] text-[18px] leading-7 text-white/90">
-                  List on one of the world’s most downloaded travel apps to earn more, faster and expand into new markets.
+                  List on one of the world’s most downloaded travel apps to earn
+                  more, faster and expand into new markets.
                 </p>
               </div>
 
               <div className="rounded-lg border-4 border-[#ffb700] bg-white text-[#262626] shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
                 <div className="p-5">
-                  <h3 className="mb-1 text-[20px] font-bold">Register for free</h3>
+                  <h3 className="mb-1 text-[20px] font-bold">
+                    Register for free
+                  </h3>
                   <small className="mb-3 block text-[14px] text-[#595959]">
                     45% of hosts get their first booking within a week
                   </small>
@@ -119,16 +135,24 @@ export default function ListYourPropertyPage() {
 
                   <div className="my-3 flex items-center gap-3">
                     <Tick />
-                    <span className="text-[14px] leading-[1.4]">We’ll facilitate payments for you</span>
+                    <span className="text-[14px] leading-[1.4]">
+                      We’ll facilitate payments for you
+                    </span>
                   </div>
 
-                  <Link to="/partner-register" className={`${btn} mt-4 w-full h-11 text-[16px] font-bold`}>
+                  <Link
+                    to="/partner-register"
+                    className={`${btn} mt-4 w-full h-11 text-[16px] font-bold`}
+                  >
                     Start registration →
                   </Link>
 
                   <div className="mt-4 border-t border-[#e0e0e0] pt-4 text-[14px] text-[#262626]">
                     Already started a registration?{" "}
-                    <Link to="/partner-register" className="font-bold underline decoration-transparent hover:decoration-inherit">
+                    <Link
+                      to="/partner-register"
+                      className="font-bold underline decoration-transparent hover:decoration-inherit"
+                    >
                       Continue your registration
                     </Link>
                   </div>
@@ -144,18 +168,30 @@ export default function ListYourPropertyPage() {
 
             <div className="grid gap-12 md:grid-cols-3">
               <div>
-                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">Your rental, your rules</h4>
+                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">
+                  Your rental, your rules
+                </h4>
 
                 <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
-                    Accept or decline bookings with <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">Request to Book</a>.
+                    Accept or decline bookings with{" "}
+                    <a
+                      href="#"
+                      className="text-[#006ce4] underline-offset-2 hover:underline"
+                    >
+                      Request to Book
+                    </a>
+                    .
                   </span>
                 </div>
 
                 <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
-                  <span>Manage your guests’ expectations by setting up clear house rules.</span>
+                  <span>
+                    Manage your guests’ expectations by setting up clear house
+                    rules.
+                  </span>
                 </div>
 
                 <div className="mt-6">
@@ -170,11 +206,16 @@ export default function ListYourPropertyPage() {
               </div>
 
               <div>
-                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">Get to know your guests</h4>
+                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">
+                  Get to know your guests
+                </h4>
 
                 <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
-                  <span>Chat with your guests before accepting their stay with pre-booking messaging.*</span>
+                  <span>
+                    Chat with your guests before accepting their stay with
+                    pre-booking messaging.*
+                  </span>
                 </div>
 
                 <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
@@ -184,19 +225,36 @@ export default function ListYourPropertyPage() {
               </div>
 
               <div>
-                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">Stay protected</h4>
+                <h4 className="mb-3 text-[18px] font-bold leading-[1.4]">
+                  Stay protected
+                </h4>
 
                 <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
-                    Protection against <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">liability claims</a> from guests and neighbours up to €/$/£1,000,000 for every reservation.
+                    Protection against{" "}
+                    <a
+                      href="#"
+                      className="text-[#006ce4] underline-offset-2 hover:underline"
+                    >
+                      liability claims
+                    </a>{" "}
+                    from guests and neighbours up to €/$/£1,000,000 for every
+                    reservation.
                   </span>
                 </div>
 
                 <div className="mb-3 flex items-start gap-3 text-[16px] leading-6 text-[#595959]">
                   <Tick />
                   <span>
-                    Selection of <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">damage protection</a> options for you to choose.
+                    Selection of{" "}
+                    <a
+                      href="#"
+                      className="text-[#006ce4] underline-offset-2 hover:underline"
+                    >
+                      damage protection
+                    </a>{" "}
+                    options for you to choose.
                   </span>
                 </div>
               </div>
@@ -206,7 +264,9 @@ export default function ListYourPropertyPage() {
 
         <section className="bg-[#f5f5f5] py-14">
           <div className="mx-auto max-w-[1128px] px-6">
-            <h2 className={h2}>Take control of your finances with Payments by Booking.com</h2>
+            <h2 className={h2}>
+              Take control of your finances with Payments by Booking.com
+            </h2>
 
             <div className="grid gap-12 md:grid-cols-2">
               <div>
@@ -215,7 +275,8 @@ export default function ListYourPropertyPage() {
                   <span>
                     <b>Payments made easy</b>
                     <br />
-                    We facilitate the payment process for you, freeing up your time to grow your business.
+                    We facilitate the payment process for you, freeing up your
+                    time to grow your business.
                   </span>
                 </div>
 
@@ -224,7 +285,8 @@ export default function ListYourPropertyPage() {
                   <span>
                     <b>Greater revenue security</b>
                     <br />
-                    Whenever guests complete prepaid reservations at your property and pay online, you are guaranteed payment.
+                    Whenever guests complete prepaid reservations at your
+                    property and pay online, you are guaranteed payment.
                   </span>
                 </div>
 
@@ -233,7 +295,8 @@ export default function ListYourPropertyPage() {
                   <span>
                     <b>More control over your cash flow</b>
                     <br />
-                    Choose your payout method and timing based on regional availability.
+                    Choose your payout method and timing based on regional
+                    availability.
                   </span>
                 </div>
               </div>
@@ -244,7 +307,8 @@ export default function ListYourPropertyPage() {
                   <span>
                     <b>Daily payouts in select markets</b>
                     <br />
-                    Get payouts faster! We’ll send your payouts 24 hours after guest checkout.
+                    Get payouts faster! We’ll send your payouts 24 hours after
+                    guest checkout.
                   </span>
                 </div>
 
@@ -253,7 +317,8 @@ export default function ListYourPropertyPage() {
                   <span>
                     <b>One-stop solution for multiple listings</b>
                     <br />
-                    Save time managing finances with group invoicing and reconciliation.
+                    Save time managing finances with group invoicing and
+                    reconciliation.
                   </span>
                 </div>
 
@@ -262,7 +327,8 @@ export default function ListYourPropertyPage() {
                   <span>
                     <b>Reduced risk</b>
                     <br />
-                    We help you stay compliant with regulatory changes and reduce the risk of fraud and chargebacks.
+                    We help you stay compliant with regulatory changes and
+                    reduce the risk of fraud and chargebacks.
                   </span>
                 </div>
               </div>
@@ -282,26 +348,48 @@ export default function ListYourPropertyPage() {
 
             <div className="grid gap-12 md:grid-cols-3">
               <div className="text-center md:text-left">
-                <img src={importPropertyDetailsImg} alt="Import property details icon" className="mx-auto mb-4 h-16 md:mx-0" />
-                <h4 className="text-[16px] font-bold">Import your property details</h4>
+                <img
+                  src={importPropertyDetailsImg}
+                  alt="Import property details icon"
+                  className="mx-auto mb-4 h-16 md:mx-0"
+                />
+                <h4 className="text-[16px] font-bold">
+                  Import your property details
+                </h4>
                 <p className="mx-auto max-w-[300px] text-[14px] leading-6 text-[#595959] md:mx-0">
-                  Seamlessly import your property information from other travel websites and avoid overbooking with calendar sync.
+                  Seamlessly import your property information from other travel
+                  websites and avoid overbooking with calendar sync.
                 </p>
               </div>
 
               <div className="text-center md:text-left">
-                <img src={startFastImg} alt="Start fast with review scores icon" className="mx-auto mb-4 h-16 md:mx-0" />
-                <h4 className="text-[16px] font-bold">Start fast with review scores</h4>
+                <img
+                  src={startFastImg}
+                  alt="Start fast with review scores icon"
+                  className="mx-auto mb-4 h-16 md:mx-0"
+                />
+                <h4 className="text-[16px] font-bold">
+                  Start fast with review scores
+                </h4>
                 <p className="mx-auto max-w-[300px] text-[14px] leading-6 text-[#595959] md:mx-0">
-                  Your review scores on other travel websites are converted and displayed on your property page before your first Booking.com guests leave their reviews.
+                  Your review scores on other travel websites are converted and
+                  displayed on your property page before your first Booking.com
+                  guests leave their reviews.
                 </p>
               </div>
 
               <div className="text-center md:text-left">
-                <img src={standOutImg} alt="Stand out in the market icon" className="mx-auto mb-4 h-16 md:mx-0" />
-                <h4 className="text-[16px] font-bold">Stand out in the market</h4>
+                <img
+                  src={standOutImg}
+                  alt="Stand out in the market icon"
+                  className="mx-auto mb-4 h-16 md:mx-0"
+                />
+                <h4 className="text-[16px] font-bold">
+                  Stand out in the market
+                </h4>
                 <p className="mx-auto max-w-[300px] text-[14px] leading-6 text-[#595959] md:mx-0">
-                  The "New to Booking.com" label helps you stand out in our search results.
+                  The "New to Booking.com" label helps you stand out in our
+                  search results.
                 </p>
               </div>
             </div>
@@ -320,17 +408,25 @@ export default function ListYourPropertyPage() {
 
             <div className="grid items-center gap-8 md:grid-cols-3">
               <div>
-                <div className="text-[48px] font-bold text-[#003b95]">1.8+ billion</div>
-                <div className="text-[16px] leading-6 text-[#595959]">holiday rental guests since 2010.</div>
+                <div className="text-[48px] font-bold text-[#003b95]">
+                  1.8+ billion
+                </div>
+                <div className="text-[16px] leading-6 text-[#595959]">
+                  holiday rental guests since 2010.
+                </div>
               </div>
               <div>
-                <div className="text-[48px] font-bold text-[#003b95]">1 in every 3</div>
+                <div className="text-[48px] font-bold text-[#003b95]">
+                  1 in every 3
+                </div>
                 <div className="text-[16px] leading-6 text-[#595959]">
                   room nights booked in 2024 was a holiday rental.
                 </div>
               </div>
               <div>
-                <div className="text-[48px] font-bold text-[#003b95]">48% of nights</div>
+                <div className="text-[48px] font-bold text-[#003b95]">
+                  48% of nights
+                </div>
                 <div className="text-[16px] leading-6 text-[#595959]">
                   booked were for international stays at the end of 2023.
                 </div>
@@ -406,7 +502,9 @@ export default function ListYourPropertyPage() {
                 return (
                   <div
                     key={i}
-                    className={`rounded-lg border border-[#e0e0e0] bg-white p-4 ${isOpen ? "pb-5" : ""}`}
+                    className={`rounded-lg border border-[#e0e0e0] bg-white p-4 ${
+                      isOpen ? "pb-5" : ""
+                    }`}
                   >
                     <button
                       className="flex w-full items-center justify-between text-left text-[16px] font-bold text-[#262626]"
@@ -415,7 +513,11 @@ export default function ListYourPropertyPage() {
                       aria-controls={`faq-panel-${i}`}
                     >
                       <span>{item.q}</span>
-                      <ChevronDown className={`h-6 w-6 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`h-6 w-6 transition-transform ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      />
                     </button>
 
                     <div className="my-4 h-px w-full bg-[#e0e0e0]" />
@@ -435,7 +537,13 @@ export default function ListYourPropertyPage() {
 
             <p className="mt-6 text-left text-[16px] text-[#595959]">
               Still have questions? Find answers to all your questions on our{" "}
-              <a href="#" className="text-[#006ce4] underline-offset-2 hover:underline">FAQ</a>.
+              <a
+                href="#"
+                className="text-[#006ce4] underline-offset-2 hover:underline"
+              >
+                FAQ
+              </a>
+              .
             </p>
 
             <div className="mt-4 text-left">
@@ -451,33 +559,78 @@ export default function ListYourPropertyPage() {
         <div className="mx-auto max-w-[1200px] px-6">
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_380px]">
             <div>
-              <h2 className="text-[44px] font-bold leading-[1.1]">Sign up and start<br />welcoming guests today!</h2>
+              <h2 className="text-[44px] font-bold leading-[1.1]">
+                Sign up and start
+                <br />
+                welcoming guests today!
+              </h2>
             </div>
 
             <div className="rounded-lg border-4 border-[#ffb700] bg-white text-black shadow-[0_4px_16px_rgba(0,0,0,0.15)]">
               <div className="p-5">
-                <h3 className="mb-3 text-[20px] font-bold">Register for free</h3>
+                <h3 className="mb-3 text-[20px] font-bold">
+                  Register for free
+                </h3>
                 <ul className="mb-4 grid gap-2">
                   <li className="flex items-center gap-2 text-[14px] text-[#262626]">
-                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 12.9l2.7 2.7L17 9.3"
+                        fill="none"
+                        stroke="#008009"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     45% of hosts get their first booking within a week
                   </li>
                   <li className="flex items-center gap-2 text-[14px] text-[#262626]">
-                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 12.9l2.7 2.7L17 9.3"
+                        fill="none"
+                        stroke="#008009"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     Choose instant bookings or Request to Book
                   </li>
                   <li className="flex items-center gap-2 text-[14px] text-[#262626]">
-                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 12.9l2.7 2.7L17 9.3" fill="none" stroke="#008009" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 12.9l2.7 2.7L17 9.3"
+                        fill="none"
+                        stroke="#008009"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     We’ll facilitate payments for you
                   </li>
                 </ul>
-                <Link to="/partner-register" className="inline-flex h-10 w-full items-center justify-center rounded-md bg-[#006ce4] font-semibold text-white hover:bg-[#0059bc]">
+                <Link
+                  to="/partner-register"
+                  className="inline-flex h-10 w-full items-center justify-center rounded-md bg-[#006ce4] font-semibold text-white hover:bg-[#0059bc]"
+                >
                   Start registration <span className="ml-2">→</span>
                 </Link>
               </div>
@@ -490,36 +643,72 @@ export default function ListYourPropertyPage() {
             <div>
               <h4 className="mb-3 text-[16px] font-bold">Discover</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="underline">Trust and Safety</a></li>
+                <li>
+                  <a href="#" className="underline">
+                    Trust and Safety
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <h4 className="mb-3 text-[16px] font-bold">Useful links</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="underline">Extranet</a></li>
-                <li><a href="#" className="underline">Pulse for Android</a></li>
-                <li><a href="#" className="underline">Pulse for iOS</a></li>
+                <li>
+                  <a href="#" className="underline">
+                    Extranet
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="underline">
+                    Pulse for Android
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="underline">
+                    Pulse for iOS
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="mb-3 text-[16px] font-bold">Help and communities</h4>
+              <h4 className="mb-3 text-[16px] font-bold">
+                Help and communities
+              </h4>
               <ul className="space-y-2">
-                <li><a href="#" className="underline">Partner Help</a></li>
-                <li><a href="#" className="underline">Partner Community</a></li>
-                <li><a href="#" className="underline">How-to videos</a></li>
+                <li>
+                  <a href="#" className="underline">
+                    Partner Help
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="underline">
+                    Partner Community
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="underline">
+                    How-to videos
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-4 py-4">
             <div className="flex flex-wrap items-center gap-3">
-              <a href="#" className="underline">About Us</a>
+              <a href="#" className="underline">
+                About Us
+              </a>
               <span className="opacity-60">|</span>
-              <a href="#" className="underline">Privacy and Cookie Statement</a>
+              <a href="#" className="underline">
+                Privacy and Cookie Statement
+              </a>
             </div>
-            <p className="m-0 text-[12px] text-white/85">© Copyright Booking.com 2025</p>
+            <p className="m-0 text-[12px] text-white/85">
+              © Copyright Booking.com 2025
+            </p>
           </div>
         </div>
       </footer>

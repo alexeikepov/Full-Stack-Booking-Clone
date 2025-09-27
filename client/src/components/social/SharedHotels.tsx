@@ -15,7 +15,7 @@ import {
   Hotel,
   MapPin,
   Star,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import {
   getSharedHotels,
@@ -26,10 +26,10 @@ import {
   getFriends,
   type SharedHotel,
   type Friend,
-  type SendSharedHotelData
+  type SendSharedHotelData,
 } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import HotelSelector from "./HotelSelector";
+import HotelSelector from "@/components/maps/HotelSelector";
 
 export default function SharedHotels() {
   const { user: currentUser } = useAuth();
@@ -52,9 +52,9 @@ export default function SharedHotels() {
     setLoading(true);
     try {
       const [received, sent, friendsList] = await Promise.all([
-        getSharedHotels('all'),
+        getSharedHotels("all"),
         getMySharedHotels(),
-        getFriends()
+        getFriends(),
       ]);
       setSharedHotels(received);
       setMySharedHotels(sent);
@@ -78,7 +78,7 @@ export default function SharedHotels() {
 
   const handleDelete = async (sharedHotelId: string) => {
     if (!confirm("Are you sure you want to delete this shared hotel?")) return;
-    
+
     try {
       await deleteSharedHotel(sharedHotelId);
       await loadData();
@@ -96,7 +96,6 @@ export default function SharedHotels() {
   const handleHotelSelected = (hotel: any) => {
     setSelectedHotel(hotel);
     setShowHotelSelector(false);
-    // Small delay to ensure the selector closes before opening the share modal
     setTimeout(() => {
       setShowShareModal(true);
     }, 100);
@@ -109,7 +108,7 @@ export default function SharedHotels() {
       const shareData: SendSharedHotelData = {
         receiverId: selectedFriend._id,
         hotelId: selectedHotel._id,
-        message: shareMessage || undefined
+        message: shareMessage || undefined,
       };
 
       await shareHotel(shareData);
@@ -126,21 +125,31 @@ export default function SharedHotels() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'viewed': return 'bg-blue-100 text-blue-800';
-      case 'accepted': return 'bg-green-100 text-green-800';
-      case 'declined': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "viewed":
+        return "bg-blue-100 text-blue-800";
+      case "accepted":
+        return "bg-green-100 text-green-800";
+      case "declined":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <Eye className="h-4 w-4" />;
-      case 'viewed': return <Eye className="h-4 w-4" />;
-      case 'accepted': return <CheckCircle className="h-4 w-4" />;
-      case 'declined': return <XCircle className="h-4 w-4" />;
-      default: return null;
+      case "pending":
+        return <Eye className="h-4 w-4" />;
+      case "viewed":
+        return <Eye className="h-4 w-4" />;
+      case "accepted":
+        return <CheckCircle className="h-4 w-4" />;
+      case "declined":
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return null;
     }
   };
 
@@ -161,7 +170,9 @@ export default function SharedHotels() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Shared Hotels</h2>
-          <p className="text-gray-600">Share and discover hotels with friends</p>
+          <p className="text-gray-600">
+            Share and discover hotels with friends
+          </p>
         </div>
       </div>
 
@@ -209,8 +220,12 @@ export default function SharedHotels() {
             <Card>
               <CardContent className="p-8 text-center">
                 <Share2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No shared hotels</h3>
-                <p className="text-gray-600">No one has shared hotels with you yet.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No shared hotels
+                </h3>
+                <p className="text-gray-600">
+                  No one has shared hotels with you yet.
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -226,15 +241,21 @@ export default function SharedHotels() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold">{sharedHotel.sender.name}</p>
-                          <p className="text-sm text-gray-600">shared a hotel with you</p>
+                          <p className="font-semibold">
+                            {sharedHotel.sender.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            shared a hotel with you
+                          </p>
                         </div>
                       </div>
 
                       <div className="bg-gray-50 p-4 rounded-lg mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Hotel className="h-5 w-5 text-blue-600" />
-                          <h4 className="font-semibold text-lg">{sharedHotel.hotel.name}</h4>
+                          <h4 className="font-semibold text-lg">
+                            {sharedHotel.hotel.name}
+                          </h4>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
@@ -246,19 +267,23 @@ export default function SharedHotels() {
                             {sharedHotel.hotel.rating}
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            ${sharedHotel.hotel.price}/night
+                            <Calendar className="h-4 w-4" />$
+                            {sharedHotel.hotel.price}/night
                           </div>
                         </div>
                         {sharedHotel.message && (
-                          <p className="mt-2 text-gray-700 italic">"{sharedHotel.message}"</p>
+                          <p className="mt-2 text-gray-700 italic">
+                            "{sharedHotel.message}"
+                          </p>
                         )}
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(sharedHotel.status)}>
                           {getStatusIcon(sharedHotel.status)}
-                          <span className="ml-1 capitalize">{sharedHotel.status}</span>
+                          <span className="ml-1 capitalize">
+                            {sharedHotel.status}
+                          </span>
                         </Badge>
                         <span className="text-sm text-gray-500">
                           {new Date(sharedHotel.createdAt).toLocaleDateString()}
@@ -266,11 +291,13 @@ export default function SharedHotels() {
                       </div>
                     </div>
 
-                    {sharedHotel.status === 'pending' && (
+                    {sharedHotel.status === "pending" && (
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => handleStatusUpdate(sharedHotel._id, 'accepted')}
+                          onClick={() =>
+                            handleStatusUpdate(sharedHotel._id, "accepted")
+                          }
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Accept
@@ -278,7 +305,9 @@ export default function SharedHotels() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleStatusUpdate(sharedHotel._id, 'declined')}
+                          onClick={() =>
+                            handleStatusUpdate(sharedHotel._id, "declined")
+                          }
                         >
                           <XCircle className="h-4 w-4 mr-1" />
                           Decline
@@ -299,8 +328,12 @@ export default function SharedHotels() {
             <Card>
               <CardContent className="p-8 text-center">
                 <Send className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No sent shares</h3>
-                <p className="text-gray-600">You haven't shared any hotels yet.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No sent shares
+                </h3>
+                <p className="text-gray-600">
+                  You haven't shared any hotels yet.
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -316,15 +349,24 @@ export default function SharedHotels() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold">Shared with {sharedHotel.receiver.name}</p>
-                          <p className="text-sm text-gray-600">on {new Date(sharedHotel.createdAt).toLocaleDateString()}</p>
+                          <p className="font-semibold">
+                            Shared with {sharedHotel.receiver.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            on{" "}
+                            {new Date(
+                              sharedHotel.createdAt
+                            ).toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
 
                       <div className="bg-gray-50 p-4 rounded-lg mb-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Hotel className="h-5 w-5 text-blue-600" />
-                          <h4 className="font-semibold text-lg">{sharedHotel.hotel.name}</h4>
+                          <h4 className="font-semibold text-lg">
+                            {sharedHotel.hotel.name}
+                          </h4>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
@@ -336,19 +378,23 @@ export default function SharedHotels() {
                             {sharedHotel.hotel.rating}
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            ${sharedHotel.hotel.price}/night
+                            <Calendar className="h-4 w-4" />$
+                            {sharedHotel.hotel.price}/night
                           </div>
                         </div>
                         {sharedHotel.message && (
-                          <p className="mt-2 text-gray-700 italic">"{sharedHotel.message}"</p>
+                          <p className="mt-2 text-gray-700 italic">
+                            "{sharedHotel.message}"
+                          </p>
                         )}
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(sharedHotel.status)}>
                           {getStatusIcon(sharedHotel.status)}
-                          <span className="ml-1 capitalize">{sharedHotel.status}</span>
+                          <span className="ml-1 capitalize">
+                            {sharedHotel.status}
+                          </span>
                         </Badge>
                       </div>
                     </div>
@@ -374,8 +420,12 @@ export default function SharedHotels() {
             <Card>
               <CardContent className="p-8 text-center">
                 <Hotel className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No friends to share with</h3>
-                <p className="text-gray-600">Add some friends first to share hotels with them.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No friends to share with
+                </h3>
+                <p className="text-gray-600">
+                  Add some friends first to share hotels with them.
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -415,7 +465,7 @@ export default function SharedHotels() {
           onSelectHotel={handleHotelSelected}
           onClose={() => {
             setShowHotelSelector(false);
-            setSelectedFriend(null); // Clear selectedFriend only when manually closing
+            setSelectedFriend(null);
           }}
         />
       )}
@@ -441,7 +491,9 @@ export default function SharedHotels() {
                   </Avatar>
                   <div>
                     <p className="font-medium">{selectedFriend.name}</p>
-                    <p className="text-sm text-gray-600">{selectedFriend.email}</p>
+                    <p className="text-sm text-gray-600">
+                      {selectedFriend.email}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -466,8 +518,8 @@ export default function SharedHotels() {
                       {selectedHotel.rating}
                     </div>
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      ${selectedHotel.price}/night
+                      <Calendar className="h-4 w-4" />${selectedHotel.price}
+                      /night
                     </div>
                   </div>
                 </div>
@@ -486,10 +538,7 @@ export default function SharedHotels() {
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  onClick={submitShareHotel}
-                  className="flex-1"
-                >
+                <Button onClick={submitShareHotel} className="flex-1">
                   <Share2 className="h-4 w-4 mr-2" />
                   Share Hotel
                 </Button>

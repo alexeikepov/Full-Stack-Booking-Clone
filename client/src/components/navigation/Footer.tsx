@@ -1,7 +1,7 @@
 // src/components/Footer.tsx
 import { Link } from "react-router-dom";
-import CurrencySelector from "./CurrencySelector";
-import LanguageSelector from "./LanguageSelector";
+import CurrencySelector from "@/components/forms/CurrencySelector";
+import LanguageSelector from "@/components/forms/LanguageSelector";
 
 export default function Footer() {
   return (

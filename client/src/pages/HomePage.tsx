@@ -8,7 +8,7 @@ import TrendingDestinations from "@/components/homePage/TrendingDestinations";
 import TripPlannerCarousel from "@/components/homePage/TripPlannerCarousel";
 import TravelMoreSection from "@/components/homePage/TravelMoreSection";
 import PopularWithTravellers from "@/components/homePage/PopularWithTravellers";
-import Footer from "@/components/Footer";
+import Footer from "@/components/navigation/Footer";
 import { useNavigationStore } from "@/stores/navigation";
 import { useTranslation } from "react-i18next";
 
@@ -80,9 +80,7 @@ export default function HomePage() {
                 <div className="text-2xl font-bold">
                   {t("home.card2.title")}
                 </div>
-                <div className="mt-1 text-sm ">
-                  {t("home.card2.subtitle")}
-                </div>
+                <div className="mt-1 text-sm ">{t("home.card2.subtitle")}</div>
                 <Button className="mt-3 w-auto rounded bg-[#0071c2] hover:bg-[#0a69b4]">
                   {t("home.card2.cta")}
                 </Button>
@@ -102,7 +100,7 @@ export default function HomePage() {
       <PropertyTypesSection />
       <TripPlannerCarousel />
       <TravelMoreSection />
-      
+
       <PopularWithTravellers />
       <Footer />
     </div>

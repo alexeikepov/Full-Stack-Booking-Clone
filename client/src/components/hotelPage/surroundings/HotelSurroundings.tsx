@@ -1,8 +1,13 @@
-import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getHotelById } from "@/lib/api";
 import { Utensils, User, Mountain, Star, Bus, Plane } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+interface LocationItem {
+  name: string;
+  distance: string;
+  type?: string;
+}
 
 interface HotelSurroundingsProps {
   hotelId?: string;
@@ -21,7 +26,6 @@ export default function HotelSurroundings({
   });
   const navigate = useNavigate();
 
-  // Check if hotel has any surroundings data
   const hasSurroundingsData =
     hotel?.surroundings &&
     (hotel.surroundings.nearbyAttractions?.length > 0 ||
@@ -31,7 +35,6 @@ export default function HotelSurroundings({
       hotel.surroundings.publicTransport?.length > 0 ||
       hotel.surroundings.closestAirports?.length > 0);
 
-  // Don't render the component if there's no surroundings data
   if (!hasSurroundingsData) {
     return null;
   }
@@ -40,7 +43,6 @@ export default function HotelSurroundings({
     if (onShowMap) {
       onShowMap();
     } else {
-      // Fallback to scroll behavior
       const mapElement = document.getElementById("hotel-map");
       if (mapElement) {
         mapElement.scrollIntoView({
@@ -56,14 +58,12 @@ export default function HotelSurroundings({
   };
 
   const handleLocationClick = (location: string) => {
-    // TODO: Handle location click (show on map, get directions, etc.)
     console.log("Location clicked:", location);
   };
 
   return (
     <div id="hotel-surroundings" className="bg-white">
       <div className="mx-auto max-w-6xl px-4 py-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">
@@ -89,11 +89,8 @@ export default function HotelSurroundings({
           </button>
         </div>
 
-        {/* Content Grid - 3 columns as in the image */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
           <div className="space-y-8">
-            {/* What's nearby */}
             {hotel?.surroundings?.nearbyAttractions?.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -104,7 +101,7 @@ export default function HotelSurroundings({
                 </div>
                 <div className="space-y-2">
                   {hotel.surroundings.nearbyAttractions.map(
-                    (location, index) => (
+                    (location: LocationItem, index: number) => (
                       <button
                         key={index}
                         onClick={() => handleLocationClick(location.name)}
@@ -123,7 +120,6 @@ export default function HotelSurroundings({
               </div>
             )}
 
-            {/* Top attractions */}
             {hotel?.surroundings?.topAttractions?.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -133,28 +129,28 @@ export default function HotelSurroundings({
                   </h3>
                 </div>
                 <div className="space-y-2">
-                  {hotel.surroundings.topAttractions.map((location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
-                        {location.name}
-                      </span>
-                      <span className="text-gray-600 text-xs">
-                        {location.distance}
-                      </span>
-                    </button>
-                  ))}
+                  {hotel.surroundings.topAttractions.map(
+                    (location: LocationItem, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => handleLocationClick(location.name)}
+                        className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                      >
+                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                          {location.name}
+                        </span>
+                        <span className="text-gray-600 text-xs">
+                          {location.distance}
+                        </span>
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Middle Column */}
           <div className="space-y-8">
-            {/* Restaurants & cafes */}
             {hotel?.surroundings?.restaurantsCafes?.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -165,7 +161,7 @@ export default function HotelSurroundings({
                 </div>
                 <div className="space-y-2">
                   {hotel.surroundings.restaurantsCafes.map(
-                    (location, index) => (
+                    (location: LocationItem, index: number) => (
                       <button
                         key={index}
                         onClick={() => handleLocationClick(location.name)}
@@ -194,7 +190,6 @@ export default function HotelSurroundings({
               </div>
             )}
 
-            {/* Natural beauty */}
             {hotel?.surroundings?.naturalBeauty?.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -204,38 +199,38 @@ export default function HotelSurroundings({
                   </h3>
                 </div>
                 <div className="space-y-2">
-                  {hotel.surroundings.naturalBeauty.map((location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <div className="flex items-center">
-                        {location.type && (
-                          <>
-                            <span className="text-gray-500 text-xs">
-                              {location.type}
-                            </span>
-                            <span className="text-gray-400 mx-1">•</span>
-                          </>
-                        )}
-                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
-                          {location.name}
+                  {hotel.surroundings.naturalBeauty.map(
+                    (location: LocationItem, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => handleLocationClick(location.name)}
+                        className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                      >
+                        <div className="flex items-center">
+                          {location.type && (
+                            <>
+                              <span className="text-gray-500 text-xs">
+                                {location.type}
+                              </span>
+                              <span className="text-gray-400 mx-1">•</span>
+                            </>
+                          )}
+                          <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                            {location.name}
+                          </span>
+                        </div>
+                        <span className="text-gray-600 text-xs">
+                          {location.distance}
                         </span>
-                      </div>
-                      <span className="text-gray-600 text-xs">
-                        {location.distance}
-                      </span>
-                    </button>
-                  ))}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Right Column */}
           <div className="space-y-8">
-            {/* Public transport */}
             {hotel?.surroundings?.publicTransport?.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -245,35 +240,36 @@ export default function HotelSurroundings({
                   </h3>
                 </div>
                 <div className="space-y-2">
-                  {hotel.surroundings.publicTransport.map((location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <div className="flex items-center">
-                        {location.type && (
-                          <>
-                            <span className="text-gray-500 text-xs">
-                              {location.type}
-                            </span>
-                            <span className="text-gray-400 mx-1">•</span>
-                          </>
-                        )}
-                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
-                          {location.name}
+                  {hotel.surroundings.publicTransport.map(
+                    (location: LocationItem, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => handleLocationClick(location.name)}
+                        className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                      >
+                        <div className="flex items-center">
+                          {location.type && (
+                            <>
+                              <span className="text-gray-500 text-xs">
+                                {location.type}
+                              </span>
+                              <span className="text-gray-400 mx-1">•</span>
+                            </>
+                          )}
+                          <span className="text-gray-900 group-hover:text-[#003b95] transition-colors text-sm">
+                            {location.name}
+                          </span>
+                        </div>
+                        <span className="text-gray-600 text-xs">
+                          {location.distance}
                         </span>
-                      </div>
-                      <span className="text-gray-600 text-xs">
-                        {location.distance}
-                      </span>
-                    </button>
-                  ))}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Closest airports */}
             {hotel?.surroundings?.closestAirports?.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -283,20 +279,22 @@ export default function HotelSurroundings({
                   </h3>
                 </div>
                 <div className="space-y-2">
-                  {hotel.surroundings.closestAirports.map((location, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleLocationClick(location.name)}
-                      className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
-                    >
-                      <span className="text-gray-900 group-hover:text-[#003b95] transition-colors">
-                        {location.name}
-                      </span>
-                      <span className="text-gray-600 text-sm">
-                        {location.distance}
-                      </span>
-                    </button>
-                  ))}
+                  {hotel.surroundings.closestAirports.map(
+                    (location: LocationItem, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => handleLocationClick(location.name)}
+                        className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 transition-colors group"
+                      >
+                        <span className="text-gray-900 group-hover:text-[#003b95] transition-colors">
+                          {location.name}
+                        </span>
+                        <span className="text-gray-600 text-sm">
+                          {location.distance}
+                        </span>
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             )}

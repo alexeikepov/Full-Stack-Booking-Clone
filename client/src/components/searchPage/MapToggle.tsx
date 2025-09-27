@@ -1,4 +1,4 @@
-import HotelsMap from "@/components/HotelsMap";
+import HotelsMap from "@/components/maps/HotelsMap";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { api } from "@/lib/api";
@@ -8,7 +8,9 @@ export default function MapToggle() {
   const { data } = useQuery({
     queryKey: ["hotels", Object.fromEntries(params.entries())],
     queryFn: async () => {
-      const { data } = await api.get("/api/hotels", { params: Object.fromEntries(params.entries()) });
+      const { data } = await api.get("/api/hotels", {
+        params: Object.fromEntries(params.entries()),
+      });
       return Array.isArray(data) ? data : data?.items ?? [];
     },
   });

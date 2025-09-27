@@ -6,9 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 //
 import { useNavigationStore } from "@/stores/navigation";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
-import CurrencySelector from "./CurrencySelector";
-import LanguageSelector from "./LanguageSelector";
-import ProfileMenu from "./ProfileMenu";
+import CurrencySelector from "@/components/forms/CurrencySelector";
+import LanguageSelector from "@/components/forms/LanguageSelector";
+import ProfileMenu from "@/components/layout/ProfileMenu";
 import { useTranslation } from "react-i18next";
 
 function NavPill({

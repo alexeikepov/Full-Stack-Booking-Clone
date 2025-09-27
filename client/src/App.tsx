@@ -1,8 +1,8 @@
-import Header from "@/components/Header";
-import { CartSheet } from "@/components/CartSheet";
-import { ConfirmModal } from "@/components/ConfirmModal";
-import ScrollToTop from "@/components/ScrollToTop";
-import ScrollToTopButton from "@/components/ScrollToTopButton";
+import Header from "@/components/navigation/Header";
+import { CartSheet } from "@/components/layout/CartSheet";
+import { ConfirmModal } from "@/components/modals/ConfirmModal";
+import ScrollToTop from "@/components/navigation/ScrollToTop";
+import ScrollToTopButton from "@/components/navigation/ScrollToTopButton";
 import { Outlet, useLocation } from "react-router-dom";
 
 export default function App() {

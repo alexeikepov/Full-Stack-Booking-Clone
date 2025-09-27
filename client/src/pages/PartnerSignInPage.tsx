@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, getMe, loginUser } from "@/lib/api";
-import AdminHeader from "@/components/AdminHeader";
+import AdminHeader from "@/components/admin/AdminHeader";
 
 type Step = "username" | "password";
 
