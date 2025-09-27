@@ -3,15 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  UserPlus, 
-  UserCheck, 
-  UserX, 
-  Users, 
-  Clock, 
-  CheckCircle, 
+import { ToastContainer, useToast } from "@/components/ui/toast";
+import {
+  UserPlus,
+  UserCheck,
+  UserX,
+  Users,
+  Clock,
+  CheckCircle,
   XCircle,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import {
   sendFriendRequest,
@@ -23,7 +24,7 @@ import {
   removeFriend,
   type FriendRequest,
   type Friend,
-  type SendFriendRequestData
+  type SendFriendRequestData,
 } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
@@ -33,6 +34,7 @@ interface FriendRequestsProps {
 
 export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
   const { user } = useAuth();
+  const { toasts, removeToast, success, error } = useToast();
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,13 +48,13 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
     try {
       setLoading(true);
       const [requests, friendsList] = await Promise.all([
-        getFriendRequests('all'),
-        getFriends()
+        getFriendRequests("all"),
+        getFriends(),
       ]);
       setFriendRequests(requests);
       setFriends(friendsList);
     } catch (error) {
-      alert("Failed to load friend data");
+      error("Failed to load friend data", "Please try refreshing the page");
     } finally {
       setLoading(false);
     }
@@ -63,9 +65,9 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
       await acceptFriendRequest(requestId);
       await loadData();
       onStatsUpdate?.();
-      alert("Friend request accepted");
+      success("Friend request accepted!", "You are now friends");
     } catch (error) {
-      alert("Failed to accept friend request");
+      error("Failed to accept friend request", "Please try again");
     }
   };
 
@@ -74,9 +76,9 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
       await rejectFriendRequest(requestId);
       await loadData();
       onStatsUpdate?.();
-      alert("Friend request rejected");
+      success("Friend request rejected", "The request has been declined");
     } catch (error) {
-      alert("Failed to reject friend request");
+      error("Failed to reject friend request", "Please try again");
     }
   };
 
@@ -85,9 +87,9 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
       await cancelFriendRequest(requestId);
       await loadData();
       onStatsUpdate?.();
-      alert("Friend request cancelled");
+      success("Friend request cancelled", "The request has been withdrawn");
     } catch (error) {
-      alert("Failed to cancel friend request");
+      error("Failed to cancel friend request", "Please try again");
     }
   };
 
@@ -96,19 +98,19 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
       await removeFriend(friendId);
       await loadData();
       onStatsUpdate?.();
-      alert("Friend removed");
+      success("Friend removed", "The friend has been removed from your list");
     } catch (error) {
-      alert("Failed to remove friend");
+      error("Failed to remove friend", "Please try again");
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'accepted':
+      case "accepted":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'rejected':
+      case "rejected":
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
         return null;
@@ -117,11 +119,15 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return <Badge variant="secondary">Pending</Badge>;
-      case 'accepted':
-        return <Badge variant="default" className="bg-green-500">Accepted</Badge>;
-      case 'rejected':
+      case "accepted":
+        return (
+          <Badge variant="default" className="bg-green-500">
+            Accepted
+          </Badge>
+        );
+      case "rejected":
         return <Badge variant="destructive">Rejected</Badge>;
       default:
         return null;
@@ -129,18 +135,16 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
   };
 
   const currentUserId = user?.id;
-  
-  const receivedRequests = friendRequests.filter(req => 
-    req.status === 'pending' && 
-    req.receiver._id === currentUserId
+
+  const receivedRequests = friendRequests.filter(
+    (req) => req.status === "pending" && req.receiver._id === currentUserId
   );
-  
-  const sentRequests = friendRequests.filter(req => 
-    req.status === 'pending' && 
-    req.sender._id === currentUserId
+
+  const sentRequests = friendRequests.filter(
+    (req) => req.status === "pending" && req.sender._id === currentUserId
   );
-  
-  const allRequests = friendRequests.filter(req => req.status !== 'pending');
+
+  const allRequests = friendRequests.filter((req) => req.status !== "pending");
 
   if (loading) {
     return (
@@ -157,49 +161,51 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Friends & Requests</h1>
-        <p className="text-gray-600 mt-2">Manage your friend requests and connections</p>
+        <p className="text-gray-600 mt-2">
+          Manage your friend requests and connections
+        </p>
       </div>
 
       <div className="w-full">
         <div className="grid w-full grid-cols-4 mb-6">
-          <button 
+          <button
             onClick={() => setActiveTab("received")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === "received" 
-                ? "bg-blue-600 text-white" 
+              activeTab === "received"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             <UserPlus className="h-4 w-4" />
             Received ({receivedRequests.length})
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab("sent")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === "sent" 
-                ? "bg-blue-600 text-white" 
+              activeTab === "sent"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             <Clock className="h-4 w-4" />
             Sent ({sentRequests.length})
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab("friends")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === "friends" 
-                ? "bg-blue-600 text-white" 
+              activeTab === "friends"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             <Users className="h-4 w-4" />
             Friends ({friends.length})
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab("history")}
             className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === "history" 
-                ? "bg-blue-600 text-white" 
+              activeTab === "history"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -225,7 +231,10 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
               ) : (
                 <div className="space-y-4">
                   {receivedRequests.map((request) => (
-                    <div key={request._id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={request._id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <Avatar>
                           <AvatarFallback>
@@ -234,7 +243,9 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
                         </Avatar>
                         <div>
                           <p className="font-medium">{request.sender.name}</p>
-                          <p className="text-sm text-gray-500">{request.sender.email}</p>
+                          <p className="text-sm text-gray-500">
+                            {request.sender.email}
+                          </p>
                           <p className="text-xs text-gray-400">
                             {new Date(request.createdAt).toLocaleDateString()}
                           </p>
@@ -283,7 +294,10 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
               ) : (
                 <div className="space-y-4">
                   {sentRequests.map((request) => (
-                    <div key={request._id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={request._id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <Avatar>
                           <AvatarFallback>
@@ -292,9 +306,12 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
                         </Avatar>
                         <div>
                           <p className="font-medium">{request.receiver.name}</p>
-                          <p className="text-sm text-gray-500">{request.receiver.email}</p>
+                          <p className="text-sm text-gray-500">
+                            {request.receiver.email}
+                          </p>
                           <p className="text-xs text-gray-400">
-                            Sent {new Date(request.createdAt).toLocaleDateString()}
+                            Sent{" "}
+                            {new Date(request.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -330,12 +347,17 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
                 <div className="text-center py-8 text-gray-500">
                   <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                   <p>No friends yet</p>
-                  <p className="text-sm">Send friend requests to start building your network</p>
+                  <p className="text-sm">
+                    Send friend requests to start building your network
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {friends.map((friend) => (
-                    <div key={friend._id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={friend._id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <Avatar>
                           <AvatarFallback>
@@ -344,7 +366,9 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
                         </Avatar>
                         <div>
                           <p className="font-medium">{friend.name}</p>
-                          <p className="text-sm text-gray-500">{friend.email}</p>
+                          <p className="text-sm text-gray-500">
+                            {friend.email}
+                          </p>
                         </div>
                       </div>
                       <Button
@@ -380,18 +404,21 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
               ) : (
                 <div className="space-y-4">
                   {allRequests.map((request) => (
-                    <div key={request._id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={request._id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-3">
                         <Avatar>
                           <AvatarFallback>
-                            {request.sender._id === request.receiver._id 
+                            {request.sender._id === request.receiver._id
                               ? request.receiver.name.charAt(0).toUpperCase()
                               : request.sender.name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-medium">
-                            {request.sender._id === request.receiver._id 
+                            {request.sender._id === request.receiver._id
                               ? `You → ${request.receiver.name}`
                               : `${request.sender.name} → You`}
                           </p>
@@ -412,6 +439,8 @@ export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
           </Card>
         )}
       </div>
+
+      <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
     </div>
   );
 }
