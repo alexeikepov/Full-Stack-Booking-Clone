@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+import { loadGoogleMaps } from "@/lib/googleMapsLoader";
 import {
   Dialog,
   DialogContent,
@@ -356,10 +356,6 @@ export default function EditHotelDialog({
 
   useEffect(() => {
     if (!isOpen) return;
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as
-      | string
-      | undefined;
-    if (!apiKey) return;
 
     let autocomplete: google.maps.places.Autocomplete | null = null;
     const styleId = "gmaps-pac-zindex";
@@ -373,12 +369,7 @@ export default function EditHotelDialog({
     const init = async () => {
       try {
         console.log("Initializing Google Places Autocomplete...");
-        const loader = new Loader({
-          apiKey,
-          version: "weekly",
-          libraries: ["places"],
-        });
-        await loader.load();
+        await loadGoogleMaps();
         console.log("Google Maps API loaded successfully");
 
         await new Promise((resolve) => setTimeout(resolve, 100));

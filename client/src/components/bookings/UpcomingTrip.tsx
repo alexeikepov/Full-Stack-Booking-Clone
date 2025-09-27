@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Trip } from "./types";
+import ImageWithFallback from "../ui/ImageWithFallback";
 
 interface UpcomingTripProps {
   trip: Trip;
@@ -59,7 +60,7 @@ export default function UpcomingTrip({
   return (
     <div className="flex items-center justify-between rounded-[16px] bg-[#f5f7fb] px-5 py-5">
       <div className="flex items-center gap-5">
-        <img
+        <ImageWithFallback
           src={trip.imageUrl}
           alt=""
           className="h-[96px] w-[96px] rounded object-cover ring-1 ring-black/10"

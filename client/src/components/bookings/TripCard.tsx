@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users } from "lucide-react";
 import type { Trip } from "./types";
+import ImageWithFallback from "../ui/ImageWithFallback";
 
 interface TripCardProps {
   trip: Trip;
@@ -34,7 +35,7 @@ export default function TripCard({ trip, canReview = false }: TripCardProps) {
   return (
     <div className="flex items-center justify-between rounded-[12px] bg-white px-5 py-5 min-h-[108px]">
       <div className="flex items-center gap-5">
-        <img
+        <ImageWithFallback
           src={trip.imageUrl}
           alt=""
           className="h-[84px] w-[80px] rounded object-cover ring-1 ring-black/10"

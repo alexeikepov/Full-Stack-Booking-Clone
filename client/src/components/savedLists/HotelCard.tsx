@@ -15,8 +15,14 @@ export default function HotelCard({
   };
 
   const getHotelImage = (hotel: any) => {
-    if (hotel.images && hotel.images.length > 0) {
-      return hotel.images[0].url || hotel.images[0];
+    if (hotel.media && hotel.media.length > 0) {
+      // Find first image in media array
+      const imageMedia = hotel.media.find((item: any) => item.type === "image");
+      if (imageMedia) {
+        return imageMedia.url;
+      }
+      // Fallback to first media item if no image type found
+      return hotel.media[0].url || hotel.media[0];
     }
     return "https://cf.bstatic.com/xdata/images/hotel/square600/597783002.webp?k=3545efe5865606bf107ad177c20591c2048174246717d7b2f2476168143488d1&o=";
   };
