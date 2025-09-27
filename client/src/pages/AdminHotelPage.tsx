@@ -1,35 +1,9 @@
-import { useState, useEffect, Fragment } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Building2,
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Eye,
-  BarChart3,
-  Star,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  MapPin,
-  Phone,
-  Mail,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import EditHotelDialog from "@/components/EditHotelDialog";
-// import AddHotelDialog from "@/components/AddHotelDialog"; // removed, using EditHotelDialog for full add
+import { Building2, BarChart3, Star, Calendar } from "lucide-react";
+import { EditHotelDialog } from "@/components/EditHotelDialog";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
-import AdminHeader from "@/components/AdminHeader";
+import AdminHeader from "@/components/admin/AdminHeader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getOwnerHotels,
@@ -39,25 +13,23 @@ import {
   deleteHotel,
   getOwnerAnalytics,
   getReservations,
-  updateReservationStatus,
-  getHotelReviews,
-  respondToReview,
   setHotelVisibility,
 } from "@/lib/api";
+import { HotelList } from "@/components/admin/hotelList";
+import { AnalyticsTab } from "@/components/admin/analytics";
+import { ReservationsTab } from "@/components/admin/reservations";
+import { ReviewsTab } from "@/components/admin/reviews";
+import type { Hotel } from "@/types/admin";
 
-// Mock data for hotel owner's hotels
-const mockOwnerHotels = [
+const mockOwnerHotels: Hotel[] = [
   {
-    id: 1,
+    id: "1",
     name: "Grand Hotel Moscow",
-    location: "Moscow, Russia",
     address: "Tverskaya Street, 1",
-    rating: 4.8,
-    rooms: 200,
+    city: "Moscow",
+    country: "Russia",
     status: "active",
-    totalBookings: 1250,
-    revenue: 45000,
-    occupancy: 85,
+    rooms: [],
     averageRating: 4.8,
     reviewsCount: 324,
     createdAt: "2024-01-15",
@@ -68,16 +40,13 @@ const mockOwnerHotels = [
     },
   },
   {
-    id: 2,
+    id: "2",
     name: "St. Petersburg Plaza",
-    location: "St. Petersburg, Russia",
     address: "Nevsky Prospect, 28",
-    rating: 4.6,
-    rooms: 150,
+    city: "St. Petersburg",
+    country: "Russia",
     status: "active",
-    totalBookings: 890,
-    revenue: 32000,
-    occupancy: 72,
+    rooms: [],
     averageRating: 4.6,
     reviewsCount: 198,
     createdAt: "2024-01-10",
@@ -88,16 +57,13 @@ const mockOwnerHotels = [
     },
   },
   {
-    id: 3,
+    id: "3",
     name: "Kazan Center Hotel",
-    location: "Kazan, Russia",
     address: "Bauman Street, 15",
-    rating: 4.2,
-    rooms: 100,
+    city: "Kazan",
+    country: "Russia",
     status: "inactive",
-    totalBookings: 456,
-    revenue: 18500,
-    occupancy: 58,
+    rooms: [],
     averageRating: 4.2,
     reviewsCount: 87,
     createdAt: "2024-01-08",
@@ -109,356 +75,16 @@ const mockOwnerHotels = [
   },
 ];
 
-// Mock analytics data
-const mockAnalytics = {
-  totalRevenue: 95500,
-  totalBookings: 2596,
-  averageOccupancy: 72,
-  totalReviews: 609,
-  monthlyRevenue: [32000, 28000, 35500],
-  monthlyBookings: [890, 756, 950],
-  topPerformingHotels: [
-    { name: "Grand Hotel Moscow", revenue: 45000, bookings: 1250 },
-    { name: "St. Petersburg Plaza", revenue: 32000, bookings: 890 },
-    { name: "Kazan Center Hotel", revenue: 18500, bookings: 456 },
-  ],
-};
-
-function AdminHotelReviewsList({ hotelId }: { hotelId: string }) {
-  const queryClient = useQueryClient();
-  const { data: reviews = [], isLoading } = useQuery({
-    queryKey: ["owner-hotel-reviews", hotelId],
-    queryFn: () => getHotelReviews(hotelId, { limit: 100 }),
-    retry: false,
-  });
-
-  const [replyText, setReplyText] = useState<Record<string, string>>({});
-  const [editingResponseId, setEditingResponseId] = useState<string | null>(
-    null
-  );
-
-  const replyMutation = useMutation({
-    mutationFn: ({ reviewId, text }: { reviewId: string; text: string }) =>
-      respondToReview(reviewId, text),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["owner-hotel-reviews", hotelId],
-      });
-    },
-  });
-
-  if (isLoading) {
-    return <div className="text-sm text-gray-600">Loading reviews...</div>;
-  }
-
-  return (
-    <div className="space-y-4">
-      {(reviews as any[]).map((rv: any) => {
-        const createdAt = rv.createdAt ? new Date(rv.createdAt) : null;
-        const stayDate = rv.stayDate ? new Date(rv.stayDate) : null;
-        const categories = rv.categoryRatings || {};
-        const categoryEntries = Object.entries(categories).filter(
-          ([, v]) => typeof v === "number"
-        );
-
-        return (
-          <Card key={String(rv._id || rv.id)}>
-            <CardContent className="p-5 space-y-4">
-              {/* Header */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-md bg-blue-600 text-white flex items-center justify-center font-semibold">
-                      {Number(rv.rating)?.toFixed?.(1) ?? rv.rating}
-                    </div>
-                    <Badge variant="secondary">Rating</Badge>
-                  </div>
-                  <span className="font-medium">
-                    {rv.guestName || rv.user?.name || "Guest"}
-                    {rv.guestCountry ? ` • ${rv.guestCountry}` : ""}
-                  </span>
-                </div>
-                <div className="text-xs text-gray-500 flex gap-3">
-                  {createdAt && (
-                    <span>Posted {createdAt.toLocaleDateString()}</span>
-                  )}
-                  {stayDate && (
-                    <span>Stayed {stayDate.toLocaleDateString()}</span>
-                  )}
-                  {rv.roomType && <span>Room: {rv.roomType}</span>}
-                  {rv.travelType && <span>Type: {rv.travelType}</span>}
-                </div>
-              </div>
-
-              {/* Content */}
-              {(rv.comment || rv.negative) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {rv.comment && (
-                    <div className="rounded-lg border p-3">
-                      <div className="text-sm font-medium mb-1">Positive</div>
-                      <div className="text-sm text-gray-800 whitespace-pre-wrap">
-                        {rv.comment}
-                      </div>
-                    </div>
-                  )}
-                  {rv.negative && (
-                    <div className="rounded-lg border p-3">
-                      <div className="text-sm font-medium mb-1">Negative</div>
-                      <div className="text-sm text-gray-800 whitespace-pre-wrap">
-                        {rv.negative}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Categories */}
-              {categoryEntries.length > 0 && (
-                <div>
-                  <div className="text-sm font-medium mb-2">
-                    Category ratings
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                    {categoryEntries.map(([key, val]) => (
-                      <div
-                        key={key}
-                        className="bg-gray-50 rounded p-2 text-center"
-                      >
-                        <div className="text-xs text-gray-500 capitalize">
-                          {key}
-                        </div>
-                        <div className="text-sm font-semibold">
-                          {Number(val as number).toFixed(1)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Response */}
-              {rv.hotelResponse ? (
-                <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="font-medium">Hotel response</div>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => {
-                        setEditingResponseId(String(rv._id || rv.id));
-                        setReplyText((m) => ({
-                          ...m,
-                          [String(rv._id || rv.id)]:
-                            rv.hotelResponse?.text || "",
-                        }));
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </div>
-                  {editingResponseId === String(rv._id || rv.id) ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        className="flex-1 rounded border px-2 py-1 text-sm"
-                        placeholder="Edit response"
-                        value={replyText[String(rv._id || rv.id)] || ""}
-                        onChange={(e) =>
-                          setReplyText((m) => ({
-                            ...m,
-                            [String(rv._id || rv.id)]: e.target.value,
-                          }))
-                        }
-                      />
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          replyMutation.mutate(
-                            {
-                              reviewId: String(rv._id || rv.id),
-                              text: replyText[String(rv._id || rv.id)] || "",
-                            },
-                            {
-                              onSuccess: () => setEditingResponseId(null),
-                            }
-                          )
-                        }
-                        disabled={
-                          !replyText[String(rv._id || rv.id)] ||
-                          replyMutation.isPending
-                        }
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditingResponseId(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="whitespace-pre-wrap">
-                        {rv.hotelResponse.text}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {rv.hotelResponse.respondedAt
-                          ? new Date(
-                              rv.hotelResponse.respondedAt
-                            ).toLocaleString()
-                          : null}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <input
-                    className="flex-1 rounded border px-2 py-1 text-sm"
-                    placeholder="Write a response to this review"
-                    value={replyText[String(rv._id || rv.id)] || ""}
-                    onChange={(e) =>
-                      setReplyText((m) => ({
-                        ...m,
-                        [String(rv._id || rv.id)]: e.target.value,
-                      }))
-                    }
-                  />
-                  <Button
-                    size="sm"
-                    disabled={
-                      !replyText[String(rv._id || rv.id)] ||
-                      replyMutation.isPending
-                    }
-                    onClick={() =>
-                      replyMutation.mutate({
-                        reviewId: String(rv._id || rv.id),
-                        text: replyText[String(rv._id || rv.id)],
-                      })
-                    }
-                  >
-                    Reply
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
-function HotelKpis({ hotelId }: { hotelId: string }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["owner-analytics", hotelId],
-    queryFn: () => getOwnerAnalytics({ hotelId }),
-    staleTime: 60_000,
-  });
-
-  const currency = (amount: number) =>
-    new Intl.NumberFormat("he-IL", {
-      style: "currency",
-      currency: "ILS",
-      minimumFractionDigits: 0,
-    }).format(Number.isFinite(amount) ? amount : 0);
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div
-            key={i}
-            className="bg-gray-50 p-3 rounded-lg h-[66px] animate-pulse"
-          />
-        ))}
-      </div>
-    );
-  }
-
-  const totalBookings = Number(data?.totalBookings || 0);
-  const totalRevenue = Number(data?.totalRevenue || 0);
-  const averageOccupancy = Number(data?.averageOccupancy || 0);
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="bg-gray-50 p-3 rounded-lg">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Calendar className="h-4 w-4" />
-          Bookings
-        </div>
-        <div className="text-lg font-semibold">{totalBookings}</div>
-      </div>
-      <div className="bg-gray-50 p-3 rounded-lg">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <DollarSign className="h-4 w-4" />
-          Revenue
-        </div>
-        <div className="text-lg font-semibold">{currency(totalRevenue)}</div>
-      </div>
-      <div className="bg-gray-50 p-3 rounded-lg">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <TrendingUp className="h-4 w-4" />
-          Occupancy
-        </div>
-        <div className="text-lg font-semibold">{averageOccupancy}%</div>
-      </div>
-    </div>
-  );
-}
-
-function HotelKpisMini({
-  hotelId,
-  formatCurrency,
-}: {
-  hotelId: string;
-  formatCurrency: (n: number) => string;
-}) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["owner-analytics-mini", hotelId],
-    queryFn: () => getOwnerAnalytics({ hotelId }),
-    staleTime: 60_000,
-  });
-  const totalBookings = Number(data?.totalBookings || 0);
-  const totalRevenue = Number(data?.totalRevenue || 0);
-  const averageOccupancy = Number(data?.averageOccupancy || 0);
-  return (
-    <>
-      <div className="bg-gray-50 p-2 rounded-md">
-        <div className="text-[11px] text-gray-500">Bookings</div>
-        <div className="text-base font-semibold">
-          {isLoading ? "…" : totalBookings}
-        </div>
-      </div>
-      <div className="bg-gray-50 p-2 rounded-md">
-        <div className="text-[11px] text-gray-500">Revenue</div>
-        <div className="text-base font-semibold">
-          {isLoading ? "…" : formatCurrency(totalRevenue)}
-        </div>
-      </div>
-      <div className="bg-gray-50 p-2 rounded-md">
-        <div className="text-[11px] text-gray-500">Occupancy</div>
-        <div className="text-base font-semibold">
-          {isLoading ? "…" : `${averageOccupancy}%`}
-        </div>
-      </div>
-    </>
-  );
-}
-
 export default function AdminHotelPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("hotels");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedHotel, setSelectedHotel] = useState<any>(null);
+  const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [reservationStatus, setReservationStatus] = useState<string>("");
   const { setShowTabs } = useNavigationTabsStore();
   const queryClient = useQueryClient();
 
-  // API queries
   const {
     data: hotels = [],
     isLoading: hotelsLoading,
@@ -467,10 +93,8 @@ export default function AdminHotelPage() {
     queryKey: ["owner-hotels"],
     queryFn: async () => {
       try {
-        // Try multiple endpoints to get hotels
         console.log("Trying to load hotels from API...");
 
-        // First try: public hotels endpoint
         try {
           const response = await fetch("/api/hotels?limit=1000");
           if (response.ok) {
@@ -482,14 +106,12 @@ export default function AdminHotelPage() {
           console.log("Public API failed:", e);
         }
 
-        // Second try: owner hotels endpoint
         try {
           return await getOwnerHotels();
         } catch (e) {
           console.log("Owner hotels API failed:", e);
         }
 
-        // Third try: all hotels for owner
         try {
           return await getAllHotelsForOwner();
         } catch (e) {
@@ -515,7 +137,6 @@ export default function AdminHotelPage() {
     enabled: !!selectedHotel?.id,
   });
 
-  // Reservations list for selected hotel
   const { data: reservations = [] } = useQuery({
     queryKey: ["owner-reservations", selectedHotel?.id, reservationStatus],
     queryFn: () =>
@@ -529,14 +150,12 @@ export default function AdminHotelPage() {
     retry: false,
   });
 
-  // Mutations
   const createHotelMutation = useMutation({
     mutationFn: createHotel,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       queryClient.invalidateQueries({ queryKey: ["owner-analytics"] });
       setIsEditDialogOpen(false);
-      setIsAddDialogOpen(false);
       setSelectedHotel(null);
     },
     onError: (err: any) => {
@@ -549,7 +168,6 @@ export default function AdminHotelPage() {
     mutationFn: ({ hotelId, hotelData }: { hotelId: string; hotelData: any }) =>
       updateHotel(hotelId, hotelData),
     onSuccess: (updated: any, vars) => {
-      // Optimistically update cache
       queryClient.setQueryData(["owner-hotels"], (prev: any) => {
         if (!Array.isArray(prev)) return prev;
         return prev.map((h: any) =>
@@ -567,7 +185,6 @@ export default function AdminHotelPage() {
       queryClient.invalidateQueries({ queryKey: ["owner-hotels"] });
       queryClient.invalidateQueries({ queryKey: ["owner-analytics"] });
       setIsEditDialogOpen(false);
-      setIsAddDialogOpen(false);
       setSelectedHotel(null);
     },
     onError: (err: any) => {
@@ -585,17 +202,13 @@ export default function AdminHotelPage() {
     },
   });
 
-  // Hide navigation tabs on admin page
   useEffect(() => {
     setShowTabs(false);
-
-    // Restore tabs when component unmounts
     return () => {
       setShowTabs(true);
     };
   }, [setShowTabs]);
 
-  // Do not auto-select a hotel; require explicit user selection
   useEffect(() => {
     if (
       !isEditDialogOpen &&
@@ -604,7 +217,7 @@ export default function AdminHotelPage() {
       Array.isArray(hotels)
     ) {
       const stillExists = hotels.some(
-        (h: any) => String(h.id) === String(selectedHotel.id)
+        (h: Hotel) => String(h.id) === String(selectedHotel.id)
       );
       if (!stillExists) setSelectedHotel(null);
     }
@@ -614,10 +227,9 @@ export default function AdminHotelPage() {
     setIsAdding(true);
     setSelectedHotel(null);
     setIsEditDialogOpen(true);
-    setIsAddDialogOpen(false);
   };
 
-  const handleEditHotel = (hotel: any) => {
+  const handleEditHotel = (hotel: Hotel) => {
     setSelectedHotel(hotel);
     setIsEditDialogOpen(true);
   };
@@ -626,15 +238,12 @@ export default function AdminHotelPage() {
     deleteHotelMutation.mutate(id);
   };
 
-  const handleToggleHotelStatus = (id: any) => {
-    const hotel = (hotels as any[]).find(
-      (h: any) => String(h.id) === String(id)
-    );
+  const handleToggleHotelStatus = (id: string) => {
+    const hotel = hotels.find((h: Hotel) => String(h.id) === String(id));
     if (!hotel) return;
     const currentlyVisible = hotel.isVisible !== false;
     const nextVisible = !currentlyVisible;
 
-    // Optimistic update
     queryClient.setQueryData(["owner-hotels"], (prev: any) => {
       if (!Array.isArray(prev)) return prev;
       return prev.map((h: any) =>
@@ -662,7 +271,7 @@ export default function AdminHotelPage() {
   };
 
   const handleSaveHotel = (updatedHotel: any) => {
-    const id = updatedHotel?.id; // only trust explicit id from dialog
+    const id = updatedHotel?.id;
     const sanitizeRooms = (rooms: any[]) =>
       (rooms || []).map((r) => {
         const pricePerNight = Number(r.pricePerNight ?? 0);
@@ -714,7 +323,6 @@ export default function AdminHotelPage() {
         const out: any = {};
         Object.entries(obj).forEach(([k, v]) => {
           const cleaned = deepClean(v as any);
-          // Special handling for facilities - keep empty arrays and empty strings
           if (k === "facilities" || k.startsWith("facilities")) {
             out[k] = cleaned;
           } else if (
@@ -741,7 +349,6 @@ export default function AdminHotelPage() {
     const baseFacilities = {
       ...(selectedHotel?.facilities || {}),
       ...((updatedHotel.facilities as any) || {}),
-      // Ensure all facility categories are present with empty arrays if not set
       greatForStay: updatedHotel.facilities?.greatForStay || [],
       bathroom: updatedHotel.facilities?.bathroom || [],
       bedroom: updatedHotel.facilities?.bedroom || [],
@@ -760,7 +367,6 @@ export default function AdminHotelPage() {
       languagesSpoken: updatedHotel.facilities?.languagesSpoken || [],
     };
 
-    // Merge and sanitize houseRules to match server schema and avoid empty required strings
     const mergedHouseRules = {
       ...(selectedHotel?.houseRules || {}),
       ...((updatedHotel.houseRules as any) || {}),
@@ -831,7 +437,6 @@ export default function AdminHotelPage() {
     const mappedRooms = sanitizeRooms(updatedHotel.rooms || []);
     if (mappedRooms.length > 0) base.rooms = mappedRooms;
 
-    // Convert facility objects to strings for server compatibility
     const convertFacilitiesToServerFormat = (facilities: any) => {
       const converted: any = {};
 
@@ -839,20 +444,17 @@ export default function AdminHotelPage() {
         const value = facilities[key];
 
         if (Array.isArray(value)) {
-          // Convert array of objects to array of strings
           converted[key] = value.map((item: any) => {
             if (typeof item === "object" && item.name) {
-              // Object format: {name: 'Free WiFi', available: true, note: 'Additional charge'}
               let result = item.name;
               if (item.note && item.note.trim()) {
                 result += ` (${item.note})`;
               }
               return result;
             }
-            return String(item); // Already a string
+            return String(item);
           });
         } else if (typeof value === "string") {
-          // Keep string values as is
           converted[key] = value;
         }
       });
@@ -877,30 +479,8 @@ export default function AdminHotelPage() {
 
   const handleCloseDialog = () => {
     setIsEditDialogOpen(false);
-    setIsAddDialogOpen(false);
     setSelectedHotel(null);
     setIsAdding(false);
-  };
-
-  const filteredHotels = (hotels as any[]).filter((hotel: any) => {
-    const hay = `${hotel.name || ""} ${hotel.city || ""} ${
-      hotel.address || ""
-    }`.toLowerCase();
-    return hay.includes(searchTerm.toLowerCase());
-  });
-
-  const getStatusBadge = (status: string) => {
-    const colors = {
-      active: "bg-green-100 text-green-800",
-      inactive: "bg-gray-100 text-gray-800",
-    };
-
-    return (
-      <Badge className={colors[status as keyof typeof colors]}>
-        {status === "active" && "Active"}
-        {status === "inactive" && "Inactive"}
-      </Badge>
-    );
   };
 
   const formatCurrency = (amount: number) => {
@@ -909,6 +489,10 @@ export default function AdminHotelPage() {
       currency: "USD",
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const handleHotelSelect = (hotel: Hotel | null) => {
+    setSelectedHotel(hotel);
   };
 
   return (
@@ -972,631 +556,51 @@ export default function AdminHotelPage() {
 
           {activeTab === "hotels" && (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <CardTitle>My Hotels</CardTitle>
-                      <CardDescription>
-                        Manage your hotels on the platform
-                      </CardDescription>
-                    </div>
-                    <Button
-                      onClick={handleAddHotel}
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Hotel
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-4 mt-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        placeholder="Search by name or location..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {hotelsLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading hotels...</p>
-                      </div>
-                    </div>
-                  ) : hotelsError ? (
-                    <div className="text-center py-12">
-                      <p className="text-red-600 mb-4">Error loading hotels</p>
-                      <p className="text-gray-600 text-sm">Using demo data</p>
-                      <div className="space-y-4 mt-6">
-                        {mockOwnerHotels.map((hotel) => (
-                          <Card
-                            key={hotel.id}
-                            className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow"
-                          >
-                            <CardContent className="pt-6">
-                              <div className="flex justify-between items-start">
-                                <div className="space-y-3 flex-1">
-                                  <div className="flex items-center gap-3">
-                                    <h3 className="text-xl font-semibold">
-                                      {hotel.name}
-                                    </h3>
-                                    {getStatusBadge(hotel.status)}
-                                  </div>
-
-                                  <div className="flex items-center gap-4 text-gray-600">
-                                    <div className="flex items-center gap-1">
-                                      <MapPin className="h-4 w-4" />
-                                      {hotel.address}
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Star className="h-4 w-4 text-yellow-500" />
-                                      {hotel.averageRating} (
-                                      {hotel.reviewsCount} отзывов)
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="bg-gray-50 p-3 rounded-lg">
-                                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Building2 className="h-4 w-4" />
-                                        Rooms
-                                      </div>
-                                      <div className="text-lg font-semibold">
-                                        {hotel.rooms}
-                                      </div>
-                                    </div>
-                                    <Fragment>
-                                      <HotelKpis hotelId={String(hotel.id)} />
-                                    </Fragment>
-                                  </div>
-
-                                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                                    <span>
-                                      Created:{" "}
-                                      {hotel.createdAt
-                                        ? new Date(
-                                            hotel.createdAt
-                                          ).toLocaleString()
-                                        : "—"}
-                                    </span>
-                                    {hotel.lastBooking && (
-                                      <span>
-                                        Last booking: {hotel.lastBooking}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  <div className="flex items-center gap-4 text-sm">
-                                    {hotel.contactInfo.phone && (
-                                      <div className="flex items-center gap-1">
-                                        <Phone className="h-4 w-4" />
-                                        {hotel.contactInfo.phone}
-                                      </div>
-                                    )}
-                                    {hotel.contactInfo.email && (
-                                      <div className="flex items-center gap-1">
-                                        <Mail className="h-4 w-4" />
-                                        {hotel.contactInfo.email}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="flex flex-col items-end space-y-2 ml-4">
-                                  <div className="flex space-x-2">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() =>
-                                        handleToggleHotelStatus(
-                                          String(hotel.id)
-                                        )
-                                      }
-                                    >
-                                      <Eye className="h-4 w-4 mr-1" />
-                                      {hotel.status === "active"
-                                        ? "Deactivate"
-                                        : "Activate"}
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => handleEditHotel(hotel)}
-                                    >
-                                      <Edit className="h-4 w-4 mr-1" />
-                                      Edit
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      onClick={() =>
-                                        handleDeleteHotel(String(hotel.id))
-                                      }
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-1" />
-                                      Delete
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredHotels.map((hotel: any) => (
-                        <Card
-                          key={hotel.id}
-                          className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow"
-                        >
-                          <CardContent className="pt-6">
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-3 flex-1">
-                                {/* Header */}
-                                <div className="flex items-center gap-3">
-                                  <h3 className="text-xl font-semibold">
-                                    {hotel.name}
-                                  </h3>
-                                  {getStatusBadge(hotel.status)}
-                                </div>
-
-                                {/* Subheader: location & rating */}
-                                <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
-                                  <div className="flex items-center gap-1">
-                                    <MapPin className="h-4 w-4" />
-                                    <span className="truncate max-w-[360px]">
-                                      {hotel.address || hotel.city}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Star className="h-4 w-4 text-yellow-500" />
-                                    <span className="font-medium">
-                                      {hotel.averageRating ?? 0}
-                                    </span>
-                                    <span className="text-gray-500">
-                                      ({hotel.reviewsCount} reviews)
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* KPIs */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                  <div className="bg-gray-50 p-2 rounded-md">
-                                    <div className="text-[11px] text-gray-500">
-                                      Rooms
-                                    </div>
-                                    <div className="text-base font-semibold">
-                                      {hotel.rooms}
-                                    </div>
-                                  </div>
-                                  {/* Live analytics per hotel */}
-                                  <HotelKpisMini
-                                    hotelId={String(hotel.id)}
-                                    formatCurrency={formatCurrency}
-                                  />
-                                </div>
-
-                                {/* Meta */}
-                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                                  <span>
-                                    Created:{" "}
-                                    {hotel.createdAt
-                                      ? new Date(
-                                          hotel.createdAt
-                                        ).toLocaleString()
-                                      : "—"}
-                                  </span>
-                                  {hotel.lastBooking && (
-                                    <span>
-                                      Last booking: {hotel.lastBooking}
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* Contact */}
-                                <div className="flex items-center gap-4 text-sm">
-                                  {hotel.contactInfo?.phone && (
-                                    <div className="flex items-center gap-1">
-                                      <Phone className="h-4 w-4" />
-                                      {hotel.contactInfo.phone}
-                                    </div>
-                                  )}
-                                  {hotel.contactInfo?.email && (
-                                    <div className="flex items-center gap-1">
-                                      <Mail className="h-4 w-4" />
-                                      {hotel.contactInfo.email}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div className="flex flex-col items-end space-y-2 ml-4">
-                                <div className="flex space-x-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() =>
-                                      handleToggleHotelStatus(String(hotel.id))
-                                    }
-                                    disabled={updateHotelMutation.isPending}
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" />
-                                    {hotel.status === "active"
-                                      ? "Deactivate"
-                                      : "Activate"}
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleEditHotel(hotel)}
-                                  >
-                                    <Edit className="h-4 w-4 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => handleDeleteHotel(hotel.id)}
-                                    disabled={deleteHotelMutation.isPending}
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-1" />
-                                    Delete
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <HotelList
+                hotels={hotels}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onAddHotel={handleAddHotel}
+                onEditHotel={handleEditHotel}
+                onDeleteHotel={handleDeleteHotel}
+                onToggleHotelStatus={handleToggleHotelStatus}
+                isLoading={hotelsLoading}
+                error={!!hotelsError}
+                formatCurrency={formatCurrency}
+                isUpdating={updateHotelMutation.isPending}
+                isDeleting={deleteHotelMutation.isPending}
+              />
             </div>
           )}
 
           {activeTab === "analytics" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-end">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Hotel:</span>
-                  <select
-                    className="rounded border px-2 py-1 text-sm"
-                    value={selectedHotel?.id ?? ""}
-                    onChange={(e) => {
-                      const id = e.target.value;
-                      const h =
-                        hotels.find((x: any) => String(x.id) === id) || null;
-                      setSelectedHotel(h);
-                    }}
-                  >
-                    <option value="">All hotels</option>
-                    {hotels.map((h: any) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              {!!selectedHotel?.id && !!analytics ? (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Total Revenue
-                          </p>
-                          <p className="text-2xl font-bold">
-                            {formatCurrency(analytics.totalRevenue)}
-                          </p>
-                        </div>
-                        <DollarSign className="h-8 w-8 text-green-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Total Bookings
-                          </p>
-                          <p className="text-2xl font-bold">
-                            {analytics.totalBookings}
-                          </p>
-                        </div>
-                        <Calendar className="h-8 w-8 text-blue-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Average Occupancy
-                          </p>
-                          <p className="text-2xl font-bold">
-                            {analytics.averageOccupancy}%
-                          </p>
-                        </div>
-                        <TrendingUp className="h-8 w-8 text-purple-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            Reviews
-                          </p>
-                          <p className="text-2xl font-bold">
-                            {analytics.totalReviews}
-                          </p>
-                        </div>
-                        <Star className="h-8 w-8 text-yellow-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <Card>
-                  <CardContent className="p-6 text-sm text-gray-600">
-                    Select a hotel to view analytics.
-                  </CardContent>
-                </Card>
-              )}
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Performing Hotels by Revenue</CardTitle>
-                  <CardDescription>
-                    Ranking of your hotels by performance
-                  </CardDescription>
-                </CardHeader>
-                {selectedHotel?.id && analytics ? (
-                  <CardContent>
-                    <div className="space-y-4">
-                      {(analytics?.topPerformingHotels ?? []).map(
-                        (hotel: any, index: number) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold">
-                                {index + 1}
-                              </div>
-                              <div>
-                                <h4 className="font-semibold">{hotel.name}</h4>
-                                <p className="text-sm text-gray-600">
-                                  {hotel.bookings} bookings
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold">
-                                {formatCurrency(hotel.revenue)}
-                              </p>
-                              <p className="text-sm text-gray-600">revenue</p>
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </CardContent>
-                ) : (
-                  <CardContent className="p-6 text-sm text-gray-600">
-                    No analytics available.
-                  </CardContent>
-                )}
-              </Card>
-            </div>
+            <AnalyticsTab
+              hotels={hotels}
+              selectedHotel={selectedHotel}
+              onHotelSelect={handleHotelSelect}
+              analytics={analytics}
+              formatCurrency={formatCurrency}
+            />
           )}
 
           {activeTab === "reservations" && (
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reservations</CardTitle>
-                  <CardDescription>
-                    View and update reservation status
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
-                    <select
-                      className="rounded border px-2 py-1 text-sm"
-                      value={selectedHotel?.id ?? ""}
-                      onChange={(e) => {
-                        const id = e.target.value;
-                        const h =
-                          hotels.find((x: any) => String(x.id) === id) || null;
-                        setSelectedHotel(h);
-                      }}
-                    >
-                      <option value="">Select a hotel</option>
-                      {hotels.map((h: any) => (
-                        <option key={h.id} value={h.id}>
-                          {h.name}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className="rounded border px-2 py-1 text-sm"
-                      value={reservationStatus}
-                      onChange={(e) => setReservationStatus(e.target.value)}
-                    >
-                      <option value="">All statuses</option>
-                      <option value="PENDING">Pending</option>
-                      <option value="CONFIRMED">Confirmed</option>
-                      <option value="CANCELLED">Cancelled</option>
-                      <option value="COMPLETED">Completed</option>
-                    </select>
-                  </div>
-                  {!selectedHotel?.id ? (
-                    <div className="text-sm text-gray-600">
-                      Select a hotel to view its reservations.
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full text-sm">
-                        <thead>
-                          <tr className="text-left border-b">
-                            <th className="py-2 pr-3">Guest</th>
-                            <th className="py-2 pr-3">Dates</th>
-                            <th className="py-2 pr-3">Rooms</th>
-                            <th className="py-2 pr-3">Guests</th>
-                            <th className="py-2 pr-3">Total</th>
-                            <th className="py-2 pr-3">Status</th>
-                            <th className="py-2 pr-3">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(reservations as any[]).map((r: any) => (
-                            <tr
-                              key={String(r._id || r.id)}
-                              className="border-b"
-                            >
-                              <td className="py-2 pr-3">
-                                {r.guestInfo?.firstName} {r.guestInfo?.lastName}
-                              </td>
-                              <td className="py-2 pr-3">
-                                {new Date(r.checkIn).toLocaleDateString()} –{" "}
-                                {new Date(r.checkOut).toLocaleDateString()}
-                              </td>
-                              <td className="py-2 pr-3">{r.quantity}</td>
-                              <td className="py-2 pr-3">
-                                {r.guests?.total ??
-                                  (r.guests?.adults || 0) +
-                                    (r.guests?.children || 0)}
-                              </td>
-                              <td className="py-2 pr-3">
-                                ₪{(r.totalPrice || 0).toLocaleString()}
-                              </td>
-                              <td className="py-2 pr-3">{r.status}</td>
-                              <td className="py-2 pr-3">
-                                <div className="flex gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() =>
-                                      updateReservationStatus(
-                                        String(r._id || r.id),
-                                        "CONFIRMED"
-                                      ).then(() =>
-                                        queryClient.invalidateQueries({
-                                          queryKey: ["owner-reservations"],
-                                        })
-                                      )
-                                    }
-                                  >
-                                    Confirm
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    className="bg-green-600 hover:bg-green-700 text-white"
-                                    onClick={() =>
-                                      updateReservationStatus(
-                                        String(r._id || r.id),
-                                        "COMPLETED"
-                                      ).then(() =>
-                                        queryClient.invalidateQueries({
-                                          queryKey: ["owner-reservations"],
-                                        })
-                                      )
-                                    }
-                                  >
-                                    Complete
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() =>
-                                      updateReservationStatus(
-                                        String(r._id || r.id),
-                                        "CANCELLED"
-                                      ).then(() =>
-                                        queryClient.invalidateQueries({
-                                          queryKey: ["owner-reservations"],
-                                        })
-                                      )
-                                    }
-                                  >
-                                    Cancel
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            <ReservationsTab
+              hotels={hotels}
+              selectedHotel={selectedHotel}
+              onHotelSelect={handleHotelSelect}
+              reservationStatus={reservationStatus}
+              onStatusChange={setReservationStatus}
+              reservations={reservations}
+            />
           )}
 
           {activeTab === "reviews" && (
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reviews</CardTitle>
-                  <CardDescription>View and reply to reviews</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3 mb-4">
-                    <select
-                      className="rounded border px-2 py-1 text-sm"
-                      value={selectedHotel?.id ?? ""}
-                      onChange={(e) => {
-                        const id = e.target.value;
-                        const h =
-                          hotels.find((x: any) => String(x.id) === id) || null;
-                        setSelectedHotel(h);
-                      }}
-                    >
-                      <option value="">Select a hotel</option>
-                      {hotels.map((h: any) => (
-                        <option key={h.id} value={h.id}>
-                          {h.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {!selectedHotel?.id ? (
-                    <div className="text-sm text-gray-600">
-                      Select a hotel to view its reviews.
-                    </div>
-                  ) : (
-                    <AdminHotelReviewsList hotelId={String(selectedHotel.id)} />
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+            <ReviewsTab
+              hotels={hotels}
+              selectedHotel={selectedHotel}
+              onHotelSelect={handleHotelSelect}
+            />
           )}
-
-          {/* Removed separate AddHotelDialog; full add uses EditHotelDialog */}
-          {/* <AddHotelDialog
-            isOpen={isAddDialogOpen}
-            onClose={handleCloseDialog}
-            onSave={handleSaveHotel}
-          /> */}
         </Tabs>
 
         <EditHotelDialog

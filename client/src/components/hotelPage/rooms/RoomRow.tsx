@@ -7,13 +7,11 @@ import PriceSummary from "../info/PriceSummary";
 interface RoomRowProps {
   room: any;
   index: number;
-  isFirstOfType: boolean;
   selectedRooms: Record<string, number>;
   onRoomSelect: (roomId: string, count: number) => void;
   getRoomId: (room: any) => string;
   totalSelectedRooms: number;
   totalPrice: number;
-  pricePerNight: number;
   firstSelectedRoom: any;
   adults: number;
   children: number;
@@ -23,22 +21,19 @@ interface RoomRowProps {
 export default function RoomRow({
   room,
   index,
-  isFirstOfType,
   selectedRooms,
   onRoomSelect,
   getRoomId,
   totalSelectedRooms,
   totalPrice,
-  pricePerNight,
   firstSelectedRoom,
   adults,
   children,
   hotel,
 }: RoomRowProps) {
-  // Calculate required rooms based on current guests
   const calculateRequiredRooms = (adults: number, children: number) => {
     const totalGuests = adults + children;
-    const guestsPerRoom = 3; // 2 adults + 1 child per room
+    const guestsPerRoom = 3;
     const minRooms = Math.ceil(totalGuests / guestsPerRoom);
     return Math.max(1, minRooms);
   };
@@ -48,7 +43,6 @@ export default function RoomRow({
 
   return (
     <div key={room._id || room.id}>
-      {/* Row grid mirrors header widths */}
       <div
         className={`grid grid-cols-[minmax(320px,1.2fr)_140px_220px_1.8fr_88px_180px] gap-0 p-0 divide-x divide-[#e6e6e6] ${
           index === 0 ? "sticky top-16 z-30" : ""
@@ -66,10 +60,7 @@ export default function RoomRow({
             {room.name}
           </a>
 
-          {/* Room specifications */}
           <RoomSpecifications room={room} />
-
-          {/* Availability warning */}
           {room.availableRooms !== undefined && room.availableRooms > 0 && (
             <div className="flex items-center gap-2 text-red-600 text-sm">
               <div className="w-2 h-2 bg-red-600 rounded-full"></div>
@@ -83,7 +74,6 @@ export default function RoomRow({
             </div>
           )}
 
-          {/* Categories */}
           {room.categories && room.categories.length > 0 && (
             <div className="space-y-1 text-sm">
               <div className="flex flex-wrap gap-1">
@@ -99,7 +89,6 @@ export default function RoomRow({
             </div>
           )}
 
-          {/* Amenities from backend */}
           <div className="space-y-1 text-sm">
             {(room.amenities || [])
               .slice(0, 6)
@@ -115,7 +104,6 @@ export default function RoomRow({
           </div>
         </div>
 
-        {/* Number of guests */}
         <div
           className={`p-4 flex items-start justify-start ${
             index > 0 ? "border-t border-gray-200" : ""
@@ -138,7 +126,6 @@ export default function RoomRow({
           </div>
         </div>
 
-        {/* Today's price */}
         <div
           className={`p-4 text-left ${
             index > 0 ? "border-t border-gray-200" : ""
@@ -151,7 +138,6 @@ export default function RoomRow({
             </div>
             <div className="text-sm text-gray-500">per night</div>
           </div>
-          {/* Show room calculation details */}
           {requiredRooms > 1 && (
             <div className="text-xs text-gray-400 mt-1">
               {requiredRooms} rooms needed for {adults + children} guests (₪
@@ -160,12 +146,10 @@ export default function RoomRow({
           )}
         </div>
 
-        {/* Your choices */}
         <div className={`p-4 ${index > 0 ? "border-t border-gray-200" : ""}`}>
           <RoomAmenities room={room} />
         </div>
 
-        {/* Select rooms */}
         <div
           className={`p-4 flex items-start gap-2 ${
             index > 0 ? "border-t border-gray-200" : ""
@@ -179,7 +163,6 @@ export default function RoomRow({
           />
         </div>
 
-        {/* Reserve button column */}
         <div
           className={`p-4 flex items-start border-b-0 ${
             totalSelectedRooms > 0 ? "bg-blue-50" : "bg-white"
@@ -190,7 +173,6 @@ export default function RoomRow({
               <PriceSummary
                 totalSelectedRooms={totalSelectedRooms}
                 totalPrice={totalPrice}
-                pricePerNight={pricePerNight}
                 firstSelectedRoom={firstSelectedRoom}
                 hotel={hotel}
                 selectedRooms={selectedRooms}

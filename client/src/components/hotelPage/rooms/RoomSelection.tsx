@@ -30,7 +30,6 @@ interface RoomSelectionProps {
   rooms: RoomOption[];
 }
 
-// Sticky reservation summary component
 function ReservationSummary({
   selectedRooms,
   calculateTotalPrice,
@@ -106,12 +105,10 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
 
-  // Helper function to get room ID
   const getRoomId = (room: any) => {
     return room.id || room._id?.$oid || room._id || "";
   };
 
-  // Handle room selection
   const handleRoomSelect = (roomId: string, count: number) => {
     setSelectedRooms((prev) => ({
       ...prev,
@@ -119,7 +116,6 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
     }));
   };
 
-  // Calculate total price for selected rooms
   const calculateTotalPrice = () => {
     let total = 0;
     Object.entries(selectedRooms).forEach(([roomId, count]) => {
@@ -134,19 +130,14 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
   };
 
   const handleReserve = () => {
-    // Handle reservation logic
     console.log("Reserving rooms:", selectedRooms);
   };
-
-  // Handle sticky header
   useEffect(() => {
     const handleScroll = () => {
       if (headerRef.current && tableRef.current) {
         const headerRect = headerRef.current.getBoundingClientRect();
         const tableRect = tableRef.current.getBoundingClientRect();
 
-        // Header becomes sticky when it reaches the top of viewport
-        // and table is still visible (not scrolled past)
         const shouldBeSticky =
           headerRect.top <= 0 && tableRect.bottom > headerRect.height;
         setIsSticky(shouldBeSticky);

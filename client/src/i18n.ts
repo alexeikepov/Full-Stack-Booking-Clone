@@ -45,7 +45,8 @@ import ptBR from "./locales/pt-BR.json";
 import esMX from "./locales/es-MX.json";
 import esAR from "./locales/es-AR.json";
 
-const stored = typeof window !== "undefined" ? localStorage.getItem("lang") : null;
+const stored =
+  typeof window !== "undefined" ? localStorage.getItem("lang") : null;
 const fallbackLng = stored || "en";
 
 // Minimal resources; add real translations later
@@ -96,18 +97,15 @@ const resources: Record<string, { translation: any }> = {
   bg: { translation: bg as any },
   // Map the rest to English for now (so UI works) until real translations are added
   "en-US": { translation: en as any },
-  bg: { translation: en as any },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: fallbackLng,
-    fallbackLng: "en",
-    interpolation: { escapeValue: false },
-    returnNull: false,
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: fallbackLng,
+  fallbackLng: "en",
+  interpolation: { escapeValue: false },
+  returnNull: false,
+});
 
 // Set document direction for RTL languages
 if (typeof document !== "undefined") {
@@ -117,5 +115,3 @@ if (typeof document !== "undefined") {
 }
 
 export default i18n;
-
-

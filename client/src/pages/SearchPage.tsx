@@ -1,212 +1,28 @@
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams, Link } from "react-router-dom";
-import { api } from "@/lib/api";
-import type { Hotel } from "@/types/hotel";
+import { useSearchParams } from "react-router-dom";
 import SearchTopBar from "@/components/search/HeroSearch";
-import FiltersSidebar, {
-  type FiltersState,
-} from "@/components/searchPage/FiltersSidebar";
-import HotelCard from "@/components/searchPage/HotelCard";
-import InfoNotice from "@/components/searchPage/InfoNotice";
-import SortBar from "@/components/searchPage/SortBar";
+import {
+  FiltersSidebar,
+  SearchHeader,
+  HotelList,
+  Breadcrumb,
+} from "@/components/searchPage";
+import type { FiltersState } from "@/components/searchPage/FiltersSidebar";
 import { sortHotels, type SortKey } from "@/utils/sortHotels";
 import { buildFacets, type FacetGroup } from "@/utils/buildFacets";
-import { useTranslation } from "react-i18next";
+import { categoriesFacet } from "@/utils/facetsUtils";
+import {
+  nightsFromParams,
+  fetchHotels,
+  mergeSelected,
+  filterHotels,
+} from "@/utils/searchUtils";
+import { priceOf } from "@/utils/hotelUtils";
 
 type ViewMode = "list" | "grid";
 
-const n = (v: unknown): number | null =>
-  Number.isFinite(Number(v)) ? Number(v) : null;
-const priceOf = (h: Hotel) =>
-  n((h as any).totalPrice) ?? n((h as any).priceFrom);
-const ratingOf = (h: Hotel) => n((h as any).averageRating) ?? 0;
-const starsOf = (h: Hotel) => n((h as any).stars) ?? 0;
-
-function toStringArray(val: unknown): string[] {
-  if (Array.isArray(val)) return val.map(String);
-  if (val instanceof Set) return Array.from(val).map(String);
-  if (typeof val === "string")
-    return val
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  if (val && typeof val === "object") {
-    return Object.entries(val as Record<string, any>)
-      .filter(([, v]) => Boolean(v))
-      .map(([k]) => k);
-  }
-  return [];
-}
-
-const catsSet = (h: Hotel) =>
-  new Set<string>(
-    toStringArray((h as any).categories).map((s) => s.toLowerCase())
-  );
-
-const typeOf = (h: Hotel) => {
-  const fromField = String(
-    (h as any).propertyType ?? (h as any).type ?? ""
-  ).toLowerCase();
-  if (fromField) return fromField;
-  const c = catsSet(h);
-  if (c.has("hotels")) return "hotel";
-  if (c.has("apartments") || c.has("entire homes & apartments"))
-    return "apartment";
-  if (c.has("hostels")) return "hostel";
-  if (c.has("villas")) return "villa";
-  if (c.has("guest houses")) return "guest house";
-  if (c.has("motels")) return "motel";
-  if (c.has("bed and breakfasts")) return "bed and breakfast";
-  if (c.has("campsites")) return "campsite";
-  return "";
-};
-
-const amens = (h: Hotel) => {
-  const base = Array.isArray((h as any).amenityIds)
-    ? (h as any).amenityIds
-    : (h as any).amenities ?? [];
-  const normalized = base.map((x: any) => String(x).toLowerCase());
-  const merged = new Set<string>([...normalized, ...catsSet(h)]);
-  return Array.from(merged);
-};
-
-const meals = (h: Hotel) => {
-  const fromField = new Set<string>(
-    toStringArray((h as any).meals).map((s) => s.toLowerCase())
-  );
-  // derive meals from categories; categories may be pipe-separated strings
-  const rawCats = toStringArray((h as any).categories);
-  for (const raw of rawCats) {
-    const parts = String(raw)
-      .split("|")
-      .map((s) => s.trim().toLowerCase())
-      .filter(Boolean);
-    for (const p of parts) {
-      if (p === "breakfast included") fromField.add("breakfast included");
-      if (p === "all-inclusive" || p === "all inclusive") fromField.add("all-inclusive");
-    }
-  }
-  return fromField;
-};
-
-const pay = (h: Hotel) => {
-  const p = (h as any).paymentOptions ?? {};
-  const c = catsSet(h);
-  return {
-    free:
-      Boolean((h as any).freeCancellation) ||
-      Boolean((p as any).freeCancellation) ||
-      c.has("free cancellation"),
-    noPre:
-      Boolean((h as any).noPrepayment) ||
-      Boolean((p as any).noPrepayment) ||
-      c.has("no prepayment"),
-    online:
-      Boolean((h as any).acceptsOnlinePayments) ||
-      Boolean((p as any).acceptsOnlinePayments) ||
-      Boolean((p as any).onlinePayments) ||
-      c.has("accepts online payments"),
-  };
-};
-
-const dist = (h: Hotel) =>
-  n((h as any).distanceKm) ??
-  n((h as any).distance_km) ??
-  n((h as any).distanceFromCenterKm);
-const hood = (h: Hotel) =>
-  String((h as any).neighborhood ?? (h as any).area ?? "").toLowerCase();
-const brand = (h: Hotel) =>
-  String((h as any).brand ?? (h as any).chain ?? "").toLowerCase();
-
-function nightsFromParams(params: URLSearchParams): number | null {
-  const from = params.get("from");
-  const to = params.get("to");
-  if (!from || !to) return null;
-  const s = new Date(from);
-  const e = new Date(to);
-  if (isNaN(+s) || isNaN(+e) || e <= s) return null;
-  return Math.max(1, Math.ceil((+e - +s) / (1000 * 60 * 60 * 24)));
-}
-
-async function fetchHotels(params: URLSearchParams) {
-  const { data } = await api.get<Hotel[] | { items: Hotel[] }>("/api/hotels", {
-    params: Object.fromEntries(params.entries()),
-  });
-  if (Array.isArray(data)) return data;
-  return (data as any)?.items ?? [];
-}
-
-function categoriesFacet(hotels: Hotel[]): FacetGroup {
-  const counts = new Map<string, number>();
-  for (const h of hotels) {
-    const set = catsSet(h);
-    for (const c of set) counts.set(c, (counts.get(c) ?? 0) + 1);
-  }
-  const items = Array.from(counts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .map(([label, count]) => ({
-      id: `cat_${label}`,
-      label,
-      count,
-    }));
-  return { key: "categories", title: "categories", items };
-}
-
-function selectedCategoryTokens(selected: FiltersState["selected"]): string[] {
-  const tokens: string[] = [];
-  const set = selected["categories"];
-  if (!set) return tokens;
-  for (const raw of Array.from(set)) {
-    const id = String(raw);
-    const token = id.startsWith("cat_") ? id.slice(4) : id;
-    const t = token.trim().toLowerCase();
-    if (t) tokens.push(t);
-  }
-  return tokens;
-}
-
-type SelectedMap = FiltersState["selected"];
-
-function mergeSelected(prev: SelectedMap, next?: SelectedMap): SelectedMap {
-  if (!next) return prev;
-  const out: SelectedMap = { ...prev };
-  for (const key of Object.keys(next)) {
-    const s = next[key];
-    if (s instanceof Set) out[key] = new Set(s);
-  }
-  return out;
-}
-
-function NoResultsPanel({ city }: { city: string | null }) {
-  return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="mx-auto w-full max-w-[680px] rounded-xl border border-[#e7e7e7] bg-white p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <div className="mx-auto mb-4 h-14 w-14 rounded-full border border-muted-foreground/30 p-3">
-          <svg viewBox="0 0 24 24" className="h-full w-full" aria-hidden="true">
-            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.5 21.5 20l-6-6zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-          </svg>
-        </div>
-        <h2 className="text-lg font-semibold">
-          {city ? `${city}: 0 properties found` : "0 properties found"}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          There are no matching properties for your search criteria. Try
-          updating your search.
-        </p>
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="mt-4 inline-flex items-center rounded-md bg-[#0071c2] px-4 py-2 text-sm font-medium text-white hover:bg-[#005fa3]"
-        >
-          Update search
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function SearchPage() {
-  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>(
     params.get("view") === "grid" ? "grid" : "list"
@@ -215,7 +31,6 @@ export default function SearchPage() {
     (params.get("sort") as SortKey) || "price_high"
   );
 
-  // Scroll to top when component mounts or params change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [params]);
@@ -229,16 +44,6 @@ export default function SearchPage() {
     retry: 1,
     retryDelay: 1000,
   });
-
-  // Debug logging
-  if (process.env.NODE_ENV === "development") {
-    console.log("SearchPage render:", {
-      data,
-      isLoading,
-      error,
-      params: Object.fromEntries(params.entries()),
-    });
-  }
 
   const [minBound, maxBound] = useMemo(() => {
     const prices = (data ?? [])
@@ -268,7 +73,11 @@ export default function SearchPage() {
   });
 
   useMemo(() => {
-    setFilters((f) => ({ ...f, priceMin: minBound, priceMax: maxBound }));
+    setFilters((f: FiltersState) => ({
+      ...f,
+      priceMin: minBound,
+      priceMax: maxBound,
+    }));
   }, [minBound, maxBound]);
 
   const updateUrl = (next: Partial<{ sort: string; view: string }>) => {
@@ -279,7 +88,7 @@ export default function SearchPage() {
   };
 
   const handleFiltersChange = (next: FiltersState) => {
-    setFilters((prev) => ({
+    setFilters((prev: FiltersState) => ({
       priceMin: next.priceMin ?? prev.priceMin,
       priceMax: next.priceMax ?? prev.priceMax,
       selected: mergeSelected(prev.selected, next.selected),
@@ -292,140 +101,11 @@ export default function SearchPage() {
   );
 
   const filtered = useMemo(() => {
-    const sel = filters.selected;
-    const catTokens = selectedCategoryTokens(sel);
-
-    const anyIn = (g: string, pred: (id: string) => boolean) =>
-      (sel[g] ? Array.from(sel[g]!) : []).some(pred);
-
-    return sorted.filter((h) => {
-      const p = priceOf(h);
-      if (p != null) {
-        if (filters.priceMin != null && p < (filters.priceMin ?? -Infinity))
-          return false;
-        if (filters.priceMax != null && p > (filters.priceMax ?? Infinity))
-          return false;
-      }
-
-      if (sel.review && sel.review.size > 0) {
-        let minRequired = 0;
-        for (const raw of Array.from(sel.review)) {
-          const v = String(raw).toLowerCase();
-          if (v.includes("9")) minRequired = Math.max(minRequired, 9);
-          else if (v.includes("8")) minRequired = Math.max(minRequired, 8);
-          else if (v.includes("7")) minRequired = Math.max(minRequired, 7);
-          else if (v.includes("6")) minRequired = Math.max(minRequired, 6);
-          if (v.includes("superb")) minRequired = Math.max(minRequired, 9);
-          if (v.includes("very good")) minRequired = Math.max(minRequired, 8);
-          if (v === "good" || v.includes("good:")) minRequired = Math.max(minRequired, 7);
-          if (v.includes("pleasant")) minRequired = Math.max(minRequired, 6);
-        }
-        if (minRequired > 0 && ratingOf(h) < minRequired) return false;
-      }
-
-      if (sel.stars && sel.stars.size > 0) {
-        const hotelStarsRaw = starsOf(h);
-        const hotelStarsFloored = Math.floor(hotelStarsRaw);
-        const match = [...sel.stars].some((id) => {
-          const token = String(id).toLowerCase();
-          const val = Number(token.replace("stars_", ""));
-          if (Number.isFinite(val)) {
-            return hotelStarsFloored === val;
-          }
-          if (token.includes("plus")) {
-            const base = Number(token.replace(/[^0-9]/g, ""));
-            return Number.isFinite(base) && hotelStarsFloored >= base;
-          }
-          return false;
-        });
-        if (!match) return false;
-      }
-
-      if (sel.ptype && sel.ptype.size > 0) {
-        const t = typeOf(h);
-        if (![...sel.ptype].some((id) => t.includes(id.replace(/^pt_/, ""))))
-          return false;
-      }
-
-      if (sel.facilities && sel.facilities.size > 0) {
-        const a = amens(h);
-        if (
-          ![...sel.facilities].every((id) =>
-            a.includes(id.replace(/^amen_/, "").toLowerCase())
-          )
-        )
-          return false;
-      }
-
-      if (
-        sel.meals?.has("meal_breakfast") &&
-        !meals(h).has("breakfast included")
-      )
-        return false;
-      if (sel.meals?.has("meal_all") && !meals(h).has("all-inclusive"))
-        return false;
-
-      const payFlags = pay(h);
-      if (sel.payment?.has("pay_free_cxl") && !payFlags.free) return false;
-      if (sel.payment?.has("pay_no_prepay") && !payFlags.noPre) return false;
-      if (sel.payment?.has("pay_online") && !payFlags.online) return false;
-
-      if (sel.distance && sel.distance.size > 0) {
-        const d = dist(h);
-        const need =
-          (sel.distance.has("dist_<1") && d != null && d < 1) ||
-          (sel.distance.has("dist_<3") && d != null && d < 3) ||
-          (sel.distance.has("dist_<5") && d != null && d < 5);
-        if (!need) return false;
-      }
-
-      if (sel.neighborhood && sel.neighborhood.size > 0) {
-        const hv = hood(h);
-        if (
-          ![...sel.neighborhood].some((id) =>
-            hv.includes(id.replace(/^hood_/, ""))
-          )
-        )
-          return false;
-      }
-
-      if (sel.brands && sel.brands.size > 0) {
-        const b = brand(h);
-        if (
-          ![...sel.brands].some((id) => b.includes(id.replace(/^brand_/, "")))
-        )
-          return false;
-      }
-
-      if (catTokens.length > 0) {
-        const cset = catsSet(h);
-        const catsArr = Array.from(cset);
-        const hasAll = catTokens.every((t) =>
-          catsArr.some((c) => c.includes(t))
-        );
-        if (!hasAll) return false;
-      }
-
-      if (sel.popular && sel.popular.size > 0) {
-        for (const raw of Array.from(sel.popular)) {
-          const v = String(raw).toLowerCase();
-          if (v.includes("breakfast") && !meals(h).has("breakfast included")) return false;
-          if (v.includes("parking") && !amens(h).includes("parking")) return false;
-          if (v.includes("hotels") && !typeOf(h).includes("hotel")) return false;
-          if (v.includes("apartments") && !typeOf(h).includes("apartment")) return false;
-          if (v.includes("hostels") && !typeOf(h).includes("hostel")) return false;
-          if (v.includes("9+") || v.includes("superb")) { if (ratingOf(h) < 9) return false; }
-          if (v.includes("8+") || v.includes("very good")) { if (ratingOf(h) < 8) return false; }
-        }
-      }
-
-      return true;
-    });
+    return filterHotels(sorted, filters);
   }, [sorted, filters]);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Blue background section for spacing like on home page */}
       <section className="w-full bg-[#003b95] text-white">
         <div className="mx-auto max-w-6xl px-2">
           <div className="text-3xl font-bold md:text-[1px]">&nbsp;</div>
@@ -433,83 +113,31 @@ export default function SearchPage() {
         </div>
       </section>
 
-      {/* Search Bar - Overlapping between blue and white */}
       <div className="relative -mt-8 z-10">
         <SearchTopBar />
       </div>
 
-      {/* Breadcrumb */}
-      <div className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-2">
-          <nav className="text-sm text-gray-500">
-            <Link to="/" className="text-[#0071c2] hover:underline">
-              {t("search.breadcrumb.home")}
-            </Link>
-            <span className="mx-2">›</span>
-            <Link to="#" className="text-[#0071c2] hover:underline">
-              {t("search.breadcrumb.country")}
-            </Link>
-            <span className="mx-2">›</span>
-            <Link to="#" className="text-[#0071c2] hover:underline">
-              {params.get("city") ?? t("search.breadcrumb.city")}
-            </Link>
-            <span className="mx-2">›</span>
-            <span>{t("search.breadcrumb.results")}</span>
-          </nav>
-        </div>
-      </div>
+      <Breadcrumb />
 
       <div className="mx-auto max-w-[1112px] px-2 sm:px-0">
-        <h1 className="text-[18px] font-semibold">
-          {(params.get("city") ?? t("search.breadcrumb.city")) + ": "}
-          {isLoading ? "…" : filtered.length} {t("search.count.propertiesFound")}
-        </h1>
-
-        <div className="mt-2 flex items-center justify-between">
-          <SortBar
-            value={sortKey}
-            onChange={(k) => {
-              setSortKey(k);
-              const sp = new URLSearchParams(
-                Object.fromEntries(params.entries())
-              );
-              sp.set("sort", k);
-              setParams(sp, { replace: true });
-            }}
-          />
-          <div className="hidden items-center gap-2 sm:flex">
-            <button
-              onClick={() => {
-                setView("list");
-                updateUrl({ view: "list" });
-              }}
-              className={`rounded-md border px-2 py-1 text-[12px] ${
-                view === "list" ? "bg-muted" : ""
-              }`}
-            >
-              {t("search.view.list")}
-            </button>
-            <button
-              onClick={() => {
-                setView("grid");
-                updateUrl({ view: "grid" });
-              }}
-              className={`rounded-md border px-2 py-1 text-[12px] ${
-                view === "grid" ? "bg-muted" : ""
-              }`}
-            >
-              {t("search.view.grid")}
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-2">
-          <InfoNotice>
-            {t("search.notice.conflict")}
-          </InfoNotice>
-        </div>
-
-        {/* Map removed (use sidebar toggle only) */}
+        <SearchHeader
+          isLoading={isLoading}
+          filteredCount={filtered.length}
+          sortKey={sortKey}
+          view={view}
+          onSortChange={(k) => {
+            setSortKey(k);
+            const sp = new URLSearchParams(
+              Object.fromEntries(params.entries())
+            );
+            sp.set("sort", k);
+            setParams(sp, { replace: true });
+          }}
+          onViewChange={(v) => {
+            setView(v);
+            updateUrl({ view: v });
+          }}
+        />
 
         <div className="mt-3 flex items-start gap-4 pb-10">
           <FiltersSidebar
@@ -526,72 +154,14 @@ export default function SearchPage() {
                 : "space-y-3"
             }`}
           >
-            {error && (
-              <div className="flex flex-1 items-center justify-center">
-                <div className="mx-auto w-full max-w-[680px] rounded-xl border border-[#e7e7e7] bg-white p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-                  <div className="mx-auto mb-4 h-14 w-14 rounded-full border border-red-500/30 p-3">
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="h-full w-full text-red-500"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-                      />
-                    </svg>
-                  </div>
-                  <h2 className="text-lg font-semibold text-red-600">{t("search.error.title")}</h2>
-                  <p className="mt-1 text-sm text-gray-600">{error.message || t("search.error.description")}</p>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="mt-4 inline-flex items-center rounded-md bg-[#0071c2] px-4 py-2 text-sm font-medium text-white hover:bg-[#005fa3]"
-                  >
-                    {t("search.error.retry")}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isLoading &&
-              Array.from({ length: 4 }).map((_, i) =>
-                view === "grid" ? (
-                  <div key={i} className="rounded-xl border p-3">
-                    <div className="h-44 w-full rounded-lg bg-muted" />
-                    <div className="mt-3 h-5 w-1/2 rounded bg-muted" />
-                    <div className="mt-2 h-4 w-2/3 rounded bg-muted" />
-                    <div className="mt-4 h-8 w-28 rounded bg-muted" />
-                  </div>
-                ) : (
-                  <div
-                    key={i}
-                    className="flex animate-pulse gap-4 rounded-xl border p-3 sm:flex-row"
-                  >
-                    <div className="h-40 w-full rounded-lg bg-muted sm:w-[260px]" />
-                    <div className="flex w-full flex-1 flex-col gap-3">
-                      <div className="h-6 w-1/2 rounded bg-muted" />
-                      <div className="h-4 w-2/3 rounded bg-muted" />
-                      <div className="mt-auto h-8 w-28 rounded bg-muted" />
-                    </div>
-                  </div>
-                )
-              )}
-
-            {!isLoading &&
-              !error &&
-              filtered.length > 0 &&
-              filtered.map((h) => (
-                <HotelCard
-                  key={h._id.$oid}
-                  hotel={h}
-                  nights={nights}
-                  variant={view}
-                />
-              ))}
-
-            {!isLoading && !error && filtered.length === 0 && (
-              <NoResultsPanel city={params.get("city")} />
-            )}
+            <HotelList
+              hotels={filtered}
+              isLoading={isLoading}
+              error={error}
+              view={view}
+              nights={nights}
+              city={params.get("city")}
+            />
           </div>
         </div>
       </div>

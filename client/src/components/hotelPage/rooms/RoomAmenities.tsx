@@ -3,14 +3,12 @@ interface RoomAmenitiesProps {
 }
 
 export default function RoomAmenities({ room }: RoomAmenitiesProps) {
-  // Safely check if arrays exist and have content
   const amenities = room.amenities || [];
   const facilities = room.facilities || [];
   const categories = room.categories || [];
 
   return (
     <div className="space-y-2 text-[14px]">
-      {/* Breakfast */}
       {amenities.some((a: string) => /breakfast/i.test(a)) && (
         <div className="flex items-center gap-2">
           <span>☕</span>
@@ -20,7 +18,6 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
         </div>
       )}
 
-      {/* High-speed internet */}
       {(amenities.some((a: string) => /wifi|internet/i.test(a)) ||
         facilities.some((a: string) => /wifi|internet/i.test(a))) && (
         <div className="flex items-center gap-2 text-green-600">
@@ -29,7 +26,6 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
         </div>
       )}
 
-      {/* Free cancellation */}
       {categories.some((c: string) => /free cancellation/i.test(c)) && (
         <div className="flex items-center gap-2 text-green-600">
           <span>✓</span>
@@ -37,7 +33,6 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
         </div>
       )}
 
-      {/* No prepayment */}
       {categories.some((c: string) => /no prepayment/i.test(c)) && (
         <div className="flex items-center gap-2 text-green-600">
           <span>✓</span>
@@ -45,7 +40,6 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
         </div>
       )}
 
-      {/* Genius discount */}
       {categories.some((c: string) => /genius/i.test(c)) && (
         <div className="flex items-center gap-2 text-[#0071c2]">
           <span>🏷️</span>
@@ -53,7 +47,6 @@ export default function RoomAmenities({ room }: RoomAmenitiesProps) {
         </div>
       )}
 
-      {/* Standard amenities */}
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-green-600">
           <span>✓</span>

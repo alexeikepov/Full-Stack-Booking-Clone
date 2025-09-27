@@ -3,9 +3,9 @@
 export type HotelApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export type RoomReservation = {
-  reservationId: string; // unique id
-  checkIn: string; // ISO date string
-  checkOut: string; // ISO date string
+  reservationId: string;
+  checkIn: string;
+  checkOut: string;
 };
 
 export type Room = {
@@ -88,7 +88,6 @@ export type Hotel = {
   description: string;
   shortDescription?: string;
 
-  // Hotel overview sections
   overview?: {
     infoAndPrices?: string;
     activity?: string;
@@ -100,7 +99,6 @@ export type Hotel = {
     hotelSurroundings?: string;
   };
 
-  // Property highlights
   propertyHighlights?: {
     perfectFor?: string;
     locationScore?: number;
@@ -108,13 +106,11 @@ export type Hotel = {
     roomsWith?: string[];
   };
 
-  // Most popular facilities
   mostPopularFacilities?: (
     | string
     | { name: string; distance: string; type: string }
   )[];
 
-  // Hotel facilities
   facilities?: {
     general?: string[];
     greatForStay?: string[];
@@ -135,7 +131,6 @@ export type Hotel = {
     languagesSpoken?: string[];
   };
 
-  // Guest reviews summary (aggregated)
   guestReviews?: {
     overallRating: number;
     overallLabel: string;
@@ -151,7 +146,6 @@ export type Hotel = {
     };
   };
 
-  // Hotel surroundings
   surroundings?: {
     nearbyAttractions?: Array<{
       name: string;
@@ -182,7 +176,6 @@ export type Hotel = {
     }>;
   };
 
-  // Travellers questions
   travellersQuestions?: Array<{
     question: string;
     answer: string;
@@ -195,7 +188,7 @@ export type Hotel = {
   categories: string[];
   averageRating: number;
   reviewsCount: number;
-  ratingLabel?: string; // "Fabulous", "Good", "Excellent"
+  ratingLabel?: string;
   categoryRatings?: {
     staff: number;
     comfort: number;
@@ -214,9 +207,9 @@ export type Hotel = {
     cleanliness: string;
     location: string;
   };
-  highScoreCategories?: string[]; // categories that show arrow
-  highScoreTexts?: Record<string, string>; // custom text for high scores
-  reviewTopics?: string[]; // topics for filter buttons
+  highScoreCategories?: string[];
+  highScoreTexts?: Record<string, string>;
+  reviewTopics?: string[];
   ownerId: { $oid: string };
   approvalStatus: HotelApprovalStatus;
   submittedAt: { $date: string };
@@ -227,9 +220,8 @@ export type Hotel = {
   checkIn: string;
   checkOut: string;
 
-  // computed fields from backend (optional)
-  priceFrom?: number | null; // cheapest nightly price
-  totalPrice?: number | null; // total for stay (when dates provided)
+  priceFrom?: number | null;
+  totalPrice?: number | null;
   availability?: {
     from: string;
     to: string;

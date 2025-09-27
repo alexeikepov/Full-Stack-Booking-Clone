@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createReview, updateMyReviewForHotel } from "@/lib/api";
 
-// Define CreateReviewData type locally to match server schema
 export type CreateReviewData = {
   rating: number;
   comment: string;
@@ -146,7 +145,6 @@ export default function CreateReviewForm({
           </div>
         </div>
 
-        {/* Guest Information */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -193,7 +191,6 @@ export default function CreateReviewForm({
           </div>
         </div>
 
-        {/* Travel Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Travel Type
@@ -211,7 +208,6 @@ export default function CreateReviewForm({
           </select>
         </div>
 
-        {/* Category Ratings */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">
             Category Ratings
@@ -248,7 +244,6 @@ export default function CreateReviewForm({
           </div>
         </div>
 
-        {/* Positive/Negative */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -284,7 +279,6 @@ export default function CreateReviewForm({
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center justify-end space-x-3">
           {onCancel && (
             <button

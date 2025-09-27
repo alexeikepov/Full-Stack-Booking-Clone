@@ -1,4 +1,3 @@
-import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +48,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
     );
   }
 
-  // Default house rules structure
   const defaultRules = {
     checkIn: {
       time: "15:00",
@@ -114,7 +112,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
   return (
     <div id="house-rules" className="bg-white">
       <div className="mx-auto max-w-6xl px-4 py-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-semibold mb-2">House rules</h2>
@@ -130,9 +127,7 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
           </button>
         </div>
 
-        {/* Rules sections - Single block with dividers */}
         <div className="bg-white border border-gray-200 rounded-lg">
-          {/* Check-in */}
           <div className="flex items-start gap-4 p-4 border-b border-gray-200">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <LogIn className="w-5 h-5 text-gray-600" />
@@ -153,7 +148,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
             </div>
           </div>
 
-          {/* Check-out */}
           <div className="flex items-start gap-4 p-4 border-b border-gray-200">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <LogOut className="w-5 h-5 text-gray-600" />
@@ -166,7 +160,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
             </div>
           </div>
 
-          {/* Cancellation/prepayment */}
           <div className="flex items-start gap-4 p-4 border-b border-gray-200">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <Info className="w-5 h-5 text-gray-600" />
@@ -187,14 +180,12 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
             </div>
           </div>
 
-          {/* Children and beds */}
           <div className="flex items-start gap-4 p-4 border-b border-gray-200">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <Baby className="w-5 h-5 text-gray-600" />
               <h3 className="font-semibold text-gray-900">Children and beds</h3>
             </div>
             <div className="flex-1">
-              {/* Child policies */}
               <div className="mb-4">
                 <h4 className="font-semibold text-gray-900 mb-2">
                   Child policies
@@ -209,7 +200,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
                 </p>
               </div>
 
-              {/* Cot and extra bed policies */}
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">
                   Cot and extra bed policies
@@ -253,7 +243,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
             </div>
           </div>
 
-          {/* Age restriction */}
           <div className="flex items-start gap-4 p-4 border-b border-gray-200">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <UserX className="w-5 h-5 text-gray-600" />
@@ -271,7 +260,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
             </div>
           </div>
 
-          {/* Pets */}
           <div className="flex items-start gap-4 p-4 border-b border-gray-200">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <PawPrint className="w-5 h-5 text-gray-600" />
@@ -284,7 +272,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
             </div>
           </div>
 
-          {/* Payment methods */}
           <div className="flex items-start gap-4 p-4 border-b border-gray-200">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <CreditCard className="w-5 h-5 text-gray-600" />
@@ -305,7 +292,7 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
                     "UnionPay",
                     "Cash",
                   ]
-                ).map((method, index) => (
+                ).map((method: string, index: number) => (
                   <div
                     key={index}
                     className="px-3 py-1 bg-gray-100 rounded text-sm text-gray-700"
@@ -317,7 +304,6 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
             </div>
           </div>
 
-          {/* Parties */}
           <div className="flex items-start gap-4 p-4">
             <div className="flex items-center gap-2 w-48 flex-shrink-0">
               <PartyPopper className="w-5 h-5 text-gray-600" />

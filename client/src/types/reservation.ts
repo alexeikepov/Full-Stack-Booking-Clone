@@ -1,5 +1,3 @@
-// src/types/reservation.ts
-
 export type ReservationStatus =
   | "PENDING"
   | "CONFIRMED"

@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Users, 
-  UserPlus, 
-  UserCheck, 
+import {
+  Users,
+  UserPlus,
+  UserCheck,
   Clock,
   MessageCircle,
   Share2,
   Hotel,
   Calendar,
-  Heart
+  Heart,
 } from "lucide-react";
-import FriendRequests from "@/components/FriendRequests";
-import FindFriends from "@/components/FindFriends";
-import SharedHotels from "@/components/SharedHotels";
-import Groups from "@/components/Groups";
+import FriendRequests from "@/components/social/FriendRequests";
+import FindFriends from "@/components/social/FindFriends";
+import SharedHotels from "@/components/social/SharedHotels";
+import Groups from "@/components/social/Groups";
 import Chat from "@/components/Chat";
 
 export default function FriendsPage() {
@@ -93,66 +93,66 @@ export default function FriendsPage() {
         {/* Main Content */}
         <div className="w-full">
           <div className="grid w-full grid-cols-6 mb-6">
-            <button 
+            <button
               onClick={() => setActiveTab("requests")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === "requests" 
-                  ? "bg-blue-600 text-white" 
+                activeTab === "requests"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               <UserCheck className="h-4 w-4" />
               Requests
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("find")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === "find" 
-                  ? "bg-blue-600 text-white" 
+                activeTab === "find"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               <UserPlus className="h-4 w-4" />
               Find Friends
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("shared-hotels")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === "shared-hotels" 
-                  ? "bg-blue-600 text-white" 
+                activeTab === "shared-hotels"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               <Hotel className="h-4 w-4" />
               Shared Hotels
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("groups")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === "groups" 
-                  ? "bg-blue-600 text-white" 
+                activeTab === "groups"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               <Calendar className="h-4 w-4" />
               Groups
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("chat")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === "chat" 
-                  ? "bg-blue-600 text-white" 
+                activeTab === "chat"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               <MessageCircle className="h-4 w-4" />
               Chat
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab("social")}
               className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === "social" 
-                  ? "bg-blue-600 text-white" 
+                activeTab === "social"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
@@ -181,23 +181,30 @@ export default function FriendsPage() {
                     More Social Features Coming Soon
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Additional social features like trip recommendations, travel memories, and friend activity feeds will be available soon.
+                    Additional social features like trip recommendations, travel
+                    memories, and friend activity feeds will be available soon.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
                     <div className="p-4 border rounded-lg">
                       <div className="text-2xl mb-2">🌟</div>
                       <h4 className="font-medium mb-1">Recommendations</h4>
-                      <p className="text-sm text-gray-600">Get personalized travel recommendations from friends</p>
+                      <p className="text-sm text-gray-600">
+                        Get personalized travel recommendations from friends
+                      </p>
                     </div>
                     <div className="p-4 border rounded-lg">
                       <div className="text-2xl mb-2">📸</div>
                       <h4 className="font-medium mb-1">Travel Memories</h4>
-                      <p className="text-sm text-gray-600">Share and discover travel photos and stories</p>
+                      <p className="text-sm text-gray-600">
+                        Share and discover travel photos and stories
+                      </p>
                     </div>
                     <div className="p-4 border rounded-lg">
                       <div className="text-2xl mb-2">📊</div>
                       <h4 className="font-medium mb-1">Activity Feed</h4>
-                      <p className="text-sm text-gray-600">See what your friends are up to</p>
+                      <p className="text-sm text-gray-600">
+                        See what your friends are up to
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -209,4 +216,3 @@ export default function FriendsPage() {
     </div>
   );
 }
-

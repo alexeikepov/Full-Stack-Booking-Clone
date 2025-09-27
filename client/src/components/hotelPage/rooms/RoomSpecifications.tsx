@@ -5,7 +5,6 @@ interface RoomSpecificationsProps {
 }
 
 export default function RoomSpecifications({ room }: RoomSpecificationsProps) {
-  // Safely get values with defaults
   const bedrooms = room.bedrooms || 1;
   const bathrooms = room.bathrooms || 1;
   const sizeSqm = room.sizeSqm || 0;
