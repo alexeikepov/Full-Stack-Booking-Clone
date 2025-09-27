@@ -1,0 +1,11 @@
+export { default as HeroSection } from "./HeroSection";
+export { default as HostWorryFreeSection } from "./HostWorryFreeSection";
+export { default as PaymentsSection } from "./PaymentsSection";
+export { default as SimpleToBeginSection } from "./SimpleToBeginSection";
+export { default as GlobalCustomerSection } from "./GlobalCustomerSection";
+export { default as TestimonialsSection } from "./TestimonialsSection";
+export { default as FAQSection } from "./FAQSection";
+export { default as FooterSection } from "./FooterSection";
+export { default as Tick } from "./Tick";
+export { default as ChevronDown } from "./ChevronDown";
+export { default as TestimonialCard } from "./TestimonialCard";

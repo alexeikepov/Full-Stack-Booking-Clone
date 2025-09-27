@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { ReactNode } from "react";
 
 interface RowProps {
   to: string;
