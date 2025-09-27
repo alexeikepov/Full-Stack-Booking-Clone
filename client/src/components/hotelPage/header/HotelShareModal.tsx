@@ -11,9 +11,14 @@ import {
   Star,
   Calendar,
   Users,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
-import { shareHotel, getFriends, type Friend, type SendSharedHotelData } from "@/lib/api";
+import {
+  shareHotel,
+  getFriends,
+  type Friend,
+  type SendSharedHotelData,
+} from "@/lib/api";
 
 interface HotelShareModalProps {
   isOpen: boolean;
@@ -21,7 +26,11 @@ interface HotelShareModalProps {
   hotel: any; // Hotel type
 }
 
-export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareModalProps) {
+export default function HotelShareModal({
+  isOpen,
+  onClose,
+  hotel,
+}: HotelShareModalProps) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriends, setSelectedFriends] = useState<Friend[]>([]);
   const [message, setMessage] = useState("");
@@ -47,10 +56,10 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
   };
 
   const toggleFriend = (friend: Friend) => {
-    setSelectedFriends(prev => {
-      const isSelected = prev.some(f => f._id === friend._id);
+    setSelectedFriends((prev) => {
+      const isSelected = prev.some((f) => f._id === friend._id);
       if (isSelected) {
-        return prev.filter(f => f._id !== friend._id);
+        return prev.filter((f) => f._id !== friend._id);
       } else {
         return [...prev, friend];
       }
@@ -66,17 +75,21 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
     setSharing(true);
     try {
       // Share with all selected friends
-      const sharePromises = selectedFriends.map(friend => 
+      const sharePromises = selectedFriends.map((friend) =>
         shareHotel({
           receiverId: friend._id,
           hotelId: hotel.id || hotel._id,
-          message: message || undefined
+          message: message || undefined,
         })
       );
 
       await Promise.all(sharePromises);
-      
-      alert(`Hotel shared successfully with ${selectedFriends.length} friend${selectedFriends.length > 1 ? 's' : ''}`);
+
+      alert(
+        `Hotel shared successfully with ${selectedFriends.length} friend${
+          selectedFriends.length > 1 ? "s" : ""
+        }`
+      );
       onClose();
       setSelectedFriends([]);
       setMessage("");
@@ -90,7 +103,10 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50"
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
+    >
       <Card className="w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -115,7 +131,7 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
                   </div>
                 )}
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   <Hotel className="h-5 w-5 text-blue-600" />
@@ -131,8 +147,7 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
                     {hotel.rating}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    ${hotel.price}/night
+                    <Calendar className="h-4 w-4" />${hotel.price}/night
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -150,7 +165,7 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Select Friends ({selectedFriends.length} selected)
             </label>
-            
+
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -159,21 +174,27 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
             ) : friends.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No friends yet</h3>
-                <p className="text-gray-600">Add some friends first to share hotels with them.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No friends yet
+                </h3>
+                <p className="text-gray-600">
+                  Add some friends first to share hotels with them.
+                </p>
               </div>
             ) : (
               <div className="max-h-48 overflow-y-auto space-y-2">
                 {friends.map((friend) => {
-                  const isSelected = selectedFriends.some(f => f._id === friend._id);
+                  const isSelected = selectedFriends.some(
+                    (f) => f._id === friend._id
+                  );
                   return (
                     <div
                       key={friend._id}
                       onClick={() => toggleFriend(friend)}
                       className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                        isSelected 
-                          ? 'bg-blue-50 border-2 border-blue-200' 
-                          : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                        isSelected
+                          ? "bg-blue-50 border-2 border-blue-200"
+                          : "bg-gray-50 hover:bg-gray-100 border-2 border-transparent"
                       }`}
                     >
                       <Avatar className="h-10 w-10">
@@ -183,7 +204,9 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium">{friend.name}</p>
-                        <p className="text-sm text-gray-600 truncate">{friend.email}</p>
+                        <p className="text-sm text-gray-600 truncate">
+                          {friend.email}
+                        </p>
                       </div>
                       {isSelected && (
                         <CheckCircle className="h-5 w-5 text-blue-600" />
@@ -223,15 +246,12 @@ export default function HotelShareModal({ isOpen, onClose, hotel }: HotelShareMo
               ) : (
                 <>
                   <Share2 className="h-4 w-4 mr-2" />
-                  Share with {selectedFriends.length} friend{selectedFriends.length !== 1 ? 's' : ''}
+                  Share with {selectedFriends.length} friend
+                  {selectedFriends.length !== 1 ? "s" : ""}
                 </>
               )}
             </Button>
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={sharing}
-            >
+            <Button variant="outline" onClick={onClose} disabled={sharing}>
               Cancel
             </Button>
           </div>
