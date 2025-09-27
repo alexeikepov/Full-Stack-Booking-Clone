@@ -34,7 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const me = await getMe();
-        const next = { id: me.id, name: me.name, email: me.email, genius: me.genius } as User;
+        const next = {
+          id: me.id,
+          name: me.name,
+          email: me.email,
+          genius: me.genius,
+        } as User;
         setUser(next);
         localStorage.setItem("user", JSON.stringify(next));
       } catch {

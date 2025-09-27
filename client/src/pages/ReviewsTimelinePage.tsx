@@ -11,9 +11,9 @@ type Review = {
   hotel: string;
   city: string;
   country?: string;
-  stayed: string; // e.g. "Sep 2024"
-  reviewed: string; // e.g. "17 Oct 2024"
-  score: number; // 1..10
+  stayed: string;
+  reviewed: string;
+  score: number;
   positive?: string;
   negative?: string;
   response?: string;

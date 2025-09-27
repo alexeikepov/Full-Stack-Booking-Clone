@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building2,
   Users,
@@ -16,9 +16,7 @@ import {
   XCircle,
   Trash2,
   Edit,
-  Eye,
   Search,
-  Filter,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EditHotelDialog } from "@/components/EditHotelDialog";
@@ -33,7 +31,6 @@ import {
   rejectAdminApplication,
   getOwnerHotels,
   getAllHotelsForOwner,
-  setHotelVisibility,
   deleteHotel as apiDeleteHotel,
   getHotelById,
   updateHotel as apiUpdateHotel,
@@ -234,7 +231,7 @@ export default function OwnerPage() {
   );
 
   const filteredHotels = hotels.filter(
-    (hotel) =>
+    (hotel: any) =>
       hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       hotel.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -398,7 +395,7 @@ export default function OwnerPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredHotels.map((hotel) => (
+                    {filteredHotels.map((hotel: any) => (
                       <Card
                         key={hotel.id}
                         className="border-l-4 border-l-green-500"
