@@ -27,6 +27,9 @@ import FlightsPage from "./pages/FlightsPage.tsx";
 import RewardsWalletPage from "./pages/RewardsWalletPage";
 import GeniusPage from "./pages/GeniusPage";
 import FriendsPage from "./pages/FriendsPage";
+import AccessDeniedPage from "./pages/AccessDeniedPage.tsx";
+import NotFoundPage from "./pages/NotFoundPage.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 const router = createBrowserRouter([
   {
@@ -49,10 +52,26 @@ const router = createBrowserRouter([
       { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
 
-      { path: "/owner", element: <OwnerPage /> },
-      { path: "/adminhotel", element: <AdminHotelPage /> },
+      {
+        path: "/owner",
+        element: (
+          <ProtectedRoute requiredRole="OWNER">
+            <OwnerPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/adminhotel",
+        element: (
+          <ProtectedRoute requiredRoles={["OWNER", "HOTEL_ADMIN"]}>
+            <AdminHotelPage />
+          </ProtectedRoute>
+        ),
+      },
       { path: "/admin-hotel/sign-in", element: <AdminHotelSignInPage /> },
       { path: "/flights", element: <FlightsPage /> },
+      { path: "/access-denied", element: <AccessDeniedPage /> },
+      { path: "/not-found", element: <NotFoundPage /> },
       { path: "/coming-soon", element: <ComingSoonPage /> },
       { path: "*", element: <ComingSoonPage /> },
     ],

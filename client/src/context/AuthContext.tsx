@@ -5,6 +5,7 @@ type User = {
   id: string;
   name: string;
   email: string;
+  role?: string;
   genius?: {
     level: number;
     completedLast24Months: number;
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: me.id,
           name: me.name,
           email: me.email,
+          role: me.role,
           genius: me.genius,
         } as User;
         setUser(next);
