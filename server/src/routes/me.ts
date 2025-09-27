@@ -2,7 +2,7 @@ import { Router } from "express";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { UserModel } from "../models/User";
 import { ReservationModel } from "../models/Reservation";
-import { getMyReviews } from "../controller/hotelController";
+import { getMyReviews } from "../controller/hotel";
 
 const router = Router();
 
@@ -26,7 +26,9 @@ router.get("/me", requireAuth, async (req: AuthedRequest, res, next) => {
     else if (completedCount >= 5) level = 2; // Level 2 – 5 in 24 months
 
     const nextThreshold = level === 1 ? 5 : level === 2 ? 15 : null;
-    const remaining = nextThreshold ? Math.max(0, nextThreshold - completedCount) : 0;
+    const remaining = nextThreshold
+      ? Math.max(0, nextThreshold - completedCount)
+      : 0;
 
     res.json({
       id: me._id,
