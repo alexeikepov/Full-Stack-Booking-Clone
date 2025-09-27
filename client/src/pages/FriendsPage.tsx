@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Users,
@@ -16,9 +16,49 @@ import FindFriends from "@/components/social/FindFriends";
 import SharedHotels from "@/components/social/SharedHotels";
 import Groups from "@/components/social/Groups";
 import Chat from "@/components/Chat";
+import { getFriends, getFriendRequests, getSharedHotels, getMyGroups } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState("requests");
+  const [stats, setStats] = useState({
+    friends: 0,
+    sharedHotels: 0,
+    unreadMessages: 0,
+    groups: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      const [friends, sharedHotels, groups] = await Promise.all([
+        getFriends(),
+        getSharedHotels('all'),
+        getMyGroups('all')
+      ]);
+
+      setStats({
+        friends: friends.length,
+        sharedHotels: sharedHotels.length,
+        unreadMessages: 0, // TODO: Implement unread messages count when chat functionality is ready
+        groups: groups.length
+      });
+    } catch (error) {
+      console.error("Failed to load stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshStats = () => {
+    loadStats();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -40,7 +80,9 @@ export default function FriendsPage() {
                   <Users className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : stats.friends}
+                  </p>
                   <p className="text-sm text-gray-600">Friends</p>
                 </div>
               </div>
@@ -50,26 +92,14 @@ export default function FriendsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <Clock className="h-6 w-6 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                  <p className="text-sm text-gray-600">Pending</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-100 rounded-lg">
-                  <UserCheck className="h-6 w-6 text-green-600" />
+                  <Hotel className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                  <p className="text-sm text-gray-600">Accepted</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : stats.sharedHotels}
+                  </p>
+                  <p className="text-sm text-gray-600">Shared Hotels</p>
                 </div>
               </div>
             </CardContent>
@@ -79,11 +109,29 @@ export default function FriendsPage() {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-100 rounded-lg">
-                  <MessageCircle className="h-6 w-6 text-purple-600" />
+                  <Calendar className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
-                  <p className="text-sm text-gray-600">Messages</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : stats.groups}
+                  </p>
+                  <p className="text-sm text-gray-600">My Groups</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <MessageCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {loading ? "..." : stats.unreadMessages}
+                  </p>
+                  <p className="text-sm text-gray-600">Unread Messages</p>
                 </div>
               </div>
             </CardContent>
@@ -161,8 +209,8 @@ export default function FriendsPage() {
             </button>
           </div>
 
-          {activeTab === "requests" && <FriendRequests />}
-          {activeTab === "find" && <FindFriends />}
+          {activeTab === "requests" && <FriendRequests onStatsUpdate={refreshStats} />}
+          {activeTab === "find" && <FindFriends onStatsUpdate={refreshStats} />}
           {activeTab === "shared-hotels" && <SharedHotels />}
           {activeTab === "groups" && <Groups />}
           {activeTab === "chat" && <Chat />}

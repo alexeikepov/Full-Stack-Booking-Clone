@@ -24,7 +24,11 @@ import {
 } from "@/lib/api";
 
 
-export default function FindFriends() {
+interface FindFriendsProps {
+  onStatsUpdate?: () => void;
+}
+
+export default function FindFriends({ onStatsUpdate }: FindFriendsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -110,6 +114,7 @@ export default function FindFriends() {
       setLoading(true);
       await sendFriendRequest({ receiverId: userId });
       await loadFriendsAndRequests();
+      onStatsUpdate?.();
       alert("Friend request sent");
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to send friend request");
