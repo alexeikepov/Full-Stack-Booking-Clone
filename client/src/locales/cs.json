@@ -1,0 +1,107 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Zaregistrujte své ubytování",
+  "register": "Registrovat se",
+  "signIn": "Přihlásit se",
+  "geniusLevel": "Úroveň Genius {{level}}",
+  "tabs": {
+    "stays": "Ubytování",
+    "flights": "Lety",
+    "cars": "Půjčení aut",
+    "attractions": "Atrakce",
+    "taxis": "Letištní taxi",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": { "title": "Najděte své příští ubytování", "subtitle": "Hledejte nízké ceny hotelů, apartmánů a dalšího..." },
+    "offers": { "title": "Nabídky", "subtitle": "Akce, slevy a speciální nabídky pro vás" },
+    "card1": { "kicker": "Rekreační domy", "title": "Sněte v rekreačním domě", "subtitle": "Vyberte si z domů, vil, chat a dalších", "cta": "Rezervovat" },
+    "card2": { "title": "Rychlý výlet, skvělé chvíle", "subtitle": "Ušetřete až 20 % s Getaway Deal", "cta": "Ušetřit na ubytování" },
+    "trending": { "title": "Oblíbené destinace", "subtitle": "Nejoblíbenější volby pro cestovatele z Izraele" },
+    "propertyTypes": {
+      "title": "Procházejte podle typu ubytování",
+      "items": {
+        "hotels": "Hotely",
+        "apartments": "Apartmány",
+        "resorts": "Resorty",
+        "villas": "Vily",
+        "cabins": "Chaty",
+        "cottages": "Chalupy",
+        "glamping": "Glamping",
+        "serviced-apartments": "Aparthotely",
+        "holiday-homes": "Rekreační domy",
+        "guest-houses": "Penziony",
+        "hostels": "Hostely",
+        "motels": "Motely"
+      }
+    },
+    "tripPlanner": {
+      "title": "Jednoduchý a rychlý plánovač cest",
+      "subtitle": "Vyberte náladu a objevte nejlepší destinace v Izraeli",
+      "categories": {
+        "festivals": "Festivaly",
+        "artMusic": "Umění a hudba",
+        "beachRelaxation": "Pláž a relax",
+        "gastronomyWine": "Gastronomie a víno",
+        "shoppingMarkets": "Nákupy a trhy",
+        "culturalExploration": "Kulturní objevování"
+      },
+      "kmAway": "{{km}} km daleko"
+    },
+    "banner": { "titleLine1": "Chcete se cítit jako doma", "titleLine2": "na svém dalším dobrodružství?", "cta": "Objevte rekreační domy" },
+    "popular": {
+      "title": "Oblíbené mezi cestovateli z Izraele",
+      "tabs": { "domestic": "Města v zemi", "international": "Mezinárodní města", "regions": "Regiony", "countries": "Země", "places": "Ubytování" },
+      "showMore": "+ Zobrazit více",
+      "showLess": "− Zobrazit méně"
+    },
+    "travelMore": {
+      "title": "Cestujte více, plaťte méně",
+      "boxTitle": "Přihlaste se a ušetřete",
+      "boxSubtitle": "Ušetřete 10 % a více v účastnických ubytováních – hledejte modré označení Genius",
+      "features": {
+        "freeCancellation": { "title": "Rezervujte nyní, zaplaťte na místě", "subtitle": "U většiny pokojů zdarma storno", "imgAlt": "Ilustrace kontrolního seznamu" },
+        "worldwide": { "title": "+2 miliony ubytování po celém světě", "subtitle": "Hotely, penziony, apartmány a další...", "imgAlt": "Ilustrace glóbu" },
+        "support247": { "title": "Spolehlivá zákaznická podpora 24/7", "subtitle": "Jsme tu vždy, abychom pomohli", "imgAlt": "Ilustrace podpory" }
+      }
+    }
+  },
+  "search": {
+    "where": "Kam jedete?",
+    "cta": "Hledat",
+    "breadcrumb": { "home": "Domů", "country": "Izrael", "city": "Město", "results": "Výsledky hledání" },
+    "count": { "propertiesFound": "ubytování nalezeno" },
+    "view": { "list": "Seznam", "grid": "Mřížka" },
+    "notice": { "conflict": "Před rozhodnutím o pobytu v této oblasti si prosím zkontrolujte cestovní upozornění vydaná vaší vládou, protože tato oblast může být považována za zasaženou konfliktem." },
+    "error": { "title": "Chyba při načítání hotelů", "description": "Nepodařilo se načíst data o hotelech. Zkuste to znovu.", "retry": "Zkusit znovu" },
+    "sort": {
+      "by": "Seřadit podle:",
+      "labels": {
+        "top_picks": "Nejlepší pro sólové cestovatele",
+        "price_low": "Cena (od nejnižší)",
+        "price_high": "Cena (od nejvyšší)",
+        "rating_high": "Hodnocení (sestupně)",
+        "rating_low": "Hodnocení (vzestupně)",
+        "distance_low": "Vzdálenost od centra",
+        "reviews_high": "Nejlépe hodnocené"
+      }
+    },
+    "filters": {
+      "budget": "Váš rozpočet (za noc)",
+      "categories": "Kategorie",
+      "review": "Skóre hodnocení",
+      "meals": "Strava",
+      "stars": "Kategorie hvězdiček",
+      "ptype": "Typ ubytování",
+      "facilities": "Populární filtry",
+      "payment": "Platební možnosti",
+      "distance": "Vzdálenost od centra",
+      "neighborhood": "Čtvrti",
+      "brands": "Značky",
+      "showAll": "Zobrazit vše",
+      "showLess": "Zobrazit méně"
+    }
+  }
+}
+
+

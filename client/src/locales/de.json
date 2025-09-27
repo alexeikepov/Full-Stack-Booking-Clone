@@ -1,0 +1,152 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Unterkunft anmelden",
+  "register": "Registrieren",
+  "signIn": "Anmelden",
+  "geniusLevel": "Genius‑Stufe {{level}}",
+  "tabs": {
+    "stays": "Unterkünfte",
+    "flights": "Flüge",
+    "cars": "Mietwagen",
+    "attractions": "Attraktionen",
+    "taxis": "Flughafentaxis",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Finden Sie Ihre nächste Unterkunft",
+      "subtitle": "Günstige Preise für Hotels, Apartments und vieles mehr…"
+    },
+    "offers": {
+      "title": "Angebote",
+      "subtitle": "Aktionen, Deals und spezielle Angebote für Sie"
+    },
+    "card1": {
+      "kicker": "Ferienunterkünfte",
+      "title": "Erfüllen Sie sich den Traum im Ferienhaus",
+      "subtitle": "Wählen Sie aus Häusern, Villen, Chalets und mehr",
+      "cta": "Jetzt buchen"
+    },
+    "card2": {
+      "title": "Kurztrip, große Zeit",
+      "subtitle": "Sparen Sie bis zu 20% mit dem Getaway‑Deal",
+      "cta": "Bei Aufenthalten sparen"
+    },
+    "trending": {
+      "title": "Beliebte Reiseziele",
+      "subtitle": "Beliebteste Ziele für Reisende aus Israel"
+    },
+    "propertyTypes": {
+      "title": "Nach Unterkunftsart stöbern",
+      "items": {
+        "hotels": "Hotels",
+        "apartments": "Apartments",
+        "resorts": "Resorts",
+        "villas": "Villen",
+        "cabins": "Hütten",
+        "cottages": "Cottages",
+        "glamping": "Glamping",
+        "serviced-apartments": "Aparthotels",
+        "holiday-homes": "Ferienhäuser",
+        "guest-houses": "Pensionen",
+        "hostels": "Hostels",
+        "motels": "Motels"
+      }
+    },
+    "tripPlanner": {
+      "title": "Schneller, einfacher Reiseplaner",
+      "subtitle": "Wählen Sie eine Stimmung und entdecken Sie Top‑Ziele in Israel",
+      "categories": {
+        "festivals": "Festivals",
+        "artMusic": "Kunst & Musik",
+        "beachRelaxation": "Strand & Erholung",
+        "gastronomyWine": "Gastronomie & Wein",
+        "shoppingMarkets": "Shopping & Märkte",
+        "culturalExploration": "Kulturelle Entdeckung"
+      },
+      "kmAway": "{{km}} km entfernt"
+    },
+    "banner": {
+      "titleLine1": "Zuhause fühlen auf Ihrer",
+      "titleLine2": "nächsten Reise?",
+      "cta": "Ferienunterkünfte entdecken"
+    },
+    "popular": {
+      "title": "Beliebt bei Reisenden aus Israel",
+      "tabs": {
+        "domestic": "Inländische Städte",
+        "international": "Internationale Städte",
+        "regions": "Regionen",
+        "countries": "Länder",
+        "places": "Unterkünfte"
+      },
+      "showMore": "+ Mehr anzeigen",
+      "showLess": "− Weniger anzeigen"
+    },
+    "travelMore": {
+      "title": "Mehr reisen, weniger bezahlen",
+      "boxTitle": "Anmelden und sparen",
+      "boxSubtitle": "Sparen Sie 10% oder mehr bei teilnehmenden Unterkünften – achten Sie auf das blaue Genius‑Label",
+      "features": {
+        "freeCancellation": {
+          "title": "Jetzt buchen, in der Unterkunft zahlen",
+          "subtitle": "Kostenlose Stornierung bei den meisten Zimmern",
+          "imgAlt": "Checkliste Illustration"
+        },
+        "worldwide": {
+          "title": "+2 Mio. Unterkünfte weltweit",
+          "subtitle": "Hotels, Pensionen, Apartments und mehr...",
+          "imgAlt": "Globus Illustration"
+        },
+        "support247": {
+          "title": "Zuverlässiger Kundenservice, 24/7",
+          "subtitle": "Wir sind immer für Sie da",
+          "imgAlt": "Kundenservice Illustration"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Wohin geht die Reise?",
+    "cta": "Suchen",
+    "breadcrumb": {
+      "home": "Startseite",
+      "country": "Israel",
+      "city": "Stadt",
+      "results": "Suchergebnisse"
+    },
+    "count": { "propertiesFound": "Unterkünfte gefunden" },
+    "view": { "list": "Liste", "grid": "Raster" },
+    "notice": { "conflict": "Bitte beachten Sie etwaige Reisehinweise Ihrer Regierung, bevor Sie eine Entscheidung über einen Aufenthalt in dieser möglicherweise konfliktbetroffenen Region treffen." },
+    "error": { "title": "Fehler beim Laden der Hotels", "description": "Hoteldaten konnten nicht geladen werden. Bitte erneut versuchen.", "retry": "Erneut versuchen" },
+    "sort": {
+      "by": "Sortieren nach:",
+      "labels": {
+        "top_picks": "Top‑Empfehlungen für Alleinreisende",
+        "price_low": "Preis (niedrig zuerst)",
+        "price_high": "Preis (hoch zuerst)",
+        "rating_high": "Bewertung (hoch bis niedrig)",
+        "rating_low": "Bewertung (niedrig bis hoch)",
+        "distance_low": "Entfernung zum Zentrum",
+        "reviews_high": "Am besten bewertet"
+      }
+    },
+    "filters": {
+      "budget": "Ihr Budget (pro Nacht)",
+      "categories": "Kategorien",
+      "review": "Bewertung",
+      "meals": "Mahlzeiten",
+      "stars": "Sternebewertung",
+      "ptype": "Unterkunftsart",
+      "facilities": "Beliebte Filter",
+      "payment": "Zahlungsoptionen",
+      "distance": "Entfernung vom Zentrum",
+      "neighborhood": "Stadtteile",
+      "brands": "Marken",
+      "showAll": "Alle anzeigen",
+      "showLess": "Weniger anzeigen"
+    }
+  }
+}
+
+

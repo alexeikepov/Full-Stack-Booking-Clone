@@ -1,0 +1,107 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registrer overnattingsstedet ditt",
+  "register": "Registrer deg",
+  "signIn": "Logg inn",
+  "geniusLevel": "Genius‑nivå {{level}}",
+  "tabs": {
+    "stays": "Overnatting",
+    "flights": "Fly",
+    "cars": "Leiebil",
+    "attractions": "Attraksjoner",
+    "taxis": "Flyplasstaxi",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": { "title": "Finn ditt neste opphold", "subtitle": "Søk lave priser på hoteller, leiligheter og mer..." },
+    "offers": { "title": "Tilbud", "subtitle": "Kampanjer, rabatter og spesialtilbud for deg" },
+    "card1": { "kicker": "Feriehus", "title": "Drøm i et feriehus", "subtitle": "Velg blant hus, villaer, hytter og mer", "cta": "Bestill" },
+    "card2": { "title": "Kjapp getaway, gode tider", "subtitle": "Spar opptil 20% med Getaway Deal", "cta": "Spar på overnatting" },
+    "trending": { "title": "Populære destinasjoner", "subtitle": "De mest populære valgene for reisende fra Israel" },
+    "propertyTypes": {
+      "title": "Utforsk etter overnattingstype",
+      "items": {
+        "hotels": "Hoteller",
+        "apartments": "Leiligheter",
+        "resorts": "Resorter",
+        "villas": "Villaer",
+        "cabins": "Hytter",
+        "cottages": "Hus",
+        "glamping": "Glamping",
+        "serviced-apartments": "Leilighetshotell",
+        "holiday-homes": "Feriehus",
+        "guest-houses": "Gjestgiverier",
+        "hostels": "Vandrerhjem",
+        "motels": "Moteller"
+      }
+    },
+    "tripPlanner": {
+      "title": "Enkel og rask reiseplanlegger",
+      "subtitle": "Velg stemning og oppdag toppdestinasjoner i Israel",
+      "categories": {
+        "festivals": "Festivaler",
+        "artMusic": "Kunst og musikk",
+        "beachRelaxation": "Strand og avslapping",
+        "gastronomyWine": "Gastronomi og vin",
+        "shoppingMarkets": "Shopping og markeder",
+        "culturalExploration": "Kulturell utforskning"
+      },
+      "kmAway": "{{km}} km unna"
+    },
+    "banner": { "titleLine1": "Vil du føle deg som hjemme", "titleLine2": "på ditt neste eventyr?", "cta": "Oppdag feriehus" },
+    "popular": {
+      "title": "Populært blant reisende fra Israel",
+      "tabs": { "domestic": "Nasjonale byer", "international": "Internasjonale byer", "regions": "Regioner", "countries": "Land", "places": "Overnattingssteder" },
+      "showMore": "+ Vis mer",
+      "showLess": "− Vis mindre"
+    },
+    "travelMore": {
+      "title": "Reis mer, betal mindre",
+      "boxTitle": "Logg inn og spar",
+      "boxSubtitle": "Spar 10% eller mer på deltakende steder – se etter den blå Genius‑merkingen",
+      "features": {
+        "freeCancellation": { "title": "Bestill nå, betal på stedet", "subtitle": "Gratis avbestilling for de fleste rom", "imgAlt": "Sjekkliste‑illustrasjon" },
+        "worldwide": { "title": "+2 millioner steder verden over", "subtitle": "Hoteller, gjestehus, leiligheter og mer...", "imgAlt": "Globus‑illustrasjon" },
+        "support247": { "title": "Pålitelige kundetjenester døgnet rundt", "subtitle": "Vi er alltid her for å hjelpe", "imgAlt": "Kundeservice‑illustrasjon" }
+      }
+    }
+  },
+  "search": {
+    "where": "Hvor skal du?",
+    "cta": "Søk",
+    "breadcrumb": { "home": "Hjem", "country": "Israel", "city": "By", "results": "Søkeresultater" },
+    "count": { "propertiesFound": "steder funnet" },
+    "view": { "list": "Liste", "grid": "Rute" },
+    "notice": { "conflict": "Sjekk reiseråd fra myndighetene før du bestemmer deg for å bo i dette området, som kan regnes som berørt av konflikt." },
+    "error": { "title": "Feil ved lasting av hoteller", "description": "Klarte ikke å laste hotell‑data. Prøv igjen.", "retry": "Prøv igjen" },
+    "sort": {
+      "by": "Sorter etter:",
+      "labels": {
+        "top_picks": "Best for alenereisende",
+        "price_low": "Pris (lav til høy)",
+        "price_high": "Pris (høy til lav)",
+        "rating_high": "Vurdering (synkende)",
+        "rating_low": "Vurdering (stigende)",
+        "distance_low": "Avstand til sentrum",
+        "reviews_high": "Best anmeldt"
+      }
+    },
+    "filters": {
+      "budget": "Budsjettet ditt (per natt)",
+      "categories": "Kategorier",
+      "review": "Vurderingsscore",
+      "meals": "Måltider",
+      "stars": "Stjernerangering",
+      "ptype": "Overnattingstype",
+      "facilities": "Populære filtre",
+      "payment": "Betalingsalternativer",
+      "distance": "Avstand fra sentrum",
+      "neighborhood": "Bydeler",
+      "brands": "Merker",
+      "showAll": "Vis alle",
+      "showLess": "Vis færre"
+    }
+  }
+}
+
+

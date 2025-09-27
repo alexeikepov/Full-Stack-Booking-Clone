@@ -1,0 +1,1 @@
+export { AdminHotelReviewsList } from "./AdminHotelReviewsList";

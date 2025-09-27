@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Registruokite savo nakvynę",
+  "register": "Registruotis",
+  "signIn": "Prisijungti",
+  "geniusLevel": "Genius lygis {{level}}",
+  "tabs": {
+    "stays": "Nakvynės",
+    "flights": "Skrydžiai",
+    "cars": "Automobilių nuoma",
+    "attractions": "Lankytinos vietos",
+    "taxis": "Oro uosto taksi",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Raskite savo kitą nakvynę",
+      "subtitle": "Ieškokite žemų kainų viešbučiuose, butuose ir daugiau..."
+    },
+    "offers": {
+      "title": "Pasiūlymai",
+      "subtitle": "Akcijos, nuolaidos ir specialūs pasiūlymai jums"
+    },
+    "card1": {
+      "kicker": "Atostogų namai",
+      "title": "Svajokite atostogų namuose",
+      "subtitle": "Rinkitės iš namų, vilų, šalė ir daugiau",
+      "cta": "Rezervuoti"
+    },
+    "card2": {
+      "title": "Greitas pabėgimas, geri momentai",
+      "subtitle": "Taupykite iki 20% su Getaway Deal",
+      "cta": "Taupykite nakvynėje"
+    },
+    "trending": {
+      "title": "Populiarios kryptys",
+      "subtitle": "Populiariausi pasirinkimai keliautojams iš Izraelio"
+    },
+    "propertyTypes": {
+      "title": "Naršykite pagal nakvynės tipą",
+      "items": {
+        "hotels": "Viešbučiai",
+        "apartments": "Butai",
+        "resorts": "Kurortai",
+        "villas": "Vilos",
+        "cabins": "Trobelės",
+        "cottages": "Kotedžai",
+        "glamping": "Glamping",
+        "serviced-apartments": "Aptarnaujami butai",
+        "holiday-homes": "Atostogų namai",
+        "guest-houses": "Svečių namai",
+        "hostels": "Hosteliai",
+        "motels": "Moteliai"
+      }
+    },
+    "tripPlanner": {
+      "title": "Paprastas ir greitas kelionių planuotojas",
+      "subtitle": "Pasirinkite nuotaiką ir atraskite geriausias kryptis Izraelyje",
+      "categories": {
+        "festivals": "Festivaliai",
+        "artMusic": "Menas ir muzika",
+        "beachRelaxation": "Paplūdimys ir poilsis",
+        "gastronomyWine": "Gastronomija ir vynas",
+        "shoppingMarkets": "Pirkiniai ir turgai",
+        "culturalExploration": "Kultūrinis tyrinėjimas"
+      },
+      "kmAway": "{{km}} km atstumu"
+    },
+    "banner": {
+      "titleLine1": "Norite jaustis kaip namuose",
+      "titleLine2": "savo kitoje nuotykiuose?",
+      "cta": "Atraskite atostogų namus"
+    },
+    "popular": {
+      "title": "Populiaru tarp keliautojų iš Izraelio",
+      "tabs": {
+        "domestic": "Vidaus miestai",
+        "international": "Tarptautiniai miestai",
+        "regions": "Regionai",
+        "countries": "Šalys",
+        "places": "Nakvynės"
+      },
+      "showMore": "+ Rodyti daugiau",
+      "showLess": "− Rodyti mažiau"
+    },
+    "travelMore": {
+      "title": "Keliaukite daugiau, mokėkite mažiau",
+      "boxTitle": "Prisijunkite ir taupykite",
+      "boxSubtitle": "Taupykite 10% ar daugiau dalyvaujančiose vietose — ieškokite mėlynos Genius etiketės",
+      "features": {
+        "freeCancellation": {
+          "title": "Rezervuokite dabar, mokėkite vietoje",
+          "subtitle": "Nemokamas atšaukimas daugumai kambarių",
+          "imgAlt": "Patikros sąrašo iliustracija"
+        },
+        "worldwide": {
+          "title": "+2 milijonai nakvynių visame pasaulyje",
+          "subtitle": "Viešbučiai, svečių namai, butai ir daugiau...",
+          "imgAlt": "Žemės rutulio iliustracija"
+        },
+        "support247": {
+          "title": "Patikimas klientų aptarnavimas 24/7",
+          "subtitle": "Visada esame čia, kad padėtume",
+          "imgAlt": "Klientų aptarnavimo iliustracija"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Kur vykstate?",
+    "cta": "Ieškoti",
+    "breadcrumb": {
+      "home": "Pagrindinis",
+      "country": "Izraelis",
+      "city": "Miestas",
+      "results": "Paieškos rezultatai"
+    },
+    "count": { "propertiesFound": "nakvynių rasta" },
+    "view": { "list": "Sąrašas", "grid": "Tinklelis" },
+    "notice": { "conflict": "Prieš nuspręsdami apsistoti šioje srityje, prašome patikrinti savo vyriausybės kelionių įspėjimus, nes ši sritis gali būti laikoma paveikta konflikto." },
+    "error": { "title": "Klaida kraunant viešbučius", "description": "Nepavyko įkelti viešbučių duomenų. Bandykite dar kartą.", "retry": "Bandyti dar kartą" },
+    "sort": {
+      "by": "Rūšiuoti pagal:",
+      "labels": {
+        "top_picks": "Geriausi vienišam keliautojams",
+        "price_low": "Kaina (nuo žemiausios iki aukščiausios)",
+        "price_high": "Kaina (nuo aukščiausios iki žemiausios)",
+        "rating_high": "Vietos įvertinimas (mažėjant)",
+        "rating_low": "Vietos įvertinimas (didėjant)",
+        "distance_low": "Atstumas nuo centro",
+        "reviews_high": "Geriausiai įvertinti"
+      }
+    },
+    "filters": {
+      "budget": "Jūsų biudžetas (per naktį)",
+      "categories": "Kategorijos",
+      "review": "Atsiliepimų įvertinimas",
+      "meals": "Valgiai",
+      "stars": "Žvaigždučių kategorija",
+      "ptype": "Nakvynės tipas",
+      "facilities": "Populiarūs filtrai",
+      "payment": "Mokėjimo variantai",
+      "distance": "Atstumas nuo centro",
+      "neighborhood": "Mikrorajonai",
+      "brands": "Prekės ženklai",
+      "showAll": "Rodyti viską",
+      "showLess": "Rodyti mažiau"
+    }
+  }
+}

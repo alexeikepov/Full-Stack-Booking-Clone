@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "숙소 등록",
+  "register": "회원가입",
+  "signIn": "로그인",
+  "geniusLevel": "Genius 레벨 {{level}}",
+  "tabs": {
+    "stays": "숙소",
+    "flights": "항공편",
+    "cars": "렌터카",
+    "attractions": "관광명소",
+    "taxis": "공항 택시",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "다음 숙소를 찾아보세요",
+      "subtitle": "호텔, 아파트 등의 저렴한 가격을 검색하세요..."
+    },
+    "offers": {
+      "title": "특가",
+      "subtitle": "당신을 위한 프로모션, 할인 및 특별 혜택"
+    },
+    "card1": {
+      "kicker": "휴가용 숙소",
+      "title": "휴가용 숙소에서 꿈을 꾸세요",
+      "subtitle": "집, 빌라, 샬레 등에서 선택하세요",
+      "cta": "예약하기"
+    },
+    "card2": {
+      "title": "빠른 휴가, 좋은 시간",
+      "subtitle": "Getaway Deal로 최대 20% 절약",
+      "cta": "숙박비 절약"
+    },
+    "trending": {
+      "title": "인기 목적지",
+      "subtitle": "이스라엘 여행객에게 가장 인기 있는 선택"
+    },
+    "propertyTypes": {
+      "title": "숙소 유형별로 둘러보기",
+      "items": {
+        "hotels": "호텔",
+        "apartments": "아파트",
+        "resorts": "리조트",
+        "villas": "빌라",
+        "cabins": "캐빈",
+        "cottages": "코티지",
+        "glamping": "글램핑",
+        "serviced-apartments": "서비스드 아파트",
+        "holiday-homes": "휴가용 숙소",
+        "guest-houses": "게스트하우스",
+        "hostels": "호스텔",
+        "motels": "모텔"
+      }
+    },
+    "tripPlanner": {
+      "title": "간단하고 빠른 여행 계획기",
+      "subtitle": "분위기를 선택하고 이스라엘의 최고 목적지를 발견하세요",
+      "categories": {
+        "festivals": "페스티벌",
+        "artMusic": "예술 & 음악",
+        "beachRelaxation": "해변 휴식",
+        "gastronomyWine": "요리 & 와인",
+        "shoppingMarkets": "쇼핑 & 시장",
+        "culturalExploration": "문화 탐험"
+      },
+      "kmAway": "{{km}}km 거리"
+    },
+    "banner": {
+      "titleLine1": "다음 모험에서",
+      "titleLine2": "집 같은 편안함을 느끼고 싶으신가요?",
+      "cta": "휴가용 숙소 발견하기"
+    },
+    "popular": {
+      "title": "이스라엘 여행객에게 인기",
+      "tabs": {
+        "domestic": "국내 도시",
+        "international": "국제 도시",
+        "regions": "지역",
+        "countries": "국가",
+        "places": "숙소"
+      },
+      "showMore": "+ 더 보기",
+      "showLess": "− 덜 보기"
+    },
+    "travelMore": {
+      "title": "더 많이 여행하고, 덜 지불하세요",
+      "boxTitle": "로그인하고 절약하세요",
+      "boxSubtitle": "참여 숙소에서 10% 이상 절약 — 파란색 Genius 라벨을 찾아보세요",
+      "features": {
+        "freeCancellation": {
+          "title": "지금 예약하고, 현장에서 결제",
+          "subtitle": "대부분의 객실에서 무료 취소",
+          "imgAlt": "체크리스트 일러스트"
+        },
+        "worldwide": {
+          "title": "전 세계 200만 개 이상의 숙소",
+          "subtitle": "호텔, 게스트하우스, 아파트 등...",
+          "imgAlt": "지구 일러스트"
+        },
+        "support247": {
+          "title": "신뢰할 수 있는 24/7 고객 서비스",
+          "subtitle": "언제나 도움을 드립니다",
+          "imgAlt": "고객 서비스 일러스트"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "어디로 가시나요?",
+    "cta": "검색",
+    "breadcrumb": {
+      "home": "홈",
+      "country": "이스라엘",
+      "city": "도시",
+      "results": "검색 결과"
+    },
+    "count": { "propertiesFound": "개 숙소 발견" },
+    "view": { "list": "목록", "grid": "그리드" },
+    "notice": { "conflict": "이 지역에 숙박하기로 결정하기 전에 정부의 여행 경고를 확인하시기 바랍니다. 이 지역은 갈등의 영향을 받는 것으로 간주될 수 있습니다." },
+    "error": { "title": "호텔 로딩 오류", "description": "호텔 데이터를 로드할 수 없습니다. 다시 시도해 주세요.", "retry": "다시 시도" },
+    "sort": {
+      "by": "정렬:",
+      "labels": {
+        "top_picks": "솔로 여행자에게 최고",
+        "price_low": "가격 (낮은 순)",
+        "price_high": "가격 (높은 순)",
+        "rating_high": "평점 (높은 순)",
+        "rating_low": "평점 (낮은 순)",
+        "distance_low": "시내에서의 거리",
+        "reviews_high": "최고 평점"
+      }
+    },
+    "filters": {
+      "budget": "예산 (1박당)",
+      "categories": "카테고리",
+      "review": "리뷰 점수",
+      "meals": "식사",
+      "stars": "별점 등급",
+      "ptype": "숙소 유형",
+      "facilities": "인기 필터",
+      "payment": "결제 옵션",
+      "distance": "시내에서의 거리",
+      "neighborhood": "지역",
+      "brands": "브랜드",
+      "showAll": "모두 보기",
+      "showLess": "덜 보기"
+    }
+  }
+}

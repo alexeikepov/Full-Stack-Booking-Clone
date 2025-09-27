@@ -1,0 +1,150 @@
+{
+  "brand": "Booking.com",
+  "listYourProperty": "Skráðu gistingu þína",
+  "register": "Skráðu þig",
+  "signIn": "Skrá inn",
+  "geniusLevel": "Genius stig {{level}}",
+  "tabs": {
+    "stays": "Gisting",
+    "flights": "Flug",
+    "cars": "Bílaleiga",
+    "attractions": "Aðdráttarafl",
+    "taxis": "Flugvöllur leigubíll",
+    "taxisBadge": "TAXI"
+  },
+  "home": {
+    "hero": {
+      "title": "Finndu næstu gistingu þína",
+      "subtitle": "Leitaðu að lágum verðum á hótelum, íbúðum og meira..."
+    },
+    "offers": {
+      "title": "Tilboð",
+      "subtitle": "Kynningar, afslættir og sérstök tilboð fyrir þig"
+    },
+    "card1": {
+      "kicker": "Fríðuhús",
+      "title": "Draumt í fríðuhúsi",
+      "subtitle": "Veldu úr húsum, villum, chaletum og meira",
+      "cta": "Bóka"
+    },
+    "card2": {
+      "title": "Fljótur frí, góðir augnablik",
+      "subtitle": "Sparðu allt að 20% með Getaway Deal",
+      "cta": "Sparðu á gistingu"
+    },
+    "trending": {
+      "title": "Vinsæl áfangastaðir",
+      "subtitle": "Vinsælustu valkostir fyrir ferðamenn frá Ísrael"
+    },
+    "propertyTypes": {
+      "title": "Flettu eftir gistingu tegund",
+      "items": {
+        "hotels": "Hótel",
+        "apartments": "Íbúðir",
+        "resorts": "Útileguhús",
+        "villas": "Villur",
+        "cabins": "Hús",
+        "cottages": "Hús",
+        "glamping": "Glamping",
+        "serviced-apartments": "Þjónustuð íbúðir",
+        "holiday-homes": "Fríðuhús",
+        "guest-houses": "Gestahús",
+        "hostels": "Gestahús",
+        "motels": "Motel"
+      }
+    },
+    "tripPlanner": {
+      "title": "Einfaldur og fljótur ferðaáætlanagerð",
+      "subtitle": "Veldu stemningu og uppgötvaðu bestu áfangastaði í Ísrael",
+      "categories": {
+        "festivals": "Hátíðir",
+        "artMusic": "List og tónlist",
+        "beachRelaxation": "Strönd og slökun",
+        "gastronomyWine": "Matargerð og vín",
+        "shoppingMarkets": "Verslun og markaðir",
+        "culturalExploration": "Menningarleg könnun"
+      },
+      "kmAway": "{{km}} km í burtu"
+    },
+    "banner": {
+      "titleLine1": "Viltu líða eins og heima",
+      "titleLine2": "í næstu ævintýri þínu?",
+      "cta": "Uppgötvaðu fríðuhús"
+    },
+    "popular": {
+      "title": "Vinsælt meðal ferðamanna frá Ísrael",
+      "tabs": {
+        "domestic": "Inlendir borgir",
+        "international": "Alþjóðlegar borgir",
+        "regions": "Svæði",
+        "countries": "Lönd",
+        "places": "Gisting"
+      },
+      "showMore": "+ Sýndu meira",
+      "showLess": "− Sýndu minna"
+    },
+    "travelMore": {
+      "title": "Ferðast meira, borga minna",
+      "boxTitle": "Skráðu þig inn og sparaðu",
+      "boxSubtitle": "Sparðu 10% eða meira á þátttökugistingu — leitaðu að bláu Genius merki",
+      "features": {
+        "freeCancellation": {
+          "title": "Bókaðu núna, borgaðu á gistingu",
+          "subtitle": "Ókeypis hætta við fyrir flestar herbergi",
+          "imgAlt": "Athugasemd lista mynd"
+        },
+        "worldwide": {
+          "title": "+2 milljónir gistingar um allan heim",
+          "subtitle": "Hótel, gestahús, íbúðir og meira...",
+          "imgAlt": "Jörð mynd"
+        },
+        "support247": {
+          "title": "Áreiðanlegur þjónustuver fyrir viðskiptavini 24/7",
+          "subtitle": "Við erum alltaf hér til að hjálpa",
+          "imgAlt": "Þjónustuver fyrir viðskiptavini mynd"
+        }
+      }
+    }
+  },
+  "search": {
+    "where": "Hvert ertu að fara?",
+    "cta": "Leita",
+    "breadcrumb": {
+      "home": "Heim",
+      "country": "Ísrael",
+      "city": "Borg",
+      "results": "Leitarniðurstöður"
+    },
+    "count": { "propertiesFound": "gisting fannst" },
+    "view": { "list": "Listi", "grid": "Net" },
+    "notice": { "conflict": "Vinsamlegast athugaðu ferða viðvaranir ríkisstjórnarinnar þinnar áður en þú ákveður að dvelja á þessu svæði, sem gæti verið talið fyrir áhrifum af átökum." },
+    "error": { "title": "Villa við að hlaða hótelum", "description": "Mistókst að hlaða hótel gögnum. Vinsamlegast reyndu aftur.", "retry": "Reyndu aftur" },
+    "sort": {
+      "by": "Raða eftir:",
+      "labels": {
+        "top_picks": "Besta fyrir einstaklings ferðamenn",
+        "price_low": "Verð (lágt til hátt)",
+        "price_high": "Verð (hátt til lágt)",
+        "rating_high": "Einkunn gistingu (lækkandi)",
+        "rating_low": "Einkunn gistingu (hækkandi)",
+        "distance_low": "Fjarlægð frá miðju",
+        "reviews_high": "Hæst einkunn"
+      }
+    },
+    "filters": {
+      "budget": "Fjárhagsáætlun þín (á nótt)",
+      "categories": "Flokkar",
+      "review": "Umsagnir einkunn",
+      "meals": "Máltíðir",
+      "stars": "Stjörnu flokkur",
+      "ptype": "Gistingu tegund",
+      "facilities": "Vinsælir síur",
+      "payment": "Greiðslu valkostir",
+      "distance": "Fjarlægð frá miðju",
+      "neighborhood": "Hverfi",
+      "brands": "Vörumerki",
+      "showAll": "Sýna allt",
+      "showLess": "Sýna minna"
+    }
+  }
+}
