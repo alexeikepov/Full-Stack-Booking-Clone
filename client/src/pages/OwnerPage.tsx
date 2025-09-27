@@ -21,7 +21,7 @@ import {
   Filter,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import EditHotelDialog from "@/components/EditHotelDialog";
+import { EditHotelDialog } from "@/components/EditHotelDialog";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import { useEffect } from "react";
 import AdminHeader from "@/components/AdminHeader";

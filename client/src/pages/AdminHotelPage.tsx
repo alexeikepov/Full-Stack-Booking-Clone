@@ -26,7 +26,7 @@ import {
   Mail,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import EditHotelDialog from "@/components/EditHotelDialog";
+import { EditHotelDialog } from "@/components/EditHotelDialog";
 // import AddHotelDialog from "@/components/AddHotelDialog"; // removed, using EditHotelDialog for full add
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
 import AdminHeader from "@/components/AdminHeader";
