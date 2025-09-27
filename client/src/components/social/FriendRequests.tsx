@@ -27,7 +27,11 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
-export default function FriendRequests() {
+interface FriendRequestsProps {
+  onStatsUpdate?: () => void;
+}
+
+export default function FriendRequests({ onStatsUpdate }: FriendRequestsProps) {
   const { user } = useAuth();
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -58,6 +62,7 @@ export default function FriendRequests() {
     try {
       await acceptFriendRequest(requestId);
       await loadData();
+      onStatsUpdate?.();
       alert("Friend request accepted");
     } catch (error) {
       alert("Failed to accept friend request");
@@ -68,6 +73,7 @@ export default function FriendRequests() {
     try {
       await rejectFriendRequest(requestId);
       await loadData();
+      onStatsUpdate?.();
       alert("Friend request rejected");
     } catch (error) {
       alert("Failed to reject friend request");
@@ -78,6 +84,7 @@ export default function FriendRequests() {
     try {
       await cancelFriendRequest(requestId);
       await loadData();
+      onStatsUpdate?.();
       alert("Friend request cancelled");
     } catch (error) {
       alert("Failed to cancel friend request");
@@ -88,6 +95,7 @@ export default function FriendRequests() {
     try {
       await removeFriend(friendId);
       await loadData();
+      onStatsUpdate?.();
       alert("Friend removed");
     } catch (error) {
       alert("Failed to remove friend");

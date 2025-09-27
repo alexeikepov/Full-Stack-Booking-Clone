@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 import {
   Calendar,
   MapPin,
@@ -83,7 +84,12 @@ export default function GroupCard({
             <div className="bg-gray-50 p-4 rounded-lg mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <Hotel className="h-5 w-5 text-blue-600" />
-                <h4 className="font-semibold text-lg">{group.hotel.name}</h4>
+                <Link 
+                  to={`/hotel/${group.hotel._id || group.hotel.id}`}
+                  className="font-semibold text-lg text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                >
+                  {group.hotel.name}
+                </Link>
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">

@@ -302,20 +302,20 @@ export default function BookingsPage() {
               }}
             />
           ) : (
-            <div className="flex items-start gap-6">
-              <img
-                src={globeImg}
-                alt=""
-                className="h-[200px] w-[200px] select-none object-contain object-center"
-              />
-              <div>
-                <div className="text-[28px] font-bold">Where to next?</div>
-                <div className="mt-3 text-[16px] text-black/60">
-                  You haven't started any trips yet. When you've made a booking,
-                  it will appear here.
-                </div>
+          <div className="flex items-start gap-6">
+            <img
+              src={globeImg}
+              alt=""
+              className="h-[200px] w-[200px] select-none object-contain object-center"
+            />
+            <div>
+              <div className="text-[28px] font-bold">Where to next?</div>
+              <div className="mt-3 text-[16px] text-black/60">
+                You haven't started any trips yet. When you've made a booking,
+                it will appear here.
               </div>
             </div>
+          </div>
           )}
 
           <div className="mt-8 flex items-center gap-2">
