@@ -15,6 +15,12 @@ export default function HotelHeader({ hotel, onShowMap }: HotelHeaderProps) {
   const [isPriceMatchModalOpen, setIsPriceMatchModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
+  console.log("HotelHeader hotel data:", {
+    _id: hotel._id,
+    name: hotel.name,
+    hotelId: hotel._id?.$oid || hotel._id,
+  });
+
   const handleShareClick = () => {
     setIsShareModalOpen(true);
   };
@@ -98,7 +104,11 @@ export default function HotelHeader({ hotel, onShowMap }: HotelHeaderProps) {
             {/* Top row: Heart, Share, Reserve */}
             <div className="flex items-center gap-3">
               <WishlistButton
-                hotelId={hotel._id.$oid}
+                hotelId={
+                  typeof hotel._id === "string"
+                    ? hotel._id
+                    : hotel._id?.$oid || ""
+                }
                 hotelName={hotel.name}
                 className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 size="md"

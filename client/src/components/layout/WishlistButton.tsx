@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import {
-  checkHotelInWishlist,
-  addHotelToWishlist,
-  removeHotelFromWishlist,
-  getWishlists,
-  type Wishlist,
-} from "@/lib/api";
+import { checkHotelInWishlist, removeHotelFromWishlist } from "@/lib/api";
 import WishlistDialog from "@/components/ui/WishlistDialog";
 
 interface WishlistButtonProps {
@@ -31,15 +25,21 @@ export default function WishlistButton({
   const [loading, setLoading] = useState(false);
   const [showWishlistDialog, setShowWishlistDialog] = useState(false);
 
+  console.log("WishlistButton props:", { hotelId, hotelName, user: !!user });
+
   useEffect(() => {
     if (user && hotelId) {
       checkHotelStatus();
+    } else {
+      console.log("Skipping checkHotelStatus:", { user: !!user, hotelId });
     }
   }, [user, hotelId]);
 
   const checkHotelStatus = async () => {
     try {
+      console.log("Checking hotel status for hotelId:", hotelId);
       const result = await checkHotelInWishlist(hotelId);
+      console.log("Hotel status result:", result);
       setIsInWishlist(result.isInWishlist);
       setWishlists(result.wishlists);
     } catch (err) {
@@ -49,17 +49,27 @@ export default function WishlistButton({
 
   const handleToggleWishlist = async () => {
     if (!user) {
+      console.log("User not authenticated, skipping wishlist toggle");
       return;
     }
+
+    if (!hotelId) {
+      console.error("Hotel ID is missing:", hotelId);
+      return;
+    }
+
+    console.log("Toggling wishlist for hotel:", { hotelId, isInWishlist });
 
     if (isInWishlist) {
       try {
         setLoading(true);
+        console.log("Removing hotel from wishlists:", { hotelId, wishlists });
         for (const wishlist of wishlists) {
           await removeHotelFromWishlist(wishlist._id, hotelId);
         }
         setIsInWishlist(false);
         setWishlists([]);
+        console.log("Successfully removed hotel from wishlists");
       } catch (err) {
         console.error("Failed to remove from wishlist:", err);
       } finally {

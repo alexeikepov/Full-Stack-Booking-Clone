@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AuthedRequest } from "../middlewares/auth";
 import { WishlistModel } from "../models/Wishlist";
 import { HotelModel } from "../models/Hotel";
+import mongoose from "mongoose";
 
 // Create a new wishlist
 export async function createWishlist(
@@ -11,20 +12,24 @@ export async function createWishlist(
 ) {
   try {
     const { name, description, isPublic = false } = req.body;
-    
+
+    console.log("Creating wishlist:", { name, userId: req.user?.id });
+
     const wishlist = new WishlistModel({
       userId: req.user!.id,
       name: name || "My Wishlist",
       description,
       isPublic,
-      hotelIds: []
+      hotelIds: [],
     });
 
     await wishlist.save();
-    await wishlist.populate('hotelIds', 'name location images rating');
-    
+    await wishlist.populate("hotelIds", "name location media rating");
+
+    console.log("Successfully created wishlist:", wishlist._id);
     res.status(201).json(wishlist);
   } catch (err) {
+    console.error("Error creating wishlist:", err);
     next(err);
   }
 }
@@ -37,7 +42,7 @@ export async function getUserWishlists(
 ) {
   try {
     const wishlists = await WishlistModel.find({ userId: req.user!.id })
-      .populate('hotelIds', 'name location images rating')
+      .populate("hotelIds", "name location media rating")
       .sort({ updatedAt: -1 })
       .lean();
 
@@ -55,16 +60,16 @@ export async function getWishlistById(
 ) {
   try {
     const { id } = req.params;
-    
+
     const wishlist = await WishlistModel.findOne({
       _id: id,
-      userId: req.user!.id
+      userId: req.user!.id,
     })
-    .populate({
-      path: 'hotelIds',
-      select: 'name location images rating price city'
-    })
-    .lean();
+      .populate({
+        path: "hotelIds",
+        select: "name location media rating price city",
+      })
+      .lean();
 
     if (!wishlist) {
       return res.status(404).json({ error: "Wishlist not found" });
@@ -96,7 +101,7 @@ export async function updateWishlist(
       return res.status(404).json({ error: "Wishlist not found" });
     }
 
-    await wishlist.populate('hotelIds', 'name location images rating');
+    await wishlist.populate("hotelIds", "name location media rating");
     res.json(wishlist);
   } catch (err) {
     next(err);
@@ -114,7 +119,7 @@ export async function deleteWishlist(
 
     const wishlist = await WishlistModel.findOneAndDelete({
       _id: id,
-      userId: req.user!.id
+      userId: req.user!.id,
     });
 
     if (!wishlist) {
@@ -137,32 +142,68 @@ export async function addHotelToWishlist(
     const { id } = req.params;
     const { hotelId } = req.body;
 
-    // Verify hotel exists
-    const hotel = await HotelModel.findById(hotelId);
+    console.log("Adding hotel to wishlist:", {
+      wishlistId: id,
+      hotelId,
+      userId: req.user?.id,
+    });
+
+    if (!hotelId) {
+      return res.status(400).json({ error: "Hotel ID is required" });
+    }
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+      console.log("Invalid hotel ID format:", hotelId);
+      return res.status(400).json({ error: "Invalid hotel ID format" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.log("Invalid wishlist ID format:", id);
+      return res.status(400).json({ error: "Invalid wishlist ID format" });
+    }
+
+    // Verify hotel exists (simplified check for now)
+    const hotel = await HotelModel.findById(hotelId).lean();
     if (!hotel) {
+      console.log("Hotel not found in database:", hotelId);
       return res.status(404).json({ error: "Hotel not found" });
     }
 
+    console.log("Hotel found:", {
+      id: hotel._id,
+      name: hotel.name,
+      approvalStatus: hotel.approvalStatus,
+      isVisible: hotel.isVisible,
+    });
+
     const wishlist = await WishlistModel.findOne({
       _id: id,
-      userId: req.user!.id
+      userId: req.user!.id,
     });
 
     if (!wishlist) {
+      console.log("Wishlist not found:", {
+        wishlistId: id,
+        userId: req.user?.id,
+      });
       return res.status(404).json({ error: "Wishlist not found" });
     }
 
     // Check if hotel is already in the wishlist
-    if (wishlist.hotelIds.includes(hotelId as any)) {
+    if (wishlist.hotelIds.some((id) => id.toString() === hotelId)) {
+      console.log("Hotel already in wishlist:", hotelId);
       return res.status(400).json({ error: "Hotel already in wishlist" });
     }
 
-    wishlist.hotelIds.push(hotelId as any);
+    wishlist.hotelIds.push(hotelId);
     await wishlist.save();
-    
-    await wishlist.populate('hotelIds', 'name location images rating');
+
+    await wishlist.populate("hotelIds", "name location media rating");
+    console.log("Successfully added hotel to wishlist:", hotelId);
     res.json(wishlist);
   } catch (err) {
+    console.error("Error adding hotel to wishlist:", err);
     next(err);
   }
 }
@@ -178,7 +219,7 @@ export async function removeHotelFromWishlist(
 
     const wishlist = await WishlistModel.findOne({
       _id: id,
-      userId: req.user!.id
+      userId: req.user!.id,
     });
 
     if (!wishlist) {
@@ -189,8 +230,8 @@ export async function removeHotelFromWishlist(
       (id) => id.toString() !== hotelId
     );
     await wishlist.save();
-    
-    await wishlist.populate('hotelIds', 'name location images rating');
+
+    await wishlist.populate("hotelIds", "name location media rating");
     res.json(wishlist);
   } catch (err) {
     next(err);
@@ -206,16 +247,46 @@ export async function checkHotelInWishlist(
   try {
     const { hotelId } = req.params;
 
+    console.log("Checking hotel in wishlist:", {
+      hotelId,
+      userId: req.user?.id,
+    });
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(hotelId)) {
+      console.log("Invalid hotel ID format:", hotelId);
+      return res.status(400).json({ error: "Invalid hotel ID format" });
+    }
+
+    // Check if hotel exists (simplified check for now)
+    const hotelExists = await HotelModel.findById(hotelId).lean();
+    if (!hotelExists) {
+      console.log("Hotel not found in database:", hotelId);
+      return res.status(404).json({ error: "Hotel not found" });
+    }
+
+    console.log("Hotel exists:", {
+      id: hotelExists._id,
+      name: hotelExists.name,
+    });
+
     const wishlists = await WishlistModel.find({
       userId: req.user!.id,
-      hotelIds: hotelId
-    }).select('_id name');
+      hotelIds: hotelId,
+    }).select("_id name");
+
+    console.log("Wishlist check result:", {
+      hotelId,
+      isInWishlist: wishlists.length > 0,
+      wishlistsCount: wishlists.length,
+    });
 
     res.json({
       isInWishlist: wishlists.length > 0,
-      wishlists
+      wishlists,
     });
   } catch (err) {
+    console.error("Error checking hotel in wishlist:", err);
     next(err);
   }
 }
@@ -231,14 +302,14 @@ export async function getPublicWishlist(
 
     const wishlist = await WishlistModel.findOne({
       _id: id,
-      isPublic: true
+      isPublic: true,
     })
-    .populate('userId', 'name')
-    .populate({
-      path: 'hotelIds',
-      select: 'name location images rating price city'
-    })
-    .lean();
+      .populate("userId", "name")
+      .populate({
+        path: "hotelIds",
+        select: "name location media rating price city",
+      })
+      .lean();
 
     if (!wishlist) {
       return res.status(404).json({ error: "Public wishlist not found" });

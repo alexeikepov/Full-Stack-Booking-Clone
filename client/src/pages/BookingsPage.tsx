@@ -43,6 +43,7 @@ export default function BookingsPage() {
         });
 
         console.log("Raw reservations from server:", rows);
+        console.log("Sample hotel data:", rows[0]?.hotel);
 
         const toIso = (d: any) => {
           try {
@@ -61,20 +62,108 @@ export default function BookingsPage() {
         today.setHours(0, 0, 0, 0);
 
         const getHotelImage = (hotel: any): string => {
-          if (!hotel) return "";
+          if (!hotel) {
+            console.log("No hotel data provided");
+            return "";
+          }
+
+          console.log(
+            "Getting image for hotel:",
+            hotel.name,
+            "Media:",
+            hotel.media,
+            "Rooms:",
+            hotel.rooms?.length
+          );
+
+          // Try hotel-level media first
           const media = Array.isArray(hotel.media) ? hotel.media : [];
           const primary = media.find((m: any) => m?.url)?.url || media[0]?.url;
-          if (primary) return String(primary);
+          if (primary) {
+            console.log("Found hotel media image:", primary);
+            return String(primary);
+          }
+
+          // Try rooms media
           const rooms = Array.isArray(hotel.rooms) ? hotel.rooms : [];
           for (const r of rooms) {
+            // Try room media array
             const rmMedia = Array.isArray(r?.media) ? r.media : [];
             const rmUrl =
               rmMedia.find((m: any) => m?.url)?.url || rmMedia[0]?.url;
-            if (rmUrl) return String(rmUrl);
-            if (Array.isArray(r?.photos) && r.photos[0])
+            if (rmUrl) {
+              console.log("Found room media image:", rmUrl);
+              return String(rmUrl);
+            }
+
+            // Try room photos array
+            if (Array.isArray(r?.photos) && r.photos[0]) {
+              console.log("Found room photo:", r.photos[0]);
               return String(r.photos[0]);
+            }
+
+            // Try room image field
+            if (r?.image) {
+              console.log("Found room image field:", r.image);
+              return String(r.image);
+            }
+            if (r?.imageUrl) {
+              console.log("Found room imageUrl field:", r.imageUrl);
+              return String(r.imageUrl);
+            }
           }
+
+          // Try hotel-level image fields
+          if (hotel.image) {
+            console.log("Found hotel image field:", hotel.image);
+            return String(hotel.image);
+          }
+          if (hotel.imageUrl) {
+            console.log("Found hotel imageUrl field:", hotel.imageUrl);
+            return String(hotel.imageUrl);
+          }
+          if (hotel.photo) {
+            console.log("Found hotel photo field:", hotel.photo);
+            return String(hotel.photo);
+          }
+          if (hotel.photoUrl) {
+            console.log("Found hotel photoUrl field:", hotel.photoUrl);
+            return String(hotel.photoUrl);
+          }
+
+          console.log("No image found for hotel:", hotel.name);
           return "";
+        };
+
+        // Function to get a reliable fallback image based on hotel location
+        const getFallbackImage = (hotel: any): string => {
+          const city = hotel?.city?.toLowerCase() || "";
+          const country = hotel?.country?.toLowerCase() || "";
+
+          console.log("Getting fallback image for:", city, country);
+
+          // City-specific fallback images
+          if (city.includes("eilat")) {
+            console.log("Using Eilat-specific fallback image");
+            return "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop";
+          }
+          if (city.includes("tel aviv") || city.includes("telaviv")) {
+            return "https://images.unsplash.com/photo-1505764706515-aa95265c5abc?q=80&w=800&auto=format&fit=crop";
+          }
+          if (city.includes("jerusalem")) {
+            return "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop";
+          }
+          if (city.includes("haifa")) {
+            return "https://images.unsplash.com/photo-1558981285-6f0c94958bb6?q=80&w=800&auto=format&fit=crop";
+          }
+
+          // Country-specific fallback images
+          if (country.includes("israel")) {
+            return "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop";
+          }
+
+          // Default hotel image
+          return "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop";
         };
 
         const mapped: Trip[] = rows.map((r: any) => ({
@@ -83,9 +172,7 @@ export default function BookingsPage() {
           from: toIso(r.checkIn),
           to: toIso(r.checkOut),
           bookings: 1,
-          imageUrl:
-            getHotelImage(r.hotel) ||
-            "https://images.unsplash.com/photo-1501117716987-c8e004f568d5?q=80&w=800&auto=format&fit=crop",
+          imageUrl: getHotelImage(r.hotel) || getFallbackImage(r.hotel),
           quantity: Number(r.quantity) || 1,
           pricePerNight: Number(r.pricePerNight) || 0,
           totalPrice: Number(r.totalPrice) || 0,
@@ -148,6 +235,8 @@ export default function BookingsPage() {
           const nearest = upcoming.sort(
             (a, b) => +new Date(a.from) - +new Date(b.from)
           )[0];
+          console.log("Upcoming trip selected:", nearest);
+          console.log("Upcoming trip imageUrl:", nearest.imageUrl);
           setUpcoming(nearest);
         } else {
           setUpcoming(null);

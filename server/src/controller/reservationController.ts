@@ -149,7 +149,10 @@ export async function createReservation(
 
     const alreadyBooked = overlap[0]?.qty ?? 0;
     const totalRooms =
-      roomInfo.totalRooms ?? roomInfo.availableRooms ?? roomInfo.totalUnits ?? 0;
+      roomInfo.totalRooms ??
+      roomInfo.availableRooms ??
+      roomInfo.totalUnits ??
+      0;
     const availableNow = Math.max(0, totalRooms - alreadyBooked);
 
     if (dto.quantity > availableNow) {
@@ -231,21 +234,23 @@ export async function listReservations(
   next: NextFunction
 ) {
   try {
-    console.log('listReservations - User ID:', req.user?.id);
-    
+    console.log("listReservations - User ID:", req.user?.id);
+
     const wantsAll =
       (req.query.all === "1" || req.query.all === "true") &&
       isAdmin(req.user?.role);
     const q = req.query as any;
-    const filter: any = wantsAll ? {} : { 
-      $or: [
-        { user: req.user!.id },
-        { sharedWith: { $in: [req.user!.id] } }
-      ]
-    };
-    
-    console.log('Filter:', JSON.stringify(filter, null, 2));
-    
+    const filter: any = wantsAll
+      ? {}
+      : {
+          $or: [
+            { user: req.user!.id },
+            { sharedWith: { $in: [req.user!.id] } },
+          ],
+        };
+
+    console.log("Filter:", JSON.stringify(filter, null, 2));
+
     if (q.status) filter.status = q.status;
     if (q.hotelId && isAdmin(req.user?.role)) {
       try {
@@ -255,14 +260,22 @@ export async function listReservations(
 
     const list = await ReservationModel.find(filter)
       .sort({ createdAt: -1 })
-      .populate("hotel", "name city address media rooms")
+      .populate({
+        path: "hotel",
+        select: "name city address media rooms",
+        populate: {
+          path: "rooms",
+          select: "media photos",
+        },
+      })
       .select("-__v")
       .lean();
 
-    console.log('Found reservations:', list.length);
-    list.forEach(r => {
-      console.log('Reservation ID:', r._id, 'User:', r.user, 'SharedWith:', r.sharedWith);
-    });
+    console.log("Found reservations:", list.length);
+    // Log hotel data for debugging
+    if (list.length > 0) {
+      console.log("Sample hotel data:", JSON.stringify(list[0].hotel, null, 2));
+    }
 
     res.json(list);
   } catch (err) {
@@ -478,7 +491,9 @@ export async function updateReservation(
 
     // Handle sharedWith - convert string IDs to ObjectIds
     if (dto.sharedWith) {
-      reservation.sharedWith = dto.sharedWith.map(id => new mongoose.Types.ObjectId(id));
+      reservation.sharedWith = dto.sharedWith.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
     }
 
     if (dto.checkIn || dto.checkOut || dto.quantity) {
@@ -486,7 +501,8 @@ export async function updateReservation(
         (reservation.checkOut.getTime() - reservation.checkIn.getTime()) /
           (1000 * 60 * 60 * 24)
       );
-      const basePrice = reservation.pricePerNight * nights * reservation.quantity;
+      const basePrice =
+        reservation.pricePerNight * nights * reservation.quantity;
 
       let childrenCost = 0;
       if (reservation.children) {
@@ -714,5 +730,3 @@ export async function deleteReservation(
     next(err);
   }
 }
-
-

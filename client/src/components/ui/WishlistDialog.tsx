@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Heart, Check } from "lucide-react";
-import { getWishlists, createWishlist, addHotelToWishlist, type Wishlist, type CreateWishlistData } from "@/lib/api";
+import {
+  getWishlists,
+  createWishlist,
+  addHotelToWishlist,
+  type Wishlist,
+} from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 interface WishlistDialogProps {
@@ -14,12 +24,12 @@ interface WishlistDialogProps {
   onSuccess?: () => void;
 }
 
-export default function WishlistDialog({ 
-  isOpen, 
-  onClose, 
-  hotelId, 
-  hotelName, 
-  onSuccess 
+export default function WishlistDialog({
+  isOpen,
+  onClose,
+  hotelId,
+  hotelName,
+  onSuccess,
 }: WishlistDialogProps) {
   const { user } = useAuth();
   const [wishlists, setWishlists] = useState<Wishlist[]>([]);
@@ -38,14 +48,21 @@ export default function WishlistDialog({
   const loadWishlists = async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log("Loading wishlists...");
       const data = await getWishlists();
+      console.log("Loaded wishlists:", data.length);
       setWishlists(data);
       if (data.length > 0) {
         setSelectedWishlistId(data[0]._id);
       }
-    } catch (err) {
-      setError("Failed to load wishlists");
-      console.error(err);
+    } catch (err: any) {
+      console.error("Error loading wishlists:", err);
+      const errorMessage =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to load wishlists";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -57,34 +74,60 @@ export default function WishlistDialog({
 
     try {
       setLoading(true);
+      setError(null);
+      console.log("Creating new wishlist:", newWishlistName.trim());
       const newWishlist = await createWishlist({
         name: newWishlistName.trim(),
         description: "",
         isPublic: false,
       });
+      console.log("Successfully created wishlist:", newWishlist._id);
       setWishlists([newWishlist, ...wishlists]);
       setSelectedWishlistId(newWishlist._id);
       setNewWishlistName("");
       setShowCreateForm(false);
-    } catch (err) {
-      setError("Failed to create wishlist");
-      console.error(err);
+    } catch (err: any) {
+      console.error("Error creating wishlist:", err);
+      const errorMessage =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to create wishlist";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSaveToWishlist = async () => {
-    if (!selectedWishlistId) return;
+    if (!selectedWishlistId) {
+      console.error("No wishlist selected");
+      return;
+    }
+
+    if (!hotelId) {
+      console.error("Hotel ID is missing:", hotelId);
+      setError("Hotel ID is missing");
+      return;
+    }
 
     try {
       setLoading(true);
+      setError(null);
+      console.log("Saving hotel to wishlist:", {
+        wishlistId: selectedWishlistId,
+        hotelId,
+      });
       await addHotelToWishlist(selectedWishlistId, hotelId);
+      console.log("Successfully saved hotel to wishlist");
       onSuccess?.();
       onClose();
-    } catch (err) {
-      setError("Failed to save hotel to wishlist");
-      console.error(err);
+    } catch (err: any) {
+      console.error("Error saving hotel to wishlist:", err);
+      const errorMessage =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to save hotel to wishlist";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -105,7 +148,9 @@ export default function WishlistDialog({
             <DialogTitle>Sign in required</DialogTitle>
           </DialogHeader>
           <div className="text-center py-4">
-            <p className="text-gray-600 mb-4">You need to sign in to save hotels to your wishlists.</p>
+            <p className="text-gray-600 mb-4">
+              You need to sign in to save hotels to your wishlists.
+            </p>
             <Button onClick={handleClose} className="w-full">
               Close
             </Button>
@@ -160,22 +205,31 @@ export default function WishlistDialog({
                             name="wishlist"
                             value={wishlist._id}
                             checked={selectedWishlistId === wishlist._id}
-                            onChange={(e) => setSelectedWishlistId(e.target.value)}
+                            onChange={(e) =>
+                              setSelectedWishlistId(e.target.value)
+                            }
                             className="sr-only"
                           />
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                            selectedWishlistId === wishlist._id
-                              ? "border-blue-500 bg-blue-500"
-                              : "border-gray-300"
-                          }`}>
+                          <div
+                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                              selectedWishlistId === wishlist._id
+                                ? "border-blue-500 bg-blue-500"
+                                : "border-gray-300"
+                            }`}
+                          >
                             {selectedWishlistId === wishlist._id && (
                               <Check className="w-2.5 h-2.5 text-white" />
                             )}
                           </div>
                           <div className="flex-1">
-                            <div className="font-medium text-gray-900">{wishlist.name}</div>
+                            <div className="font-medium text-gray-900">
+                              {wishlist.name}
+                            </div>
                             <div className="text-sm text-gray-500">
-                              {wishlist.hotelIds.length} saved {wishlist.hotelIds.length === 1 ? 'property' : 'properties'}
+                              {wishlist.hotelIds.length} saved{" "}
+                              {wishlist.hotelIds.length === 1
+                                ? "property"
+                                : "properties"}
                             </div>
                           </div>
                         </label>
@@ -200,7 +254,10 @@ export default function WishlistDialog({
               ) : (
                 <form onSubmit={handleCreateWishlist} className="space-y-3">
                   <div>
-                    <label htmlFor="wishlistName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="wishlistName"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Wishlist name
                     </label>
                     <Input

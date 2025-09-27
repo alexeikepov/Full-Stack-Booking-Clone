@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import type { Hotel } from "@/types/hotel";
+import { loadGoogleMaps } from "@/lib/googleMapsLoader";
 
 interface FullscreenMapModalProps {
   isOpen: boolean;
@@ -24,17 +24,7 @@ export default function FullscreenMapModal({
     let clusterer: MarkerClusterer | null = null;
     let markers: google.maps.Marker[] = [];
 
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as
-      | string
-      | undefined;
-    if (!apiKey) {
-      console.warn("Missing VITE_GOOGLE_MAPS_API_KEY env var; map disabled");
-      return;
-    }
-
-    const loader = new Loader({ apiKey, version: "weekly" });
-
-    loader.load().then(async () => {
+    loadGoogleMaps().then(async () => {
       if (!mapRef.current) return;
 
       map = new google.maps.Map(mapRef.current, {
