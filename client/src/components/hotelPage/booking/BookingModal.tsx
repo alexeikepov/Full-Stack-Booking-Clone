@@ -104,12 +104,20 @@ export default function BookingModal({
         adults: adults,
         children: children,
       },
-      checkIn:
-        from?.toISOString().split("T")[0] ||
-        new Date().toISOString().split("T")[0],
-      checkOut:
-        to?.toISOString().split("T")[0] ||
-        new Date(Date.now() + 86400000).toISOString().split("T")[0],
+      checkIn: (() => {
+        const date = from || new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      })(),
+      checkOut: (() => {
+        const date = to || new Date(Date.now() + 86400000);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      })(),
       guestInfo: {
         firstName: formData.firstName,
         lastName: formData.lastName,

@@ -1,9 +1,12 @@
 // src/pages/BookingsPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api, getReservations } from "@/lib/api";
+import { api, getReservations, getFriends, type Friend } from "@/lib/api";
 import globeImg from "@/img/MyBooking/Bookings.png";
 import { useNavigationTabsStore } from "@/stores/navigationTabs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { CheckCircle, Users } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 type Trip = {
   id: string;
@@ -16,19 +19,24 @@ type Trip = {
   pricePerNight: number;
   totalPrice: number;
   hotelId?: string;
+  sharedWith?: string[];
+  isShared?: boolean;
+  isOwner?: boolean;
 };
 
 type ApiPayload = {
   past: Trip[];
   cancelled: Trip[];
+  shared: Trip[];
 };
 
 //
 
 export default function BookingsPage() {
   const { setShowTabs } = useNavigationTabsStore();
-  const [tab, setTab] = useState<"past" | "cancelled">("past");
-  const [data, setData] = useState<ApiPayload>({ past: [], cancelled: [] });
+  const { user: currentUser } = useAuth();
+  const [tab, setTab] = useState<"past" | "cancelled" | "shared">("past");
+  const [data, setData] = useState<ApiPayload>({ past: [], cancelled: [], shared: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [upcoming, setUpcoming] = useState<Trip | null>(null);
@@ -48,11 +56,17 @@ export default function BookingsPage() {
           throw err;
         });
 
+        console.log('Raw reservations from server:', rows);
+
         const toIso = (d: any) => {
           try {
             const dt = new Date(d);
             if (isNaN(+dt)) return String(d ?? "");
-            return dt.toISOString().split("T")[0];
+            // Use timezone-safe date formatting
+            const year = dt.getFullYear();
+            const month = String(dt.getMonth() + 1).padStart(2, '0');
+            const day = String(dt.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
           } catch {
             return String(d ?? "");
           }
@@ -89,19 +103,39 @@ export default function BookingsPage() {
           pricePerNight: Number(r.pricePerNight) || 0,
           totalPrice: Number(r.totalPrice) || 0,
           hotelId: String(r.hotel?._id || r.hotel?.id || ""),
+          sharedWith: r.sharedWith || [],
+          isShared: r.sharedWith && r.sharedWith.length > 0,
+          isOwner: true, // Will be updated later
         }));
 
         const past: Trip[] = [];
         const cancelled: Trip[] = [];
+        const shared: Trip[] = [];
         const upcoming: Trip[] = [];
         for (const r of rows) {
           const trip = mapped.find((t) => t.id === String(r._id || r.id));
           if (!trip) continue;
+          
+          // Update isOwner based on current user
+          trip.isOwner = String(r.user) === String(currentUser?.id);
+          
           const status = String(r.status || "").toUpperCase();
           const ci = new Date(trip.from);
           const co = new Date(trip.to);
           co.setHours(0, 0, 0, 0);
-          if (status === "CANCELLED") {
+          
+          // Check if this is a shared reservation (current user is in sharedWith array)
+          const isSharedWithCurrentUser = trip.sharedWith && currentUser?.id && 
+            trip.sharedWith.some((sharedUserId: any) => 
+              String(sharedUserId) === String(currentUser.id)
+            );
+          
+          console.log('Reservation:', trip.id, 'isOwner:', trip.isOwner, 'sharedWith:', trip.sharedWith, 'currentUser:', currentUser?.id, 'isSharedWithCurrentUser:', isSharedWithCurrentUser);
+          
+          if (!trip.isOwner && isSharedWithCurrentUser) {
+            console.log('Adding to shared:', trip.id);
+            shared.push(trip);
+          } else if (status === "CANCELLED") {
             cancelled.push(trip);
           } else if (status === "COMPLETED" || +co < +today) {
             past.push(trip);
@@ -110,7 +144,7 @@ export default function BookingsPage() {
           }
         }
 
-        setData({ past, cancelled });
+        setData({ past, cancelled, shared });
         if (upcoming.length) {
           const nearest = upcoming.sort(
             (a, b) => +new Date(a.from) - +new Date(b.from)
@@ -122,7 +156,7 @@ export default function BookingsPage() {
       } catch (e: any) {
         if (e?.name !== "AbortError") {
           setError(e?.response?.data?.error || "Failed to load reservations");
-          setData({ past: DEMO_PAST, cancelled: DEMO_CANCELLED });
+          setData({ past: DEMO_PAST, cancelled: DEMO_CANCELLED, shared: [] });
         }
       } finally {
         setLoading(false);
@@ -137,6 +171,7 @@ export default function BookingsPage() {
         cancelled: prev.cancelled.concat(
           prev.past.find((t) => t.id === id) || []
         ),
+        shared: prev.shared,
       }));
     };
     window.addEventListener("reservation-cancelled", onCancelled as any);
@@ -147,7 +182,12 @@ export default function BookingsPage() {
   }, []);
 
   const trips = useMemo(
-    () => (tab === "past" ? data.past : data.cancelled),
+    () => {
+      if (tab === "past") return data.past;
+      if (tab === "cancelled") return data.cancelled;
+      if (tab === "shared") return data.shared;
+      return [];
+    },
     [tab, data]
   );
 
@@ -218,6 +258,17 @@ export default function BookingsPage() {
               }
             >
               Cancelled
+            </button>
+            <button
+              onClick={() => setTab("shared")}
+              className={
+                "rounded-full border px-6 py-3 text-[14px] font-medium " +
+                (tab === "shared"
+                  ? "border-[#0071c2] bg-[#e6f2ff] text-[#0071c2]"
+                  : "border-[#e6eaf0] bg-white text-[#1a1a1a] hover:bg-[#f6f7fb]")
+              }
+            >
+              Shared
             </button>
           </div>
 
@@ -552,12 +603,23 @@ function TripCard({ trip, canReview = false }: { trip: Trip; canReview?: boolean
           className="h-[84px] w-[80px] rounded object-cover ring-1 ring-black/10"
       />
       <div className="min-w-0">
+        <div className="flex items-center gap-2">
         <div className="truncate text-[15px] font-medium hover:underline">
           {trip.city}
+          </div>
+          {trip.isShared && (
+            <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+              <Users className="h-3 w-3" />
+              <span>Shared</span>
+            </div>
+          )}
         </div>
         <div className="mt-1 truncate text-[13px] text-black/60">
           {fmtRange(trip.from, trip.to)} · {trip.bookings} booking
           {trip.bookings === 1 ? "" : "s"}
+          {trip.isShared && !trip.isOwner && (
+            <span className="text-blue-600"> · Shared with you</span>
+          )}
         </div>
       </div>
       </div>
@@ -620,10 +682,31 @@ function EditReservationModal({
   const [to, setTo] = useState(trip.to);
   const [qty, setQty] = useState(trip.quantity);
   const [saving, setSaving] = useState(false);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<Friend[]>([]);
+  const [loadingFriends, setLoadingFriends] = useState(false);
+
+  useEffect(() => {
+    const loadFriends = async () => {
+      setLoadingFriends(true);
+      try {
+        const friendsList = await getFriends();
+        setFriends(friendsList);
+      } catch (error) {
+        console.error("Failed to load friends:", error);
+      } finally {
+        setLoadingFriends(false);
+      }
+    };
+    loadFriends();
+  }, []);
   
   const toLocalISO = (d: Date) => {
-    const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-    return z.toISOString().split("T")[0];
+    // Use timezone-safe date formatting
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
   const todayIso = (() => {
     const d = new Date();
@@ -664,6 +747,17 @@ function EditReservationModal({
   })();
   const isFromInPast = from < todayIso;
 
+  const toggleFriend = (friend: Friend) => {
+    setSelectedFriends(prev => {
+      const isSelected = prev.some(f => f._id === friend._id);
+      if (isSelected) {
+        return prev.filter(f => f._id !== friend._id);
+      } else {
+        return [...prev, friend];
+      }
+    });
+  };
+
   const save = async () => {
     setSaving(true);
     try {
@@ -671,6 +765,7 @@ function EditReservationModal({
         checkIn: from,
         checkOut: to,
         quantity: qty,
+        sharedWith: selectedFriends.map(f => f._id),
       });
       onSaved({ ...trip, from, to, quantity: qty, totalPrice: newTotal });
     } catch (e: any) {
@@ -682,7 +777,7 @@ function EditReservationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-5">
+      <div className="w-full max-w-lg rounded-lg bg-white p-5 max-h-[90vh] overflow-y-auto">
         <div className="mb-3 flex items-center justify-between">
           <div className="text-[18px] font-semibold">Edit reservation</div>
           <button onClick={onClose} className="h-8 w-8 rounded-full hover:bg-black/5">✕</button>
@@ -743,6 +838,49 @@ function EditReservationModal({
             <div className="mb-1 text-[13px] text-black/70">Rooms</div>
             <input type="number" min={1} value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))} className="w-full rounded border px-3 py-2" />
           </label>
+
+          {/* Friends Selection */}
+          <div className="block">
+            <div className="mb-2 flex items-center gap-2">
+              <Users className="h-4 w-4 text-gray-600" />
+              <div className="text-[13px] text-black/70">Share with friends (optional)</div>
+            </div>
+            {loadingFriends ? (
+              <div className="text-center text-sm text-gray-500 py-2">Loading friends...</div>
+            ) : friends.length === 0 ? (
+              <div className="text-center text-sm text-gray-500 py-2">No friends found</div>
+            ) : (
+              <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
+                {friends.map(friend => (
+                  <div
+                    key={friend._id}
+                    className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-md cursor-pointer"
+                    onClick={() => toggleFriend(friend)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {friend.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{friend.name}</p>
+                        <p className="text-xs text-gray-600">{friend.email}</p>
+                      </div>
+                    </div>
+                    {selectedFriends.some(f => f._id === friend._id) && (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {selectedFriends.length > 0 && (
+              <div className="mt-2 text-xs text-gray-600">
+                Selected {selectedFriends.length} friend{selectedFriends.length !== 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
 
           <div className="mt-2 rounded bg-[#f6f7fb] p-3 text-[13px]">
             <div>Original total: ₪{trip.totalPrice.toLocaleString()}</div>

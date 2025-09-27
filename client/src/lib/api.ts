@@ -647,3 +647,284 @@ export async function requestAdminRole() {
   const res = await api.post("/api/users/request-admin");
   return res.data as { ok: true; ownerApplicationStatus: string };
 }
+
+// ----- Friend Requests API -----
+export type FriendRequest = {
+  _id: string;
+  sender: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  receiver: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Friend = {
+  _id: string;
+  name: string;
+  email: string;
+};
+
+export type SendFriendRequestData = {
+  receiverId: string;
+};
+
+// Send a friend request
+export async function sendFriendRequest(data: SendFriendRequestData): Promise<FriendRequest> {
+  const res = await api.post("/api/friend-requests", data);
+  return res.data;
+}
+
+// Get friend requests (sent, received, or all)
+export async function getFriendRequests(type: 'sent' | 'received' | 'all' = 'all'): Promise<FriendRequest[]> {
+  const res = await api.get("/api/friend-requests", { params: { type } });
+  return res.data;
+}
+
+// Accept a friend request
+export async function acceptFriendRequest(requestId: string): Promise<FriendRequest> {
+  const res = await api.patch(`/api/friend-requests/${requestId}/accept`);
+  return res.data;
+}
+
+// Reject a friend request
+export async function rejectFriendRequest(requestId: string): Promise<FriendRequest> {
+  const res = await api.patch(`/api/friend-requests/${requestId}/reject`);
+  return res.data;
+}
+
+// Cancel a friend request (sender can cancel)
+export async function cancelFriendRequest(requestId: string): Promise<{ message: string }> {
+  const res = await api.delete(`/api/friend-requests/${requestId}`);
+  return res.data;
+}
+
+// Get friends list
+export async function getFriends(): Promise<Friend[]> {
+  const res = await api.get("/api/friend-requests/friends");
+  return res.data;
+}
+
+// Remove a friend
+export async function removeFriend(friendId: string): Promise<{ message: string }> {
+  const res = await api.delete(`/api/friend-requests/friends/${friendId}`);
+  return res.data;
+}
+
+// Search users
+export async function searchUsers(query: string): Promise<User[]> {
+  console.log("API: Searching users with query:", query);
+  const res = await api.get("/api/friend-requests/search", { params: { q: query } });
+  console.log("API: Search response:", res.data);
+  return res.data;
+}
+
+export type User = {
+  _id: string;
+  name: string;
+  email: string;
+  role?: string;
+};
+
+// Social Features Types
+export type SharedHotel = {
+  _id: string;
+  sender: User;
+  receiver: User;
+  hotel: {
+    _id: string;
+    name: string;
+    city: string;
+    images: string[];
+    rating: number;
+    price: number;
+  };
+  message?: string;
+  status: 'pending' | 'viewed' | 'accepted' | 'declined';
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Group = {
+  _id: string;
+  name: string;
+  description?: string;
+  creator: User;
+  members: User[];
+  hotel: {
+    _id: string;
+    name: string;
+    city: string;
+    images: string[];
+    rating: number;
+    price: number;
+  };
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+  children: number;
+  rooms: number;
+  status: 'planning' | 'booked' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Chat = {
+  _id: string;
+  participants: User[];
+  lastMessage?: Message;
+  lastMessageAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Message = {
+  _id: string;
+  chat: string;
+  sender: User;
+  content: string;
+  type: 'text' | 'image' | 'file' | 'hotel_share' | 'group_invite';
+  metadata?: {
+    hotelId?: string;
+    groupId?: string;
+    fileName?: string;
+    fileUrl?: string;
+  };
+  readBy: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SendSharedHotelData = {
+  receiverId: string;
+  hotelId: string;
+  message?: string;
+};
+
+export type CreateGroupData = {
+  name: string;
+  description?: string;
+  hotelId: string;
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+  children?: number;
+  rooms: number;
+  memberIds?: string[];
+};
+
+export type SendMessageData = {
+  content: string;
+  type?: 'text' | 'image' | 'file' | 'hotel_share' | 'group_invite';
+  metadata?: {
+    hotelId?: string;
+    groupId?: string;
+    fileName?: string;
+    fileUrl?: string;
+  };
+};
+
+// Shared Hotels API
+export async function shareHotel(data: SendSharedHotelData): Promise<SharedHotel> {
+  const res = await api.post("/api/shared-hotels", data);
+  return res.data;
+}
+
+export async function getSharedHotels(status: string = 'all'): Promise<SharedHotel[]> {
+  const res = await api.get("/api/shared-hotels", { params: { status } });
+  return res.data;
+}
+
+export async function getMySharedHotels(): Promise<SharedHotel[]> {
+  const res = await api.get("/api/shared-hotels/my-shares");
+  return res.data;
+}
+
+export async function updateSharedHotelStatus(sharedHotelId: string, status: string): Promise<SharedHotel> {
+  const res = await api.patch(`/api/shared-hotels/${sharedHotelId}/status`, { status });
+  return res.data;
+}
+
+export async function deleteSharedHotel(sharedHotelId: string): Promise<void> {
+  await api.delete(`/api/shared-hotels/${sharedHotelId}`);
+}
+
+// Groups API
+export async function createGroup(data: CreateGroupData): Promise<Group> {
+  const res = await api.post("/api/groups", data);
+  return res.data;
+}
+
+export async function getMyGroups(status: string = 'all'): Promise<Group[]> {
+  const res = await api.get("/api/groups", { params: { status } });
+  return res.data;
+}
+
+export async function getGroupById(groupId: string): Promise<Group> {
+  const res = await api.get(`/api/groups/${groupId}`);
+  return res.data;
+}
+
+export async function addMemberToGroup(groupId: string, memberId: string): Promise<Group> {
+  const res = await api.post(`/api/groups/${groupId}/members`, { memberId });
+  return res.data;
+}
+
+export async function removeMemberFromGroup(groupId: string, memberId: string): Promise<Group> {
+  const res = await api.delete(`/api/groups/${groupId}/members`, { data: { memberId } });
+  return res.data;
+}
+
+export async function updateGroupStatus(groupId: string, status: string): Promise<Group> {
+  const res = await api.patch(`/api/groups/${groupId}/status`, { status });
+  return res.data;
+}
+
+export async function deleteGroup(groupId: string): Promise<void> {
+  await api.delete(`/api/groups/${groupId}`);
+}
+
+// Chat API
+export async function getOrCreateChat(friendId: string): Promise<Chat> {
+  const res = await api.get(`/api/chats/with/${friendId}`);
+  return res.data;
+}
+
+export async function getMyChats(): Promise<Chat[]> {
+  const res = await api.get("/api/chats");
+  return res.data;
+}
+
+export async function getChatMessages(chatId: string, page: number = 1, limit: number = 50): Promise<Message[]> {
+  const res = await api.get(`/api/chats/${chatId}/messages`, { 
+    params: { page, limit } 
+  });
+  return res.data;
+}
+
+export async function sendMessage(chatId: string, data: SendMessageData): Promise<Message> {
+  const res = await api.post(`/api/chats/${chatId}/messages`, data);
+  return res.data;
+}
+
+export async function markMessagesAsRead(chatId: string): Promise<void> {
+  await api.patch(`/api/chats/${chatId}/read`);
+}
+
+export async function getUnreadCount(): Promise<{ unreadCount: number }> {
+  const res = await api.get("/api/chats/unread/count");
+  return res.data;
+}
+
+// Search hotels by query (for sharing)
+export async function searchHotelsByQuery(query: string): Promise<any[]> {
+  const res = await api.get("/api/hotels", { params: { q: query } });
+  return res.data;
+}

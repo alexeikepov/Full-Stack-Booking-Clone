@@ -26,6 +26,7 @@ import ComingSoonPage from "./pages/ComingSoonPage.tsx";
 import FlightsPage from "./pages/FlightsPage.tsx";
 import RewardsWalletPage from "./pages/RewardsWalletPage";
 import GeniusPage from "./pages/GeniusPage";
+import FriendsPage from "./pages/FriendsPage";
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       { path: "/reviews/write", element: <WriteReviewPage /> },
       { path: "/account/rewards", element: <RewardsWalletPage /> },
       { path: "/account/genius", element: <GeniusPage /> },
+      { path: "/account/friends", element: <FriendsPage /> },
       { path: "list-your-property", element: <ListYourPropertyPage /> },
       { path: "/partner-register", element: <PartnerRegisterPage /> },
 

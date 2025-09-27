@@ -21,6 +21,10 @@ import cron from "node-cron";
 import { ReservationModel } from "./src/models/Reservation";
 import searchHistoryRoutes from "./src/routes/searchHistory";
 import authRoutes from "./src/routes/auth";
+import friendRequestRoutes from "./src/routes/friendRequests";
+import sharedHotelRoutes from "./src/routes/sharedHotels";
+import groupRoutes from "./src/routes/groups";
+import chatRoutes from "./src/routes/chats";
 
 async function start() {
   const app = express();
@@ -61,6 +65,10 @@ async function start() {
   app.use("/api/admin-hotel", adminHotelRoutes);
   app.use("/api", trendingCitiesRoutes);
   app.use("/api", searchHistoryRoutes);
+  app.use("/api/friend-requests", friendRequestRoutes);
+  app.use("/api/shared-hotels", sharedHotelRoutes);
+  app.use("/api/groups", groupRoutes);
+  app.use("/api/chats", chatRoutes);
 
   // 404 + error handling
   app.use(notFound);

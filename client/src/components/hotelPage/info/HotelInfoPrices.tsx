@@ -41,11 +41,20 @@ export default function HotelInfoPrices({
     error: roomsError,
   } = useQuery({
     queryKey: ["hotelRooms", hotel.id || hotel._id?.$oid, from, to],
-    queryFn: () =>
-      getHotelRooms(hotel.id || hotel._id?.$oid, {
-        from: from?.toISOString().split("T")[0],
-        to: to?.toISOString().split("T")[0],
-      }),
+    queryFn: () => {
+      // Helper function to format date without timezone issues
+      const formatDateForAPI = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      return getHotelRooms(hotel.id || hotel._id?.$oid, {
+        from: from ? formatDateForAPI(from) : undefined,
+        to: to ? formatDateForAPI(to) : undefined,
+      });
+    },
     enabled: Boolean(hotel.id || hotel._id?.$oid),
     retry: 1,
   });
