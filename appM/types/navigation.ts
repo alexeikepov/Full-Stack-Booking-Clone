@@ -6,27 +6,31 @@ export type RootStackParamList = {
   MainTabs: undefined;
   PropertyListScreen: undefined;
   PropertyDetailsScreen: {
-    propertyData: {
-      propertyName: string;
-      dates: string;
-      price: string;
-      status: string;
-      location: string;
-      details: {
-        confirmationNumber: string;
-        pin: string;
-        checkIn: string;
-        checkOut: string;
-        address: string;
-        roomType: string;
-        includedExtras: string;
-        breakfastIncluded: boolean;
-        nonRefundable: boolean;
-        totalPrice: string;
-        shareOptions: string[];
-        contactNumber: string;
-      };
-    };
+    propertyData:
+      | {
+          propertyName: string;
+          dates: string;
+          price: string;
+          status: string;
+          location: string;
+          imageSource?: any;
+          images?: any[];
+          details: {
+            confirmationNumber: string;
+            pin: string;
+            checkIn: string;
+            checkOut: string;
+            address: string;
+            roomType: string;
+            includedExtras: string;
+            breakfastIncluded: boolean;
+            nonRefundable: boolean;
+            totalPrice: string;
+            shareOptions: string[];
+            contactNumber: string;
+          };
+        }
+      | import("../components/PropertyCard").Property;
   };
 };
 

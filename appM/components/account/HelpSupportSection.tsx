@@ -11,7 +11,6 @@ import {
   StyleSheet,
   Text,
   TextStyle,
-  TouchableOpacity,
   UIManager,
   View,
   ViewStyle,
@@ -395,15 +394,16 @@ export default function HelpSupport({
                 Frequently asked questions
               </Text>
               <ScrollView
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
                   paddingHorizontal: 16,
-                  marginTop: 20,
+                  paddingVertical: 20,
+                  alignItems: "center",
                 }}
+                style={{ marginTop: 0 }}
               >
-                {Object.keys(faqData).map((tab) => (
+                {Object.keys(faqData).map((tab, index) => (
                   <Pressable
                     key={tab}
                     onPress={() => setActiveTab(tab)}
@@ -413,6 +413,9 @@ export default function HelpSupport({
                         borderBottomWidth: activeTab === tab ? 2 : 0,
                         borderBottomColor:
                           activeTab === tab ? "#007AFF" : "transparent",
+                        marginRight:
+                          index < Object.keys(faqData).length - 1 ? 20 : 0,
+                        paddingHorizontal: 12,
                       },
                     ]}
                   >
@@ -561,18 +564,7 @@ export default function HelpSupport({
         backgroundColor: colors.background,
       }}
     >
-      <View style={styles.modalHeader}>
-        <TouchableOpacity onPress={onBack} style={styles.closeButton}>
-          <Ionicons name="chevron-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text
-          style={[styles.modalHeaderText, { flex: 1 }, { textAlign: "center" }]}
-        >
-          Help Center
-        </Text>
-      </View>
-
-      <AccountSection title="">
+      <AccountSection title="Help center">
         {dynamicItems.map((item) => (
           <AccountItem
             key={item.title}

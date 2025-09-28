@@ -1,7 +1,10 @@
 // path: src/components/account/PaymentInfoSection.tsx
 import { JSX, useEffect, useState } from "react";
 import {
+  Alert,
   BackHandler,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -11,6 +14,7 @@ import {
   TextInput,
   TextStyle,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
   ViewStyle,
 } from "react-native";
@@ -188,6 +192,13 @@ export default function PaymentInfoSection(): JSX.Element {
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [name, setName] = useState("");
+  const [errors, setErrors] = useState<{
+    cardNumber?: string;
+    expiry?: string;
+    cvc?: string;
+    name?: string;
+  }>({});
+  const [isFormValid, setIsFormValid] = useState(false);
   const insets = useSafeAreaInsets();
   // Android back handler
   useEffect(() => {
@@ -208,6 +219,13 @@ export default function PaymentInfoSection(): JSX.Element {
   const [justSavedCard, setJustSavedCard] = useState(false);
   const handleSaveCard = (details: any) => {
     setCardDetails(details);
+    // reset form fields after saving
+    setCardNumber("");
+    setExpiry("");
+    setCvc("");
+    setName("");
+    setErrors({});
+    setIsFormValid(false);
     setShowSavedModal(true);
     setJustSavedCard(true);
     setTimeout(() => {
@@ -217,6 +235,84 @@ export default function PaymentInfoSection(): JSX.Element {
         setJustSavedCard(false);
       }, 100);
     }, 1200);
+  };
+  // Validation helpers
+  const luhnCheck = (num: string) => {
+    let sum = 0;
+    let shouldDouble = false;
+    for (let i = num.length - 1; i >= 0; i--) {
+      let digit = parseInt(num.charAt(i), 10);
+      if (shouldDouble) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+      }
+      sum += digit;
+      shouldDouble = !shouldDouble;
+    }
+    return sum % 10 === 0;
+  };
+  const validateAll = () => {
+    const newErrors: any = {};
+    const digits = cardNumber.replace(/\D/g, "");
+    // Accept any 16-digit entry as valid (wildcard requirement).
+    // For other lengths (13-19), require passing the Luhn check.
+    if (digits.length === 16) {
+      // valid: 16 digits — skip Luhn check
+    } else if (!/^[0-9]{13,19}$/.test(digits) || !luhnCheck(digits)) {
+      newErrors.cardNumber = "Enter a valid card number";
+    }
+    if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiry)) {
+      newErrors.expiry = "Use MM/YY format";
+    } else {
+      const parts = expiry.split("/");
+      const m = parseInt(parts[0], 10);
+      const y = 2000 + parseInt(parts[1], 10);
+      const expDate = new Date(y, m - 1, 1);
+      const now = new Date();
+      expDate.setMonth(expDate.getMonth() + 1);
+      if (expDate <= now) newErrors.expiry = "Card has expired";
+    }
+    if (!/^[0-9]{3,4}$/.test(cvc)) {
+      newErrors.cvc = "Enter 3 or 4 digit CVC";
+    }
+    if (!name || name.trim().length < 2) {
+      newErrors.name = "Enter the name on card";
+    }
+    setErrors(newErrors);
+    setIsFormValid(Object.keys(newErrors).length === 0);
+  };
+  useEffect(() => {
+    validateAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardNumber, expiry, cvc, name]);
+
+  // Format card number: insert a space every 4 digits and limit to 19 digits
+  const formatCardNumber = (input: string) => {
+    // strip non-digits
+    const digits = input.replace(/\D/g, "").slice(0, 16); // up to 19 digits
+    // group into 4s
+    const groups: string[] = [];
+    for (let i = 0; i < digits.length; i += 4) {
+      groups.push(digits.slice(i, i + 4));
+    }
+    return groups.join(" ");
+  };
+  const handleRemoveCard = () => {
+    if (!cardDetails) return;
+    Alert.alert(
+      "Remove card",
+      "Are you sure you want to remove this saved card? We promise we will not do anything bad with it :(, trust us...",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () => {
+            setCardDetails(null);
+          },
+        },
+      ],
+    );
   };
   // Modals
   const MainModal = activeModal === "main" && (
@@ -648,42 +744,17 @@ export default function PaymentInfoSection(): JSX.Element {
             Add card
           </Text>
         </View>
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
         >
-          <View style={styles.cardFormContainer}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>
-              Card number
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-              ]}
-              keyboardType="numeric"
-              value={cardNumber}
-              onChangeText={setCardNumber}
-            />
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
             >
-              <View style={{ flex: 1, marginRight: 8 }}>
+              <View style={[styles.cardFormContainer, { paddingTop: 8 }]}>
                 <Text style={[styles.label, { color: colors.textSecondary }]}>
-                  Expiration date
-                </Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    { backgroundColor: colors.card, color: colors.text },
-                  ]}
-                  placeholder="MM/YY"
-                  value={expiry}
-                  onChangeText={setExpiry}
-                />
-              </View>
-              <View style={{ flex: 1, marginLeft: 8 }}>
-                <Text style={[styles.label, { color: colors.textSecondary }]}>
-                  CVC
+                  Card number
                 </Text>
                 <TextInput
                   style={[
@@ -691,30 +762,112 @@ export default function PaymentInfoSection(): JSX.Element {
                     { backgroundColor: colors.card, color: colors.text },
                   ]}
                   keyboardType="numeric"
-                  value={cvc}
-                  onChangeText={setCvc}
+                  value={cardNumber}
+                  onChangeText={(text) => setCardNumber(formatCardNumber(text))}
+                  placeholder="1234 5678 9012 3456"
+                  maxLength={20} // 19 digits + up to 4 spaces
                 />
+                {errors.cardNumber && (
+                  <Text style={{ color: "#ff3b30", marginBottom: 8 }}>
+                    {errors.cardNumber}
+                  </Text>
+                )}
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text
+                      style={[styles.label, { color: colors.textSecondary }]}
+                    >
+                      Expiration date
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.input,
+                        { backgroundColor: colors.card, color: colors.text },
+                      ]}
+                      placeholder="MM/YY"
+                      value={expiry}
+                      onChangeText={(text) =>
+                        setExpiry(
+                          text
+                            .replace(/[^0-9\/]/g, "")
+                            .replace(/^(\d{2})(\d)/, "$1/$2"),
+                        )
+                      }
+                      maxLength={5}
+                      keyboardType="numeric"
+                    />
+                    {errors.expiry && (
+                      <Text style={{ color: "#ff3b30", marginBottom: 8 }}>
+                        {errors.expiry}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 8 }}>
+                    <Text
+                      style={[styles.label, { color: colors.textSecondary }]}
+                    >
+                      CVC
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.input,
+                        { backgroundColor: colors.card, color: colors.text },
+                      ]}
+                      keyboardType="numeric"
+                      value={cvc}
+                      onChangeText={(text) => setCvc(text.replace(/\D/g, ""))}
+                      maxLength={4}
+                      placeholder="123"
+                    />
+                    {errors.cvc && (
+                      <Text style={{ color: "#ff3b30", marginBottom: 8 }}>
+                        {errors.cvc}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+
+                <Text style={[styles.label, { color: colors.textSecondary }]}>
+                  Name on card
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    { backgroundColor: colors.card, color: colors.text },
+                  ]}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Full name"
+                />
+                {errors.name && (
+                  <Text style={{ color: "#ff3b30", marginBottom: 8 }}>
+                    {errors.name}
+                  </Text>
+                )}
+
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    { backgroundColor: isFormValid ? "#007AFF" : "#9bbcff" },
+                    { paddingVertical: 14 },
+                  ]}
+                  onPress={() =>
+                    handleSaveCard({ cardNumber, expiry, cvc, name })
+                  }
+                  disabled={!isFormValid}
+                >
+                  <Text style={styles.buttonText}>Save card</Text>
+                </TouchableOpacity>
               </View>
-            </View>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>
-              Name on card
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: colors.card, color: colors.text },
-              ]}
-              value={name}
-              onChangeText={setName}
-            />
-            <Pressable
-              style={styles.button}
-              onPress={() => handleSaveCard({ cardNumber, expiry, cvc, name })}
-            >
-              <Text style={styles.buttonText}>Save card</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </Modal>
   );
@@ -770,8 +923,9 @@ export default function PaymentInfoSection(): JSX.Element {
                   fontSize: 16,
                 }}
               >
-                Saved Card
+                Saved Card Details:
               </Text>
+              <Text style={{ fontSize: 4 }}>( פראיירים )</Text>
               <Text style={{ color: colors.text, marginTop: 8 }}>
                 Card Number: **** **** **** {cardDetails.cardNumber?.slice(-4)}
               </Text>
@@ -781,6 +935,21 @@ export default function PaymentInfoSection(): JSX.Element {
               <Text style={{ color: colors.text }}>
                 Name: {cardDetails.name}
               </Text>
+              <TouchableOpacity
+                onPress={handleRemoveCard}
+                style={{
+                  marginTop: 12,
+                  alignSelf: "flex-end",
+                  backgroundColor: "#ff3b30",
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  borderRadius: 6,
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "600" }}>
+                  Remove card
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>

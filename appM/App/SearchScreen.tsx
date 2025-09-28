@@ -1,12 +1,17 @@
+import { AntDesign, Fontisto } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
+  Linking,
   Modal,
+  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -20,7 +25,6 @@ import GeniusLoyaltyModal from "../components/account/GeniusLoyaltyModal";
 import HelpSupportSection, {
   HelpSupportSectionProps,
 } from "../components/account/HelpSupportSection";
-import ContinueSearchCard from "../components/search/ContinueSearchCard";
 import SearchBar from "../components/search/SearchBar";
 import TabSelector from "../components/search/TabSelector";
 import { useTheme } from "../hooks/ThemeContext";
@@ -41,10 +45,825 @@ type ThemeColors = {
   blue?: string; // Ensure blue is part of ThemeColors
   [key: string]: string | undefined;
 };
+
+type ModalType =
+  | "location"
+  | "dates"
+  | "guests"
+  | "sort"
+  | "filter"
+  | "map"
+  | null;
+
+type StyleProp = ReturnType<typeof createStyles>;
+
+type GuestData = {
+  rooms: number;
+  adults: number;
+  children: number;
+  childAges: number[];
+  pets: boolean;
+};
+
+type ModalProps = {
+  isVisible: boolean;
+  onClose: () => void;
+  styles: StyleProp;
+  selectedLocation?: string;
+  setSelectedLocation?: (location: string) => void;
+  selectedDates?: { checkIn: Date | null; checkOut: Date | null };
+  setSelectedDates?: (dates: {
+    checkIn: Date | null;
+    checkOut: Date | null;
+  }) => void;
+  selectedGuests?: GuestData;
+  setSelectedGuests?: (guests: GuestData) => void;
+  selectedSortOption?: string;
+  setSelectedSortOption?: (option: string) => void;
+  selectedFilters?: Set<string>;
+  setSelectedFilters?: (filters: Set<string>) => void;
+  onOpenFilterModal?: () => void;
+};
+
+const LocationModal = ({
+  isVisible,
+  onClose,
+  styles,
+  selectedLocation = "Enter your destination",
+  setSelectedLocation,
+}: ModalProps) => {
+  const [searchText, setSearchText] = useState("");
+
+  const destinations = [
+    "Rome, Italy",
+    "Paris, France",
+    "London, UK",
+    "Barcelona, Spain",
+    "Amsterdam, Netherlands",
+    "Berlin, Germany",
+    "Vienna, Austria",
+    "Prague, Czech Republic",
+    "Budapest, Hungary",
+    "Venice, Italy",
+    "Florence, Italy",
+    "Milan, Italy",
+    "Madrid, Spain",
+    "Lisbon, Portugal",
+    "Athens, Greece",
+    "Santorini, Greece",
+    "Istanbul, Turkey",
+    "Dubai, UAE",
+    "Bangkok, Thailand",
+    "Tokyo, Japan",
+    "Kyoto, Japan",
+    "Seoul, South Korea",
+    "Singapore",
+    "Hong Kong",
+    "Bali, Indonesia",
+    "Sydney, Australia",
+    "Melbourne, Australia",
+    "Auckland, New Zealand",
+    "Mumbai, India",
+    "New Delhi, India",
+    "Goa, India",
+    "Cairo, Egypt",
+    "Marrakech, Morocco",
+    "Cape Town, South Africa",
+    "New York, USA",
+    "Los Angeles, USA",
+    "San Francisco, USA",
+    "Las Vegas, USA",
+    "Miami, USA",
+    "Chicago, USA",
+    "Toronto, Canada",
+    "Vancouver, Canada",
+    "Montreal, Canada",
+    "Mexico City, Mexico",
+    "Cancun, Mexico",
+    "Rio de Janeiro, Brazil",
+    "São Paulo, Brazil",
+    "Buenos Aires, Argentina",
+    "Lima, Peru",
+    "Bogotá, Colombia",
+  ];
+
+  const filteredDestinations = destinations.filter((destination) =>
+    destination.toLowerCase().includes(searchText.toLowerCase()),
+  );
+
+  const handleDestinationPress = (destination: string) => {
+    if (setSelectedLocation) {
+      setSelectedLocation(destination);
+    }
+    onClose();
+  };
+
+  if (!isVisible) return null;
+  return (
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      presentationStyle="overFullScreen"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalContainer} pointerEvents="box-none">
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <AntDesign
+            name="arrow-left"
+            size={24}
+            color={styles.secondaryText.color}
+          />
+        </TouchableOpacity>
+        <TextInput
+          style={styles.modalSearchInput}
+          placeholder="Enter destinations"
+          placeholderTextColor={styles.searchInputText.color}
+          value={searchText}
+          onChangeText={setSearchText}
+          autoFocus={true}
+        />
+        <ScrollView>
+          <Text style={styles.modalTitle}>
+            {searchText ? "Search results" : "Popular destinations"}
+          </Text>
+          {filteredDestinations.map((destination, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => handleDestinationPress(destination)}
+              style={styles.modalItemContainer}
+            >
+              <Text style={styles.modalItem}>{destination}</Text>
+            </TouchableOpacity>
+          ))}
+          {filteredDestinations.length === 0 && (
+            <Text style={styles.noResults}>No destinations found</Text>
+          )}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+};
+
+const DatesModal = ({
+  isVisible,
+  onClose,
+  styles,
+  selectedDates,
+  setSelectedDates,
+}: ModalProps) => {
+  const [activeTab, setActiveTab] = useState<"calendar" | "flexible">(
+    "calendar",
+  );
+  const [checkInDate, setCheckInDate] = useState<Date | null>(
+    selectedDates?.checkIn || null,
+  );
+  const [checkOutDate, setCheckOutDate] = useState<Date | null>(
+    selectedDates?.checkOut || null,
+  );
+  const [flexibleDuration, setFlexibleDuration] = useState<
+    "weekend" | "week" | "month" | "other"
+  >("weekend");
+  const [flexibleMonth, setFlexibleMonth] = useState<string>("Oct");
+
+  const generateCalendarMonths = () => {
+    const months = [];
+    const currentDate = new Date();
+
+    for (let i = 0; i < 12; i++) {
+      const monthDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + i,
+        1,
+      );
+      const monthName = monthDate.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
+      const daysInMonth = new Date(
+        monthDate.getFullYear(),
+        monthDate.getMonth() + 1,
+        0,
+      ).getDate();
+      const firstDayOfMonth = monthDate.getDay();
+
+      months.push({
+        name: monthName,
+        year: monthDate.getFullYear(),
+        month: monthDate.getMonth(),
+        daysInMonth,
+        firstDayOfMonth,
+      });
+    }
+    return months;
+  };
+
+  const months = generateCalendarMonths();
+
+  const handleDatePress = (year: number, month: number, day: number) => {
+    const selectedDate = new Date(year, month, day);
+
+    if (!checkInDate || (checkInDate && checkOutDate)) {
+      // Start new selection
+      setCheckInDate(selectedDate);
+      setCheckOutDate(null);
+    } else if (checkInDate && !checkOutDate) {
+      // Set check-out date
+      if (selectedDate > checkInDate) {
+        setCheckOutDate(selectedDate);
+      } else {
+        // If selected date is before check-in, make it new check-in
+        setCheckInDate(selectedDate);
+        setCheckOutDate(null);
+      }
+    }
+  };
+
+  const isDateInRange = (year: number, month: number, day: number) => {
+    if (!checkInDate || !checkOutDate) return false;
+    const date = new Date(year, month, day);
+    return date >= checkInDate && date <= checkOutDate;
+  };
+
+  const isDateSelected = (year: number, month: number, day: number) => {
+    const date = new Date(year, month, day);
+    return (
+      (checkInDate && date.getTime() === checkInDate.getTime()) ||
+      (checkOutDate && date.getTime() === checkOutDate.getTime())
+    );
+  };
+
+  const handleApply = () => {
+    if (
+      activeTab === "calendar" &&
+      checkInDate &&
+      checkOutDate &&
+      setSelectedDates
+    ) {
+      setSelectedDates({ checkIn: checkInDate, checkOut: checkOutDate });
+    } else if (activeTab === "flexible" && setSelectedDates) {
+      // For flexible dates, we'll set some example dates
+      const startDate = new Date(2025, 9, 1); // October 1st
+      const endDate = new Date(2025, 9, 7); // October 7th
+      setSelectedDates({ checkIn: startDate, checkOut: endDate });
+    }
+    onClose();
+  };
+
+  const renderCalendarView = () => (
+    <ScrollView style={{ flex: 1, paddingHorizontal: 15 }}>
+      {months.map((monthData, monthIndex) => (
+        <View key={monthIndex} style={{ marginBottom: 30 }}>
+          <Text style={styles.monthHeader}>{monthData.name}</Text>
+          <View style={styles.calendarGrid}>
+            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+              <Text key={day} style={styles.calendarDayHeader}>
+                {day}
+              </Text>
+            ))}
+            {/* Empty cells for days before the first day of the month */}
+            {Array.from({ length: monthData.firstDayOfMonth }, (_, index) => (
+              <View key={`empty-${index}`} style={styles.calendarDay} />
+            ))}
+            {/* Days of the month */}
+            {Array.from({ length: monthData.daysInMonth }, (_, index) => {
+              const day = index + 1;
+              const isSelected = isDateSelected(
+                monthData.year,
+                monthData.month,
+                day,
+              );
+              const inRange = isDateInRange(
+                monthData.year,
+                monthData.month,
+                day,
+              );
+
+              return (
+                <TouchableOpacity
+                  key={day}
+                  style={[
+                    styles.calendarDay,
+                    isSelected && styles.selectedDay,
+                    inRange && !isSelected && styles.rangeDay,
+                  ]}
+                  onPress={() =>
+                    handleDatePress(monthData.year, monthData.month, day)
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.calendarDayText,
+                      isSelected && styles.selectedDayText,
+                      inRange && !isSelected && styles.rangeDayText,
+                    ]}
+                  >
+                    {day}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
+  const renderFlexibleView = () => (
+    <ScrollView style={{ flex: 1, paddingHorizontal: 15 }}>
+      <Text style={styles.flexibleSectionTitle}>
+        How long do you want to stay?
+      </Text>
+      <View style={styles.durationRow}>
+        {[
+          { key: "weekend", label: "Weekend" },
+          { key: "week", label: "Week" },
+          { key: "month", label: "Month" },
+          { key: "other", label: "Other" },
+        ].map((option) => (
+          <TouchableOpacity
+            key={option.key}
+            style={[
+              styles.durationButton,
+              flexibleDuration === option.key && styles.durationButtonActive,
+            ]}
+            onPress={() => setFlexibleDuration(option.key as any)}
+          >
+            <Text
+              style={[
+                styles.durationButtonText,
+                flexibleDuration === option.key &&
+                  styles.durationButtonTextActive,
+              ]}
+            >
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Text style={styles.flexibleSectionTitle}>When do you want to go?</Text>
+      <Text style={styles.flexibleSubtitle}>Select up to 3 months</Text>
+
+      <View style={styles.monthsRow}>
+        {["Sep", "Oct", "Nov", "Dec"].map((month) => (
+          <TouchableOpacity
+            key={month}
+            style={[
+              styles.monthButton,
+              flexibleMonth === month && styles.monthButtonActive,
+            ]}
+            onPress={() => setFlexibleMonth(month)}
+          >
+            <AntDesign
+              name="calendar"
+              size={24}
+              color={
+                flexibleMonth === month
+                  ? styles.monthButtonTextActive.color
+                  : styles.monthButtonText.color
+              }
+            />
+            <Text
+              style={[
+                styles.monthButtonText,
+                flexibleMonth === month && styles.monthButtonTextActive,
+              ]}
+            >
+              {month}
+            </Text>
+            <Text
+              style={[
+                styles.monthButtonYear,
+                flexibleMonth === month && styles.monthButtonTextActive,
+              ]}
+            >
+              2025
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.flexibleResult}>
+        <Text style={styles.flexibleResultText}>
+          {flexibleDuration.charAt(0).toUpperCase() + flexibleDuration.slice(1)}{" "}
+          in {flexibleMonth}
+        </Text>
+      </View>
+    </ScrollView>
+  );
+
+  if (!isVisible) return null;
+
+  return (
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      presentationStyle="overFullScreen"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalContainer}>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <AntDesign
+            name="arrow-left"
+            size={24}
+            color={styles.secondaryText.color}
+          />
+        </TouchableOpacity>
+
+        <View style={styles.datesHeader}>
+          <Text style={styles.datesHeaderText}>Select dates</Text>
+        </View>
+
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "calendar" && styles.activeTab]}
+            onPress={() => setActiveTab("calendar")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "calendar" && styles.activeTabText,
+              ]}
+            >
+              Calendar
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "flexible" && styles.activeTab]}
+            onPress={() => setActiveTab("flexible")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "flexible" && styles.activeTabText,
+              ]}
+            >
+              I am flexible
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {activeTab === "calendar" ? renderCalendarView() : renderFlexibleView()}
+
+        {checkInDate && checkOutDate && activeTab === "calendar" && (
+          <View style={styles.selectedDatesInfo}>
+            <Text style={styles.selectedDatesText}>
+              {checkInDate.toDateString()} - {checkOutDate.toDateString()}
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity onPress={handleApply} style={styles.applyButton}>
+          <Text style={styles.applyButtonText}>Select dates</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  );
+};
+
+const GuestsModal = ({
+  isVisible,
+  onClose,
+  styles,
+  selectedGuests = {
+    rooms: 1,
+    adults: 2,
+    children: 0,
+    childAges: [],
+    pets: false,
+  },
+  setSelectedGuests,
+}: ModalProps) => {
+  const [rooms, setRooms] = useState(selectedGuests.rooms);
+  const [adults, setAdults] = useState(selectedGuests.adults);
+  const [children, setChildren] = useState(selectedGuests.children);
+  const [childAges, setChildAges] = useState(selectedGuests.childAges);
+  const [pets, setPets] = useState(selectedGuests.pets);
+  const [ageModalVisible, setAgeModalVisible] = useState(false);
+  const [selectedChildIndex, setSelectedChildIndex] = useState<number>(0);
+
+  const handleRoomsChange = (increment: boolean) => {
+    const newValue = increment ? rooms + 1 : Math.max(1, rooms - 1);
+    setRooms(newValue);
+  };
+
+  const handleAdultsChange = (increment: boolean) => {
+    const newValue = increment ? adults + 1 : Math.max(1, adults - 1);
+    setAdults(newValue);
+  };
+
+  const handleChildrenChange = (increment: boolean) => {
+    const newValue = increment ? children + 1 : Math.max(0, children - 1);
+    setChildren(newValue);
+
+    // Update child ages array
+    if (increment) {
+      setChildAges([...childAges, 0]);
+    } else if (newValue < children) {
+      setChildAges(childAges.slice(0, newValue));
+    }
+  };
+
+  const handleChildAgeChange = (index: number, age: number) => {
+    const newAges = [...childAges];
+    newAges[index] = age;
+    setChildAges(newAges);
+  };
+
+  const openAgeModal = (childIndex: number) => {
+    setSelectedChildIndex(childIndex);
+    setAgeModalVisible(true);
+  };
+
+  const handleAgeSelect = (age: number) => {
+    if (age === -1) return; // "Select" option, do nothing
+    handleChildAgeChange(selectedChildIndex, age);
+  };
+
+  const getAgeDisplayText = (age: number | undefined) => {
+    if (age === undefined) return "Select age";
+    if (age === 0) return "< 1 year old";
+    return `${age} year${age === 1 ? "" : "s"} old`;
+  };
+
+  const handleApply = () => {
+    if (setSelectedGuests) {
+      setSelectedGuests({
+        rooms,
+        adults,
+        children,
+        childAges,
+        pets,
+      });
+    }
+    onClose();
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      presentationStyle="overFullScreen"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalContainer}>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <AntDesign
+            name="close"
+            size={24}
+            color={styles.secondaryText.color}
+          />
+        </TouchableOpacity>
+
+        <ScrollView>
+          <Text style={styles.modalHeaderTitle}>Select rooms and guests</Text>
+
+          {/* Rooms */}
+          <View style={styles.guestRow}>
+            <Text style={styles.guestLabel}>Rooms</Text>
+            <View style={styles.stepper}>
+              <TouchableOpacity
+                style={[
+                  styles.stepperButton,
+                  rooms <= 1 && styles.stepperButtonDisabled,
+                ]}
+                onPress={() => handleRoomsChange(false)}
+                disabled={rooms <= 1}
+              >
+                <AntDesign
+                  name="minus"
+                  size={16}
+                  color={
+                    rooms <= 1
+                      ? styles.stepperButtonTextDisabled.color
+                      : styles.stepperButtonText.color
+                  }
+                />
+              </TouchableOpacity>
+              <Text style={styles.stepperText}>{rooms}</Text>
+              <TouchableOpacity
+                style={styles.stepperButton}
+                onPress={() => handleRoomsChange(true)}
+              >
+                <AntDesign
+                  name="plus"
+                  size={16}
+                  color={styles.stepperButtonText.color}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Adults */}
+          <View style={styles.guestRow}>
+            <Text style={styles.guestLabel}>Adults</Text>
+            <View style={styles.stepper}>
+              <TouchableOpacity
+                style={[
+                  styles.stepperButton,
+                  adults <= 1 && styles.stepperButtonDisabled,
+                ]}
+                onPress={() => handleAdultsChange(false)}
+                disabled={adults <= 1}
+              >
+                <AntDesign
+                  name="minus"
+                  size={16}
+                  color={
+                    adults <= 1
+                      ? styles.stepperButtonTextDisabled.color
+                      : styles.stepperButtonText.color
+                  }
+                />
+              </TouchableOpacity>
+              <Text style={styles.stepperText}>{adults}</Text>
+              <TouchableOpacity
+                style={styles.stepperButton}
+                onPress={() => handleAdultsChange(true)}
+              >
+                <AntDesign
+                  name="plus"
+                  size={16}
+                  color={styles.stepperButtonText.color}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Children */}
+          <View style={styles.guestRow}>
+            <View style={styles.guestLabelContainer}>
+              <Text style={styles.guestLabel}>Children</Text>
+              <Text style={styles.guestSubLabel}>0 – 17 years old</Text>
+            </View>
+            <View style={styles.stepper}>
+              <TouchableOpacity
+                style={[
+                  styles.stepperButton,
+                  children <= 0 && styles.stepperButtonDisabled,
+                ]}
+                onPress={() => handleChildrenChange(false)}
+                disabled={children <= 0}
+              >
+                <AntDesign
+                  name="minus"
+                  size={16}
+                  color={
+                    children <= 0
+                      ? styles.stepperButtonTextDisabled.color
+                      : styles.stepperButtonText.color
+                  }
+                />
+              </TouchableOpacity>
+              <Text style={styles.stepperText}>{children}</Text>
+              <TouchableOpacity
+                style={styles.stepperButton}
+                onPress={() => handleChildrenChange(true)}
+              >
+                <AntDesign
+                  name="plus"
+                  size={16}
+                  color={styles.stepperButtonText.color}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.guestRow}>
+            <Text style={styles.guestLabel}>Traveling with pets?</Text>
+            <TouchableOpacity
+              style={[styles.toggleSwitch, pets && styles.toggleSwitchActive]}
+              onPress={() => setPets(!pets)}
+            >
+              <View
+                style={[styles.toggleHandle, pets && styles.toggleHandleActive]}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {children > 0 && (
+            <View style={styles.childAgesSection}>
+              <Text style={styles.childAgesSectionTitle}>
+                Age of children at check-out
+              </Text>
+              <Text style={styles.childAgesSectionSubtitle}>
+                Add the age of each child to get the best match for beds, room
+                size, and special prices.
+              </Text>
+
+              {Array.from({ length: children }, (_, index) => (
+                <View key={index} style={styles.childAgeRow}>
+                  <Text style={styles.childAgeLabel}>
+                    Child {index + 1}
+                    <Text style={styles.required}>*</Text>
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.ageDropdownContainer}
+                    onPress={() => openAgeModal(index)}
+                  >
+                    <Text style={styles.ageDropdownText}>
+                      {getAgeDisplayText(childAges[index])}
+                    </Text>
+                    <AntDesign
+                      name="down"
+                      size={16}
+                      color={styles.ageDropdownArrow.color}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </ScrollView>
+
+        <TouchableOpacity onPress={handleApply} style={styles.applyButton}>
+          <Text style={styles.applyButtonText}>Apply</Text>
+        </TouchableOpacity>
+
+        <AgeSelectionModal
+          isVisible={ageModalVisible}
+          onClose={() => setAgeModalVisible(false)}
+          onSelectAge={handleAgeSelect}
+          styles={styles}
+          childNumber={selectedChildIndex + 1}
+        />
+      </View>
+    </Modal>
+  );
+};
+
+const AgeSelectionModal = ({
+  isVisible,
+  onClose,
+  onSelectAge,
+  styles,
+  childNumber,
+}: {
+  isVisible: boolean;
+  onClose: () => void;
+  onSelectAge: (age: number) => void;
+  styles: StyleProp;
+  childNumber: number;
+}) => {
+  const handleAgeSelect = (age: number) => {
+    onSelectAge(age);
+    onClose();
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <View style={styles.ageModalContainer}>
+        <View style={styles.ageModalHeader}>
+          <Text style={styles.ageModalTitle}>Child {childNumber}</Text>
+        </View>
+
+        <ScrollView style={styles.ageList}>
+          <TouchableOpacity
+            style={styles.ageItem}
+            onPress={() => handleAgeSelect(-1)}
+          >
+            <Text style={styles.ageItemText}>Select age</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.ageItem}
+            onPress={() => handleAgeSelect(0)}
+          >
+            <Text style={styles.ageItemText}>{"< 1 year old"}</Text>
+          </TouchableOpacity>
+          {Array.from({ length: 17 }, (_, i) => i + 1).map((age) => (
+            <TouchableOpacity
+              key={age}
+              style={styles.ageItem}
+              onPress={() => handleAgeSelect(age)}
+            >
+              <Text style={styles.ageItemText}>
+                {age} year{age === 1 ? "" : "s"} old
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <TouchableOpacity onPress={onClose} style={styles.applyButton}>
+          <Text style={styles.applyButtonText}>Done</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  );
+};
+
 const createStyles = (colors: ThemeColors, theme: string) =>
   StyleSheet.create({
     searchFormBorder: {
-      borderWidth: 2,
+      borderWidth: 4,
       borderColor: colors.theme === "light" ? "#FFC107" : "#FFCC00",
       borderRadius: 14,
       padding: 16,
@@ -162,7 +981,7 @@ const createStyles = (colors: ThemeColors, theme: string) =>
       fontSize: 16,
     },
     whyBookingSubtitle: { color: colors.textSecondary, marginTop: 4 },
-    modalContainer: { flex: 1, backgroundColor: colors.background },
+
     modalContent: {
       flex: 1,
       justifyContent: "center",
@@ -170,13 +989,7 @@ const createStyles = (colors: ThemeColors, theme: string) =>
       paddingHorizontal: 20,
     },
     messageImage: { width: 200, height: 200, resizeMode: "contain" },
-    modalTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: colors.text,
-      textAlign: "center",
-      marginTop: 20,
-    },
+
     modalSubtitle: {
       fontSize: 16,
       color: colors.textSecondary,
@@ -197,7 +1010,7 @@ const createStyles = (colors: ThemeColors, theme: string) =>
       fontSize: 20,
       fontWeight: "bold",
     },
-    closeButton: { paddingRight: 10 },
+
     apartmentsListOverlayDebug: {
       position: "absolute",
       top: 0,
@@ -278,6 +1091,425 @@ const createStyles = (colors: ThemeColors, theme: string) =>
       backgroundColor: colors.background,
       flexGrow: 1,
     },
+    // Modal styles
+    searchInput: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "transparent",
+      borderRadius: 0,
+      paddingHorizontal: 0,
+      paddingVertical: 0,
+      marginBottom: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.inputBackground,
+      minHeight: 44,
+    },
+    searchIcon: {
+      marginRight: 10,
+    },
+    searchInputText: {
+      color: colors.text,
+      fontSize: 16,
+    },
+    modalContainer: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.background,
+      zIndex: 10,
+      paddingTop: 50,
+    },
+    closeButton: {
+      padding: 15,
+      color: colors.text,
+    },
+    modalSearchInput: {
+      backgroundColor: colors.inputBackground,
+      borderRadius: 8,
+      padding: 15,
+      margin: 15,
+      color: colors.text,
+      fontSize: 16,
+      borderWidth: 2,
+      borderColor: "#FFD700",
+    },
+    modalTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+      marginHorizontal: 15,
+      marginTop: 10,
+    },
+    modalItem: {
+      color: colors.text,
+      fontSize: 16,
+      padding: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator,
+    },
+    modalItemContainer: {
+      backgroundColor: colors.card,
+    },
+    noResults: {
+      color: colors.textSecondary,
+      fontSize: 16,
+      padding: 20,
+      textAlign: "center",
+      fontStyle: "italic",
+    },
+    tabContainer: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator,
+      marginHorizontal: 15,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 15,
+      alignItems: "center",
+      borderBottomWidth: 2,
+      borderBottomColor: "transparent",
+    },
+    activeTab: {
+      borderBottomColor: colors.button,
+    },
+    tabText: {
+      fontSize: 16,
+      color: colors.textSecondary,
+    },
+    activeTabText: {
+      color: colors.button,
+      fontWeight: "bold",
+    },
+    selectedDay: {
+      backgroundColor: colors.button,
+    },
+    selectedDayText: {
+      color: colors.background,
+      fontWeight: "bold",
+    },
+    rangeDay: {
+      backgroundColor: `${colors.button}20`,
+    },
+    rangeDayText: {
+      color: colors.button,
+    },
+    selectedDatesInfo: {
+      backgroundColor: colors.card,
+      padding: 15,
+      marginHorizontal: 15,
+      marginBottom: 15,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.button,
+    },
+    selectedDatesText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+    flexibleSectionTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: colors.text,
+      marginTop: 25,
+      marginBottom: 15,
+    },
+    flexibleSubtitle: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: 15,
+    },
+    durationRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+      marginBottom: 20,
+    },
+    durationButton: {
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 25,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      backgroundColor: colors.card,
+    },
+    durationButtonActive: {
+      borderColor: colors.button,
+      backgroundColor: colors.button,
+    },
+    durationButtonText: {
+      color: colors.text,
+      fontSize: 16,
+    },
+    durationButtonTextActive: {
+      color: colors.background,
+      fontWeight: "bold",
+    },
+    monthsRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 15,
+      marginBottom: 30,
+    },
+    monthButton: {
+      flex: 1,
+      minWidth: "22%",
+      aspectRatio: 1,
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.separator,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 15,
+    },
+    monthButtonActive: {
+      borderColor: colors.button,
+      backgroundColor: colors.button,
+    },
+    monthButtonText: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+      marginTop: 5,
+    },
+    monthButtonTextActive: {
+      color: colors.background,
+    },
+    monthButtonYear: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginTop: 2,
+    },
+    flexibleResult: {
+      backgroundColor: colors.card,
+      padding: 20,
+      borderRadius: 12,
+      alignItems: "center",
+      marginBottom: 30,
+    },
+    flexibleResultText: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    datesHeader: {
+      alignItems: "center",
+      paddingVertical: 15,
+    },
+    datesHeaderText: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    monthHeader: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: "bold",
+      marginVertical: 15,
+    },
+    calendarGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
+    },
+    calendarDayHeader: {
+      width: "14%",
+      textAlign: "center",
+      color: colors.textSecondary,
+      marginBottom: 10,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    calendarDay: {
+      width: "14%",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 10,
+      minHeight: 40,
+      borderRadius: 20,
+    },
+    calendarDayText: {
+      color: colors.text,
+      fontSize: 16,
+    },
+    applyButton: {
+      backgroundColor: colors.button,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: "center",
+      margin: 15,
+    },
+    applyButtonText: {
+      color: colors.background,
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    modalHeaderTitle: {
+      color: colors.text,
+      fontSize: 22,
+      fontWeight: "bold",
+      padding: 15,
+    },
+    guestRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator,
+    },
+    guestLabel: {
+      color: colors.text,
+      fontSize: 18,
+    },
+    stepper: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    stepperButton: {
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.button,
+      padding: 8,
+      borderRadius: 4,
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    stepperButtonDisabled: {
+      borderColor: colors.separator,
+      backgroundColor: colors.card,
+    },
+    stepperButtonText: {
+      color: colors.button,
+    },
+    stepperButtonTextDisabled: {
+      color: colors.separator,
+    },
+    stepperText: {
+      color: colors.text,
+      fontSize: 18,
+      marginHorizontal: 20,
+      minWidth: 30,
+      textAlign: "center",
+    },
+    guestLabelContainer: {
+      flex: 1,
+    },
+    guestSubLabel: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginTop: 2,
+    },
+    toggleSwitch: {
+      width: 50,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: colors.separator,
+      padding: 2,
+      justifyContent: "center",
+    },
+    toggleSwitchActive: {
+      backgroundColor: colors.button,
+    },
+    toggleHandle: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: colors.background,
+      alignSelf: "flex-start",
+    },
+    toggleHandleActive: {
+      alignSelf: "flex-end",
+    },
+    childAgesSection: {
+      marginTop: 20,
+      paddingHorizontal: 15,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: colors.separator,
+    },
+    childAgesSectionTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 10,
+    },
+    childAgesSectionSubtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginBottom: 20,
+      lineHeight: 20,
+    },
+    childAgeRow: {
+      marginBottom: 20,
+    },
+    childAgeLabel: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "500",
+      marginBottom: 10,
+    },
+    required: {
+      color: colors.accent,
+    },
+    ageDropdownContainer: {
+      borderWidth: 1,
+      borderColor: colors.separator,
+      borderRadius: 8,
+      padding: 15,
+      backgroundColor: colors.card,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    ageDropdownText: {
+      color: colors.textSecondary,
+      fontSize: 16,
+      marginBottom: 10,
+    },
+    ageDropdownArrow: {
+      color: colors.textSecondary,
+    },
+    ageModalContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    ageModalHeader: {
+      paddingVertical: 20,
+      paddingHorizontal: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator,
+      alignItems: "center",
+    },
+    ageModalTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    ageList: {
+      flex: 1,
+    },
+    ageItem: {
+      paddingVertical: 15,
+      paddingHorizontal: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.separator,
+      backgroundColor: colors.card,
+    },
+    ageItemText: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    secondaryText: {
+      color: colors.textSecondary,
+    },
   });
 export default function App({ onBack }: HelpSupportSectionProps) {
   const { colors, theme } = useTheme();
@@ -285,19 +1517,243 @@ export default function App({ onBack }: HelpSupportSectionProps) {
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
+  const [isDirectHelpCenterOpen, setIsDirectHelpCenterOpen] = useState(false);
   const [showApartmentsList, setShowApartmentsList] = useState(false);
+  const [activeHelpTab, setActiveHelpTab] = useState("Stays");
+  const [openHelpQuestionIndex, setOpenHelpQuestionIndex] = useState<
+    number | null
+  >(null);
+
+  // Modal state
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [selectedLocation, setSelectedLocation] = useState(
+    "Enter your destination",
+  );
+  const [selectedDates, setSelectedDates] = useState<{
+    checkIn: Date | null;
+    checkOut: Date | null;
+  }>({ checkIn: null, checkOut: null });
+  const [selectedGuests, setSelectedGuests] = useState<GuestData>({
+    rooms: 1,
+    adults: 2,
+    children: 0,
+    childAges: [],
+    pets: false,
+  });
+
+  // State to store search parameters for PropertyListScreen
+  const [searchParamsForPropertyList, setSearchParamsForPropertyList] =
+    useState<{
+      location: string;
+      dates: { checkIn: Date | null; checkOut: Date | null };
+      guests: GuestData;
+    } | null>(null);
+  // When true, instruct PropertyListScreen to open its "Edit your search" section
+  const [openExpandedSearch, setOpenExpandedSearch] = useState(false);
+
   const insets = useSafeAreaInsets();
   const openMessages = () => setShowMessagesModal(true);
   const closeMessages = () => setShowMessagesModal(false);
   const openNotifications = () => setShowNotificationsModal(true);
   const closeNotifications = () => setShowNotificationsModal(false);
-  const openHelpCenter = () => {
-    setIsHelpCenterOpen(true);
-    closeMessages();
-  };
   const closeHelpCenter = () => {
     setIsHelpCenterOpen(false);
     openMessages();
+  };
+  const openDirectHelpCenter = () => {
+    setIsDirectHelpCenterOpen(true);
+    closeMessages();
+  };
+  const closeDirectHelpCenter = () => {
+    setIsDirectHelpCenterOpen(false);
+  };
+
+  // Modal handlers
+  const handleLocationModalClose = () => setModalType(null);
+  const handleDatesModalClose = () => setModalType(null);
+  const handleGuestsModalClose = () => setModalType(null);
+
+  // Format functions for display
+  const formatDates = () => {
+    if (selectedDates.checkIn && selectedDates.checkOut) {
+      const checkIn = selectedDates.checkIn.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      const checkOut = selectedDates.checkOut.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      return `${checkIn} - ${checkOut}`;
+    }
+    return "Select dates";
+  };
+
+  const formatGuests = () => {
+    const { rooms, adults, children } = selectedGuests;
+    // Check if it's still the default values
+    if (rooms === 1 && adults === 2 && children === 0) {
+      return "Rooms & guests";
+    }
+
+    let result = `${rooms} room${rooms > 1 ? "s" : ""} · ${adults} adult${
+      adults > 1 ? "s" : ""
+    }`;
+    if (children > 0) {
+      result += ` · ${children} child${children > 1 ? "ren" : ""}`;
+    }
+    return result;
+  };
+
+  const faqData: { [key: string]: { question: string; answer: string }[] } = {
+    Stays: [
+      {
+        question: "Cancellations",
+        answer: "You can cancel anytime before check-in.",
+      },
+      { question: "Payment", answer: "Payments are secured and encrypted." },
+      {
+        question: "Booking Details",
+        answer: "You can view your bookings in the app.",
+      },
+      {
+        question: "Communications",
+        answer: "Communicate with hosts through the app.",
+      },
+      { question: "Room Types", answer: "Different room types available." },
+      {
+        question: "Pricing",
+        answer: "Prices depend on season and availability.",
+      },
+    ],
+    Flights: [
+      {
+        question: "Baggage and seats",
+        answer: "Check baggage policies before travel.",
+      },
+      {
+        question: "Boarding pass and check-in",
+        answer: "You can check in online.",
+      },
+      {
+        question: "Booking a flight",
+        answer: "Flights can be booked on the website.",
+      },
+      {
+        question: "Changes and cancellation",
+        answer: "Changes depend on airline policy.",
+      },
+      {
+        question: "Flight confirmation",
+        answer: "Confirmation sent to your email.",
+      },
+      {
+        question: "My flight booking",
+        answer: "Manage your bookings in the app.",
+      },
+    ],
+    "Car rentals": [
+      {
+        question: "Most popular",
+        answer: "Check our most popular car rentals.",
+      },
+      {
+        question: "Driver requirements and responsibilities",
+        answer: "Drivers must meet age requirements.",
+      },
+      {
+        question: "Fuel, mileage, and travel plans",
+        answer: "Fuel policies vary by rental company.",
+      },
+      {
+        question: "Insurance and protection",
+        answer: "Insurance options are available.",
+      },
+      { question: "Extras", answer: "Additional options can be selected." },
+      {
+        question: "Payment, fees, and confirmation",
+        answer: "Payments are processed securely.",
+      },
+    ],
+    Attractions: [
+      {
+        question: "Cancellations",
+        answer: "Cancellations allowed as per policy.",
+      },
+      { question: "Payment", answer: "Payment is required at booking." },
+      {
+        question: "Modifications and changes",
+        answer: "Changes may be allowed with fees.",
+      },
+      {
+        question: "Booking details and information",
+        answer: "Booking info is in your account.",
+      },
+      {
+        question: "Pricing",
+        answer: "Pricing depends on attraction and date.",
+      },
+      {
+        question: "Tickets and check-in",
+        answer: "Tickets are digital in most cases.",
+      },
+    ],
+    "Airport taxis": [
+      {
+        question: "Manage booking",
+        answer: "Bookings can be managed in your profile.",
+      },
+      { question: "Journey", answer: "Track your taxi journey in the app." },
+      { question: "Payment info", answer: "Payment info is secured." },
+      {
+        question: "Accessibility and extras",
+        answer: "Accessible options available.",
+      },
+      { question: "Pricing", answer: "Prices depend on distance and type." },
+    ],
+    Insurance: [
+      {
+        question:
+          "Room Cancellation Insurance - Claims (excludes U.S. residents)",
+        answer: "Claims are processed according to policy.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - Coverage (excludes U.S. residents)",
+        answer: "Coverage details are listed in the policy.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - Policy terms (excludes U.S. residents)",
+        answer: "Terms must be read carefully.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - General (excludes U.S. residents)",
+        answer: "General info available in policy documents.",
+      },
+    ],
+    Other: [
+      {
+        question: "How can I contact Booking.com?",
+        answer: "You can contact through the Help Center.",
+      },
+      {
+        question:
+          "Can I get support in my language for accommodation bookings in the EEA?",
+        answer: "Yes, multiple languages are supported.",
+      },
+      {
+        question:
+          "Can I get customer support in my language for flight bookings in the European Economic Area?",
+        answer: "Yes, support is available in several languages.",
+      },
+      {
+        question:
+          "Can I get customer support in my language for car rental bookings in the European Economic Area?",
+        answer: "Yes, support is available in your language.",
+      },
+    ],
   };
 
   const handleSwipeGesture = (event: any) => {
@@ -309,6 +1765,75 @@ export default function App({ onBack }: HelpSupportSectionProps) {
         setShowApartmentsList(false);
       }
     }
+  };
+
+  // Helper functions to parse card data
+  const parseDateString = (dateString: string) => {
+    // Parse strings like "26–28 Sep", "15–18 Oct", etc.
+    const parts = dateString.split(", ")[0]; // Remove ", 2 adults" part
+    const [dateRange, monthStr] = parts.split(" ");
+    const [startDay, endDay] = dateRange.split("–");
+
+    const currentYear = new Date().getFullYear();
+    const monthMap: { [key: string]: number } = {
+      Jan: 0,
+      Feb: 1,
+      Mar: 2,
+      Apr: 3,
+      May: 4,
+      Jun: 5,
+      Jul: 6,
+      Aug: 7,
+      Sep: 8,
+      Oct: 9,
+      Nov: 10,
+      Dec: 11,
+    };
+
+    const month = monthMap[monthStr];
+    const checkIn = new Date(currentYear, month, parseInt(startDay));
+    const checkOut = new Date(currentYear, month, parseInt(endDay));
+
+    return { checkIn, checkOut };
+  };
+
+  const parseGuestString = (guestString: string): GuestData => {
+    // Parse strings like "2 adults", "1 adult", etc.
+    const adultMatch = guestString.match(/(\d+)\s+adult/);
+    const adults = adultMatch ? parseInt(adultMatch[1]) : 2;
+
+    return {
+      rooms: 1,
+      adults: adults,
+      children: 0,
+      childAges: [],
+      pets: false,
+    };
+  };
+
+  const handleCardPress = (
+    location: string,
+    dateString: string,
+    guestString: string,
+  ) => {
+    const parsedDates = parseDateString(dateString);
+    const parsedGuests = parseGuestString(guestString);
+
+    setSearchParamsForPropertyList({
+      location: location,
+      dates: parsedDates,
+      guests: parsedGuests,
+    });
+    setShowApartmentsList(true);
+  };
+
+  const handleLocationOnlyPress = (location: string) => {
+    setSearchParamsForPropertyList({
+      location: location,
+      dates: selectedDates,
+      guests: selectedGuests,
+    });
+    setShowApartmentsList(true);
   };
 
   const SearchScreen = ({
@@ -353,6 +1878,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
     const [directFlightsOnly, setDirectFlightsOnly] = useState(false);
     const [flightType, setFlightType] = useState("Round-trip");
     const [taxiType, setTaxiType] = useState("One-way");
+    const [searchSubmitting, setSearchSubmitting] = useState(false);
     const tabIcons = {
       Stays: "bed-outline",
       "Car rental": "car-outline",
@@ -361,16 +1887,68 @@ export default function App({ onBack }: HelpSupportSectionProps) {
       Attractions: "sparkles-outline",
     };
     const renderSearchForm = () => {
-      const handleSearch = () => {
-        setShowApartmentsList(true);
+      const handleSearch = async () => {
+        setSearchSubmitting(true);
+        try {
+          // simulate processing delay
+          await new Promise((res) => setTimeout(res, 1000));
+
+          // Store the current search parameters
+          setSearchParamsForPropertyList({
+            location: selectedLocation,
+            dates: selectedDates,
+            guests: selectedGuests,
+          });
+          // Request the property list to open its expanded "Edit your search" section
+          setOpenExpandedSearch(true);
+          setShowApartmentsList(true);
+        } finally {
+          setSearchSubmitting(false);
+        }
       };
       switch (activeTab) {
         case "Stays":
           return (
             <View style={styles.searchFormBorder}>
-              <SearchBar placeholder="Rome" />
-              <SearchBar placeholder="Thu, 18 Sep - Mon, 22 Sep" />
-              <SearchBar placeholder="1 room · 4 adults · No children" />
+              <TouchableOpacity
+                style={styles.searchInput}
+                onPress={() => setModalType("location")}
+              >
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color={colors.text}
+                  style={styles.searchIcon}
+                />
+                <Text style={styles.searchInputText}>{selectedLocation}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.searchInput}
+                onPress={() => setModalType("dates")}
+              >
+                <Fontisto
+                  name="calendar"
+                  size={18}
+                  color={colors.text}
+                  style={styles.searchIcon}
+                />
+                <Text style={styles.searchInputText}>{formatDates()}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.searchInput}
+                onPress={() => setModalType("guests")}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={18}
+                  color={colors.text}
+                  style={styles.searchIcon}
+                />
+                <Text style={styles.searchInputText}>{formatGuests()}</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={{
                   backgroundColor:
@@ -381,10 +1959,15 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   marginTop: 8,
                 }}
                 onPress={handleSearch}
+                disabled={searchSubmitting}
               >
-                <Text style={{ color: "#fff", fontWeight: "bold" }}>
-                  Search
-                </Text>
+                {searchSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                    Search
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
           );
@@ -605,41 +2188,524 @@ export default function App({ onBack }: HelpSupportSectionProps) {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
+              contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
             >
-              {(() => {
-                const items = [
-                  { title: "Rome", subtitle: "18–22 Sep" },
-                  { title: "Barcelona", subtitle: "18–22 Sep" },
-                  { title: "Paris", subtitle: "18–22 Sep" },
-                  { title: "London", subtitle: "18–22 Sep" },
-                  { title: "New York", subtitle: "18–22 Sep" },
-                  { title: "Tokyo", subtitle: "18–22 Sep" },
-                ];
-                return (
-                  <View style={{ flexDirection: "row", gap: 16 }}>
-                    {items.map((item, idx) => (
-                      <View
-                        key={idx}
-                        style={{
-                          width: 180,
-                          backgroundColor: colors.card,
-                          borderRadius: 16,
-                          padding: 16,
-                        }}
-                      >
-                        <ContinueSearchCard
-                          title={item.title}
-                          subtitle={item.subtitle}
-                          titleStyle={{ color: colors.text }}
-                          subtitleStyle={{ color: colors.textSecondary }}
-                          onPress={() => setShowApartmentsList(true)}
-                        />
-                      </View>
-                    ))}
+              <View style={{ flexDirection: "column", gap: 12 }}>
+                {/* First Row */}
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "Rome, Italy",
+                      "26–28 Sep, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/rome.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      Rome
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      26–28 Sep, 2 adults
+                    </Text>
                   </View>
-                );
-              })()}
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+
+                {/* Second Row */}
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "Dubai, UAE",
+                      "26–28 Sep, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/dubai.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      Dubai
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      26–28 Sep, 2 adults
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              {/* Paris Cards */}
+              <View style={{ flexDirection: "column", gap: 12 }}>
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "Paris, France",
+                      "15–18 Oct, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/paris.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      Paris
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      15–18 Oct, 2 adults
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "London, UK",
+                      "22–25 Oct, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/london.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      London
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      22–25 Oct, 2 adults
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              {/* Barcelona Cards */}
+              <View style={{ flexDirection: "column", gap: 12 }}>
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "Barcelona, Spain",
+                      "5–8 Nov, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/barcelona.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      Barcelona
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      5–8 Nov, 2 adults
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "Amsterdam, Netherlands",
+                      "12–15 Nov, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/amsterdam.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      Amsterdam
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      12–15 Nov, 2 adults
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              {/* Tokyo Cards */}
+              <View style={{ flexDirection: "column", gap: 12 }}>
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "Tokyo, Japan",
+                      "20–24 Nov, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/tokyo.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      Tokyo
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      20–24 Nov, 2 adults
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    handleCardPress(
+                      "New York, USA",
+                      "1–5 Dec, 2 adults",
+                      "2 adults",
+                    )
+                  }
+                  style={{
+                    backgroundColor: colors.card,
+                    borderRadius: 12,
+                    padding: 16,
+                    width: 320,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Image
+                    source={require("./../assets/images/new-york.png")}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 16,
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        color: colors.text,
+                        marginBottom: 4,
+                      }}
+                    >
+                      New York
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: colors.textSecondary,
+                      }}
+                    >
+                      1–5 Dec, 2 adults
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor: "#007AFF",
+                      borderRadius: 4,
+                      padding: 4,
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Ionicons name="bed-outline" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
           </View>
 
@@ -665,8 +2731,8 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   ]}
                 >
                   <Text style={styles.geniusSubtitle}>
-                    Genius{"\n"}Crazy, you have been{"\n"}upgraded to Level 2
-                    until{"\n"}Oct 1 2025
+                    Genius{"\n"}Crazy, you will be{"\n"}upgraded to Level 2 on
+                    {"\n"}Oct 1 2025!
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -801,7 +2867,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 onPress={handleOfferPress}
               >
                 <Image
-                  source={require("./../assets/images/place-holder.jpg")}
+                  source={require("./../assets/images/offers1.png")}
                   style={[
                     StyleSheet.absoluteFill,
                     { borderRadius: 12, width: "100%", height: "100%" },
@@ -813,10 +2879,10 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                     style={{
                       fontSize: 16,
                       fontWeight: "bold",
-                      color: colors.text,
-                      textShadowColor: "rgba(0,0,0,0.3)",
+                      color: "#FFFFFF",
+                      textShadowColor: "rgba(0,0,0,0.8)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 2,
+                      textShadowRadius: 3,
                     }}
                   >
                     Quick escape, quality time
@@ -824,21 +2890,21 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: colors.textSecondary,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      color: "#F5F5F5",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Save up to 20% with a Getaway Deal
                   </Text>
                   <Text
                     style={{
-                      color: colors.button,
+                      color: "#FFD700",
                       marginTop: 4,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Save on stays
@@ -850,7 +2916,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 onPress={handleOfferPress}
               >
                 <Image
-                  source={require("./../assets/images/place-holder.jpg")}
+                  source={require("./../assets/images/offers2.png")}
                   style={[
                     StyleSheet.absoluteFill,
                     { borderRadius: 12, width: "100%", height: "100%" },
@@ -862,10 +2928,10 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                     style={{
                       fontSize: 16,
                       fontWeight: "bold",
-                      color: colors.text,
-                      textShadowColor: "rgba(0,0,0,0.3)",
+                      color: "#FFFFFF",
+                      textShadowColor: "rgba(0,0,0,0.8)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 2,
+                      textShadowRadius: 3,
                     }}
                   >
                     20% off hotel bookings
@@ -873,21 +2939,21 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: colors.textSecondary,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      color: "#F5F5F5",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Book now and get a great discount
                   </Text>
                   <Text
                     style={{
-                      color: colors.button,
+                      color: "#FFD700",
                       marginTop: 4,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Find deals
@@ -899,7 +2965,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 onPress={handleOfferPress}
               >
                 <Image
-                  source={require("./../assets/images/place-holder.jpg")}
+                  source={require("./../assets/images/offers3.png")}
                   style={[
                     StyleSheet.absoluteFill,
                     { borderRadius: 12, width: "100%", height: "100%" },
@@ -911,10 +2977,10 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                     style={{
                       fontSize: 16,
                       fontWeight: "bold",
-                      color: colors.text,
-                      textShadowColor: "rgba(0,0,0,0.3)",
+                      color: "#FFFFFF",
+                      textShadowColor: "rgba(0,0,0,0.8)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 2,
+                      textShadowRadius: 3,
                     }}
                   >
                     Free breakfast included
@@ -922,21 +2988,21 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: colors.textSecondary,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      color: "#F5F5F5",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Enjoy complimentary breakfast with your stay
                   </Text>
                   <Text
                     style={{
-                      color: colors.button,
+                      color: "#FFD700",
                       marginTop: 4,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Eat well
@@ -948,7 +3014,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 onPress={handleOfferPress}
               >
                 <Image
-                  source={require("./../assets/images/place-holder.jpg")}
+                  source={require("./../assets/images/offers4.png")}
                   style={[
                     StyleSheet.absoluteFill,
                     { borderRadius: 12, width: "100%", height: "100%" },
@@ -960,10 +3026,10 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                     style={{
                       fontSize: 16,
                       fontWeight: "bold",
-                      color: colors.text,
-                      textShadowColor: "rgba(0,0,0,0.3)",
+                      color: "#FFFFFF",
+                      textShadowColor: "rgba(0,0,0,0.8)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 2,
+                      textShadowRadius: 3,
                     }}
                   >
                     Kids stay free
@@ -971,21 +3037,21 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: colors.textSecondary,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      color: "#F5F5F5",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Special family rates available
                   </Text>
                   <Text
                     style={{
-                      color: colors.button,
+                      color: "#FFD700",
                       marginTop: 4,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Family friendly
@@ -997,7 +3063,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                 onPress={handleOfferPress}
               >
                 <Image
-                  source={require("./../assets/images/place-holder.jpg")}
+                  source={require("./../assets/images/offers5.png")}
                   style={[
                     StyleSheet.absoluteFill,
                     { borderRadius: 12, width: "100%", height: "100%" },
@@ -1009,10 +3075,10 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                     style={{
                       fontSize: 16,
                       fontWeight: "bold",
-                      color: colors.text,
-                      textShadowColor: "rgba(0,0,0,0.3)",
+                      color: "#FFFFFF",
+                      textShadowColor: "rgba(0,0,0,0.8)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 2,
+                      textShadowRadius: 3,
                     }}
                   >
                     Free cancellation
@@ -1020,21 +3086,21 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   <Text
                     style={{
                       fontSize: 14,
-                      color: colors.textSecondary,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      color: "#F5F5F5",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Cancel anytime for free on select deals
                   </Text>
                   <Text
                     style={{
-                      color: colors.button,
+                      color: "#FFD700",
                       marginTop: 4,
-                      textShadowColor: "rgba(0,0,0,0.2)",
+                      textShadowColor: "rgba(0,0,0,0.7)",
                       textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
+                      textShadowRadius: 2,
                     }}
                   >
                     Book with confidence
@@ -1051,7 +3117,8 @@ export default function App({ onBack }: HelpSupportSectionProps) {
               <View
                 style={{
                   flex: 1,
-                  backgroundColor: "rgba(0,0,0,0.3)",
+                  backgroundColor:
+                    theme === "light" ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.7)",
                   justifyContent: "center",
                   alignItems: "center",
                   minWidth: 220,
@@ -1080,7 +3147,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                       textAlign: "center",
                     }}
                   >
-                    Sorry, offers not relevant to you
+                    Sorry, these amazing offers are not relevant to you
                   </Text>
                   <Text
                     style={{
@@ -1089,7 +3156,8 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                       textAlign: "center",
                     }}
                   >
-                    You are only at level 1. Buy more to progress.
+                    You are only at level 1 genius. Purchase more properties to
+                    progress and get all these awsome deals.
                   </Text>
                   <TouchableOpacity
                     style={{ marginTop: 16 }}
@@ -1115,7 +3183,9 @@ export default function App({ onBack }: HelpSupportSectionProps) {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ gap: 16 }}
             >
-              <TouchableOpacity onPress={() => setShowApartmentsList(true)}>
+              <TouchableOpacity
+                onPress={() => handleLocationOnlyPress("Paris, France")}
+              >
                 <View
                   style={{
                     backgroundColor: colors.card,
@@ -1131,7 +3201,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   }}
                 >
                   <Image
-                    source={require("./../assets/images/place-holder.jpg")}
+                    source={require("./../assets/images/paris.png")}
                     style={{
                       width: 60,
                       height: 60,
@@ -1160,7 +3230,9 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   </Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowApartmentsList(true)}>
+              <TouchableOpacity
+                onPress={() => handleLocationOnlyPress("New York, USA")}
+              >
                 <View
                   style={{
                     backgroundColor: colors.card,
@@ -1176,7 +3248,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   }}
                 >
                   <Image
-                    source={require("./../assets/images/place-holder.jpg")}
+                    source={require("./../assets/images/new-york.png")}
                     style={{
                       width: 60,
                       height: 60,
@@ -1205,7 +3277,9 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   </Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowApartmentsList(true)}>
+              <TouchableOpacity
+                onPress={() => handleLocationOnlyPress("Tokyo, Japan")}
+              >
                 <View
                   style={{
                     backgroundColor: colors.card,
@@ -1221,7 +3295,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   }}
                 >
                   <Image
-                    source={require("./../assets/images/place-holder.jpg")}
+                    source={require("./../assets/images/tokyo.png")}
                     style={{
                       width: 60,
                       height: 60,
@@ -1250,7 +3324,9 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   </Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowApartmentsList(true)}>
+              <TouchableOpacity
+                onPress={() => handleLocationOnlyPress("London, UK")}
+              >
                 <View
                   style={{
                     backgroundColor: colors.card,
@@ -1266,7 +3342,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   }}
                 >
                   <Image
-                    source={require("./../assets/images/map.png")}
+                    source={require("./../assets/images/london.png")}
                     style={{
                       width: 60,
                       height: 60,
@@ -1295,7 +3371,11 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   </Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowApartmentsList(true)}>
+              <TouchableOpacity
+                onPress={() =>
+                  handleLocationOnlyPress("Amsterdam, Netherlands")
+                }
+              >
                 <View
                   style={{
                     backgroundColor: colors.card,
@@ -1311,7 +3391,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                   }}
                 >
                   <Image
-                    source={require("./../assets/images/place-holder.jpg")}
+                    source={require("./../assets/images/amsterdam.png")}
                     style={{
                       width: 60,
                       height: 60,
@@ -1326,7 +3406,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
                       color: colors.text,
                     }}
                   >
-                    Sydney
+                    Amsterdam
                   </Text>
                   <Text
                     style={{
@@ -1548,7 +3628,12 @@ export default function App({ onBack }: HelpSupportSectionProps) {
           onHandlerStateChange={handleSwipeGesture}
         >
           <View style={styles.apartmentsListOverlayDebug}>
-            <PropertyList onBack={() => setShowApartmentsList(false)} />
+            <PropertyList
+              onBack={() => setShowApartmentsList(false)}
+              searchParams={searchParamsForPropertyList || undefined}
+              openExpandedSearch={openExpandedSearch}
+              onOpened={() => setOpenExpandedSearch(false)}
+            />
           </View>
         </PanGestureHandler>
       )}
@@ -1569,7 +3654,7 @@ export default function App({ onBack }: HelpSupportSectionProps) {
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalHeaderText}>Messages</Text>
-            <TouchableOpacity onPress={openHelpCenter}>
+            <TouchableOpacity onPress={openDirectHelpCenter}>
               <Ionicons
                 name="help-circle-outline"
                 size={24}
@@ -1579,7 +3664,11 @@ export default function App({ onBack }: HelpSupportSectionProps) {
           </View>
           <View style={styles.modalContent}>
             <Image
-              source={require("./../assets/images/messages-man.png")}
+              source={
+                theme === "light"
+                  ? require("./../assets/images/man-white.jpg")
+                  : require("./../assets/images/messages-man.png")
+              }
               style={styles.messageImage}
             />
             <Text style={styles.modalTitle}>No messages</Text>
@@ -1639,26 +3728,216 @@ export default function App({ onBack }: HelpSupportSectionProps) {
         <SafeAreaView
           style={[styles.modalContainer, { paddingTop: insets.top }]}
         >
-          <View style={styles.modalHeader}>
-            <TouchableOpacity
-              onPress={onBack ? onBack : closeHelpCenter}
-              style={styles.closeButton}
-            >
-              <Ionicons name="chevron-back" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <Text
-              style={[
-                styles.modalHeaderText,
-                { flex: 1 },
-                { textAlign: "center" },
-              ]}
-            >
-              Help Center
-            </Text>
-          </View>
           <HelpSupportSection />
         </SafeAreaView>
       </Modal>
+      <Modal
+        visible={isDirectHelpCenterOpen}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={closeDirectHelpCenter}
+      >
+        <SafeAreaView
+          style={[styles.modalContainer, { paddingTop: insets.top }]}
+        >
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={closeDirectHelpCenter}
+              style={styles.closeButton}
+            >
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.modalHeaderText}>Help Center</Text>
+            <View style={{ width: 32 }} />
+          </View>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: insets.bottom + 20,
+            }}
+          >
+            <View style={{ paddingTop: 16 }}>
+              <View
+                style={{
+                  backgroundColor: colors.card,
+                  borderRadius: 8,
+                  marginHorizontal: 16,
+                  marginTop: 20,
+                  padding: 16,
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                }}
+              >
+                <Ionicons
+                  name="warning-outline"
+                  size={24}
+                  color="#FFD700"
+                  style={{ marginRight: 10 }}
+                />
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: colors.textSecondary,
+                    flex: 1,
+                    lineHeight: 20,
+                  }}
+                >
+                  Protect your security by never sharing your personal or credit
+                  card information.{" "}
+                  <Text
+                    style={{
+                      color: "#007AFF",
+                      textDecorationLine: "underline",
+                    }}
+                    onPress={() => Linking.openURL("https://www.booking.com")}
+                  >
+                    Learn more
+                  </Text>
+                </Text>
+              </View>
+              <View style={{ marginHorizontal: 16, marginTop: 20 }}>
+                <Text style={styles.sectionTitle}>
+                  Welcome to the Help Center
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: colors.textSecondary,
+                    marginTop: -10,
+                    marginBottom: 10,
+                  }}
+                >
+                  We are available 24 hours a day
+                </Text>
+                <Pressable
+                  style={{
+                    backgroundColor: "#007AFF",
+                    borderRadius: 8,
+                    paddingVertical: 16,
+                    alignItems: "center",
+                    marginTop: 20,
+                  }}
+                  onPress={() =>
+                    Linking.openURL(
+                      "https://www.booking.com/customer-service.html",
+                    )
+                  }
+                >
+                  <Text
+                    style={{ color: "white", fontSize: 16, fontWeight: "bold" }}
+                  >
+                    Get help with a booking
+                  </Text>
+                </Pressable>
+              </View>
+              <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
+                Frequently asked questions
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  paddingHorizontal: 16,
+                  marginTop: 20,
+                }}
+              >
+                {Object.keys(faqData).map((tab) => (
+                  <Pressable
+                    key={tab}
+                    onPress={() => setActiveHelpTab(tab)}
+                    style={{
+                      alignItems: "center",
+                      paddingHorizontal: 10,
+                      paddingBottom: 5,
+                      borderBottomWidth: activeHelpTab === tab ? 2 : 0,
+                      borderBottomColor:
+                        activeHelpTab === tab ? "#007AFF" : "transparent",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color:
+                          activeHelpTab === tab
+                            ? colors.text
+                            : colors.textSecondary,
+                        fontSize: 14,
+                      }}
+                    >
+                      {tab}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+              <View
+                style={{
+                  backgroundColor: colors.card,
+                  borderRadius: 12,
+                  marginHorizontal: 16,
+                  marginTop: 10,
+                }}
+              >
+                {faqData[activeHelpTab]?.map((item, index) => (
+                  <Pressable
+                    key={index}
+                    style={{
+                      flexDirection: "column",
+                      padding: 16,
+                      borderBottomWidth:
+                        index === faqData[activeHelpTab].length - 1 ? 0 : 1,
+                      borderBottomColor: colors.card,
+                    }}
+                    onPress={() => {
+                      setOpenHelpQuestionIndex(
+                        openHelpQuestionIndex === index ? null : index,
+                      );
+                    }}
+                  >
+                    <Text style={{ fontSize: 16, color: colors.text }}>
+                      {item.question}
+                    </Text>
+                    {openHelpQuestionIndex === index && (
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          color: colors.textSecondary,
+                          marginTop: 8,
+                        }}
+                      >
+                        {item.answer}
+                      </Text>
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Modal Components */}
+      <LocationModal
+        isVisible={modalType === "location"}
+        onClose={handleLocationModalClose}
+        styles={styles}
+        selectedLocation={selectedLocation}
+        setSelectedLocation={setSelectedLocation}
+      />
+      <DatesModal
+        isVisible={modalType === "dates"}
+        onClose={handleDatesModalClose}
+        styles={styles}
+        selectedDates={selectedDates}
+        setSelectedDates={setSelectedDates}
+      />
+      <GuestsModal
+        isVisible={modalType === "guests"}
+        onClose={handleGuestsModalClose}
+        styles={styles}
+        selectedGuests={selectedGuests}
+        setSelectedGuests={setSelectedGuests}
+      />
     </View>
   );
 }

@@ -3,8 +3,18 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { Property } from "../../components/PropertyCard";
 import { useTheme } from "../../hooks/ThemeContext";
-export default function RebookButton() {
+
+type RebookButtonProps = {
+  onPress?: () => void;
+  propertyData?: Property | any;
+};
+
+export default function RebookButton({
+  onPress,
+  propertyData,
+}: RebookButtonProps) {
   const navigation =
     useNavigation<
       NativeStackNavigationProp<Record<string, object | undefined>>
@@ -12,8 +22,22 @@ export default function RebookButton() {
   const { colors, theme } = useTheme();
   const styles = createStyles(colors, theme);
   const handlePress = () => {
-    navigation.navigate("Search"); // navigate to Search screen
+    if (onPress) onPress();
+    // If we have property data, navigate directly to the details screen with the expected param shape
+    if (propertyData) {
+      navigation.navigate("PropertyDetailsScreen", {
+        propertyData: {
+          ...(propertyData as any),
+          pricePerNight:
+            (propertyData as any).pricePerNight ?? (propertyData as any).price,
+        },
+      });
+    } else {
+      // Fallback to Search when no property provided
+      navigation.navigate("Search");
+    }
   };
+
   return (
     <TouchableOpacity style={styles.button} onPress={handlePress}>
       <Ionicons

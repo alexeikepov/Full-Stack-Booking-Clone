@@ -128,10 +128,8 @@ export default function TravelActivitySection(): JSX.Element {
       case "My questions to properties":
         return (
           <View style={styles.container}>
-            <Text style={styles.mainText}>OLD TOWN SPIRIT</Text>
-            <Text style={styles.subText}>
-              what is the latest hour you can check in
-            </Text>
+            <Text style={styles.mainText}>Your questions:</Text>
+            <Text style={styles.subText}>currently you have none</Text>
           </View>
         );
       default:

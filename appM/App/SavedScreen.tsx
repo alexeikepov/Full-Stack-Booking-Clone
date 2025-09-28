@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import PropertyCard from "../components/PropertyCard";
 import SavedItem from "../components/saved/SavedItem";
 import { useSavedProperties } from "../hooks/SavedPropertiesContext";
 import { useTheme } from "../hooks/ThemeContext";
@@ -35,36 +36,99 @@ const StartYourListPageLocal = ({ onBack }: { onBack: () => void }) => {
     // Use Alert as fallback for Expo Go, since Share is not available
     Alert.alert("Share", "Check out your next trip list on Booking.com!");
   };
+  const { savedProperties } = useSavedProperties();
+  // Styles for empty state and property card list
+  const startListStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16,
+      paddingTop: 150,
+    },
+    image: {
+      width: width * 0.9,
+      height: width * 0.6,
+      resizeMode: "contain",
+      marginBottom: 16,
+    },
+    title: localStyles.title,
+    subtitle: localStyles.subtitle,
+    findPropertiesButton: localStyles.findPropertiesButton,
+    buttonText: localStyles.buttonText,
+  });
+  const propertyCardListStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 16,
+      paddingTop: 24,
+    },
+    scrollView: {
+      marginHorizontal: -8,
+    },
+  });
+
   return (
     <View style={localStyles.container}>
       <View style={localStyles.header}>
         <TouchableOpacity onPress={onBack} style={localStyles.backButton}>
           <Text style={localStyles.backText}>Back</Text>
         </TouchableOpacity>
-        <Text style={localStyles.headerTitle}>My next trip</Text>
+        <Text style={localStyles.headerTitle}>My trip</Text>
         <TouchableOpacity style={localStyles.shareButton} onPress={handleShare}>
           <Text style={localStyles.shareText}>Share</Text>
         </TouchableOpacity>
       </View>
-      <View style={localStyles.content}>
-        <Image
-          source={
-            theme === "light"
-              ? require("../assets/images/saved-light.jpg")
-              : require("../assets/images/saved-property.png")
-          }
-          style={localStyles.illustration}
-        />
-        <Text style={localStyles.title}>Start your list</Text>
-        <Text style={localStyles.subtitle}>
-          When you find a property you like, tap the{"\n"}heart icon to save it.
-        </Text>
-        <TouchableOpacity
-          style={localStyles.findPropertiesButton}
-          onPress={() => (navigation as any).navigate("Search")}
-        >
-          <Text style={localStyles.buttonText}>Find properties</Text>
-        </TouchableOpacity>
+      <View style={{ flex: 1 }}>
+        {savedProperties.length === 0 ? (
+          <View style={startListStyles.container}>
+            <Image
+              source={
+                theme === "light"
+                  ? require("../assets/images/saved-light.jpg")
+                  : require("../assets/images/saved-property.png")
+              }
+              style={startListStyles.image}
+            />
+            <Text style={startListStyles.title}>Start your list</Text>
+            <Text style={startListStyles.subtitle}>
+              When you find a property you like, tap the{"\n"}heart icon to save
+              it.
+            </Text>
+            <TouchableOpacity
+              style={startListStyles.findPropertiesButton}
+              onPress={() => (navigation as any).navigate("Search")}
+            >
+              <Text style={startListStyles.buttonText}>Find properties</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={propertyCardListStyles.container}>
+            <ScrollView style={propertyCardListStyles.scrollView}>
+              {savedProperties.map((property) => (
+                <PropertyCard
+                  key={property.id || property.title}
+                  property={property}
+                  onPress={() =>
+                    (navigation as any).navigate("PropertyDetailsScreen", {
+                      propertyData: {
+                        // Ensure pricePerNight is provided; fall back to price if needed
+                        ...(property || {}),
+                        // property may be a simplified shape; cast to any to access optional fields
+                        pricePerNight:
+                          (property as any).pricePerNight ??
+                          (property as any).price ??
+                          undefined,
+                      },
+                    })
+                  }
+                />
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -80,8 +144,19 @@ export default function SavedScreen() {
       title: "my trip",
       subtitle: `${savedProperties.length} saved items`,
     },
-    { id: "2", title: "My next trip", subtitle: "0 saved items" },
   ]);
+
+  // Keep the default list's subtitle in sync with the number of saved properties
+  useEffect(() => {
+    setSavedLists((prev) =>
+      prev.map((item) =>
+        // Update the default list (id === "1") to reflect current savedProperties count
+        item.id === "1"
+          ? { ...item, subtitle: `${savedProperties.length} saved items` }
+          : item,
+      ),
+    );
+  }, [savedProperties.length]);
   const [createListModalVisible, setCreateListModalVisible] = useState(false);
   const [manageListModalVisible, setManageListModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
@@ -316,7 +391,7 @@ export default function SavedScreen() {
         >
           <Ionicons
             name="add-outline"
-            size={24}
+            size={35}
             color={theme === "dark" ? colors.text : colors.background}
           />
         </TouchableOpacity>
@@ -534,15 +609,25 @@ const createModalStyles = (
   StyleSheet.create({
     centeredView: {
       flex: 1,
-      justifyContent: "flex-end",
+      justifyContent: "flex-start",
       alignItems: "center",
       backgroundColor: "rgba(0,0,0,0.5)",
+      paddingTop: "60%",
     },
     modalView: {
       backgroundColor: colors.background,
-      borderRadius: 10,
-      padding: 16,
-      width: "90%",
+      borderRadius: 16,
+      padding: 24,
+      width: "85%",
+      maxWidth: 400,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
     },
     bottomModalView: {
       backgroundColor: colors.background,
@@ -555,27 +640,42 @@ const createModalStyles = (
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 12,
+      marginBottom: 20,
+      paddingBottom: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: theme === "dark" ? colors.icon : "#E5E5E5",
     },
-    modalTitle: { fontSize: 18, fontWeight: "bold", color: colors.text },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "600",
+      color: colors.text,
+    },
     input: {
       borderWidth: 1,
-      borderColor: colors.icon,
-      borderRadius: 8,
-      padding: 8,
+      borderColor: theme === "dark" ? colors.icon : "#D1D5DB",
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 16,
       color: colors.text,
       marginBottom: 8,
+      backgroundColor: theme === "dark" ? colors.card : "#F9FAFB",
     },
-    charCount: { textAlign: "right", color: colors.icon, marginBottom: 8 },
+    charCount: {
+      textAlign: "right",
+      color: colors.icon,
+      marginBottom: 20,
+      fontSize: 12,
+    },
     actionButton: {
       backgroundColor: theme === "light" ? colors.blue : colors.text,
-      borderRadius: 8,
-      padding: 12,
+      borderRadius: 12,
+      padding: 16,
       alignItems: "center",
+      marginTop: 8,
     },
     buttonText: {
       color: colors.background,
-      fontWeight: "bold",
+      fontWeight: "600",
       fontSize: 16,
     },
     modalItem: { paddingVertical: 12 },
@@ -635,6 +735,7 @@ const createLocalStyles = (
       justifyContent: "center",
       alignItems: "center",
       padding: 16,
+      marginHorizontal: 0,
     },
     illustration: {
       width: width * 0.7,
@@ -647,6 +748,7 @@ const createLocalStyles = (
       fontWeight: "bold",
       color: colors.text,
       marginBottom: 8,
+      textAlign: "center",
     },
     subtitle: {
       fontSize: 14,
@@ -659,6 +761,7 @@ const createLocalStyles = (
       paddingVertical: 12,
       paddingHorizontal: 24,
       borderRadius: 8,
+      alignSelf: "center",
     },
     buttonText: {
       color: colors.background,

@@ -2,7 +2,9 @@ import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {
   Image,
+  Linking,
   Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -31,6 +33,11 @@ export default function AccountScreen() {
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
+  const [isDirectHelpCenterOpen, setIsDirectHelpCenterOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("Stays");
+  const [openQuestionIndex, setOpenQuestionIndex] = useState<number | null>(
+    null,
+  );
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors, theme } = useTheme();
@@ -39,13 +46,167 @@ export default function AccountScreen() {
   const closeMessages = () => setShowMessagesModal(false);
   const openNotifications = () => setShowNotificationsModal(true);
   const closeNotifications = () => setShowNotificationsModal(false);
-  const openHelpCenter = () => {
-    setIsHelpCenterOpen(true);
-    closeMessages();
-  };
   const closeHelpCenter = () => {
     setIsHelpCenterOpen(false);
     openMessages();
+  };
+  const openDirectHelpCenter = () => {
+    setIsDirectHelpCenterOpen(true);
+    closeMessages();
+  };
+  const closeDirectHelpCenter = () => {
+    setIsDirectHelpCenterOpen(false);
+  };
+
+  const faqData: { [key: string]: { question: string; answer: string }[] } = {
+    Stays: [
+      {
+        question: "Cancellations",
+        answer: "You can cancel anytime before check-in.",
+      },
+      { question: "Payment", answer: "Payments are secured and encrypted." },
+      {
+        question: "Booking Details",
+        answer: "You can view your bookings in the app.",
+      },
+      {
+        question: "Communications",
+        answer: "Communicate with hosts through the app.",
+      },
+      { question: "Room Types", answer: "Different room types available." },
+      {
+        question: "Pricing",
+        answer: "Prices depend on season and availability.",
+      },
+    ],
+    Flights: [
+      {
+        question: "Baggage and seats",
+        answer: "Check baggage policies before travel.",
+      },
+      {
+        question: "Boarding pass and check-in",
+        answer: "You can check in online.",
+      },
+      {
+        question: "Booking a flight",
+        answer: "Flights can be booked on the website.",
+      },
+      {
+        question: "Changes and cancellation",
+        answer: "Changes depend on airline policy.",
+      },
+      {
+        question: "Flight confirmation",
+        answer: "Confirmation sent to your email.",
+      },
+      {
+        question: "My flight booking",
+        answer: "Manage your bookings in the app.",
+      },
+    ],
+    "Car rentals": [
+      {
+        question: "Most popular",
+        answer: "Check our most popular car rentals.",
+      },
+      {
+        question: "Driver requirements and responsibilities",
+        answer: "Drivers must meet age requirements.",
+      },
+      {
+        question: "Fuel, mileage, and travel plans",
+        answer: "Fuel policies vary by rental company.",
+      },
+      {
+        question: "Insurance and protection",
+        answer: "Insurance options are available.",
+      },
+      { question: "Extras", answer: "Additional options can be selected." },
+      {
+        question: "Payment, fees, and confirmation",
+        answer: "Payments are processed securely.",
+      },
+    ],
+    Attractions: [
+      {
+        question: "Cancellations",
+        answer: "Cancellations allowed as per policy.",
+      },
+      { question: "Payment", answer: "Payment is required at booking." },
+      {
+        question: "Modifications and changes",
+        answer: "Changes may be allowed with fees.",
+      },
+      {
+        question: "Booking details and information",
+        answer: "Booking info is in your account.",
+      },
+      {
+        question: "Pricing",
+        answer: "Pricing depends on attraction and date.",
+      },
+      {
+        question: "Tickets and check-in",
+        answer: "Tickets are digital in most cases.",
+      },
+    ],
+    "Airport taxis": [
+      {
+        question: "Manage booking",
+        answer: "Bookings can be managed in your profile.",
+      },
+      { question: "Journey", answer: "Track your taxi journey in the app." },
+      { question: "Payment info", answer: "Payment info is secured." },
+      {
+        question: "Accessibility and extras",
+        answer: "Accessible options available.",
+      },
+      { question: "Pricing", answer: "Prices depend on distance and type." },
+    ],
+    Insurance: [
+      {
+        question:
+          "Room Cancellation Insurance - Claims (excludes U.S. residents)",
+        answer: "Claims are processed according to policy.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - Coverage (excludes U.S. residents)",
+        answer: "Coverage details are listed in the policy.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - Policy terms (excludes U.S. residents)",
+        answer: "Terms must be read carefully.",
+      },
+      {
+        question:
+          "Room Cancellation Insurance - General (excludes U.S. residents)",
+        answer: "General info available in policy documents.",
+      },
+    ],
+    Other: [
+      {
+        question: "How can I contact Booking.com?",
+        answer: "You can contact through the Help Center.",
+      },
+      {
+        question:
+          "Can I get support in my language for accommodation bookings in the EEA?",
+        answer: "Yes, multiple languages are supported.",
+      },
+      {
+        question:
+          "Can I get customer support in my language for flight bookings in the European Economic Area?",
+        answer: "Yes, support is available in several languages.",
+      },
+      {
+        question:
+          "Can I get customer support in my language for car rental bookings in the European Economic Area?",
+        answer: "Yes, support is available in your language.",
+      },
+    ],
   };
   const goToSearch = () => {
     closeMessages();
@@ -97,7 +258,7 @@ export default function AccountScreen() {
             <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.modalHeaderText}>Messages</Text>
-          <TouchableOpacity onPress={openHelpCenter}>
+          <TouchableOpacity onPress={openDirectHelpCenter}>
             <Ionicons
               name="help-circle-outline"
               size={24}
@@ -107,7 +268,11 @@ export default function AccountScreen() {
         </View>
         <View style={styles.modalContent}>
           <Image
-            source={require("./../assets/images/messages-man.png")}
+            source={
+              theme === "light"
+                ? require("./../assets/images/man-white.jpg")
+                : require("./../assets/images/messages-man.png")
+            }
             style={styles.messageImage}
           />
           <Text style={styles.modalTitle}>No messages</Text>
@@ -169,20 +334,184 @@ export default function AccountScreen() {
             onPress={closeHelpCenter}
             style={styles.closeButton}
           >
-            <Ionicons name="chevron-back" size={24} color={colors.text} />
+            <Ionicons
+              name="close"
+              size={24}
+              color={theme === "light" ? "white" : colors.text}
+            />
           </TouchableOpacity>
           <Text style={styles.modalHeaderText}>Help Center</Text>
+          <View style={{ width: 32 }} />
         </View>
-        <HelpSupportSection />
+        <HelpSupportSection onBack={closeHelpCenter} />
       </SafeAreaView>
     </Modal>
   );
+
+  const DirectHelpCenterModal = (
+    <Modal
+      visible={isDirectHelpCenterOpen}
+      animationType="slide"
+      transparent={false}
+      onRequestClose={closeDirectHelpCenter}
+    >
+      <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top }]}>
+        <View style={styles.modalHeader}>
+          <TouchableOpacity
+            onPress={closeDirectHelpCenter}
+            style={styles.closeButton}
+          >
+            <Ionicons
+              name="close"
+              size={24}
+              color={theme === "light" ? "white" : colors.text}
+            />
+          </TouchableOpacity>
+          <Text style={styles.modalHeaderText}>Help Center</Text>
+          <View style={{ width: 32 }} />
+        </View>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: insets.bottom + 20,
+          }}
+        >
+          <View style={{ paddingTop: 16 }}>
+            <View style={styles.infoContainer}>
+              <Ionicons
+                name="warning-outline"
+                size={24}
+                color="#FFD700"
+                style={{ marginRight: 10 }}
+              />
+              <Text style={styles.infoText}>
+                Protect your security by never sharing your personal or credit
+                card information.{" "}
+                <Text
+                  style={{
+                    color: "#007AFF",
+                    textDecorationLine: "underline",
+                  }}
+                  onPress={() => Linking.openURL("https://www.booking.com")}
+                >
+                  Learn more
+                </Text>
+              </Text>
+            </View>
+            <View style={{ marginHorizontal: 16, marginTop: 20 }}>
+              <Text style={styles.sectionTitle}>
+                Welcome to the Help Center
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.textSecondary,
+                  marginTop: -10,
+                  marginBottom: 10,
+                }}
+              >
+                We are available 24 hours a day
+              </Text>
+              <Pressable
+                style={styles.blueButton}
+                onPress={() =>
+                  Linking.openURL(
+                    "https://www.booking.com/customer-service.html",
+                  )
+                }
+              >
+                <Text style={styles.blueButtonText}>
+                  Get help with a booking
+                </Text>
+              </Pressable>
+            </View>
+            <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
+              Frequently asked questions
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                marginTop: 20,
+              }}
+            >
+              {Object.keys(faqData).map((tab) => (
+                <Pressable
+                  key={tab}
+                  onPress={() => setActiveTab(tab)}
+                  style={[
+                    styles.faqTab,
+                    {
+                      borderBottomWidth: activeTab === tab ? 2 : 0,
+                      borderBottomColor:
+                        activeTab === tab ? "#007AFF" : "transparent",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.faqTabText,
+                      {
+                        color:
+                          activeTab === tab
+                            ? colors.text
+                            : colors.textSecondary,
+                      },
+                    ]}
+                  >
+                    {tab}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <View
+              style={{
+                backgroundColor: colors.card,
+                borderRadius: 12,
+                marginHorizontal: 16,
+                marginTop: 10,
+              }}
+            >
+              {faqData[activeTab]?.map((item, index) => (
+                <Pressable
+                  key={index}
+                  style={[
+                    styles.faqItem,
+                    {
+                      borderBottomWidth:
+                        index === faqData[activeTab].length - 1 ? 0 : 1,
+                      borderBottomColor: colors.card,
+                    },
+                  ]}
+                  onPress={() => {
+                    setOpenQuestionIndex(
+                      openQuestionIndex === index ? null : index,
+                    );
+                  }}
+                >
+                  <Text style={styles.faqItemText}>{item.question}</Text>
+                  {openQuestionIndex === index && (
+                    <Text style={styles.faqAnswer}>{item.answer}</Text>
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <AccountScreen />
       {showMessagesModal && MessagesModal}
       {showNotificationsModal && NotificationsModal}
       {isHelpCenterOpen && HelpCenterModal}
+      {isDirectHelpCenterOpen && DirectHelpCenterModal}
     </View>
   );
 }
@@ -385,9 +714,10 @@ const createStyles = (
       paddingVertical: 12,
       borderBottomWidth: 1,
       borderBottomColor: colors.card,
+      backgroundColor: theme === "light" ? colors.blue : colors.card,
     },
     modalHeaderText: {
-      color: colors.text,
+      color: theme === "light" ? "white" : colors.text,
       fontSize: 18,
       fontWeight: "bold",
     },
@@ -416,8 +746,60 @@ const createStyles = (
       padding: 16,
     },
     messageImage: {
-      width: 120,
-      height: 120,
+      width: 250,
+      height: 250,
       resizeMode: "contain",
+    },
+    infoContainer: {
+      backgroundColor: colors.card,
+      borderRadius: 8,
+      marginHorizontal: 16,
+      marginTop: 20,
+      padding: 16,
+      flexDirection: "row",
+      alignItems: "flex-start",
+    },
+    infoText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      flex: 1,
+      lineHeight: 20,
+    },
+    blueButton: {
+      backgroundColor: "#007AFF",
+      borderRadius: 8,
+      paddingVertical: 16,
+      alignItems: "center",
+      marginHorizontal: 16,
+      marginTop: 20,
+    },
+    blueButtonText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    faqTab: {
+      alignItems: "center",
+      paddingHorizontal: 10,
+      paddingBottom: 5,
+    },
+    faqTabText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    faqItem: {
+      flexDirection: "column",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.card,
+    },
+    faqItemText: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    faqAnswer: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 8,
     },
   });

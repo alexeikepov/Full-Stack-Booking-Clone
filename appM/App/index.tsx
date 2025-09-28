@@ -6,6 +6,7 @@ import { StatusBar } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../constants/Colors";
+import { BookingsProvider } from "../hooks/BookingsContext";
 import { SavedPropertiesProvider } from "../hooks/SavedPropertiesContext";
 import { ThemeProvider, useTheme } from "../hooks/ThemeContext";
 import type { RootStackParamList } from "../types/navigation";
@@ -56,13 +57,15 @@ export default function App() {
   return (
     <ThemeProvider>
       <SavedPropertiesProvider>
-        <SafeAreaProvider>
-          <QueryClientProvider client={queryClient}>
-            <NavigationContainer>
-              <AppContent />
-            </NavigationContainer>
-          </QueryClientProvider>
-        </SafeAreaProvider>
+        <BookingsProvider>
+          <SafeAreaProvider>
+            <QueryClientProvider client={queryClient}>
+              <NavigationContainer>
+                <AppContent />
+              </NavigationContainer>
+            </QueryClientProvider>
+          </SafeAreaProvider>
+        </BookingsProvider>
       </SavedPropertiesProvider>
     </ThemeProvider>
   );

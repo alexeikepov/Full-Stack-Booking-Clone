@@ -99,7 +99,7 @@ export default function ManagePropertySection() {
     <Modal visible={showPropertyModal} animationType="slide" transparent={true}>
       <View style={styles.overlay}>
         <ImageBackground
-          source={require("../../assets/images/place-holder.jpg")}
+          source={require("../../assets/images/hotel7.png")}
           style={styles.backgroundImage}
           resizeMode="cover"
         >

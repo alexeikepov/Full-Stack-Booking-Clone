@@ -1,6 +1,15 @@
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSavedProperties } from "../hooks/SavedPropertiesContext";
 import { useTheme } from "../hooks/ThemeContext";
 
@@ -29,18 +38,38 @@ type PropertyCardProps = {
 export default function PropertyCard({ property, onPress }: PropertyCardProps) {
   const { colors } = useTheme();
   const { saveProperty, isSaved } = useSavedProperties();
-  const [isPropertySaved, setIsPropertySaved] = useState(false);
   const styles = createStyles(colors);
 
-  const propertyId = property.id || property.title;
+  const propertyId = String(property.id ?? property.title);
 
-  useEffect(() => {
-    setIsPropertySaved(isSaved(propertyId));
-  }, [propertyId, isSaved]);
+  // Always derive saved state from the context (single source of truth)
+  const isPropertySaved = isSaved(propertyId);
 
   const handleSavePress = () => {
     saveProperty(property);
-    setIsPropertySaved(!isPropertySaved);
+    // Use the previous value to decide which toast/alert to show
+    if (!isPropertySaved) {
+      if (Platform.OS === "android") {
+        ToastAndroid.show(
+          "Property saved! You can view it in the Saved List screen.",
+          ToastAndroid.SHORT,
+        );
+      } else {
+        Alert.alert(
+          "Property saved!",
+          "You can view it in the Saved List screen.",
+        );
+      }
+    } else {
+      if (Platform.OS === "android") {
+        ToastAndroid.show(
+          "Property removed from saved list.",
+          ToastAndroid.SHORT,
+        );
+      } else {
+        Alert.alert("Property removed", "Property removed from saved list.");
+      }
+    }
   };
   const renderStars = () => {
     const rating =
@@ -99,24 +128,24 @@ export default function PropertyCard({ property, onPress }: PropertyCardProps) {
     return formatPrice(oldPrice);
   };
 
+  const imgSource: any =
+    typeof property.imageSource === "number"
+      ? property.imageSource
+      : { uri: property.imageSource };
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: property.imageSource }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <Image source={imgSource} style={styles.image} resizeMode="cover" />
+        {/* Save (heart) button overlay */}
         <TouchableOpacity
           style={styles.heartContainer}
           onPress={handleSavePress}
-          activeOpacity={0.7}
         >
-          <AntDesign
-            name="heart"
-            size={24}
-            color={isPropertySaved ? colors.red : "rgba(255, 255, 255, 0.8)"}
-            style={{ opacity: isPropertySaved ? 1 : 0.8 }}
+          <Ionicons
+            name={isPropertySaved ? "heart" : "heart-outline"}
+            size={20}
+            color={isPropertySaved ? colors.red : "white"}
           />
         </TouchableOpacity>
       </View>
@@ -200,8 +229,7 @@ const createStyles = (colors: any) =>
     card: {
       backgroundColor: colors.card,
       borderRadius: 12,
-      marginHorizontal: 16,
-      marginVertical: 8,
+      marginHorizontal: 0,
       shadowColor: colors.text,
       shadowOffset: {
         width: 0,
@@ -211,6 +239,8 @@ const createStyles = (colors: any) =>
       shadowRadius: 3.84,
       elevation: 5,
       overflow: "hidden",
+      width: "100%",
+      alignSelf: "flex-start",
     },
     imageContainer: {
       position: "relative",
