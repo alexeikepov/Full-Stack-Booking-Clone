@@ -20,18 +20,20 @@ export default function SavedItem({
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
-      <View style={styles.textContainer}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Ionicons name="heart" size={20} color={colors.red} />
-          <Text style={[styles.title, { marginLeft: 8 }]}>{title}</Text>
+    <View>
+      <TouchableOpacity style={styles.container} onPress={onPress}>
+        <View style={styles.textContainer}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Ionicons name="heart" size={20} color={colors.red} />
+            <Text style={[styles.title, { marginLeft: 8 }]}>{title}</Text>
+          </View>
+          <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
-        <Text style={styles.subtitle}>{subtitle}</Text>
-      </View>
-      <TouchableOpacity onPress={onDotsPress} style={styles.dotsButton}>
-        <Ionicons name="ellipsis-vertical" size={24} color={colors.icon} />
+        <TouchableOpacity onPress={onDotsPress} style={styles.dotsButton}>
+          <Ionicons name="ellipsis-vertical" size={24} color={colors.icon} />
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -41,24 +43,33 @@ const createStyles = (colors: any) =>
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.card,
-      borderRadius: 8,
+      borderRadius: 12,
       padding: 16,
-      marginBottom: 8,
+      marginBottom: 12,
       justifyContent: "space-between",
     },
     textContainer: {
       flex: 1,
+      marginLeft: 12,
     },
     title: {
-      color: colors.text,
       fontSize: 16,
       fontWeight: "bold",
+      color: colors.text,
     },
     subtitle: {
-      color: colors.icon,
       fontSize: 14,
+      color: colors.textSecondary,
+      marginTop: 2,
     },
     dotsButton: {
-      paddingLeft: 10,
+      padding: 8,
+    },
+    propertyName: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: colors.text,
+      marginTop: 8,
+      marginLeft: 16,
     },
   });

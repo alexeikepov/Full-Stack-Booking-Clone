@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Modal,
   PanResponder,
@@ -13,8 +14,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+// Map rendering moved to shared components/MapModal.tsx
 import { SafeAreaView } from "react-native-safe-area-context";
+import MapModal from "../components/MapModal";
 import PropertyCard, { Property } from "../components/PropertyCard";
 import { useTheme } from "../hooks/ThemeContext";
 import { RootStackParamList } from "../types/navigation";
@@ -58,7 +60,7 @@ const LocationModal = ({
   isVisible,
   onClose,
   styles,
-  selectedLocation = "Rome",
+  selectedLocation = "Enter your destination",
   setSelectedLocation,
 }: ModalProps) => {
   const [searchText, setSearchText] = useState("");
@@ -280,7 +282,7 @@ const DatesModal = ({
   const renderCalendarView = () => (
     <ScrollView style={{ flex: 1, paddingHorizontal: 15 }}>
       {months.map((monthData, monthIndex) => (
-        <View key={monthIndex} style={{ marginBottom: 30 }}>
+        <View key={`month-${monthIndex}`} style={{ marginBottom: 30 }}>
           <Text style={styles.monthHeader}>{monthData.name}</Text>
           <View style={styles.calendarGrid}>
             {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
@@ -290,7 +292,10 @@ const DatesModal = ({
             ))}
             {/* Empty cells for days before the first day of the month */}
             {Array.from({ length: monthData.firstDayOfMonth }, (_, index) => (
-              <View key={`empty-${index}`} style={styles.calendarDay} />
+              <View
+                key={`empty-${monthIndex}-${index}`}
+                style={styles.calendarDay}
+              />
             ))}
             {/* Days of the month */}
             {Array.from({ length: monthData.daysInMonth }, (_, index) => {
@@ -308,7 +313,7 @@ const DatesModal = ({
 
               return (
                 <TouchableOpacity
-                  key={day}
+                  key={`day-${monthIndex}-${day}`}
                   style={[
                     styles.calendarDay,
                     isSelected && styles.selectedDay,
@@ -347,9 +352,9 @@ const DatesModal = ({
           { key: "week", label: "Week" },
           { key: "month", label: "Month" },
           { key: "other", label: "Other" },
-        ].map((option) => (
+        ].map((option, idx) => (
           <TouchableOpacity
-            key={option.key}
+            key={`${option.key}-${idx}`}
             style={[
               styles.durationButton,
               flexibleDuration === option.key && styles.durationButtonActive,
@@ -373,9 +378,9 @@ const DatesModal = ({
       <Text style={styles.flexibleSubtitle}>Select up to 3 months</Text>
 
       <View style={styles.monthsRow}>
-        {["Sep", "Oct", "Nov", "Dec"].map((month) => (
+        {["Sep", "Oct", "Nov", "Dec"].map((month, idx) => (
           <TouchableOpacity
-            key={month}
+            key={`${month}-${idx}`}
             style={[
               styles.monthButton,
               flexibleMonth === month && styles.monthButtonActive,
@@ -723,7 +728,7 @@ const GuestsModal = ({
               </Text>
 
               {Array.from({ length: children }, (_, index) => (
-                <View key={index} style={styles.childAgeRow}>
+                <View key={`child-${index}`} style={styles.childAgeRow}>
                   <Text style={styles.childAgeLabel}>
                     Child {index + 1}
                     <Text style={styles.required}>*</Text>
@@ -812,7 +817,7 @@ const AgeSelectionModal = ({
             const age = index + 1;
             return (
               <TouchableOpacity
-                key={age}
+                key={`age-${age}`}
                 style={styles.ageItem}
                 onPress={() => handleAgeSelect(age)}
               >
@@ -832,143 +837,44 @@ const AgeSelectionModal = ({
   );
 };
 
-const MapModal = ({
-  isVisible,
-  onClose,
-  styles,
-  onOpenFilterModal,
-}: ModalProps) => {
-  const [locationInput, setLocationInput] = useState("Rome, Italy");
-
+// Wrapper that uses shared MapModal component. If you want the location search UI
+// and map header to remain inside the modal, we can extend the shared MapModal
+// with render props. For now pass a set of markers and center region.
+const MapModalWrapper = ({ isVisible, onClose, styles }: ModalProps) => {
   if (!isVisible) return null;
 
-  // Rome coordinates
-  const romeRegion = {
-    latitude: 41.9028,
-    longitude: 12.4964,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  };
-
-  // Some example hotel/property markers in Rome
   const propertyMarkers = [
     {
       id: 1,
       coordinate: { latitude: 41.9028, longitude: 12.4964 },
       title: "Hotel de Russie",
-      description: "Luxury hotel near Spanish Steps",
     },
     {
       id: 2,
       coordinate: { latitude: 41.9109, longitude: 12.4818 },
       title: "Hotel Artemide",
-      description: "4-star hotel near Termini Station",
     },
     {
       id: 3,
       coordinate: { latitude: 41.8986, longitude: 12.4769 },
       title: "The First Roma Arte",
-      description: "Boutique hotel near Colosseum",
-    },
-    {
-      id: 4,
-      coordinate: { latitude: 41.9056, longitude: 12.4823 },
-      title: "Grand Hotel Plaza",
-      description: "Historic hotel near Trevi Fountain",
-    },
-    {
-      id: 5,
-      coordinate: { latitude: 41.8919, longitude: 12.4866 },
-      title: "Hotel Colosseum",
-      description: "Budget-friendly hotel near Colosseum",
     },
   ];
 
+  const region = {
+    latitude: propertyMarkers[0].coordinate.latitude,
+    longitude: propertyMarkers[0].coordinate.longitude,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  };
+
   return (
-    <Modal
+    <MapModal
       visible={isVisible}
-      animationType="slide"
-      presentationStyle="overFullScreen"
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalContainer} pointerEvents="box-none">
-        <View style={styles.mapTopHeader}>
-          <TouchableOpacity onPress={onClose} style={styles.mapCloseButton}>
-            <AntDesign
-              name="arrow-left"
-              size={24}
-              color={styles.secondaryText.color}
-            />
-          </TouchableOpacity>
-          <View style={styles.mapLocationInputContainer}>
-            <TextInput
-              style={styles.mapLocationInput}
-              value={locationInput}
-              onChangeText={setLocationInput}
-              placeholder="Enter location..."
-              placeholderTextColor={styles.secondaryText.color}
-            />
-            <AntDesign
-              name="search"
-              size={18}
-              color={styles.secondaryText.color}
-              style={styles.mapLocationInputIcon}
-            />
-          </View>
-        </View>
-        <View style={styles.mapContainer}>
-          <MapView
-            style={styles.mapImage}
-            initialRegion={romeRegion}
-            provider={PROVIDER_GOOGLE}
-            showsUserLocation={false}
-            showsMyLocationButton={false}
-            showsCompass={false}
-            showsScale={false}
-            showsBuildings={true}
-            showsTraffic={false}
-            showsIndoors={true}
-          >
-            {propertyMarkers.map((marker) => (
-              <Marker
-                key={marker.id}
-                coordinate={marker.coordinate}
-                title={marker.title}
-                description={marker.description}
-              />
-            ))}
-          </MapView>
-          <TouchableOpacity
-            style={styles.mapHeader}
-            onPress={onOpenFilterModal}
-          >
-            <Fontisto
-              name="filter"
-              size={16}
-              color={styles.mapHeaderText.color}
-              style={{ marginRight: 8 }}
-            />
-            <Text style={styles.mapHeaderText}>Filters</Text>
-          </TouchableOpacity>
-          <View style={styles.mapActions}>
-            <TouchableOpacity style={styles.mapActionButton}>
-              <Fontisto
-                name="filter"
-                size={16}
-                color={styles.mapActionButtonText.color}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.mapActionButton}>
-              <AntDesign
-                name="compass"
-                size={18}
-                color={styles.mapActionButtonText.color}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
+      onClose={onClose}
+      region={region}
+      markers={propertyMarkers}
+    />
   );
 };
 const PriceSlider = ({
@@ -2022,7 +1928,7 @@ const createStyles = (colors: any) =>
       alignItems: "center",
     },
     searchButtonText: {
-      color: colors.background,
+      color: "#ffffff",
       fontSize: 16,
       fontWeight: "bold",
     },
@@ -2183,6 +2089,57 @@ const createStyles = (colors: any) =>
       padding: 20,
       textAlign: "center",
       fontStyle: "italic",
+    },
+    noMatchBanner: {
+      backgroundColor: colors.card,
+      padding: 12,
+      margin: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.separator,
+      // layout children in a column and center them
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    noMatchLeft: {
+      // icon container — make it a square and center contents
+      width: 48,
+      height: 48,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 0,
+      marginBottom: 8,
+    },
+    noMatchBody: {
+      flex: 1,
+      justifyContent: "center",
+      // center text horizontally within the body
+      alignItems: "center",
+    },
+    noMatchAction: {
+      // center action button and add top margin
+      alignSelf: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      backgroundColor: colors.button,
+      borderRadius: 8,
+      marginTop: 12,
+    },
+    noMatchActionText: {
+      color: colors.background,
+      fontWeight: "600",
+    },
+    noMatchTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 6,
+      textAlign: "center",
+    },
+    noMatchSubtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      textAlign: "center",
     },
     tabContainer: {
       flexDirection: "row",
@@ -2847,6 +2804,9 @@ const createStyles = (colors: any) =>
       width: 24,
       height: 24,
       borderRadius: 4,
+      // center the check icon
+      alignItems: "center",
+      justifyContent: "center",
       borderWidth: 2,
       borderColor: colors.textSecondary,
     },
@@ -2932,29 +2892,91 @@ const createStyles = (colors: any) =>
   });
 interface PropertyListScreenProps {
   onBack?: () => void;
+  searchParams?: {
+    location?: string;
+    dates?: { checkIn: Date | null; checkOut: Date | null };
+    guests?: GuestData;
+  };
+  openExpandedSearch?: boolean;
+  onOpened?: () => void;
 }
 
 export default function PropertyListScreen({
   onBack,
+  searchParams,
+  openExpandedSearch,
+  onOpened,
 }: PropertyListScreenProps = {}) {
   const { colors } = useTheme();
   const [modalType, setModalType] = useState<ModalType>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("Rome");
+  const [selectedLocation, setSelectedLocation] = useState(
+    searchParams?.location || "Enter your destination",
+  );
   const [selectedDates, setSelectedDates] = useState<{
     checkIn: Date | null;
     checkOut: Date | null;
   }>({
-    checkIn: new Date(2025, 8, 18), // Sep 18, 2025
-    checkOut: new Date(2025, 8, 22), // Sep 22, 2025
+    checkIn: searchParams?.dates?.checkIn || null,
+    checkOut: searchParams?.dates?.checkOut || null,
   });
   const [selectedGuests, setSelectedGuests] = useState<GuestData>({
-    rooms: 1,
-    adults: 2,
-    children: 0,
-    childAges: [],
-    pets: false,
+    rooms: searchParams?.guests?.rooms || 1,
+    adults: searchParams?.guests?.adults || 2,
+    children: searchParams?.guests?.children || 0,
+    childAges: searchParams?.guests?.childAges || [],
+    pets: searchParams?.guests?.pets || false,
   });
+
+  // Filtered list of apartments shown in the UI. Defaults to full list once
+  // the apartments array is declared below. We'll initialize to an empty array
+  // here and set it to the full list after apartments is declared.
+  const [filteredApartments, setFilteredApartments] = useState<Property[]>([]);
+  const [noMatches, setNoMatches] = useState(false);
+  const [searchSubmitting, setSearchSubmitting] = useState(false);
+  const handleSearchPress = async () => {
+    setSearchSubmitting(true);
+    try {
+      // simulated processing delay
+      await new Promise((res) => setTimeout(res, 2000));
+
+      const raw = (selectedLocation || "").toLowerCase().trim();
+      if (!raw || raw === "enter your destination") {
+        // Reset to full list when no meaningful query
+        setFilteredApartments(apartments ?? []);
+        setNoMatches(false);
+        return;
+      }
+
+      const query = raw.split(",")[0].trim();
+
+      const matched = (apartments || []).filter((apt) => {
+        if (!apt.location) return false;
+        return apt.location.toLowerCase().includes(query);
+      });
+      if (!matched || matched.length === 0) {
+        // No matched properties — show notice but keep full list visible
+        setFilteredApartments([]);
+        setNoMatches(true);
+      } else {
+        setFilteredApartments(matched);
+        setNoMatches(false);
+      }
+    } finally {
+      setSearchSubmitting(false);
+    }
+  };
+
+  const handleShowAll = () => {
+    // Reset the search and show all properties
+    setFilteredApartments(apartments ?? []);
+    setNoMatches(false);
+    setSelectedLocation("Enter your destination");
+    // collapse the expanded search if open
+    if (isExpanded) collapseSearch();
+  };
+
+  // Initialization of filteredApartments moved after apartments declaration
   const [selectedSortOption, setSelectedSortOption] = useState(
     "Top Picks for Groups",
   );
@@ -2980,10 +3002,20 @@ export default function PropertyListScreen({
       });
       return `${checkIn} - ${checkOut}`;
     }
-    return "Thu, 18 Sep - Mon, 22 Sep";
+    return "Select dates";
   };
 
   const formatGuests = () => {
+    // Check if it's still the default values AND no search params were passed
+    if (
+      !searchParams?.guests &&
+      selectedGuests.rooms === 1 &&
+      selectedGuests.adults === 2 &&
+      selectedGuests.children === 0
+    ) {
+      return "Rooms & guests";
+    }
+
     const roomText = selectedGuests.rooms === 1 ? "room" : "rooms";
     const adultText = selectedGuests.adults === 1 ? "adult" : "adults";
 
@@ -2992,14 +3024,12 @@ export default function PropertyListScreen({
     if (selectedGuests.children > 0) {
       const childText = selectedGuests.children === 1 ? "child" : "children";
       guestString += ` • ${selectedGuests.children} ${childText}`;
-    } else {
-      guestString += " • No children";
     }
 
     return guestString;
   };
 
-  const expandSearch = () => {
+  const expandSearch = useCallback(() => {
     setIsExpanded(true);
     Animated.parallel([
       Animated.timing(animatedHeight, {
@@ -3013,7 +3043,7 @@ export default function PropertyListScreen({
         useNativeDriver: false,
       }),
     ]).start();
-  };
+  }, [animatedHeight, animatedOpacity]);
 
   const collapseSearch = useCallback(() => {
     Animated.parallel([
@@ -3054,9 +3084,42 @@ export default function PropertyListScreen({
     }
   };
 
+  const handleBackPress = () => {
+    // Navigate back to previous search screen
+    console.log("Back button pressed");
+    if (onBack) {
+      console.log("Calling onBack prop");
+      onBack();
+    } else {
+      console.log("Going back with navigation.goBack()");
+      navigation.goBack();
+    }
+  };
+
+  // If parent requests the expanded search to open, do so and notify parent
+  useEffect(() => {
+    if (openExpandedSearch) {
+      if (!isExpanded) {
+        expandSearch();
+      }
+      // notify parent the request was handled so it can reset its flag
+      if (onOpened) {
+        onOpened();
+      }
+    }
+    // only respond to changes to openExpandedSearch
+  }, [openExpandedSearch, expandSearch, isExpanded, onOpened]);
+
+  // When parent requests to open the expanded search, run expandSearch and notify back
+  useEffect(() => {
+    if ((arguments && (arguments[0] as any)) == null) {
+      // noop - defensive
+    }
+  }, []);
+
   const handleLocationPress = () => {
     if (!isExpanded) {
-      // If collapsed, always expand first (regardless of onBack)
+      // If collapsed, expand the search
       expandSearch();
     } else {
       // If expanded, show location modal
@@ -3075,14 +3138,37 @@ export default function PropertyListScreen({
       collapseSearch();
     }
   }, [modalType, isExpanded, collapseSearch]);
+
+  // Listen for Search tab press to navigate back when on PropertyListScreen
+  useEffect(() => {
+    const parent = navigation.getParent();
+    let unsubscribe: (() => void) | undefined;
+    if (parent) {
+      unsubscribe = parent.addListener("tabPress" as any, (e: any) => {
+        // Get the currently selected tab route name
+        const state = parent.getState();
+        const tabIndex = state.index;
+        const tabRoute = state.routes[tabIndex];
+        if (tabRoute.name === "Search") {
+          // Prevent default behavior and navigate back to search
+          if (typeof e.preventDefault === "function") e.preventDefault();
+          navigation.goBack();
+        }
+      });
+    }
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [navigation]);
+
   const apartments: Property[] = [
     {
       id: "1",
       title: "Dolce by Wyndham Milan Malpensa",
       rating: "8.1",
-      description: "Hotel room: 1 bed",
+      description: " 1 bed",
       price: "233",
-      imageSource: "https://i.ibb.co/y52cT3P/apartment1.jpg",
+      imageSource: require("../assets/images/hotel1.png"),
       location: "Milan Malpensa",
       distance: "1 km from downtown",
       deal: "Getaway Deal",
@@ -3102,16 +3188,16 @@ export default function PropertyListScreen({
         nonRefundable: true,
         totalPrice: "€233",
         shareOptions: ["booking", "property", "app"],
-        contactNumber: "+39 123 456 7890",
+        contactNumber: "+972 52 6102171",
       },
     },
     {
       id: "2",
       title: "Hotel Pantheon",
       rating: "8.3",
-      description: "Hotel room: 3 beds",
+      description: " 3 beds",
       price: "185",
-      imageSource: "https://i.ibb.co/b3yJ0fF/hotel1.jpg",
+      imageSource: require("../assets/images/hotel2.png"),
       location: "Rome",
       distance: "0.5 km from downtown",
       oldPrice: "250",
@@ -3130,15 +3216,22 @@ export default function PropertyListScreen({
         nonRefundable: false,
         totalPrice: "€1,785",
         shareOptions: ["booking", "property", "app"],
-        contactNumber: "+39 987 654 3210",
+        contactNumber: "+972 52-4796556",
       },
     },
     {
       title: "Aurelio’s apartment Colosseo",
       rating: "9.1",
-      description: "Hotel room: 2 beds",
+      description: " 2 beds",
       price: "150",
-      imageSource: "https://i.ibb.co/y6k9k0G/apartment2.jpg",
+      imageSource: require("../assets/images/hotel3.png"),
+      id: "3",
+      location: "Rome",
+      distance: "0.2 km from Colosseum",
+      oldPrice: "200",
+      taxesIncluded: true,
+      reviewCount: "234",
+      ratingText: "Exceptional",
       details: {
         confirmationNumber: "GHI789",
         pin: "3333",
@@ -3153,15 +3246,1327 @@ export default function PropertyListScreen({
         shareOptions: ["booking", "property", "app"],
         contactNumber: "+39 555 666 7777",
       },
-      id: "3",
-      location: "Rome",
-      distance: "0.2 km from Colosseum",
-      oldPrice: "200",
+    },
+    // 10 more properties
+    {
+      id: "51",
+      title: "Modern Studio Milan",
+      rating: "8.5",
+      description: "Studio: 1 bed",
+      price: "175",
+      imageSource: require("../assets/images/hotel4.png"),
+      location: "Milan",
+      distance: "0.7 km from downtown",
+      deal: "Special Offer",
+      oldPrice: "210",
       taxesIncluded: true,
-      reviewCount: "234",
+      reviewCount: "320",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF51",
+        pin: "1051",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Milan Central, Italy",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€175",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "52",
+      title: "Historic Villa Florence",
+      rating: "9.0",
+      description: "Villa: 4 beds",
+      price: "320",
+      imageSource: require("../assets/images/hotel5.png"),
+      location: "Florence",
+      distance: "1.5 km from downtown",
+      deal: "Getaway Deal",
+      oldPrice: "370",
+      taxesIncluded: true,
+      reviewCount: "410",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF52",
+        pin: "1052",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Florence Central, Italy",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€320",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "53",
+      title: "Cozy Apartment Venice",
+      rating: "8.2",
+      description: "Entire apartment: 2 beds",
+      price: "210",
+      imageSource: require("../assets/images/hotel6.png"),
+      location: "Venice",
+      distance: "0.5 km from downtown",
+      deal: "Limited Time",
+      oldPrice: "260",
+      taxesIncluded: true,
+      reviewCount: "290",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF53",
+        pin: "1053",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Venice Central, Italy",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€210",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "54",
+      title: "Boutique Hotel Naples",
+      rating: "9.3",
+      description: " 3 beds",
+      price: "275",
+      imageSource: require("../assets/images/hotel7.png"),
+      location: "Naples",
+      distance: "2 km from train station",
+      deal: "Early Bird",
+      oldPrice: "320",
+      taxesIncluded: true,
+      reviewCount: "510",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF54",
+        pin: "1054",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Naples Central, Italy",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€275",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "55",
+      title: "Family Room Turin",
+      rating: "8.7",
+      description: " 4 beds",
+      price: "250",
+      imageSource: require("../assets/images/hotel8.png"),
+      location: "Turin",
+      distance: "1.5 km from airport",
+      deal: "Last Minute",
+      oldPrice: "290",
+      taxesIncluded: true,
+      reviewCount: "370",
       ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF55",
+        pin: "1055",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Turin Central, Italy",
+        roomType: "Hotel room",
+        includedExtras: "Parking, TV",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€250",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "56",
+      title: "Elegant Loft Bologna",
+      rating: "8.9",
+      description: "Loft: 2 beds",
+      price: "220",
+      imageSource: require("../assets/images/hotel9.png"),
+      location: "Bologna",
+      distance: "0.8 km from Colosseum",
+      deal: "Special Offer",
+      oldPrice: "260",
+      taxesIncluded: true,
+      reviewCount: "410",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF56",
+        pin: "1056",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Bologna Central, Italy",
+        roomType: "Loft",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€220",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "57",
+      title: "Comfort Stay Palermo",
+      rating: "7.9",
+      description: " 1 bed",
+      price: "150",
+      imageSource: require("../assets/images/hotel10.png"),
+      location: "Palermo",
+      distance: "0.3 km from downtown",
+      deal: "Getaway Deal",
+      oldPrice: "180",
+      taxesIncluded: true,
+      reviewCount: "230",
+      ratingText: "Pleasant",
+      details: {
+        confirmationNumber: "CONF57",
+        pin: "1057",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Palermo Central, Italy",
+        roomType: "Hotel room",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€150",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "58",
+      title: "Classic Room Genoa",
+      rating: "8.0",
+      description: " 2 beds",
+      price: "180",
+      imageSource: require("../assets/images/hotel11.png"),
+      location: "Genoa",
+      distance: "1.2 km from downtown",
+      deal: "Limited Time",
+      oldPrice: "210",
+      taxesIncluded: true,
+      reviewCount: "340",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF58",
+        pin: "1058",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Genoa Central, Italy",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€180",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "59",
+      title: "Penthouse Verona",
+      rating: "9.1",
+      description: "Penthouse: 3 beds",
+      price: "350",
+      imageSource: require("../assets/images/hotel12.png"),
+      location: "Verona",
+      distance: "0.5 km from beach",
+      deal: "Early Bird",
+      oldPrice: "400",
+      taxesIncluded: true,
+      reviewCount: "560",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF59",
+        pin: "1059",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Verona Central, Italy",
+        roomType: "Penthouse",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€350",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "60",
+      title: "Luxury Suite Rome",
+      rating: "8.7",
+      description: "Suite: 2 beds",
+      price: "300",
+      imageSource: require("../assets/images/hotel13.png"),
+      location: "Rome",
+      distance: "2 km from train station",
+      deal: "Special Offer",
+      oldPrice: "340",
+      taxesIncluded: true,
+      reviewCount: "780",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF60",
+        pin: "1060",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Rome Central, Italy",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€300",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    // 5 properties in Paris
+    {
+      id: "61",
+      title: "Luxury Suite Paris",
+      rating: "9.2",
+      description: "Suite: 2 beds",
+      price: "340",
+      imageSource: require("../assets/images/hotel14.png"),
+      location: "Paris",
+      distance: "1 km from Eiffel Tower",
+      deal: "Special Offer",
+      oldPrice: "390",
+      taxesIncluded: true,
+      reviewCount: "820",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF61",
+        pin: "1061",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Paris Central, France",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€340",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "62",
+      title: "Cozy Apartment Paris",
+      rating: "8.8",
+      description: "Entire apartment: 1 bed",
+      price: "220",
+      imageSource: require("../assets/images/hotel15.png"),
+      location: "Paris",
+      distance: "0.5 km from Louvre",
+      deal: "Getaway Deal",
+      oldPrice: "260",
+      taxesIncluded: true,
+      reviewCount: "540",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF62",
+        pin: "1062",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Rue de Rivoli, Paris, France",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€220",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "63",
+      title: "Modern Studio Paris",
+      rating: "8.5",
+      description: "Studio: 1 bed",
+      price: "195",
+      imageSource: require("../assets/images/hotel16.png"),
+      location: "Paris",
+      distance: "1.2 km from Montmartre",
+      deal: "Limited Time",
+      oldPrice: "230",
+      taxesIncluded: true,
+      reviewCount: "410",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF63",
+        pin: "1063",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Montmartre, Paris, France",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€195",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+
+    {
+      id: "64",
+      title: "Historic Villa Paris",
+      rating: "9.0",
+      description: "Villa: 4 beds",
+      price: "420",
+      imageSource: require("../assets/images/hotel17.png"),
+      location: "Paris",
+      distance: "2 km from Notre Dame",
+      deal: "Early Bird",
+      oldPrice: "470",
+      taxesIncluded: true,
+      reviewCount: "390",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF64",
+        pin: "1064",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Notre Dame, Paris, France",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€420",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "65",
+      title: "Boutique Hotel Paris",
+      rating: "8.7",
+      description: " 2 beds",
+      price: "280",
+      imageSource: require("../assets/images/hotel18.png"),
+      location: "Paris",
+      distance: "0.8 km from Champs-Élysées",
+      deal: "Last Minute",
+      oldPrice: "320",
+      taxesIncluded: true,
+      reviewCount: "670",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF65",
+        pin: "1065",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Champs-Élysées, Paris, France",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€280",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "66",
+      title: "Luxury Suite Amsterdam",
+      rating: "9.1",
+      description: "Suite: 2 beds",
+      price: "310",
+      imageSource: require("../assets/images/hotel19.png"),
+      location: "Amsterdam",
+      distance: "1 km from city center",
+      deal: "Special Offer",
+      oldPrice: "360",
+      taxesIncluded: true,
+      reviewCount: "720",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF66",
+        pin: "1066",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Amsterdam Central, Netherlands",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€310",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "67",
+      title: "Cozy Apartment Amsterdam",
+      rating: "8.6",
+      description: "Entire apartment: 1 bed",
+      price: "210",
+      imageSource: require("../assets/images/hotel20.png"),
+      location: "Amsterdam",
+      distance: "0.7 km from canals",
+      deal: "Getaway Deal",
+      oldPrice: "250",
+      taxesIncluded: true,
+      reviewCount: "510",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF67",
+        pin: "1067",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Canals, Amsterdam, Netherlands",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€210",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "68",
+      title: "Modern Studio Amsterdam",
+      rating: "8.3",
+      description: "Studio: 1 bed",
+      price: "180",
+      imageSource: require("../assets/images/hotel1.png"),
+      location: "Amsterdam",
+      distance: "1.5 km from Rijksmuseum",
+      deal: "Limited Time",
+      oldPrice: "220",
+      taxesIncluded: true,
+      reviewCount: "390",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF68",
+        pin: "1068",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Rijksmuseum, Amsterdam, Netherlands",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€180",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "69",
+      title: "Historic Villa Amsterdam",
+      rating: "9.0",
+      description: "Villa: 4 beds",
+      price: "400",
+      imageSource: require("../assets/images/hotel2.png"),
+      location: "Amsterdam",
+      distance: "2 km from Vondelpark",
+      deal: "Early Bird",
+      oldPrice: "450",
+      taxesIncluded: true,
+      reviewCount: "370",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF69",
+        pin: "1069",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Vondelpark, Amsterdam, Netherlands",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€400",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "70",
+      title: "Boutique Hotel Amsterdam",
+      rating: "8.9",
+      description: " 2 beds",
+      price: "260",
+      imageSource: require("../assets/images/hotel3.png"),
+      location: "Amsterdam",
+      distance: "0.9 km from Dam Square",
+      deal: "Last Minute",
+      oldPrice: "300",
+      taxesIncluded: true,
+      reviewCount: "610",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF70",
+        pin: "1070",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Dam Square, Amsterdam, Netherlands",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€260",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "71",
+      title: "Luxury Suite London",
+      rating: "9.3",
+      description: "Suite: 2 beds",
+      price: "370",
+      imageSource: require("../assets/images/hotel4.png"),
+      location: "London",
+      distance: "1 km from Big Ben",
+      deal: "Special Offer",
+      oldPrice: "420",
+      taxesIncluded: true,
+      reviewCount: "920",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF71",
+        pin: "1071",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Westminster, London, UK",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "£370",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "72",
+      title: "Cozy Apartment London",
+      rating: "8.7",
+      description: "Entire apartment: 1 bed",
+      price: "240",
+      imageSource: require("../assets/images/hotel5.png"),
+      location: "London",
+      distance: "0.6 km from Hyde Park",
+      deal: "Getaway Deal",
+      oldPrice: "280",
+      taxesIncluded: true,
+      reviewCount: "640",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF72",
+        pin: "1072",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Hyde Park, London, UK",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "£240",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "73",
+      title: "Modern Studio London",
+      rating: "8.4",
+      description: "Studio: 1 bed",
+      price: "210",
+      imageSource: require("../assets/images/hotel6.png"),
+      location: "London",
+      distance: "1.3 km from Tower Bridge",
+      deal: "Limited Time",
+      oldPrice: "250",
+      taxesIncluded: true,
+      reviewCount: "510",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF73",
+        pin: "1073",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Tower Bridge, London, UK",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "£210",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+972 52 3839928",
+      },
+    },
+    {
+      id: "74",
+      title: "Historic Villa London",
+      rating: "9.0",
+      description: "Villa: 4 beds",
+      price: "450",
+      imageSource: require("../assets/images/hotel7.png"),
+      location: "London",
+      distance: "2 km from Buckingham Palace",
+      deal: "Early Bird",
+      oldPrice: "500",
+      taxesIncluded: true,
+      reviewCount: "410",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF74",
+        pin: "1074",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Buckingham Palace, London, UK",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "£450",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+44 444 555 666",
+      },
+    },
+    {
+      id: "75",
+      title: "Boutique Hotel London",
+      rating: "8.8",
+      description: " 2 beds",
+      price: "290",
+      imageSource: require("../assets/images/hotel8.png"),
+      location: "London",
+      distance: "0.7 km from Piccadilly Circus",
+      deal: "Last Minute",
+      oldPrice: "330",
+      taxesIncluded: true,
+      reviewCount: "710",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF75",
+        pin: "1075",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Piccadilly Circus, London, UK",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "£290",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+44 111 222 333",
+      },
+    },
+    {
+      id: "76",
+      title: "Luxury Suite Dubai",
+      rating: "9.4",
+      description: "Suite: 2 beds",
+      price: "420",
+      imageSource: require("../assets/images/hotel9.png"),
+      location: "Dubai",
+      distance: "1 km from Burj Khalifa",
+      deal: "Special Offer",
+      oldPrice: "470",
+      taxesIncluded: true,
+      reviewCount: "1020",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF76",
+        pin: "1076",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Downtown, Dubai, UAE",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "AED 420",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+971 123 456 789",
+      },
+    },
+    {
+      id: "77",
+      title: "Cozy Apartment Dubai",
+      rating: "8.9",
+      description: "Entire apartment: 1 bed",
+      price: "320",
+      imageSource: require("../assets/images/hotel10.png"),
+      location: "Dubai",
+      distance: "0.8 km from Dubai Mall",
+      deal: "Getaway Deal",
+      oldPrice: "360",
+      taxesIncluded: true,
+      reviewCount: "840",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF77",
+        pin: "1077",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Dubai Mall, Dubai, UAE",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "AED 320",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+971 987 654 321",
+      },
+    },
+    {
+      id: "78",
+      title: "Modern Studio Dubai",
+      rating: "8.6",
+      description: "Studio: 1 bed",
+      price: "270",
+      imageSource: require("../assets/images/hotel11.png"),
+      location: "Dubai",
+      distance: "1.5 km from Palm Jumeirah",
+      deal: "Limited Time",
+      oldPrice: "310",
+      taxesIncluded: true,
+      reviewCount: "610",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF78",
+        pin: "1078",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Palm Jumeirah, Dubai, UAE",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "AED 270",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+971 555 666 777",
+      },
+    },
+    {
+      id: "79",
+      title: "Historic Villa Dubai",
+      rating: "9.1",
+      description: "Villa: 4 beds",
+      price: "500",
+      imageSource: require("../assets/images/hotel12.png"),
+      location: "Dubai",
+      distance: "2 km from Marina",
+      deal: "Early Bird",
+      oldPrice: "550",
+      taxesIncluded: true,
+      reviewCount: "510",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF79",
+        pin: "1079",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Dubai Marina, Dubai, UAE",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "AED 500",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+971 444 555 666",
+      },
+    },
+    {
+      id: "80",
+      title: "Boutique Hotel Dubai",
+      rating: "8.8",
+      description: " 2 beds",
+      price: "350",
+      imageSource: require("../assets/images/hotel13.png"),
+      location: "Dubai",
+      distance: "1 km from JBR Beach",
+      deal: "Last Minute",
+      oldPrice: "390",
+      taxesIncluded: true,
+      reviewCount: "710",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF80",
+        pin: "1080",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "JBR Beach, Dubai, UAE",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "AED 350",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+971 111 222 333",
+      },
+    },
+    {
+      id: "81",
+      title: "Luxury Suite Tokyo",
+      rating: "9.5",
+      description: "Suite: 2 beds",
+      price: "450",
+      imageSource: require("../assets/images/hotel14.png"),
+      location: "Tokyo",
+      distance: "1 km from Shibuya",
+      deal: "Special Offer",
+      oldPrice: "500",
+      taxesIncluded: true,
+      reviewCount: "1120",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF81",
+        pin: "1081",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Shibuya, Tokyo, Japan",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "¥45000",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+81 123 456 789",
+      },
+    },
+    {
+      id: "82",
+      title: "Cozy Apartment Tokyo",
+      rating: "8.9",
+      description: "Entire apartment: 1 bed",
+      price: "320",
+      imageSource: require("../assets/images/hotel15.png"),
+      location: "Tokyo",
+      distance: "0.8 km from Ginza",
+      deal: "Getaway Deal",
+      oldPrice: "360",
+      taxesIncluded: true,
+      reviewCount: "840",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF82",
+        pin: "1082",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Ginza, Tokyo, Japan",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "¥32000",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+81 987 654 321",
+      },
+    },
+    {
+      id: "83",
+      title: "Modern Studio Tokyo",
+      rating: "8.7",
+      description: "Studio: 1 bed",
+      price: "270",
+      imageSource: require("../assets/images/hotel16.png"),
+      location: "Tokyo",
+      distance: "1.5 km from Akihabara",
+      deal: "Limited Time",
+      oldPrice: "310",
+      taxesIncluded: true,
+      reviewCount: "610",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF83",
+        pin: "1083",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Akihabara, Tokyo, Japan",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "¥27000",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+81 555 666 777",
+      },
+    },
+    {
+      id: "84",
+      title: "Historic Villa Tokyo",
+      rating: "9.2",
+      description: "Villa: 4 beds",
+      price: "520",
+      imageSource: require("../assets/images/hotel17.png"),
+      location: "Tokyo",
+      distance: "2 km from Ueno Park",
+      deal: "Early Bird",
+      oldPrice: "570",
+      taxesIncluded: true,
+      reviewCount: "510",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF84",
+        pin: "1084",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Ueno Park, Tokyo, Japan",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "¥52000",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+81 444 555 666",
+      },
+    },
+    {
+      id: "85",
+      title: "Boutique Hotel Tokyo",
+      rating: "8.9",
+      description: " 2 beds",
+      price: "350",
+      imageSource: require("../assets/images/hotel18.png"),
+      location: "Tokyo",
+      distance: "1 km from Tokyo Tower",
+      deal: "Last Minute",
+      oldPrice: "390",
+      taxesIncluded: true,
+      reviewCount: "710",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF85",
+        pin: "1085",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Tokyo Tower, Tokyo, Japan",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "¥35000",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+81 111 222 333",
+      },
+    },
+    {
+      id: "86",
+      title: "Luxury Suite Barcelona",
+      rating: "9.2",
+      description: "Suite: 2 beds",
+      price: "330",
+      imageSource: require("../assets/images/hotel19.png"),
+      location: "Barcelona",
+      distance: "1 km from Sagrada Familia",
+      deal: "Special Offer",
+      oldPrice: "380",
+      taxesIncluded: true,
+      reviewCount: "820",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF86",
+        pin: "1086",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Sagrada Familia, Barcelona, Spain",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€330",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+34 123 456 789",
+      },
+    },
+    {
+      id: "87",
+      title: "Cozy Apartment Barcelona",
+      rating: "8.8",
+      description: "Entire apartment: 1 bed",
+      price: "210",
+      imageSource: require("../assets/images/hotel20.png"),
+      location: "Barcelona",
+      distance: "0.5 km from La Rambla",
+      deal: "Getaway Deal",
+      oldPrice: "250",
+      taxesIncluded: true,
+      reviewCount: "540",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF87",
+        pin: "1087",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "La Rambla, Barcelona, Spain",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€210",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+34 987 654 321",
+      },
+    },
+    {
+      id: "88",
+      title: "Modern Studio Barcelona",
+      rating: "8.5",
+      description: "Studio: 1 bed",
+      price: "180",
+      imageSource: require("../assets/images/hotel1.png"),
+      location: "Barcelona",
+      distance: "1.2 km from Park Güell",
+      deal: "Limited Time",
+      oldPrice: "220",
+      taxesIncluded: true,
+      reviewCount: "410",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF88",
+        pin: "1088",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Park Güell, Barcelona, Spain",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€180",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+34 555 666 777",
+      },
+    },
+    {
+      id: "89",
+      title: "Historic Villa Barcelona",
+      rating: "9.0",
+      description: "Villa: 4 beds",
+      price: "400",
+      imageSource: require("../assets/images/hotel2.png"),
+      location: "Barcelona",
+      distance: "2 km from Gothic Quarter",
+      deal: "Early Bird",
+      oldPrice: "450",
+      taxesIncluded: true,
+      reviewCount: "390",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF89",
+        pin: "1089",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Gothic Quarter, Barcelona, Spain",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "€400",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+34 444 555 666",
+      },
+    },
+    {
+      id: "90",
+      title: "Boutique Hotel Barcelona",
+      rating: "8.7",
+      description: " 2 beds",
+      price: "260",
+      imageSource: require("../assets/images/hotel3.png"),
+      location: "Barcelona",
+      distance: "0.8 km from Barceloneta Beach",
+      deal: "Last Minute",
+      oldPrice: "300",
+      taxesIncluded: true,
+      reviewCount: "670",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF90",
+        pin: "1090",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Barceloneta Beach, Barcelona, Spain",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "€260",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+34 111 222 333",
+      },
+    },
+    {
+      id: "91",
+      title: "Luxury Suite New York",
+      rating: "9.4",
+      description: "Suite: 2 beds",
+      price: "480",
+      imageSource: require("../assets/images/hotel4.png"),
+      location: "New York",
+      distance: "1 km from Times Square",
+      deal: "Special Offer",
+      oldPrice: "530",
+      taxesIncluded: true,
+      reviewCount: "1220",
+      ratingText: "Superb",
+      details: {
+        confirmationNumber: "CONF91",
+        pin: "1091",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Times Square, New York, USA",
+        roomType: "Suite",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "$480",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+1 212 123 4567",
+      },
+    },
+    {
+      id: "92",
+      title: "Cozy Apartment New York",
+      rating: "8.9",
+      description: "Entire apartment: 1 bed",
+      price: "350",
+      imageSource: require("../assets/images/hotel5.png"),
+      location: "New York",
+      distance: "0.8 km from Central Park",
+      deal: "Getaway Deal",
+      oldPrice: "390",
+      taxesIncluded: true,
+      reviewCount: "940",
+      ratingText: "Very Good",
+      details: {
+        confirmationNumber: "CONF92",
+        pin: "1092",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Central Park, New York, USA",
+        roomType: "Entire apartment",
+        includedExtras: "Kitchen, WiFi",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "$350",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+1 212 987 6543",
+      },
+    },
+    {
+      id: "93",
+      title: "Modern Studio New York",
+      rating: "8.7",
+      description: "Studio: 1 bed",
+      price: "290",
+      imageSource: require("../assets/images/hotel6.png"),
+      location: "New York",
+      distance: "1.5 km from Wall Street",
+      deal: "Limited Time",
+      oldPrice: "330",
+      taxesIncluded: true,
+      reviewCount: "710",
+      ratingText: "Good",
+      details: {
+        confirmationNumber: "CONF93",
+        pin: "1093",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Wall Street, New York, USA",
+        roomType: "Studio",
+        includedExtras: "WiFi, TV",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "$290",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+1 212 555 6666",
+      },
+    },
+    {
+      id: "94",
+      title: "Historic Villa New York",
+      rating: "9.1",
+      description: "Villa: 4 beds",
+      price: "550",
+      imageSource: require("../assets/images/hotel7.png"),
+      location: "New York",
+      distance: "2 km from Brooklyn Bridge",
+      deal: "Early Bird",
+      oldPrice: "600",
+      taxesIncluded: true,
+      reviewCount: "610",
+      ratingText: "Wonderful",
+      details: {
+        confirmationNumber: "CONF94",
+        pin: "1094",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Brooklyn Bridge, New York, USA",
+        roomType: "Villa",
+        includedExtras: "Pool, Spa",
+        breakfastIncluded: false,
+        nonRefundable: true,
+        totalPrice: "$550",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+1 212 444 5555",
+      },
+    },
+    {
+      id: "95",
+      title: "Boutique Hotel New York",
+      rating: "8.8",
+      description: " 2 beds",
+      price: "390",
+      imageSource: require("../assets/images/hotel8.png"),
+      location: "New York",
+      distance: "1 km from Empire State",
+      deal: "Last Minute",
+      oldPrice: "430",
+      taxesIncluded: true,
+      reviewCount: "810",
+      ratingText: "Exceptional",
+      details: {
+        confirmationNumber: "CONF95",
+        pin: "1095",
+        checkIn: "Thu, 18 Sep",
+        checkOut: "Mon, 22 Sep",
+        address: "Empire State, New York, USA",
+        roomType: "Hotel room",
+        includedExtras: "Breakfast, WiFi",
+        breakfastIncluded: true,
+        nonRefundable: false,
+        totalPrice: "$390",
+        shareOptions: ["booking", "property", "app"],
+        contactNumber: "+1 212 111 2222",
+      },
     },
   ];
+  // Ensure filtered list is initialized to full apartments list on mount
+  useEffect(() => {
+    if (
+      (!filteredApartments || filteredApartments.length === 0) &&
+      Array.isArray(apartments) &&
+      apartments.length > 0
+    ) {
+      setFilteredApartments(apartments);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchBar}>
@@ -3184,7 +4589,7 @@ export default function PropertyListScreen({
         {!isExpanded && (
           <View style={styles.searchInput}>
             <TouchableOpacity
-              onPress={handleLocationPress}
+              onPress={handleBackPress}
               style={styles.searchIcon}
             >
               <Ionicons
@@ -3246,8 +4651,16 @@ export default function PropertyListScreen({
             />
             <Text style={styles.searchInputText}>{formatGuests()}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.searchButton}>
-            <Text style={styles.searchButtonText}>Search</Text>
+          <TouchableOpacity
+            onPress={handleSearchPress}
+            style={styles.searchButton}
+            disabled={searchSubmitting}
+          >
+            {searchSubmitting ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.searchButtonText}>Search</Text>
+            )}
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -3306,22 +4719,65 @@ export default function PropertyListScreen({
         style={styles.listContainer}
         onTouchStart={handleOutsidePress}
       >
-        {apartments.map((apt, index) => (
-          <PropertyCard
-            key={apt.id || `apartment-${index}`}
-            property={apt}
-            onPress={() =>
-              (navigation as any).navigate("PropertyDetailsScreen", {
-                propertyData: {
-                  propertyName: apt.title,
-                  price: apt.price,
-                  location: apt.location,
-                  details: apt.details,
-                },
-              })
-            }
-          />
-        ))}
+        <View>
+          {noMatches && (
+            <View style={styles.noMatchBanner}>
+              <View style={styles.noMatchLeft}>
+                <AntDesign name="warning" size={28} color={"red"} />
+              </View>
+              <View style={styles.noMatchBody}>
+                <Text style={styles.noMatchTitle} numberOfLines={2}>
+                  Sorry, we couldn&#39;t find a hotel in that location.
+                </Text>
+                <Text style={styles.noMatchSubtitle} numberOfLines={2}>
+                  Here are some other great properties you might like.
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.noMatchAction}
+                onPress={handleShowAll}
+              >
+                <Text style={styles.noMatchActionText}>Show all</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {(filteredApartments && filteredApartments.length > 0
+            ? filteredApartments
+            : apartments
+          ).map((apt, index) => (
+            <PropertyCard
+              // Ensure keys are unique even if two properties accidentally share the same id
+              key={apt.id ? `${String(apt.id)}-${index}` : `apartment-${index}`}
+              property={apt}
+              onPress={() =>
+                (navigation as any).navigate("PropertyDetailsScreen", {
+                  propertyData: {
+                    propertyName: apt.title,
+                    title: apt.title,
+                    rating: apt.rating,
+                    reviewCount: apt.reviewCount,
+                    // Ensure pricePerNight is passed so details screen uses the
+                    // correct value instead of falling back to the hardcoded 100
+                    price: apt.price,
+                    pricePerNight: apt.price,
+                    location: apt.location,
+                    description: apt.description,
+                    imageSource: apt.imageSource,
+                    deal: apt.deal,
+                    oldPrice: apt.oldPrice,
+                    taxesIncluded: apt.taxesIncluded,
+                    distance: apt.distance,
+                    details: apt.details,
+                    // Pass selected dates and guests so details screen can pre-fill
+                    dates: selectedDates,
+                    guests: selectedGuests,
+                  },
+                })
+              }
+            />
+          ))}
+        </View>
       </ScrollView>
       <LocationModal
         isVisible={modalType === "location"}
@@ -3358,7 +4814,7 @@ export default function PropertyListScreen({
         selectedFilters={selectedFilters}
         setSelectedFilters={setSelectedFilters}
       />
-      <MapModal
+      <MapModalWrapper
         isVisible={modalType === "map"}
         onClose={() => setModalType(null)}
         styles={styles}

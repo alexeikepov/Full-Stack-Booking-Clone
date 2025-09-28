@@ -162,7 +162,7 @@ export default function GeniusLoyaltyModal({
         <ScrollView style={styles.scrollView} ref={scrollViewRef}>
           <View style={styles.heroSection}>
             <Image
-              source={require("../../assets/images/place-holder.jpg")}
+              source={require("../../assets/images/genius1.jpg")}
               style={styles.heroImage}
               resizeMode="cover"
             />
@@ -280,7 +280,7 @@ export default function GeniusLoyaltyModal({
               Savings made simple
             </Text>
             <Image
-              source={require("../../assets/images/place-holder.jpg")}
+              source={require("../../assets/images/genius2.jpg")}
               style={styles.simpleImage}
             />
             <Text
@@ -549,7 +549,7 @@ export default function GeniusLoyaltyModal({
               </View>
               <View style={styles.rateModalPrompt}>
                 <Image
-                  source={require("../../assets/images/place-holder.jpg")}
+                  source={require("../../assets/images/hotel7.png")}
                   style={styles.rateModalImage}
                 />
                 <Text

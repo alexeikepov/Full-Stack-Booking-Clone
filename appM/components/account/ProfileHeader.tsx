@@ -100,6 +100,8 @@ export default function ProfileHeader({
   const [openRateModal, setOpenRateModal] = useState<boolean>(false);
   const [openThanksModal, setOpenThanksModal] = useState<boolean>(false);
   const [openPhotoModal, setOpenPhotoModal] = useState<boolean>(false);
+  const [openNotImplementedModal, setOpenNotImplementedModal] =
+    useState<boolean>(false);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   // useRef to get a reference to the ScrollView
@@ -122,14 +124,15 @@ export default function ProfileHeader({
     setOpenRateModal(false);
     setOpenThanksModal(false);
     setOpenPhotoModal(false);
+    setOpenNotImplementedModal(false);
     setSelectedRating(null);
   };
 
   const handlePhotoSelection = (option: string) => {
-    // Here you would implement the actual photo selection logic
-    // For now, we'll just close the modal
-    console.log(`Photo selection option: ${option}`);
+    // Close the photo selection modal first
     setOpenPhotoModal(false);
+    // Show the not implemented modal
+    setOpenNotImplementedModal(true);
   };
   // Function to scroll to a specific section and open the corresponding FAQ
   const scrollToFaq = () => {
@@ -246,15 +249,15 @@ export default function ProfileHeader({
           <TouchableOpacity onPress={onMessagesPress}>
             <Ionicons
               name="chatbubble-outline"
-              size={28}
-              color={theme === "light" ? "#FFFFFF" : colors.icon}
+              size={32}
+              color={theme === "light" ? "#FFFFFF" : "#FFFFFF"}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={onNotificationsPress}>
             <Ionicons
               name="notifications-outline"
-              size={28}
-              color={theme === "light" ? "#FFFFFF" : colors.icon}
+              size={32}
+              color={theme === "light" ? "#FFFFFF" : "#FFFFFF"}
             />
           </TouchableOpacity>
         </View>
@@ -297,7 +300,7 @@ export default function ProfileHeader({
           <ScrollView style={styles.scrollView} ref={scrollViewRef}>
             <View style={styles.heroSection}>
               <Image
-                source={require("../../assets/images/place-holder.jpg")} // Using placeholder image
+                source={require("../../assets/images/genius1.jpg")} // Using placeholder image
                 style={styles.heroImage}
                 resizeMode="cover"
               />
@@ -419,7 +422,7 @@ export default function ProfileHeader({
                 Savings made simple
               </Text>
               <Image
-                source={require("../../assets/images/place-holder.jpg")} // Using placeholder image
+                source={require("../../assets/images/genius2.jpg")} // Using placeholder image
                 style={styles.simpleImage}
               />
               <Text
@@ -709,7 +712,7 @@ export default function ProfileHeader({
                 </View>
                 <View style={styles.rateModalPrompt}>
                   <Image
-                    source={require("../../assets/images/place-holder.jpg")}
+                    source={require("../../assets/images/hotel7.png")}
                     style={styles.rateModalImage}
                   />
                   <Text
@@ -859,6 +862,69 @@ export default function ProfileHeader({
                   <Text style={styles.photoOptionText}>Remove Photo</Text>
                 </TouchableOpacity>
               </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Not Implemented Modal */}
+      {openNotImplementedModal && (
+        <Modal
+          visible={openNotImplementedModal}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setOpenNotImplementedModal(false)}
+        >
+          <View style={styles.photoModalOverlay}>
+            <View
+              style={[
+                styles.notImplementedModalCard,
+                { backgroundColor: colors.card },
+              ]}
+            >
+              <View style={styles.notImplementedModalHeader}>
+                <Text
+                  style={[
+                    styles.notImplementedModalTitle,
+                    { color: colors.text },
+                  ]}
+                >
+                  Feature Not Available
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setOpenNotImplementedModal(false)}
+                >
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.notImplementedModalContent}>
+                <Ionicons
+                  name="construct-outline"
+                  size={64}
+                  color={colors.textSecondary}
+                  style={{ marginBottom: 16 }}
+                />
+                <Text
+                  style={[
+                    styles.notImplementedModalText,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  This feature is not yet implemented. Please check back in a
+                  future update!
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.notImplementedModalButton,
+                  { backgroundColor: colors.blue },
+                ]}
+                onPress={() => setOpenNotImplementedModal(false)}
+              >
+                <Text style={styles.notImplementedModalButtonText}>OK</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -1274,6 +1340,44 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   photoOptionText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  /* Not Implemented Modal Styles */
+  notImplementedModalCard: {
+    width: "90%",
+    maxWidth: 350,
+    borderRadius: 12,
+    padding: 24,
+    alignItems: "center",
+  },
+  notImplementedModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+    width: "100%",
+  },
+  notImplementedModalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  notImplementedModalContent: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  notImplementedModalText: {
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  notImplementedModalButton: {
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  notImplementedModalButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",

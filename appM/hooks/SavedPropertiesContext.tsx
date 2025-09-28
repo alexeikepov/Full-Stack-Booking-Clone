@@ -5,6 +5,7 @@ interface SavedPropertiesContextType {
   savedProperties: Property[];
   saveProperty: (property: Property) => void;
   unsaveProperty: (propertyId: string) => void;
+  removeProperty: (propertyId: string) => void;
   isSaved: (propertyId: string) => boolean;
 }
 
@@ -20,31 +21,54 @@ export const SavedPropertiesProvider = ({
   const [savedProperties, setSavedProperties] = useState<Property[]>([]);
 
   const saveProperty = (property: Property) => {
-    const propertyId = property.id || property.title; // Use id or fallback to title as identifier
+    // Normalize id to string for robust comparisons
+    const propertyId = String(property.id ?? property.title);
+    console.log("SavedPropertiesContext: saveProperty called ->", {
+      propertyId,
+    });
 
     setSavedProperties((prev) => {
-      // Check if property is already saved
-      const isAlreadySaved = prev.some((p) => (p.id || p.title) === propertyId);
+      // Check if property is already saved (compare normalized ids)
+      const isAlreadySaved = prev.some(
+        (p) => String(p.id ?? p.title) === propertyId,
+      );
 
       if (isAlreadySaved) {
         // Remove it (unsave)
-        return prev.filter((p) => (p.id || p.title) !== propertyId);
+        const next = prev.filter((p) => String(p.id ?? p.title) !== propertyId);
+        console.log("SavedPropertiesContext: unsaved ->", {
+          propertyId,
+          before: prev.length,
+          after: next.length,
+        });
+        return next;
       } else {
         // Add it (save)
         const propertyWithId = { ...property, id: propertyId };
-        return [...prev, propertyWithId];
+        const next = [...prev, propertyWithId];
+        console.log("SavedPropertiesContext: saved ->", {
+          propertyId,
+          before: prev.length,
+          after: next.length,
+        });
+        return next;
       }
     });
   };
 
   const unsaveProperty = (propertyId: string) => {
+    const idStr = String(propertyId);
+    console.log("SavedPropertiesContext: unsaveProperty ->", {
+      propertyId: idStr,
+    });
     setSavedProperties((prev) =>
-      prev.filter((p) => (p.id || p.title) !== propertyId),
+      prev.filter((p) => String(p.id ?? p.title) !== idStr),
     );
   };
 
   const isSaved = (propertyId: string) => {
-    return savedProperties.some((p) => (p.id || p.title) === propertyId);
+    const idStr = String(propertyId);
+    return savedProperties.some((p) => String(p.id ?? p.title) === idStr);
   };
 
   return (
@@ -53,6 +77,7 @@ export const SavedPropertiesProvider = ({
         savedProperties,
         saveProperty,
         unsaveProperty,
+        removeProperty: unsaveProperty,
         isSaved,
       }}
     >

@@ -22,7 +22,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Colors } from "../../constants/Colors";
 import { useTheme } from "../../hooks/ThemeContext";
-const placeholderImg = require("../../assets/images/place-holder.jpg");
+const placeholderImg = require("../../assets/images/hotel7.png");
 
 interface Style {
   container: ViewStyle;
