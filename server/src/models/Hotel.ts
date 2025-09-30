@@ -245,7 +245,7 @@ const HotelSchema = new Schema(
     amenityIds: { type: [Schema.Types.ObjectId], default: [] },
     media: { type: [Schema.Types.Mixed], default: [] },
 
-    categories: { type: [String], default: [], index: true },
+    categories: { type: [String], default: [] },
 
     averageRating: { type: Number, min: 0, max: 10, default: 0, index: true },
     reviewsCount: { type: Number, min: 0, default: 0 },
@@ -382,7 +382,9 @@ export const HotelModel = model("Hotel", HotelSchema);
     const indexes = await HotelModel.collection.indexes();
     const bad = indexes.find((ix: any) => {
       const keys = Object.keys(ix.key || {});
-      return keys.includes("categories") && keys.includes("rooms.pricePerNight");
+      return (
+        keys.includes("categories") && keys.includes("rooms.pricePerNight")
+      );
     });
     if (bad?.name) {
       await HotelModel.collection.dropIndex(bad.name);

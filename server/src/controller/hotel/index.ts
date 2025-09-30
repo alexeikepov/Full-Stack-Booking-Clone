@@ -12,6 +12,7 @@ export { getHotelRooms } from "./getHotelRooms";
 // Search, categories, and facets operations
 export { listCategories } from "./listCategories";
 export { suggestCities } from "./suggestCities";
+export { suggestHotels } from "./suggestHotels";
 export { facetsSnapshot } from "./facetsSnapshot";
 
 // Review operations
@@ -21,4 +22,3 @@ export { deleteMyReview } from "./deleteMyReview";
 export { listReviews } from "./listReviews";
 export { getMyReviews } from "./getMyReviews";
 export { getMyReviewForHotel } from "./getMyReviewForHotel";
-
