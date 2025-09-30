@@ -236,7 +236,6 @@ ReservationSchema.pre("validate", function (next) {
 ReservationSchema.index({ hotel: 1, roomType: 1, checkIn: 1, checkOut: 1 });
 ReservationSchema.index({ user: 1, createdAt: -1 });
 ReservationSchema.index({ status: 1, checkIn: 1 });
-ReservationSchema.index({ "confirmation.confirmationNumber": 1 });
 ReservationSchema.index({ "guestInfo.email": 1 });
 ReservationSchema.index({ checkIn: 1, checkOut: 1 });
 ReservationSchema.index({ sharedWith: 1 });
