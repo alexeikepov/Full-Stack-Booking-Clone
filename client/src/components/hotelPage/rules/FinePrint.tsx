@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface FinePrintProps {
   hotelName?: string;
@@ -16,13 +16,31 @@ export default function FinePrint({
 }: FinePrintProps) {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const navigate = useNavigate();
+  const [params] = useSearchParams();
 
   const toggleFAQ = (index: number) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
 
   const handleSeeAvailability = () => {
-    navigate("/coming-soon");
+    const sp = new URLSearchParams();
+    const from = params.get("from");
+    const to = params.get("to");
+    const adults = params.get("adults");
+    const children = params.get("children");
+    const rooms = params.get("rooms");
+    if (from) sp.set("from", from);
+    if (to) sp.set("to", to);
+    if (adults) sp.set("adults", adults);
+    if (children) sp.set("children", children);
+    if (rooms) sp.set("rooms", rooms);
+    const qs = sp.toString();
+    const target = document.getElementById("info");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      navigate(`?${qs}`);
+    }
   };
 
   const faqs: FAQ[] = [
