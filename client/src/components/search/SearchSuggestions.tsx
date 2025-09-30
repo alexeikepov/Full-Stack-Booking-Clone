@@ -128,7 +128,11 @@ export default function SearchSuggestions({
           {suggestions.map((suggestion, index) => (
             <button
               key={`${suggestion.type}-${suggestion.text}-${index}`}
-              onClick={() => onSelect(suggestion.text, suggestion.type, { id: suggestion.id })}
+              onMouseDown={(e) => {
+                // Use mousedown so it fires before input onBlur hides the list
+                e.preventDefault();
+                onSelect(suggestion.text, suggestion.type, { id: suggestion.id });
+              }}
               className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 ${
                 index === selectedIndex ? 'bg-blue-50' : ''
               }`}
