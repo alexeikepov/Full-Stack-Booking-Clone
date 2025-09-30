@@ -25,7 +25,16 @@ export class WishlistService {
     await wishlist.save();
     await wishlist.populate("hotelIds", "name location media rating");
 
-    return wishlist.toObject() as WishlistWithHotels;
+    const wishlistObj = wishlist.toObject();
+    return {
+      ...wishlistObj,
+      id: wishlistObj._id.toString(),
+      userId: wishlistObj.userId.toString(),
+      hotelIds: wishlistObj.hotelIds.map((hotel: any) => ({
+        ...hotel,
+        _id: hotel._id.toString(),
+      })),
+    } as WishlistWithHotels;
   }
 
   static async getUserWishlists(userId: string): Promise<WishlistWithHotels[]> {
@@ -34,7 +43,15 @@ export class WishlistService {
       .sort({ updatedAt: -1 })
       .lean();
 
-    return wishlists as WishlistWithHotels[];
+    return wishlists.map((wishlist: any) => ({
+      ...wishlist,
+      id: wishlist._id.toString(),
+      userId: wishlist.userId.toString(),
+      hotelIds: wishlist.hotelIds.map((hotel: any) => ({
+        ...hotel,
+        _id: hotel._id.toString(),
+      })),
+    })) as WishlistWithHotels[];
   }
 
   static async getWishlistById(
@@ -51,7 +68,19 @@ export class WishlistService {
       })
       .lean();
 
-    return wishlist as WishlistWithHotels | null;
+    if (!wishlist) {
+      return null;
+    }
+
+    return {
+      ...wishlist,
+      id: wishlist._id.toString(),
+      userId: wishlist.userId.toString(),
+      hotelIds: wishlist.hotelIds.map((hotel: any) => ({
+        ...hotel,
+        _id: hotel._id.toString(),
+      })),
+    } as WishlistWithHotels;
   }
 
   static async updateWishlist(
@@ -70,7 +99,16 @@ export class WishlistService {
     }
 
     await wishlist.populate("hotelIds", "name location media rating");
-    return wishlist.toObject() as WishlistWithHotels;
+    const wishlistObj = wishlist.toObject();
+    return {
+      ...wishlistObj,
+      id: wishlistObj._id.toString(),
+      userId: wishlistObj.userId.toString(),
+      hotelIds: wishlistObj.hotelIds.map((hotel: any) => ({
+        ...hotel,
+        _id: hotel._id.toString(),
+      })),
+    } as WishlistWithHotels;
   }
 
   static async deleteWishlist(
@@ -119,11 +157,20 @@ export class WishlistService {
       throw new Error("Hotel already in wishlist");
     }
 
-    wishlist.hotelIds.push(hotelId);
+    wishlist.hotelIds.push(new mongoose.Types.ObjectId(hotelId));
     await wishlist.save();
     await wishlist.populate("hotelIds", "name location media rating");
 
-    return wishlist.toObject() as WishlistWithHotels;
+    const wishlistObj = wishlist.toObject();
+    return {
+      ...wishlistObj,
+      id: wishlistObj._id.toString(),
+      userId: wishlistObj.userId.toString(),
+      hotelIds: wishlistObj.hotelIds.map((hotel: any) => ({
+        ...hotel,
+        _id: hotel._id.toString(),
+      })),
+    } as WishlistWithHotels;
   }
 
   static async removeHotelFromWishlist(
@@ -146,7 +193,16 @@ export class WishlistService {
     await wishlist.save();
     await wishlist.populate("hotelIds", "name location media rating");
 
-    return wishlist.toObject() as WishlistWithHotels;
+    const wishlistObj = wishlist.toObject();
+    return {
+      ...wishlistObj,
+      id: wishlistObj._id.toString(),
+      userId: wishlistObj.userId.toString(),
+      hotelIds: wishlistObj.hotelIds.map((hotel: any) => ({
+        ...hotel,
+        _id: hotel._id.toString(),
+      })),
+    } as WishlistWithHotels;
   }
 
   static async checkHotelInWishlist(
@@ -172,7 +228,7 @@ export class WishlistService {
     return {
       isInWishlist: wishlists.length > 0,
       wishlists: wishlists.map((w) => ({
-        _id: w._id,
+        _id: w._id.toString(),
         name: w.name,
       })),
     };
