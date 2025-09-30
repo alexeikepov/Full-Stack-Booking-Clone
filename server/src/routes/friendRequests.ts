@@ -9,7 +9,7 @@ import {
   getFriends,
   removeFriend,
   searchUsers,
-} from "../controller/friendRequestController";
+} from "../controller/friendRequest";
 
 const router = Router();
 

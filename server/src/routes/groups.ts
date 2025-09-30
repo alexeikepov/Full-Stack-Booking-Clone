@@ -8,7 +8,7 @@ import {
   removeMemberFromGroup,
   updateGroupStatus,
   deleteGroup,
-} from "../controller/groupController";
+} from "../controller/group";
 
 const router = Router();
 
