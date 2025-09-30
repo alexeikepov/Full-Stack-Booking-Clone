@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createReservation } from "@/lib/api";
 import { useSearchStore } from "@/stores/search";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export default function BookingModal({
   const from = picker.mode === "calendar" ? picker.range?.from : undefined;
   const to = picker.mode === "calendar" ? picker.range?.to : undefined;
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Calculate number of nights
   const calculateNights = () => {
@@ -63,6 +65,8 @@ export default function BookingModal({
     },
     onError: (error: any) => {
       console.error("Reservation error:", error);
+      console.error("Error response:", error.response);
+      console.error("Error config:", error.config);
       if (error.response?.status === 401) {
         alert("Please log in to make a reservation");
         navigate("/login");
@@ -80,6 +84,14 @@ export default function BookingModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check if user is authenticated
+    if (!user) {
+      alert("Please log in to make a reservation");
+      navigate("/login");
+      onClose();
+      return;
+    }
+
     // Проверяем, что даты выбраны
     if (!from || !to) {
       alert("Please select check-in and check-out dates");
@@ -93,7 +105,7 @@ export default function BookingModal({
     );
 
     const reservationData = {
-      hotelId: hotel.id || hotel._id?.$oid,
+      hotelId: hotel._id?.$oid || hotel._id || hotel.id,
       roomType: firstSelectedRoom?.roomType || "STANDARD",
       roomName: firstSelectedRoom?.name || "Standard",
       roomId: firstSelectedRoom?._id || firstSelectedRoom?.id,
@@ -141,6 +153,20 @@ export default function BookingModal({
 
     console.log("Sending reservation data:", reservationData);
     console.log("Dates from search store:", { from, to });
+    console.log(
+      "API base URL:",
+      (import.meta as any).env?.VITE_API_URL || "http://localhost:3000"
+    );
+    console.log("User authenticated:", !!user);
+    console.log(
+      "Auth token:",
+      localStorage.getItem("auth_token") ? "Present" : "Missing"
+    );
+    console.log("Hotel object:", hotel);
+    console.log(
+      "Hotel ID being sent:",
+      hotel._id?.$oid || hotel._id || hotel.id
+    );
     createReservationMutation.mutate(reservationData);
   };
 
