@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import MostPopularFacilities from "./MostPopularFacilities";
 import FacilitiesGrid from "./FacilitiesGrid";
 import type { Hotel } from "@/types/hotel";
@@ -9,9 +9,28 @@ interface HotelFacilitiesProps {
 
 export default function HotelFacilities({ hotel }: HotelFacilitiesProps) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
 
   const handleSeeAvailability = () => {
-    navigate("/coming-soon");
+    const sp = new URLSearchParams();
+    const from = params.get("from");
+    const to = params.get("to");
+    const adults = params.get("adults");
+    const children = params.get("children");
+    const rooms = params.get("rooms");
+    if (from) sp.set("from", from);
+    if (to) sp.set("to", to);
+    if (adults) sp.set("adults", adults);
+    if (children) sp.set("children", children);
+    if (rooms) sp.set("rooms", rooms);
+    const qs = sp.toString();
+    // Scroll to prices/rooms section on the same page
+    const target = document.getElementById("info");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      navigate(`?${qs}`);
+    }
   };
 
   return (

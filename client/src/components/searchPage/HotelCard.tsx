@@ -390,7 +390,7 @@ export default function HotelCard({
             </div>
 
             <Link
-              to="/coming-soon"
+              to={buildHotelUrl(hotelId)}
               className="inline-flex items-center rounded-md bg-[#0071c2] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-[#005fa3] focus:outline-none focus:ring-0"
             >
               See availability
