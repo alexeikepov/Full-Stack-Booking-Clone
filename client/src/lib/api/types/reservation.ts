@@ -1,4 +1,6 @@
 export type CreateReservationData = {
+  hotelId: string;
+  roomType: string;
   roomName: string;
   roomId: string;
   quantity: number;
@@ -13,6 +15,7 @@ export type CreateReservationData = {
     lastName?: string;
     email?: string;
     phone?: string;
+    country?: string;
     specialRequests?: string;
     dietaryRequirements?: string;
     arrivalTime?: string;
@@ -28,6 +31,7 @@ export type CreateReservationData = {
     description: string;
     additionalCost?: number;
   }>;
+  sharedWith?: string[];
   payment?: {
     method?: string;
     paid?: boolean;
