@@ -5,7 +5,7 @@ import { Search, MapPin, Building } from "lucide-react";
 
 interface SearchSuggestionsProps {
   query: string;
-  onSelect: (value: string, type: 'city' | 'hotel') => void;
+  onSelect: (value: string, type: 'city' | 'hotel', opts?: { id?: string }) => void;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -14,6 +14,7 @@ interface SuggestionItem {
   text: string;
   type: 'city' | 'hotel';
   count?: number;
+  id?: string;
 }
 
 export default function SearchSuggestions({ 
@@ -54,7 +55,8 @@ export default function SearchSuggestions({
       return response.data.map((hotel: any) => ({
         text: hotel.name,
         type: 'hotel' as const,
-        city: hotel.city
+        city: hotel.city,
+        id: hotel.id
       }));
     },
     enabled: isOpen && query.length >= 2,
@@ -87,7 +89,8 @@ export default function SearchSuggestions({
         case 'Enter':
           e.preventDefault();
           if (suggestions[selectedIndex]) {
-            onSelect(suggestions[selectedIndex].text, suggestions[selectedIndex].type);
+            const sel = suggestions[selectedIndex] as SuggestionItem;
+            onSelect(sel.text, sel.type, { id: sel.id });
           }
           break;
         case 'Escape':
@@ -125,7 +128,7 @@ export default function SearchSuggestions({
           {suggestions.map((suggestion, index) => (
             <button
               key={`${suggestion.type}-${suggestion.text}-${index}`}
-              onClick={() => onSelect(suggestion.text, suggestion.type)}
+              onClick={() => onSelect(suggestion.text, suggestion.type, { id: suggestion.id })}
               className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 ${
                 index === selectedIndex ? 'bg-blue-50' : ''
               }`}
