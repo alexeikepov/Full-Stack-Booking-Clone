@@ -10,7 +10,7 @@ import {
   removeHotelFromWishlist,
   checkHotelInWishlist,
   getPublicWishlist,
-} from "../controller/wishlistController";
+} from "../controller/wishlist";
 
 const router = Router();
 

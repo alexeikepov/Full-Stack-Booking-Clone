@@ -9,7 +9,7 @@ import {
   voteHelpful,
   reportReview,
   getReviewStats,
-} from "../controller/reviewController";
+} from "../controller/review";
 import { requireAuth, maybeAuth } from "../middlewares/auth";
 
 const router = Router();

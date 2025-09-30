@@ -8,13 +8,13 @@ import {
   updateReservationStatus,
   deleteReservation,
   getMyActiveReservations,
-  getCancellationReesevatioByID,
+  getCancellationReservationByID,
   getPastReservationByID,
   checkInReservation,
   checkOutReservation,
   addSpecialRequest,
   approveSpecialRequest,
-} from "../controller/reservationController";
+} from "../controller/reservation";
 import { requireAuth, maybeAuth } from "../middlewares/auth";
 
 const router = Router();
@@ -56,7 +56,7 @@ router.delete("/:id", requireAuth, deleteReservation);
 router.get("/my/active", requireAuth, getMyActiveReservations);
 
 // My cancelled reservations
-router.get("/my/cancelled", requireAuth, getCancellationReesevatioByID);
+router.get("/my/cancelled", requireAuth, getCancellationReservationByID);
 
 // My past reservations (completed)
 router.get("/my/past", requireAuth, getPastReservationByID);

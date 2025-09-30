@@ -17,8 +17,8 @@ import {
   suggestCities,
   suggestHotels,
   facetsSnapshot,
-} from "../controller/hotelController";
-import { getReviewStats } from "../controller/reviewController";
+} from "../controller/hotel";
+import { getReviewStats } from "../controller/review";
 import { requireAuth, maybeAuth } from "../middlewares/auth";
 
 const router = Router();
