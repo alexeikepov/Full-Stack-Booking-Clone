@@ -4,6 +4,7 @@ import type { PickerValue } from "@/components/search/types";
 
 interface SearchState {
   city: string;
+  searchQuery: string; // New field for general search (city or hotel name)
   picker: PickerValue;
   adults: number;
   children: number;
@@ -11,6 +12,7 @@ interface SearchState {
 
   // Actions
   setCity: (city: string) => void;
+  setSearchQuery: (query: string) => void;
   setPicker: (picker: PickerValue) => void;
   setAdults: (adults: number) => void;
   setChildren: (children: number) => void;
@@ -28,12 +30,14 @@ export const useSearchStore = create<SearchState>()(
     persist(
       (set) => ({
         city: "",
+        searchQuery: "",
         picker: defaultPicker,
         adults: 2,
         children: 0,
         rooms: 1,
 
         setCity: (city) => set({ city }, false, "search/setCity"),
+        setSearchQuery: (searchQuery) => set({ searchQuery }, false, "search/setSearchQuery"),
         setPicker: (picker) => set({ picker }, false, "search/setPicker"),
         setAdults: (adults) => set({ adults }, false, "search/setAdults"),
         setChildren: (children) =>
@@ -42,6 +46,7 @@ export const useSearchStore = create<SearchState>()(
 
         setSearchParams: (params) => {
           const city = params.get("city") || "";
+          const searchQuery = params.get("q") || "";
           const from = params.get("from");
           const to = params.get("to");
           const adults = Math.max(1, Number(params.get("adults") || 2));
@@ -59,6 +64,7 @@ export const useSearchStore = create<SearchState>()(
           set(
             {
               city,
+              searchQuery,
               picker,
               adults,
               children,

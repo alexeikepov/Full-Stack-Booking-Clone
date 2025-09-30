@@ -6,6 +6,7 @@ import { saveLastSearch, getLastSearchForUser } from "../services/searchHistoryS
 
 const filtersSchema = z.object({
   city: z.string().min(1).optional(),
+  searchQuery: z.string().min(1).optional(),
   from: z.union([z.string(), z.date()]).optional(),
   to: z.union([z.string(), z.date()]).optional(),
   adults: z.coerce.number().int().positive().optional(),

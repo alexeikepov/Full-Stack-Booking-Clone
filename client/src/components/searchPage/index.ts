@@ -6,6 +6,7 @@ export { default as HotelList } from "./HotelList";
 export { default as InfoNotice } from "./InfoNotice";
 export { default as LoadingSkeleton } from "./LoadingSkeleton";
 export { default as NoResultsPanel } from "./NoResultsPanel";
+export { default as Pagination } from "./Pagination";
 export { default as SearchHeader } from "./SearchHeader";
 export { default as SortBar } from "./SortBar";
 export { default as ViewToggle } from "./ViewToggle";

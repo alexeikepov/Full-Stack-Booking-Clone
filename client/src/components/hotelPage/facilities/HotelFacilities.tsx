@@ -1,20 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { getHotelById } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import MostPopularFacilities from "./MostPopularFacilities";
 import FacilitiesGrid from "./FacilitiesGrid";
+import type { Hotel } from "@/types/hotel";
 
 interface HotelFacilitiesProps {
-  hotelId?: string;
+  hotel: Hotel;
 }
 
-export default function HotelFacilities({ hotelId }: HotelFacilitiesProps) {
-  const { data: hotel } = useQuery({
-    queryKey: ["hotel", hotelId],
-    queryFn: () => getHotelById(String(hotelId)),
-    enabled: Boolean(hotelId),
-    staleTime: 5 * 60 * 1000,
-  });
+export default function HotelFacilities({ hotel }: HotelFacilitiesProps) {
   const navigate = useNavigate();
 
   const handleSeeAvailability = () => {

@@ -105,9 +105,10 @@ export default function HotelInfoPrices({
     }
   }, [searchRooms, requiredRooms]);
 
-  // Helper function to get room ID
-  const getRoomId = (room: Room) => {
-    return room._id?.$oid || "";
+  // Helper: stable unique room id (never empty)
+  const getRoomId = (room: Room, index: number) => {
+    const nameToken = String((room as any).name || "room").replace(/\s+/g, "-");
+    return (room as any)._id?.$oid || (room as any).id || `${index}-${nameToken}`;
   };
 
   // Handle room selection
@@ -241,7 +242,7 @@ export default function HotelInfoPrices({
               {rooms.map((room: Room, index: number) => {
                 return (
                   <RoomRow
-                    key={room._id?.$oid}
+                    key={getRoomId(room, index)}
                     room={room}
                     index={index}
                     selectedRooms={selectedRooms}

@@ -105,8 +105,10 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
   const headerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
 
-  const getRoomId = (room: any) => {
-    return room.id || room._id?.$oid || room._id || "";
+  const getRoomId = (room: any, index: number) => {
+    // Force unique ID using index to prevent conflicts
+    const roomId = `room-${index}-${room.name?.replace(/\s+/g, '-') || 'unknown'}`;
+    return roomId;
   };
 
   const handleRoomSelect = (roomId: string, count: number) => {
@@ -120,7 +122,7 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
     let total = 0;
     Object.entries(selectedRooms).forEach(([roomId, count]) => {
       if (count > 0) {
-        const room = rooms.find((r) => getRoomId(r) === roomId);
+        const room = rooms.find((r, index) => getRoomId(r, index) === roomId);
         if (room && room.pricePerNight) {
           total += room.pricePerNight * count;
         }
@@ -209,9 +211,11 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
           </div>
           {/* Room details */}
           <div className="bg-white overflow-hidden">
-            {rooms.map((room, index) => (
+            {rooms.map((room, index) => {
+              const roomId = getRoomId(room, index);
+              return (
               <div
-                key={getRoomId(room) || index}
+                key={roomId}
                 className={`${index > 0 ? "border-t border-gray-200" : ""}`}
               >
                 {/* Room type details */}
@@ -230,7 +234,7 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
                     {/* Availability warning */}
                     <div className="flex items-center gap-2 text-red-600 text-sm">
                       <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                      <span>{room.availableRooms} rooms available</span>
+                      <span>{room.availableRooms || room.availableUnits || 0} rooms available</span>
                     </div>
 
                     {/* Room specifications */}
@@ -324,26 +328,27 @@ export default function RoomSelection({ rooms }: RoomSelectionProps) {
                   {/* Select rooms */}
                   <div className="flex flex-col gap-2">
                     <select
-                      value={selectedRooms[getRoomId(room)] || 0}
+                      value={selectedRooms[getRoomId(room, index)] || 0}
                       onChange={(e) =>
                         handleRoomSelect(
-                          getRoomId(room),
+                          getRoomId(room, index),
                           parseInt(e.target.value)
                         )
                       }
                       className="border border-gray-300 rounded px-2 py-1 text-sm"
                     >
                       <option value={0}>0</option>
-                      {room.availableRooms >= 1 && <option value={1}>1</option>}
-                      {room.availableRooms >= 2 && <option value={2}>2</option>}
-                      {room.availableRooms >= 3 && <option value={3}>3</option>}
-                      {room.availableRooms >= 4 && <option value={4}>4</option>}
-                      {room.availableRooms > 5 && <option value={6}>5+</option>}
+                      {(room.availableRooms || room.availableUnits || 0) >= 1 && <option value={1}>1</option>}
+                      {(room.availableRooms || room.availableUnits || 0) >= 2 && <option value={2}>2</option>}
+                      {(room.availableRooms || room.availableUnits || 0) >= 3 && <option value={3}>3</option>}
+                      {(room.availableRooms || room.availableUnits || 0) >= 4 && <option value={4}>4</option>}
+                      {(room.availableRooms || room.availableUnits || 0) > 5 && <option value={6}>5+</option>}
                     </select>
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

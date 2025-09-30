@@ -14,6 +14,7 @@ export type SearchHotelsParams = {
 
 export type LastSearch = {
   city?: string;
+  searchQuery?: string;
   from?: string;
   to?: string;
   adults?: number;

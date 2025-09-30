@@ -4,7 +4,8 @@ interface RoomSelectorProps {
   room: any;
   selectedRooms: Record<string, number>;
   onRoomSelect: (roomId: string, count: number) => void;
-  getRoomId: (room: any) => string;
+  getRoomId: (room: any, index: number) => string;
+  index?: number;
 }
 
 export default function RoomSelector({
@@ -12,11 +13,12 @@ export default function RoomSelector({
   selectedRooms,
   onRoomSelect,
   getRoomId,
+  index = 0,
 }: RoomSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const roomId = getRoomId(room);
+  const roomId = getRoomId(room, index);
   const currentCount = selectedRooms[roomId] || 0;
-  const availableRooms = room.availableRooms || 0;
+  const availableRooms = room.availableRooms || room.availableUnits || 0;
   const maxRooms = Math.min(availableRooms, 5);
 
   const options = Array.from({ length: maxRooms + 1 }, (_, i) => i);
