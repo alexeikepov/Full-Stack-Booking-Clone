@@ -921,13 +921,13 @@ export async function suggestHotels(
 
     const rx = new RegExp(escapeRegExp(q.trim()), "i");
     const rows = await HotelModel.find({ name: rx })
-      .select("name city")
+      .select("name city _id")
       .sort({ reviewsCount: -1, averageRating: -1 })
       .limit(10)
       .lean();
 
     res.json(
-      rows.map((h) => ({ name: (h as any).name, city: (h as any).city }))
+      rows.map((h) => ({ id: String((h as any)._id), name: (h as any).name, city: (h as any).city }))
     );
   } catch (err) {
     next(err);

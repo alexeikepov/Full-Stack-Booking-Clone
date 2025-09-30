@@ -43,8 +43,14 @@ export default function HeroSearch() {
       try {
         const last = await getMyLastSearch();
         if (mounted && last) {
-          if (last.city) setCity(last.city);
-          if (last.searchQuery) setSearchQuery(last.searchQuery);
+          // Do not override explicit URL params (city/q)
+          const hasExplicitCity = !!params.get("city");
+          const hasExplicitQuery = !!params.get("q");
+          if (!hasExplicitCity && last.city) setCity(last.city);
+          // Do NOT restore last searchQuery if URL has explicit city (to avoid overwriting city display)
+          if (!hasExplicitQuery && !hasExplicitCity && last.searchQuery) {
+            setSearchQuery(last.searchQuery);
+          }
           if (last.adults != null) setAdults(last.adults);
           if (last.children != null) setChildren(last.children);
           if (last.rooms != null) setRooms(last.rooms);
@@ -65,10 +71,22 @@ export default function HeroSearch() {
     return () => {
       mounted = false;
     };
-  }, [setCity, setAdults, setChildren, setRooms, setPicker]);
+  }, [params, setCity, setAdults, setChildren, setRooms, setPicker]);
 
   useEffect(() => {
     setSearchParams(params);
+    // Sync input with URL params so the field shows the actual filter
+    const qParam = params.get("q") || "";
+    const cityParam = params.get("city") || "";
+    if (qParam) {
+      setSearchQuery(qParam);
+      setCity("");
+      setSelectedType('hotel');
+    } else if (cityParam) {
+      setCity(cityParam);
+      setSearchQuery("");
+      setSelectedType('city');
+    }
   }, [params, setSearchParams]);
 
   const submit = (overrides?: { city?: string; q?: string; exact?: boolean }) => {
@@ -80,9 +98,20 @@ export default function HeroSearch() {
       return `${year}-${month}-${day}`;
     };
 
-    const effCity = overrides?.city !== undefined ? overrides.city : city;
-    const effQuery = overrides?.q !== undefined ? overrides.q : searchQuery;
-    const effExact = overrides?.exact ?? (selectedType === 'hotel');
+    let effCity = overrides?.city !== undefined ? overrides.city : city;
+    let effQuery = overrides?.q !== undefined ? overrides.q : searchQuery;
+    let effExact = overrides?.exact ?? (selectedType === 'hotel');
+
+    // If user typed a city and pressed Enter without selecting, treat as city search
+    if (!overrides && !effCity && effQuery && selectedType !== 'hotel') {
+      effCity = effQuery;
+      effQuery = "";
+      effExact = false;
+      // Update store so input shows the city on the results page
+      setCity(effCity);
+      setSearchQuery("");
+      setSelectedType('city');
+    }
 
     const base: Record<string, string> = {
       ...(effCity ? { city: effCity } : {}),
@@ -187,7 +216,7 @@ export default function HeroSearch() {
             {showSuggestions && isFocused && (
               <SearchSuggestions
                 query={searchQuery}
-                onSelect={(value, type) => {
+                onSelect={(value, type, opts) => {
                   if (type === 'city') {
                     setCity(value);
                     setSearchQuery(value);
@@ -198,11 +227,17 @@ export default function HeroSearch() {
                     return;
                   }
                   // hotel name
+                  setShowSuggestions(false);
+                  setIsFocused(false);
+                  // If we have an id, go directly to hotel page
+                  if (opts?.id) {
+                    navigate(`/hotel/${opts.id}`);
+                    return;
+                  }
+                  // Fallback to exact name search
                   setSearchQuery(value);
                   setCity("");
                   setSelectedType('hotel');
-                  setShowSuggestions(false);
-                  setIsFocused(false);
                   submit({ city: "", q: value, exact: true });
                 }}
                 onClose={() => {
