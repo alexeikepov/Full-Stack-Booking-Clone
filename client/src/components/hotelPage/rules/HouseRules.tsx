@@ -13,39 +13,21 @@ import {
 } from "lucide-react";
 import { MdCrib } from "react-icons/md";
 
+import type { Hotel } from "@/types/hotel";
+
 interface HouseRulesProps {
-  hotelId?: string;
+  hotel: Hotel;
 }
 
-export default function HouseRules({ hotelId }: HouseRulesProps) {
-  const { data: hotel, isLoading } = useQuery({
-    queryKey: ["hotel", hotelId],
-    queryFn: async () => {
-      const response = await api.get(`/api/hotels/${hotelId}`);
-      return response.data;
-    },
-    enabled: Boolean(hotelId),
-  });
+export default function HouseRules({ hotel }: HouseRulesProps) {
   const navigate = useNavigate();
 
   const handleSeeAvailability = () => {
     navigate("/coming-soon");
   };
 
-  if (isLoading) {
-    return (
-      <div id="house-rules" className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  if (!hotel) {
+    return null;
   }
 
   const defaultRules = {
@@ -116,7 +98,7 @@ export default function HouseRules({ hotelId }: HouseRulesProps) {
           <div>
             <h2 className="text-2xl font-semibold mb-2">House rules</h2>
             <p className="text-sm text-gray-600">
-              {hotel.name} takes special requests - add in the next step!
+              {hotel?.name || "This property"} takes special requests - add in the next step!
             </p>
           </div>
           <button

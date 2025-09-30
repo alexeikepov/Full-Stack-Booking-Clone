@@ -7,6 +7,7 @@ import {
   SearchHeader,
   HotelList,
   Breadcrumb,
+  Pagination,
 } from "@/components/searchPage";
 import type { FiltersState } from "@/components/searchPage/FiltersSidebar";
 import { sortHotels, type SortKey } from "@/utils/sortHotels";
@@ -30,10 +31,24 @@ export default function SearchPage() {
   const [sortKey, setSortKey] = useState<SortKey>(
     (params.get("sort") as SortKey) || "price_high"
   );
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 14;
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [params]);
+
+  // When search params change (new search), reset pagination to first page
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [params]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortKey]);
 
   const nights = nightsFromParams(params);
 
@@ -93,6 +108,7 @@ export default function SearchPage() {
       priceMax: next.priceMax ?? prev.priceMax,
       selected: mergeSelected(prev.selected, next.selected),
     }));
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const sorted = useMemo(
@@ -103,6 +119,17 @@ export default function SearchPage() {
   const filtered = useMemo(() => {
     return filterHotels(sorted, filters);
   }, [sorted, filters]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedHotels = filtered.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -155,13 +182,24 @@ export default function SearchPage() {
             }`}
           >
             <HotelList
-              hotels={filtered}
+              hotels={paginatedHotels}
               isLoading={isLoading}
               error={error}
               view={view}
               nights={nights}
               city={params.get("city")}
             />
+            
+            {/* Pagination */}
+            {!isLoading && filtered.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                totalItems={filtered.length}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -228,16 +228,16 @@ export default function HotelPage() {
           <GuestReviews hotel={hotel} />
         </div>
         <div id="facilities">
-          <HotelFacilities hotelId={hotel.id} />
+          <HotelFacilities hotel={hotel} />
         </div>
         <div id="surroundings">
           <HotelSurroundings
-            hotelId={hotel.id}
+            hotel={hotel}
             onShowMap={() => setIsMapModalOpen(true)}
           />
         </div>
         <div id="house-rules">
-          <HouseRules hotelId={hotel.id} />
+          <HouseRules hotel={hotel} />
         </div>
         <div id="fine-print">
           <FinePrint hotelName={hotel.name} />

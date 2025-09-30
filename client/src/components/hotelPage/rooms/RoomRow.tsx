@@ -9,7 +9,7 @@ interface RoomRowProps {
   index: number;
   selectedRooms: Record<string, number>;
   onRoomSelect: (roomId: string, count: number) => void;
-  getRoomId: (room: any) => string;
+  getRoomId: (room: any, index: number) => string;
   totalSelectedRooms: number;
   totalPrice: number;
   firstSelectedRoom: any;
@@ -61,13 +61,13 @@ export default function RoomRow({
           </a>
 
           <RoomSpecifications room={room} />
-          {room.availableRooms !== undefined && room.availableRooms > 0 && (
+          {(room.availableRooms || room.availableUnits || 0) > 0 && (
             <div className="flex items-center gap-2 text-red-600 text-sm">
               <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-              <span>Only {room.availableRooms} left on our site</span>
+              <span>Only {room.availableRooms || room.availableUnits || 0} left on our site</span>
             </div>
           )}
-          {room.availableRooms === 0 && (
+          {(room.availableRooms || room.availableUnits || 0) === 0 && (
             <div className="flex items-center gap-2 text-red-600 text-sm">
               <div className="w-2 h-2 bg-red-600 rounded-full"></div>
               <span>Sold out</span>
@@ -159,7 +159,8 @@ export default function RoomRow({
             room={room}
             selectedRooms={selectedRooms}
             onRoomSelect={onRoomSelect}
-            getRoomId={getRoomId}
+            getRoomId={(room, idx) => getRoomId(room, index)}
+            index={index}
           />
         </div>
 

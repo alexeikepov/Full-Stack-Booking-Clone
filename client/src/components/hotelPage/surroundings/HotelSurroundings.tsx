@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { getHotelById } from "@/lib/api";
 import { Utensils, User, Mountain, Star, Bus, Plane } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import type { Hotel } from "@/types/hotel";
 
 interface LocationItem {
   name: string;
@@ -10,20 +9,14 @@ interface LocationItem {
 }
 
 interface HotelSurroundingsProps {
-  hotelId?: string;
+  hotel: Hotel;
   onShowMap?: () => void;
 }
 
 export default function HotelSurroundings({
-  hotelId,
+  hotel,
   onShowMap,
 }: HotelSurroundingsProps) {
-  const { data: hotel } = useQuery({
-    queryKey: ["hotel", hotelId],
-    queryFn: () => getHotelById(String(hotelId)),
-    enabled: Boolean(hotelId),
-    staleTime: 5 * 60 * 1000,
-  });
   const navigate = useNavigate();
 
   const hasSurroundingsData =

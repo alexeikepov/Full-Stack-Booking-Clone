@@ -15,6 +15,7 @@ import {
   getMyReviews,
   listCategories,
   suggestCities,
+  suggestHotels,
   facetsSnapshot,
 } from "../controller/hotelController";
 import { getReviewStats } from "../controller/reviewController";
@@ -37,6 +38,7 @@ router.get("/me/reviews", requireAuth, getMyReviews);
 // Categories, cities, facets
 router.get("/_meta/categories", listCategories);
 router.get("/_meta/cities", suggestCities);
+router.get("/_meta/hotels", suggestHotels);
 router.get("/_meta/facets", facetsSnapshot);
 
 // ---------- Protected (hotel admin/owner) ----------

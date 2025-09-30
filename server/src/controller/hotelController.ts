@@ -210,6 +210,7 @@ export async function listHotels(
       sort,
       minStars,
       maxStars,
+      exact,
     } = req.query as Record<string, string | undefined>;
 
     const rxEq = (s: string) => new RegExp(`^${escapeRegExp(s)}$`, "i");
@@ -219,7 +220,15 @@ export async function listHotels(
     };
 
     const filter: any = {};
-    if (q) filter.$text = { $search: q };
+    const wantsExact = exact === "1" || exact === "true";
+    if (q?.trim()) {
+      if (wantsExact) {
+        // prioritize exact hotel name match when requested
+        filter.name = { $regex: rxEq(q.trim()) };
+      } else {
+        filter.$text = { $search: q };
+      }
+    }
     if (city?.trim()) filter.city = { $regex: rxEq(city.trim()) };
 
     const minS = toNum(minStars);
@@ -258,6 +267,7 @@ export async function listHotels(
     if (req.user?.id) {
       saveLastSearch(req.user.id, {
         city: city?.trim(),
+        searchQuery: q?.trim(),
         from,
         to,
         adults: numAdults,
@@ -266,8 +276,12 @@ export async function listHotels(
       }).catch(() => {});
     }
 
-    const hotels = await HotelModel.find(filter)
+    // If no search filters provided, list approved hotels by rating/date
+    const baseFilter = Object.keys(filter).length === 0 ? { approvalStatus: { $in: ["APPROVED", "approved"] } } : filter;
+
+    const hotels = await HotelModel.find(baseFilter)
       .sort({ averageRating: -1, createdAt: -1 })
+      .limit(Object.keys(filter).length === 0 ? 200 : 0)
       .lean();
 
     const start = from ? new Date(`${from}T00:00:00Z`) : undefined;
@@ -773,16 +787,21 @@ export async function getHotelRooms(
       for (const r of overlaps) bookedByType[r._id] = r.qty;
     }
 
-    const rooms = ((hotel as any).rooms ?? []).map((r: any) => {
+    const rooms = ((hotel as any).rooms ?? []).map((r: any, index: number) => {
       const key = String(r.name);
       const total = Number(
         r.totalRooms ?? r.availableRooms ?? r.totalUnits ?? 0
       );
       const booked = hasRange ? Number(bookedByType[key] ?? 0) : 0;
       const available = Math.max(0, total - booked);
+      
+      // Ensure unique ID for each room
+      const roomId = r._id || r.id || `room-${index}`;
+      console.log('Server room ID:', { roomName: r.name, originalId: r._id || r.id, finalId: roomId, index });
+      
       return {
-        _id: r._id || r.id,
-        id: r._id || r.id,
+        _id: roomId,
+        id: roomId,
         name: r.name,
         roomType: r.roomType || key,
         roomCategory: r.roomCategory || "Standard",
@@ -886,6 +905,30 @@ export async function suggestCities(
       { $limit: 10 },
     ]);
     res.json(rows.map((r) => ({ city: r._id, count: r.count })));
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function suggestHotels(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { q } = req.query as Record<string, string | undefined>;
+    if (!q || q.trim().length < 2) return res.json([]);
+
+    const rx = new RegExp(escapeRegExp(q.trim()), "i");
+    const rows = await HotelModel.find({ name: rx })
+      .select("name city")
+      .sort({ reviewsCount: -1, averageRating: -1 })
+      .limit(10)
+      .lean();
+
+    res.json(
+      rows.map((h) => ({ name: (h as any).name, city: (h as any).city }))
+    );
   } catch (err) {
     next(err);
   }
