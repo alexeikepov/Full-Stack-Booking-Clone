@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { MdPerson } from "react-icons/md";
 import RoomSpecifications from "./RoomSpecifications";
 import RoomAmenities from "./RoomAmenities";
 import RoomSelector from "./RoomSelector";
 import PriceSummary from "../info/PriceSummary";
+import ImageViewer from "../gallery/ImageViewer";
 
 interface RoomRowProps {
   room: any;
@@ -31,6 +33,9 @@ export default function RoomRow({
   children,
   hotel,
 }: RoomRowProps) {
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
   const calculateRequiredRooms = (adults: number, children: number) => {
     const totalGuests = adults + children;
     const guestsPerRoom = 3;
@@ -41,8 +46,36 @@ export default function RoomRow({
   const requiredRooms = calculateRequiredRooms(adults, children);
   const pricePerRoom = room.pricePerNight;
 
+  const roomImages: string[] = Array.isArray(room.photos) && room.photos.length
+    ? room.photos
+    : Array.isArray(room.media)
+    ? room.media
+        .filter((m: any) => m && (m.url || typeof m === "string"))
+        .map((m: any) => (typeof m === "string" ? m : m.url))
+    : [];
+
+  const openViewer = (startIdx = 0) => {
+    if (!roomImages.length) return;
+    setViewerIndex(Math.min(Math.max(0, startIdx), roomImages.length - 1));
+    setViewerOpen(true);
+  };
+  const closeViewer = () => setViewerOpen(false);
+  const nextImage = () =>
+    setViewerIndex((i) => (i + 1) % Math.max(1, roomImages.length));
+  const prevImage = () =>
+    setViewerIndex((i) => (i - 1 + Math.max(1, roomImages.length)) % Math.max(1, roomImages.length));
+
   return (
     <div key={room._id || room.id}>
+      <ImageViewer
+        isOpen={viewerOpen}
+        currentIndex={viewerIndex}
+        images={roomImages}
+        hotel={hotel}
+        onClose={closeViewer}
+        onNext={nextImage}
+        onPrev={prevImage}
+      />
       <div
         className={`grid grid-cols-[minmax(320px,1.2fr)_140px_220px_1.8fr_88px_180px] gap-0 p-0 divide-x divide-[#e6e6e6] ${
           index === 0 ? "sticky top-16 z-30" : ""
@@ -53,12 +86,12 @@ export default function RoomRow({
             index > 0 ? "border-t border-gray-200" : ""
           }`}
         >
-          <a
-            href="#"
+          <button
+            onClick={() => openViewer(0)}
             className="text-[#0071c2] font-semibold text-lg inline-block hover:underline"
           >
             {room.name}
-          </a>
+          </button>
 
           <RoomSpecifications room={room} />
           {(room.availableRooms || room.availableUnits || 0) > 0 && (
