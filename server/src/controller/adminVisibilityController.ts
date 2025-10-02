@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { HotelModel } from "../models/Hotel";
 import { AuthedRequest } from "../middlewares/auth";
 import { isOwnerOrAdmin } from "../middlewares/adminAuth";
-
+//Update hotel visibility
 export async function updateHotelVisibility(
   req: AuthedRequest,
   res: Response,
