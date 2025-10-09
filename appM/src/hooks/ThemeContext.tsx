@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext } from "react";
 import { useColorScheme } from "react-native";
-import { Colors } from "../constants/Colors";
+import { Colors } from "../components/ui/Colors";
 export type ThemeType = "light" | "dark";
 interface ThemeContextProps {
   theme: ThemeType;

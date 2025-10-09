@@ -21,6 +21,10 @@ export interface Booking {
     shareOptions: string[];
     contactNumber: string;
   };
+  guestInfo?: {
+    name: string;
+    email: string;
+  };
 }
 
 interface BookingsContextType {
@@ -30,6 +34,9 @@ interface BookingsContextType {
   updateBooking: (bookingId: string, patch: Partial<Booking>) => void;
   getActiveBookings: () => Booking[];
   getPastBookings: () => Booking[];
+  findBookingByConfirmationNumber: (
+    confirmationNumber: string,
+  ) => Booking | null;
 }
 
 const BookingsContext = createContext<BookingsContextType | undefined>(
@@ -64,6 +71,14 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
     return bookings.filter((booking) => booking.status === "Completed");
   };
 
+  const findBookingByConfirmationNumber = (confirmationNumber: string) => {
+    return (
+      bookings.find(
+        (booking) => booking.details.confirmationNumber === confirmationNumber,
+      ) || null
+    );
+  };
+
   return (
     <BookingsContext.Provider
       value={{
@@ -73,6 +88,7 @@ export const BookingsProvider = ({ children }: { children: ReactNode }) => {
         updateBooking,
         getActiveBookings,
         getPastBookings,
+        findBookingByConfirmationNumber,
       }}
     >
       {children}

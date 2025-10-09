@@ -17,6 +17,60 @@ const roomSchema = z.object({
   availableRooms: z.number().int().nonnegative().optional(),
 });
 
+const surroundingsSchema = z.object({
+  nearbyAttractions: z
+    .array(
+      z.object({
+        name: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  topAttractions: z
+    .array(
+      z.object({
+        name: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  restaurantsCafes: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  naturalBeauty: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  publicTransport: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+  closestAirports: z
+    .array(
+      z.object({
+        name: z.string(),
+        distance: z.string(),
+      })
+    )
+    .optional(),
+});
+
 const createHotelSchema = z.object({
   name: z.string().min(2),
   city: z.string().min(2),
@@ -32,13 +86,40 @@ const createHotelSchema = z.object({
   images: z.array(z.string()).optional(),
   categories: z.array(z.string()).optional(),
   rooms: z.array(roomSchema).min(1),
+  surroundings: surroundingsSchema.optional(),
 });
 
 const updateHotelSchema = createHotelSchema.partial();
 
 const reviewCreateSchema = z.object({
-  rating: z.number().int().min(1).max(5),
+  rating: z.number().int().min(1).max(10),
   comment: z.string().max(2000).optional().default(""),
+  negative: z.string().max(2000).optional().default(""),
+
+  // Guest info
+  guestName: z.string().min(1).max(100),
+  guestCountry: z.string().min(1).max(100),
+  guestInitial: z.string().min(1).max(5),
+
+  // Detailed ratings
+  categoryRatings: z
+    .object({
+      staff: z.number().int().min(1).max(10).optional(),
+      comfort: z.number().int().min(1).max(10).optional(),
+      freeWifi: z.number().int().min(1).max(10).optional(),
+      facilities: z.number().int().min(1).max(10).optional(),
+      valueForMoney: z.number().int().min(1).max(10).optional(),
+      cleanliness: z.number().int().min(1).max(10).optional(),
+      location: z.number().int().min(1).max(10).optional(),
+    })
+    .optional(),
+
+  // Stay details
+  stayDate: z.string().optional(),
+  roomType: z.string().optional(),
+  travelType: z
+    .enum(["BUSINESS", "LEISURE", "COUPLE", "FAMILY", "FRIENDS", "SOLO"])
+    .optional(),
 });
 
 const reviewUpdateSchema = reviewCreateSchema.partial();
@@ -96,8 +177,9 @@ export async function createHotel(
       location: loc,
       description: dto.description,
       categories: dto.categories,
-      media: dto.images?.map((src) => ({ src })) ?? [],
+      media: dto.images?.map((src) => ({ url: src, type: "image" })) ?? [],
       rooms: normalizedRooms,
+      surroundings: dto.surroundings,
       ownerId: req.user?.id,
     });
 
@@ -128,6 +210,7 @@ export async function listHotels(
       sort,
       minStars,
       maxStars,
+      exact,
     } = req.query as Record<string, string | undefined>;
 
     const rxEq = (s: string) => new RegExp(`^${escapeRegExp(s)}$`, "i");
@@ -137,7 +220,15 @@ export async function listHotels(
     };
 
     const filter: any = {};
-    if (q) filter.$text = { $search: q };
+    const wantsExact = exact === "1" || exact === "true";
+    if (q?.trim()) {
+      if (wantsExact) {
+        // prioritize exact hotel name match when requested
+        filter.name = { $regex: rxEq(q.trim()) };
+      } else {
+        filter.$text = { $search: q };
+      }
+    }
     if (city?.trim()) filter.city = { $regex: rxEq(city.trim()) };
 
     const minS = toNum(minStars);
@@ -176,6 +267,7 @@ export async function listHotels(
     if (req.user?.id) {
       saveLastSearch(req.user.id, {
         city: city?.trim(),
+        searchQuery: q?.trim(),
         from,
         to,
         adults: numAdults,
@@ -184,8 +276,12 @@ export async function listHotels(
       }).catch(() => {});
     }
 
-    const hotels = await HotelModel.find(filter)
+    // If no search filters provided, list approved hotels by rating/date
+    const baseFilter = Object.keys(filter).length === 0 ? { approvalStatus: { $in: ["APPROVED", "approved"] } } : filter;
+
+    const hotels = await HotelModel.find(baseFilter)
       .sort({ averageRating: -1, createdAt: -1 })
+      .limit(Object.keys(filter).length === 0 ? 200 : 0)
       .lean();
 
     const start = from ? new Date(`${from}T00:00:00Z`) : undefined;
@@ -691,18 +787,47 @@ export async function getHotelRooms(
       for (const r of overlaps) bookedByType[r._id] = r.qty;
     }
 
-    const rooms = ((hotel as any).rooms ?? []).map((r: any) => {
+    const rooms = ((hotel as any).rooms ?? []).map((r: any, index: number) => {
       const key = String(r.name);
       const total = Number(
         r.totalRooms ?? r.availableRooms ?? r.totalUnits ?? 0
       );
       const booked = hasRange ? Number(bookedByType[key] ?? 0) : 0;
       const available = Math.max(0, total - booked);
+      
+      // Ensure unique ID for each room
+      const roomId = r._id || r.id || `room-${index}`;
+      console.log('Server room ID:', { roomName: r.name, originalId: r._id || r.id, finalId: roomId, index });
+      
       return {
-        roomType: key,
+        _id: roomId,
+        id: roomId,
+        name: r.name,
+        roomType: r.roomType || key,
+        roomCategory: r.roomCategory || "Standard",
+        capacity: r.capacity || 2,
+        maxAdults: r.maxAdults || 2,
+        maxChildren: r.maxChildren || 0,
         pricePerNight: r.pricePerNight,
+        sizeSqm: r.sizeSqm || 0,
+        bedrooms: r.bedrooms || 1,
+        bathrooms: r.bathrooms || 1,
         totalRooms: total,
         availableRooms: hasRange ? available : total,
+        amenities: r.amenities || [],
+        facilities: r.facilities || [],
+        categories: r.categories || [],
+        features: r.features || [],
+        specialFeatures: r.specialFeatures || {},
+        pricing: r.pricing || {
+          basePrice: r.pricePerNight,
+          currency: "₪",
+          freeCancellation: true,
+          noPrepayment: true,
+          priceMatch: false,
+        },
+        photos: r.photos || [],
+        media: r.media || [],
       };
     });
 
@@ -780,6 +905,30 @@ export async function suggestCities(
       { $limit: 10 },
     ]);
     res.json(rows.map((r) => ({ city: r._id, count: r.count })));
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function suggestHotels(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { q } = req.query as Record<string, string | undefined>;
+    if (!q || q.trim().length < 2) return res.json([]);
+
+    const rx = new RegExp(escapeRegExp(q.trim()), "i");
+    const rows = await HotelModel.find({ name: rx })
+      .select("name city _id")
+      .sort({ reviewsCount: -1, averageRating: -1 })
+      .limit(10)
+      .lean();
+
+    res.json(
+      rows.map((h) => ({ id: String((h as any)._id), name: (h as any).name, city: (h as any).city }))
+    );
   } catch (err) {
     next(err);
   }
@@ -917,39 +1066,88 @@ export async function createReview(
   res: Response,
   next: NextFunction
 ) {
+  const { hotelId } = req.params;
+  const userId = req.user?.id;
+  
   try {
-    const { hotelId } = req.params;
     if (!mongoose.isValidObjectId(hotelId))
       return res.status(400).json({ error: "Invalid hotel id" });
-    const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    console.log(
+      `[HOTEL CONTROLLER] createReview: hotelId=${hotelId}, userId=${userId}`
+    );
+    console.log(`[HOTEL CONTROLLER] Request body:`, req.body);
 
     const dto = reviewCreateSchema.parse(req.body);
 
-    const exists = await ReviewModel.findOne({
+    // Check if user is trying to review their own hotel
+    const hotel = await HotelModel.findById(hotelId);
+    if (hotel) {
+      const isOwner = hotel.ownerId.toString() === userId;
+      const isAdmin = hotel.adminIds.includes(userId as any);
+      
+      if (isOwner || isAdmin) {
+        console.log(`User ${userId} is ${isOwner ? 'owner' : 'admin'} of hotel ${hotelId}, allowing review creation`);
+      }
+    }
+
+    console.log("Creating new review with data:", {
       hotel: hotelId,
       user: userId,
-    }).lean();
-    if (exists)
-      return res
-        .status(409)
-        .json({ error: "User already reviewed this hotel" });
+      rating: dto.rating,
+      comment: dto.comment,
+      negative: dto.negative,
+      guestName: dto.guestName,
+      guestCountry: dto.guestCountry,
+      guestInitial: dto.guestInitial,
+      categoryRatings: dto.categoryRatings,
+      stayDate: dto.stayDate ? new Date(dto.stayDate) : undefined,
+      roomType: dto.roomType,
+      travelType: dto.travelType,
+    });
 
     const review = await ReviewModel.create({
       hotel: hotelId,
       user: userId,
       rating: dto.rating,
       comment: dto.comment,
+      negative: dto.negative,
+      guestName: dto.guestName,
+      guestCountry: dto.guestCountry,
+      guestInitial: dto.guestInitial,
+      categoryRatings: dto.categoryRatings,
+      stayDate: dto.stayDate ? new Date(dto.stayDate) : undefined,
+      roomType: dto.roomType,
+      travelType: dto.travelType,
+      status: "APPROVED",
     });
+
+    console.log("Review created successfully:", review);
 
     await recomputeHotelRating(hotelId);
     res.status(201).json(review);
   } catch (err) {
+    console.error("createReview error:", err);
+
+    // If it's a duplicate key error for reviews, try to find existing review
     if ((err as any)?.code === 11000) {
-      return res
-        .status(409)
-        .json({ error: "User already reviewed this hotel" });
+      console.log("Duplicate key error, trying to find existing review...");
+      try {
+        const existingReview = await ReviewModel.findOne({
+          hotel: hotelId,
+          user: userId,
+        }).sort({ createdAt: -1 }); // Get the most recent review
+
+        if (existingReview) {
+          console.log("Found existing review, returning it:", existingReview);
+          return res.status(201).json(existingReview);
+        }
+      } catch (findErr) {
+        console.error("Error finding existing review:", findErr);
+      }
     }
+
     next(err);
   }
 }
@@ -966,18 +1164,26 @@ export async function updateMyReview(
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
+    console.log(`updateMyReview: hotelId=${hotelId}, userId=${userId}`);
+    console.log("Request body:", req.body);
+
     const dto = reviewUpdateSchema.parse(req.body);
+    console.log("Parsed DTO:", dto);
 
     const review = await ReviewModel.findOneAndUpdate(
       { hotel: hotelId, user: userId },
       { $set: { ...dto } },
       { new: true }
     );
+
+    console.log("Found review:", review);
+
     if (!review) return res.status(404).json({ error: "Review not found" });
 
     await recomputeHotelRating(hotelId);
     res.json(review);
   } catch (err) {
+    console.error("updateMyReview error:", err);
     next(err);
   }
 }

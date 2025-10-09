@@ -2,10 +2,11 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated } from "react-native";
-import { GuestData } from "../../components/search/GuestsModal";
-import { Property } from "../../components/shared/PropertyCard";
-import { demoApartments } from "../../data/demoApartments";
-import { RootStackParamList } from "../../types/navigation";
+import { GuestData } from "../types/GuestData";
+import { Property } from "../components/shared/modals/PropertyCard";
+import { HotelApiService } from "../services/hotelApi";
+import { SearchParams } from "../types/api.types";
+import { RootStackParamList } from "../types/navigation";
 
 type ModalType =
   | "location"
@@ -25,6 +26,7 @@ interface UsePropertyListHandlersProps {
   onBack?: () => void;
   openExpandedSearch?: boolean;
   onOpened?: () => void;
+  onReady?: () => void;
 }
 
 export const usePropertyListHandlers = ({
@@ -32,6 +34,7 @@ export const usePropertyListHandlers = ({
   onBack,
   openExpandedSearch,
   onOpened,
+  onReady,
 }: UsePropertyListHandlersProps) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -63,47 +66,88 @@ export const usePropertyListHandlers = ({
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(
     new Set(),
   );
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const animatedHeight = useRef(new Animated.Value(0)).current;
   const animatedOpacity = useRef(new Animated.Value(0)).current;
-
-  const apartments = demoApartments;
+  const headerAnimatedOpacity = useRef(new Animated.Value(0)).current;
+  const compactBarAnimatedOpacity = useRef(new Animated.Value(1)).current;
 
   const handleSearchPress = async () => {
     setSearchSubmitting(true);
-    try {
-      await new Promise((res) => setTimeout(res, 2000));
+    setApiError(null);
 
+    try {
+      // Build search parameters
+      const searchParams: SearchParams = {};
+
+      // Location/city search
       const raw = (selectedLocation || "").toLowerCase().trim();
-      if (!raw || raw === "enter your destination") {
-        setFilteredApartments(apartments ?? []);
-        setNoMatches(false);
-        return;
+      if (raw && raw !== "enter your destination") {
+        const cityQuery = raw.split(",")[0].trim();
+        searchParams.city = cityQuery;
       }
 
-      const query = raw.split(",")[0].trim();
+      // Date range
+      if (selectedDates.checkIn && selectedDates.checkOut) {
+        searchParams.from = selectedDates.checkIn.toISOString().split("T")[0];
+        searchParams.to = selectedDates.checkOut.toISOString().split("T")[0];
+      }
 
-      const matched = (apartments || []).filter((apt) => {
-        if (!apt.location) return false;
-        return apt.location.toLowerCase().includes(query);
-      });
-      if (!matched || matched.length === 0) {
+      // Guest parameters
+      searchParams.adults = selectedGuests.adults;
+      searchParams.children = selectedGuests.children;
+      searchParams.rooms = selectedGuests.rooms;
+
+      // Call the API
+      const properties = await HotelApiService.listHotels(searchParams);
+
+      if (properties.length === 0) {
         setFilteredApartments([]);
         setNoMatches(true);
       } else {
-        setFilteredApartments(matched);
+        setFilteredApartments(properties);
         setNoMatches(false);
       }
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : "Search failed");
+      setFilteredApartments([]);
+      setNoMatches(true);
     } finally {
       setSearchSubmitting(false);
     }
   };
 
-  const handleShowAll = () => {
-    setFilteredApartments(apartments ?? []);
-    setNoMatches(false);
-    setSelectedLocation("Enter your destination");
-    if (isExpanded) collapseSearch();
+  const handleShowAll = async () => {
+    setSearchSubmitting(true);
+    try {
+      // Load all hotels without filters
+      const properties = await HotelApiService.listHotels({});
+      setFilteredApartments(properties);
+      setNoMatches(false);
+      setSelectedLocation("Enter your destination");
+      if (isExpanded) collapseSearch();
+    } catch (error) {
+      setApiError(
+        error instanceof Error ? error.message : "Failed to load properties",
+      );
+      setFilteredApartments([]);
+      setNoMatches(true);
+    } finally {
+      setSearchSubmitting(false);
+    }
   };
+
+  const randomizeApartments = useCallback(() => {
+    setFilteredApartments((prev) => {
+      if (prev.length === 0) return prev;
+      const shuffled = [...prev].sort(() => Math.random() - 0.5);
+      // Optionally, take a random subset
+      const subsetSize = Math.floor(Math.random() * shuffled.length) + 1;
+      return shuffled.slice(0, subsetSize);
+    });
+  }, []);
 
   const formatDates = () => {
     if (selectedDates.checkIn && selectedDates.checkOut) {
@@ -158,8 +202,28 @@ export const usePropertyListHandlers = ({
         duration: 300,
         useNativeDriver: false,
       }),
-    ]).start();
-  }, [animatedHeight, animatedOpacity]);
+      Animated.timing(headerAnimatedOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(compactBarAnimatedOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+    ]).start((finished) => {
+      if (finished && !isReady) {
+        setIsReady(true);
+      }
+    });
+  }, [
+    animatedHeight,
+    animatedOpacity,
+    headerAnimatedOpacity,
+    compactBarAnimatedOpacity,
+    isReady,
+  ]);
 
   const collapseSearch = useCallback(() => {
     Animated.parallel([
@@ -173,10 +237,25 @@ export const usePropertyListHandlers = ({
         duration: 300,
         useNativeDriver: false,
       }),
+      Animated.timing(headerAnimatedOpacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+      Animated.timing(compactBarAnimatedOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }),
     ]).start(() => {
       setIsExpanded(false);
     });
-  }, [animatedHeight, animatedOpacity]);
+  }, [
+    animatedHeight,
+    animatedOpacity,
+    headerAnimatedOpacity,
+    compactBarAnimatedOpacity,
+  ]);
 
   const handleLocationModalClose = () => {
     setModalType(null);
@@ -200,10 +279,51 @@ export const usePropertyListHandlers = ({
   };
 
   const handleBackPress = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigation.goBack();
+    try {
+      if (onBack) {
+        // If there's a custom onBack handler, use it
+        onBack();
+        return;
+      }
+
+      // Controlled navigation back to search screen
+      const navigationState = navigation.getState();
+      // ...existing code...
+
+      // Always try to go back first to MainTabs, then navigate to Search
+      if (navigationState.index > 0) {
+        // We're in a stack, go back to MainTabs
+        navigation.goBack();
+
+        // After a short delay, ensure we're on the Search tab
+        setTimeout(() => {
+          try {
+            const parent = navigation.getParent();
+            if (parent) {
+              // Navigate to Search tab if we're not already there
+              parent.navigate("Search");
+            }
+          } catch (tabError) {
+            console.warn("Could not navigate to Search tab:", tabError);
+          }
+        }, 150);
+      } else {
+        // We're already at the root, just navigate to Search tab
+        try {
+          const parent = navigation.getParent();
+          if (parent) {
+            parent.navigate("Search");
+          } else {
+            // If no parent, navigate to MainTabs (should not happen)
+            navigation.navigate("MainTabs" as never);
+          }
+        } catch (navError) {
+          console.warn("Could not navigate to search:", navError);
+        }
+      }
+    } catch (error) {
+      console.error("Navigation error in handleBackPress:", error);
+      // Don't attempt any fallback navigation that might exit the app
     }
   };
 
@@ -212,6 +332,22 @@ export const usePropertyListHandlers = ({
       expandSearch();
     } else {
       setModalType("location" as ModalType);
+    }
+  };
+
+  const handleDatesPress = () => {
+    if (!isExpanded) {
+      expandSearch();
+    } else {
+      setModalType("dates" as ModalType);
+    }
+  };
+
+  const handleGuestsPress = () => {
+    if (!isExpanded) {
+      expandSearch();
+    } else {
+      setModalType("guests" as ModalType);
     }
   };
 
@@ -229,8 +365,13 @@ export const usePropertyListHandlers = ({
       if (onOpened) {
         onOpened();
       }
+    } else {
+      // If not expanding search, component is ready immediately
+      if (!isReady) {
+        setIsReady(true);
+      }
     }
-  }, [openExpandedSearch, expandSearch, isExpanded, onOpened]);
+  }, [openExpandedSearch, expandSearch, isExpanded, onOpened, isReady]);
 
   useEffect(() => {
     if (modalType !== null && isExpanded) {
@@ -257,14 +398,82 @@ export const usePropertyListHandlers = ({
     };
   }, [navigation]);
 
+  // Load initial data when component mounts
   useEffect(() => {
-    if (
-      (!filteredApartments || filteredApartments.length === 0) &&
-      Array.isArray(apartments) &&
-      apartments.length > 0
-    ) {
-      setFilteredApartments(apartments);
-    }
+    const loadInitialData = async () => {
+      if (!filteredApartments || filteredApartments.length === 0) {
+        // If we have search params from SearchScreen, perform search instead of loading all
+        if (selectedLocation && selectedLocation !== "Enter your destination") {
+          try {
+            setSearchSubmitting(true);
+            setApiError(null);
+
+            // Build search parameters
+            const searchParams: SearchParams = {};
+
+            // Location/city search
+            const raw = selectedLocation.toLowerCase().trim();
+            if (raw && raw !== "enter your destination") {
+              const cityQuery = raw.split(",")[0].trim();
+              searchParams.city = cityQuery;
+            }
+
+            // Date range
+            if (selectedDates.checkIn && selectedDates.checkOut) {
+              searchParams.from = selectedDates.checkIn
+                .toISOString()
+                .split("T")[0];
+              searchParams.to = selectedDates.checkOut
+                .toISOString()
+                .split("T")[0];
+            }
+
+            // Guest parameters
+            searchParams.adults = selectedGuests.adults;
+            searchParams.children = selectedGuests.children;
+            searchParams.rooms = selectedGuests.rooms;
+
+            // Call the API
+            const properties = await HotelApiService.listHotels(searchParams);
+
+            if (properties.length === 0) {
+              setFilteredApartments([]);
+              setNoMatches(true);
+            } else {
+              setFilteredApartments(properties);
+              setNoMatches(false);
+            }
+          } catch (error) {
+            console.error("Search failed:", error);
+            setApiError(
+              error instanceof Error ? error.message : "Search failed",
+            );
+            setFilteredApartments([]);
+            setNoMatches(true);
+          } finally {
+            setSearchSubmitting(false);
+            setIsLoading(false);
+          }
+        } else {
+          // No search params, load all hotels
+          try {
+            const properties = await HotelApiService.listHotels({});
+            setFilteredApartments(properties);
+          } catch (error) {
+            console.error("Failed to load initial properties:", error);
+            setApiError(
+              error instanceof Error
+                ? error.message
+                : "Failed to load properties",
+            );
+          } finally {
+            setIsLoading(false);
+          }
+        }
+      }
+    };
+
+    loadInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -285,10 +494,15 @@ export const usePropertyListHandlers = ({
     setSelectedSortOption,
     selectedFilters,
     setSelectedFilters,
+    apiError,
+    isLoading,
     animatedHeight,
     animatedOpacity,
+    headerAnimatedOpacity,
+    compactBarAnimatedOpacity,
     handleSearchPress,
     handleShowAll,
+    randomizeApartments,
     formatDates,
     formatGuests,
     expandSearch,
@@ -298,6 +512,9 @@ export const usePropertyListHandlers = ({
     handleGuestsModalClose,
     handleBackPress,
     handleLocationPress,
+    handleDatesPress,
+    handleGuestsPress,
     handleOutsidePress,
+    isReady,
   };
 };

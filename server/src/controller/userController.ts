@@ -1,10 +1,14 @@
- import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import { UserModel } from "../models/User";
 import { signJwt } from "../utils/jwt";
 
 // POST /api/users/register
-export async function registerUser(req: Request, res: Response, next: NextFunction) {
+export async function registerUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { name, email, phone, password } = req.body;
     if (!name || !email || !phone || !password) {
@@ -12,14 +16,40 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
     }
 
     const exists = await UserModel.findOne({ email });
-    if (exists) return res.status(409).json({ error: "Email already registered" });
+    if (exists)
+      return res.status(409).json({ error: "Email already registered" });
+
+    // Normalize phone to E.164 when possible (keep original if cannot parse)
+    const normalizePhone = (raw: string) => {
+      const s = String(raw).replace(/\D/g, "");
+      if (String(raw).trim().startsWith("+")) return `+${s}`;
+      if (/^0\d{8,10}$/.test(s)) return `+972${s.substring(1)}`; // default to IL
+      if (/^\d{6,15}$/.test(s)) return `+${s}`;
+      return String(raw).trim();
+    };
+    const phoneNormalized = normalizePhone(phone);
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await UserModel.create({ name, email, phone, passwordHash, role: "USER" });
+    const user = await UserModel.create({
+      name,
+      email,
+      phone: phoneNormalized,
+      passwordHash,
+      role: "USER",
+    });
 
-    const token = signJwt({ id: user.id, role: user.role }, { expiresIn: "2h" });
+    const token = signJwt(
+      { id: user.id, role: user.role },
+      { expiresIn: "7d" },
+    );
     res.status(201).json({
-      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
       token,
     });
   } catch (err) {
@@ -28,10 +58,15 @@ export async function registerUser(req: Request, res: Response, next: NextFuncti
 }
 
 // POST /api/users/login
-export async function loginUser(req: Request, res: Response, next: NextFunction) {
+export async function loginUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
+    if (!email || !password)
+      return res.status(400).json({ error: "Missing email or password" });
 
     const user = await UserModel.findOne({ email });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
@@ -39,9 +74,18 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    const token = signJwt({ id: user.id, role: user.role }, { expiresIn: "2h" });
+    const token = signJwt(
+      { id: user.id, role: user.role },
+      { expiresIn: "7d" },
+    );
     res.json({
-      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
       token,
     });
   } catch (err) {
@@ -50,7 +94,11 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
 }
 
 // GET /api/users (Protected)
-export async function getUsers(_req: Request, res: Response, next: NextFunction) {
+export async function getUsers(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const users = await UserModel.find().select("-passwordHash");
     res.json(users);
@@ -60,7 +108,11 @@ export async function getUsers(_req: Request, res: Response, next: NextFunction)
 }
 
 // GET /api/users/:id (Protected)
-export async function getUserById(req: Request, res: Response, next: NextFunction) {
+export async function getUserById(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { id } = req.params;
     const user = await UserModel.findById(id).select("-passwordHash");
@@ -72,7 +124,11 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
 }
 
 // PUT /api/users/:id (Protected)
-export async function updateUser(req: Request, res: Response, next: NextFunction) {
+export async function updateUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { id } = req.params;
     const { name, phone, role } = req.body;
@@ -80,7 +136,7 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
     const user = await UserModel.findByIdAndUpdate(
       id,
       { name, phone, role },
-      { new: true }
+      { new: true },
     ).select("-passwordHash");
 
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -91,7 +147,11 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
 }
 
 // DELETE /api/users/:id (Protected)
-export async function deleteUser(req: Request, res: Response, next: NextFunction) {
+export async function deleteUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { id } = req.params;
     const user = await UserModel.findByIdAndDelete(id);

@@ -40,12 +40,12 @@ function toStringArray(val: unknown): string[] {
 
 const catsSet = (h: Hotel) =>
   new Set<string>(
-    toStringArray((h as any).categories).map((s) => s.toLowerCase())
+    toStringArray((h as any).categories).map((s) => s.toLowerCase()),
   );
 
 const typeOf = (h: Hotel) => {
   const fromField = String(
-    (h as any).propertyType ?? (h as any).type ?? ""
+    (h as any).propertyType ?? (h as any).type ?? "",
   ).toLowerCase();
   if (fromField) return fromField;
   const c = catsSet(h);
@@ -64,7 +64,7 @@ const typeOf = (h: Hotel) => {
 const amens = (h: Hotel) => {
   const base = Array.isArray((h as any).amenityIds)
     ? (h as any).amenityIds
-    : (h as any).amenities ?? [];
+    : ((h as any).amenities ?? []);
   const normalized = base.map((x: any) => String(x).toLowerCase());
   const merged = new Set<string>([...normalized, ...catsSet(h)]);
   return Array.from(merged);
@@ -72,7 +72,7 @@ const amens = (h: Hotel) => {
 
 const meals = (h: Hotel) => {
   const fromField = new Set<string>(
-    toStringArray((h as any).meals).map((s) => s.toLowerCase())
+    toStringArray((h as any).meals).map((s) => s.toLowerCase()),
   );
   const c = catsSet(h);
   if (c.has("breakfast included")) fromField.add("breakfast included");
@@ -196,10 +196,10 @@ function NoResultsPanel({ city }: { city: string | null }) {
 export default function SearchPage() {
   const [params, setParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>(
-    params.get("view") === "grid" ? "grid" : "list"
+    params.get("view") === "grid" ? "grid" : "list",
   );
   const [sortKey, setSortKey] = useState<SortKey>(
-    (params.get("sort") as SortKey) || "price_high"
+    (params.get("sort") as SortKey) || "price_high",
   );
 
   const nights = nightsFromParams(params);
@@ -232,15 +232,15 @@ export default function SearchPage() {
 
   const baseFacets: FacetGroup[] = useMemo(
     () => buildFacets(data ?? []),
-    [data]
+    [data],
   );
   const catFacet: FacetGroup = useMemo(
     () => categoriesFacet(data ?? []),
-    [data]
+    [data],
   );
   const facets: FacetGroup[] = useMemo(
     () => [...baseFacets, catFacet],
-    [baseFacets, catFacet]
+    [baseFacets, catFacet],
   );
 
   const [filters, setFilters] = useState<FiltersState>({
@@ -270,7 +270,7 @@ export default function SearchPage() {
 
   const sorted = useMemo(
     () => (data ? sortHotels(data, sortKey) : []),
-    [data, sortKey]
+    [data, sortKey],
   );
 
   const filtered = useMemo(() => {
@@ -310,7 +310,7 @@ export default function SearchPage() {
       if (sel.stars && sel.stars.size > 0) {
         if (
           ![...sel.stars].some(
-            (id) => Number(id.replace("stars_", "")) === starsOf(h)
+            (id) => Number(id.replace("stars_", "")) === starsOf(h),
           )
         )
           return false;
@@ -326,7 +326,7 @@ export default function SearchPage() {
         const a = amens(h);
         if (
           ![...sel.facilities].every((id) =>
-            a.includes(id.replace(/^amen_/, "").toLowerCase())
+            a.includes(id.replace(/^amen_/, "").toLowerCase()),
           )
         )
           return false;
@@ -358,7 +358,7 @@ export default function SearchPage() {
         const hv = hood(h);
         if (
           ![...sel.neighborhood].some((id) =>
-            hv.includes(id.replace(/^hood_/, ""))
+            hv.includes(id.replace(/^hood_/, "")),
           )
         )
           return false;
@@ -437,7 +437,7 @@ export default function SearchPage() {
             onChange={(k) => {
               setSortKey(k);
               const sp = new URLSearchParams(
-                Object.fromEntries(params.entries())
+                Object.fromEntries(params.entries()),
               );
               sp.set("sort", k);
               setParams(sp, { replace: true });
@@ -545,7 +545,7 @@ export default function SearchPage() {
                       <div className="mt-auto h-8 w-28 rounded bg-muted" />
                     </div>
                   </div>
-                )
+                ),
               )}
 
             {!isLoading &&

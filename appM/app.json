@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "The Best Booking Clone Mobile App",
+    "name": "The Booking Clone Mobile App",
     "slug": "booking-clone-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/booking-app-image.png",
     "scheme": "bookingcloneapp",
-    "userInterfaceStyle": "automated",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -17,7 +17,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/booking-app-image.png",
         "backgroundColor": "#003580"
-      }
+      },
+      "androidNavigationBar": {
+        "backgroundColor": "transparent",
+        "translucent": true
+      },
+      "statusBar": {
+        "translucent": true,
+        "backgroundColor": "transparent"
+      },
+      "package": "com.thatrandomGuest.bookingcloneapp"
     },
     "web": {
       "bundler": "metro",

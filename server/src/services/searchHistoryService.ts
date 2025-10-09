@@ -3,6 +3,7 @@ import { SearchHistoryModel } from "../models/SearchHistory";
 
 export type SearchFilters = {
   city?: string;
+  searchQuery?: string;
   from?: string | Date;
   to?: string | Date;
   adults?: number;
@@ -15,6 +16,7 @@ const toISO = (d?: string | Date) => (d ? new Date(d).toISOString() : undefined)
 export async function saveLastSearch(userId: string, filters: SearchFilters) {
   const payload: SearchFilters = {
     city: filters.city,
+    searchQuery: filters.searchQuery,
     from: toISO(filters.from),
     to: toISO(filters.to),
     adults: filters.adults != null ? Number(filters.adults) : undefined,

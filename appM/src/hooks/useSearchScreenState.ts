@@ -9,6 +9,8 @@ import { formatGuests } from "../utils/formatGuests";
 import { handleCardPress } from "../utils/handleCardPress";
 import { handleLocationOnlyPress } from "../utils/handleLocationOnlyPress";
 import { useTheme } from "./ThemeContext";
+import { useMessages } from "./MessagesContext";
+import { useNotifications } from "./NotificationsContext";
 
 export type GuestData = {
   rooms: number;
@@ -26,6 +28,10 @@ export function useSearchScreenState() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
+  // Messages and notifications contexts
+  const { markAllAsRead: markAllMessagesAsRead } = useMessages();
+  const { markAllAsRead: markAllNotificationsAsRead } = useNotifications();
+
   // Modal and help state
   const [showMessagesModal, setShowMessagesModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
@@ -42,13 +48,22 @@ export function useSearchScreenState() {
   const handleGuestsModalClose = () => setModalType(null);
 
   // Message/notification/help handlers
-  const openMessages = () => setShowMessagesModal(true);
+  const openMessages = () => {
+    markAllMessagesAsRead();
+    setShowMessagesModal(true);
+  };
   const closeMessages = () => setShowMessagesModal(false);
-  const openNotifications = () => setShowNotificationsModal(true);
+  const openNotifications = () => {
+    markAllNotificationsAsRead();
+    setShowNotificationsModal(true);
+  };
   const closeNotifications = () => setShowNotificationsModal(false);
   const onBack = () => navigation.goBack && navigation.goBack();
   const closeHelpCenter = () => setIsHelpCenterOpen(false);
-  const openDirectHelpCenter = () => setIsDirectHelpCenterOpen(true);
+  const openDirectHelpCenter = () => {
+    setIsDirectHelpCenterOpen(true);
+    closeMessages();
+  };
   const closeDirectHelpCenter = () => setIsDirectHelpCenterOpen(false);
 
   const [selectedLocation, setSelectedLocation] = useState<string>(
@@ -74,6 +89,7 @@ export function useSearchScreenState() {
     } | null>(null);
   const [openExpandedSearch, setOpenExpandedSearch] = useState(false);
   const [showApartmentsList, setShowApartmentsList] = useState(false);
+  const [isPropertyListReady, setIsPropertyListReady] = useState(false);
 
   // Genius modal state and handlers
   const [showGeniusModal, setShowGeniusModal] = useState(false);
@@ -96,19 +112,73 @@ export function useSearchScreenState() {
     Attractions: "sparkles-outline",
   };
   const handleSearch = async () => {
+    closeMessages();
     setSearchSubmitting(true);
     try {
-      await new Promise((res) => setTimeout(res, 1000));
       setSearchParamsForPropertyList({
         location: selectedLocation,
         dates: selectedDates,
         guests: selectedGuests,
       });
+      setIsPropertyListReady(false);
       setOpenExpandedSearch(true);
       setShowApartmentsList(true);
-    } finally {
+      // Note: searchSubmitting will be set to false when PropertyListScreen is ready
+    } catch (error) {
+      // Only set to false on error, otherwise wait for PropertyListScreen ready
       setSearchSubmitting(false);
+      throw error;
     }
+  };
+
+  const handlePropertyListReady = () => {
+    setIsPropertyListReady(true);
+    setSearchSubmitting(false); // Hide loading when PropertyListScreen is ready
+  };
+
+  const handleClosePropertyList = () => {
+    setShowApartmentsList(false);
+    setSearchSubmitting(false); // Hide loading if PropertyListScreen is closed
+    setIsPropertyListReady(false); // Reset ready state
+  };
+
+  const handleShowPropertyList = (params: {
+    location: string;
+    dates: { checkIn: Date | null; checkOut: Date | null };
+    guests: GuestData;
+  }) => {
+    setSearchParamsForPropertyList(params);
+    setIsPropertyListReady(false);
+    setOpenExpandedSearch(true);
+    setShowApartmentsList(true);
+  };
+
+  // Wrapper for card press that uses the proper loading management
+  const handleCardPressWrapper = (
+    location: string,
+    dateString: string,
+    guestString: string,
+  ) => {
+    handleCardPress(
+      location,
+      dateString,
+      guestString,
+      setSearchParamsForPropertyList,
+      setShowApartmentsList,
+    );
+    setIsPropertyListReady(false); // Reset ready state for new property list
+  };
+
+  // Wrapper for location only press that uses the proper loading management
+  const handleLocationOnlyPressWrapper = (location: string) => {
+    handleLocationOnlyPress(
+      location,
+      selectedDates,
+      selectedGuests,
+      setSearchParamsForPropertyList,
+      setShowApartmentsList,
+    );
+    setIsPropertyListReady(false); // Reset ready state for new property list
   };
 
   return {
@@ -152,6 +222,12 @@ export function useSearchScreenState() {
     setOpenExpandedSearch,
     showApartmentsList,
     setShowApartmentsList,
+    handleClosePropertyList,
+    handleShowPropertyList,
+    handleCardPressWrapper,
+    handleLocationOnlyPressWrapper,
+    isPropertyListReady,
+    handlePropertyListReady,
     showGeniusModal,
     setShowGeniusModal,
     handleGeniusCardPress,

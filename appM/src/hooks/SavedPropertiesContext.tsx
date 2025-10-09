@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import { Property } from "../components/shared/PropertyCard";
+import { Property } from "../components/shared/modals/PropertyCard";
+import { getPropertyId } from "../utils/getPropertyId";
 
 interface SavedPropertiesContextType {
   savedProperties: Property[];
@@ -21,56 +22,36 @@ export const SavedPropertiesProvider = ({
   const [savedProperties, setSavedProperties] = useState<Property[]>([]);
 
   const saveProperty = (property: Property) => {
-    // Normalize id to string for robust comparisons
-    const propertyId = String(property.id ?? property.title);
-    console.log("SavedPropertiesContext: saveProperty called ->", {
-      propertyId,
-    });
+    const propertyId = getPropertyId(property);
 
     setSavedProperties((prev) => {
       // Check if property is already saved (compare normalized ids)
-      const isAlreadySaved = prev.some(
-        (p) => String(p.id ?? p.title) === propertyId,
-      );
+      const isAlreadySaved = prev.some((p) => getPropertyId(p) === propertyId);
 
       if (isAlreadySaved) {
         // Remove it (unsave)
-        const next = prev.filter((p) => String(p.id ?? p.title) !== propertyId);
-        console.log("SavedPropertiesContext: unsaved ->", {
-          propertyId,
-          before: prev.length,
-          after: next.length,
-        });
+        const next = prev.filter((p) => getPropertyId(p) !== propertyId);
         return next;
       } else {
         // Add it (save)
         const propertyWithId = { ...property, id: propertyId };
         const next = [...prev, propertyWithId];
-        console.log("SavedPropertiesContext: saved ->", {
-          propertyId,
-          before: prev.length,
-          after: next.length,
-        });
         return next;
       }
     });
   };
-
   const unsaveProperty = (propertyId: string) => {
     const idStr = String(propertyId);
-    console.log("SavedPropertiesContext: unsaveProperty ->", {
-      propertyId: idStr,
-    });
+
     setSavedProperties((prev) =>
-      prev.filter((p) => String(p.id ?? p.title) !== idStr),
+      prev.filter((p) => getPropertyId(p) !== idStr),
     );
   };
 
   const isSaved = (propertyId: string) => {
     const idStr = String(propertyId);
-    return savedProperties.some((p) => String(p.id ?? p.title) === idStr);
+    return savedProperties.some((p) => getPropertyId(p) === idStr);
   };
-
   return (
     <SavedPropertiesContext.Provider
       value={{
