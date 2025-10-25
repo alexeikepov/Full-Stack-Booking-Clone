@@ -36,3 +36,4 @@ FriendRequestSchema.index({ receiver: 1, status: 1 });
 FriendRequestSchema.index({ sender: 1, status: 1 });
 
 export default mongoose.model<IFriendRequest>('FriendRequest', FriendRequestSchema);
+
