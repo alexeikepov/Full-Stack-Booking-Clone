@@ -5,7 +5,7 @@ export function get_machines_api(page) {
   const response = fetch(
     `https://api.example.com/machines?page=${page}&page_size=${page_size}`
   );
-
+  ///   i did it
   //   response look like this
   //   {
   //     machines: [machines],
