@@ -1,47 +1,47 @@
-export function get_machines_api(page) {
-  const page_size = 10;
+// export function get_machines_api(page) {
+//   const page_size = 10;
 
-  // this taking sleep 10
-  const response = fetch(
-    `https://api.example.com/machines?page=${page}&page_size=${page_size}`
-  );
-  //   response look like this
-  //   {
-  //     machines: [machines],
-  //     page: page,
-  //     page_size: page_size,
-  //     total_pages: 1000
-  //   }
-  return response;
-}
+//   // this taking sleep 10
+//   const response = fetch(
+//     `https://api.example.com/machines?page=${page}&page_size=${page_size}`
+//   );
+//   //   response look like this
+//   //   {
+//   //     machines: [machines],
+//   //     page: page,
+//   //     page_size: page_size,
+//   //     total_pages: 1000
+//   //   }
+//   return response;
+// }
 
-export function save_machine(machine) {
-  machine = new Machine({ ...machine });
-  db.session.add(machine);
-  db.session.commit();
-}
+// export function save_machine(machine) {
+//   machine = new Machine({ ...machine });
+//   db.session.add(machine);
+//   db.session.commit();
+// }
 
-// ##################################################################################################################
+// // ##################################################################################################################
 
-Alexei;
-export function fetch_all_machines() {
-  let response = get_machines_api(1);
-  for (let i = 2; i <= response.total_page; i++) {
-    for (let j = 1; j <= page_size; j++) {
-      save_machine(response.machine[j]);
-    }
-    response = get_machines_api(i);
-  }
-}
+// Alexei;
+// export function fetch_all_machines() {
+//   let response = get_machines_api(1);
+//   for (let i = 2; i <= response.total_page; i++) {
+//     for (let j = 1; j <= page_size; j++) {
+//       save_machine(response.machine[j]);
+//     }
+//     response = get_machines_api(i);
+//   }
+// }
 
-Aiman;
-export function fetch_all_machines() {
-  const responses = [];
-  let response = get_machines_api(1);
-  responses.push(response);
-  for (let i = 2; i <= response.total_page; i++) {
-    const res = get_machines_api(i);
-    responses.push(res);
-  }
-  return responses;
-}
+// Aiman;
+// export function fetch_all_machines() {
+//   const responses = [];
+//   let response = get_machines_api(1);
+//   responses.push(response);
+//   for (let i = 2; i <= response.total_page; i++) {
+//     const res = get_machines_api(i);
+//     responses.push(res);
+//   }
+//   return responses;
+// }
